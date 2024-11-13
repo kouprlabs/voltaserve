@@ -14,9 +14,16 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
-import { Heading, Link as ChakraLink, Avatar, Badge } from '@chakra-ui/react'
+import {
+  Heading,
+  Link as ChakraLink,
+  Avatar,
+  Badge,
+  Button,
+} from '@chakra-ui/react'
 import {
   DataTable,
+  IconAdd,
   PagePagination,
   RelativeDate,
   SectionError,
@@ -30,7 +37,6 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { SortOrder } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
-import { CreateOrganizationButton } from '@/components/app-bar/app-bar-buttons'
 import { organizationPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
 import { useAppDispatch } from '@/store/hook'
@@ -89,7 +95,16 @@ const OrganizationListPage = () => {
         {isListEmpty ? (
           <SectionPlaceholder
             text="There are no organizations."
-            content={<CreateOrganizationButton />}
+            content={
+              <Button
+                as={Link}
+                to="/new/organization"
+                leftIcon={<IconAdd />}
+                variant="solid"
+              >
+                New Organization
+              </Button>
+            }
           />
         ) : null}
         {isListReady ? (

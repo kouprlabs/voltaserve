@@ -14,9 +14,16 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
-import { Heading, Link as ChakraLink, Avatar, Badge } from '@chakra-ui/react'
+import {
+  Heading,
+  Link as ChakraLink,
+  Avatar,
+  Badge,
+  Button,
+} from '@chakra-ui/react'
 import {
   DataTable,
+  IconAdd,
   PagePagination,
   RelativeDate,
   SectionError,
@@ -30,7 +37,6 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI, { SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
-import { CreateGroupButton } from '@/components/app-bar/app-bar-buttons'
 import { groupPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
 import { useAppDispatch } from '@/store/hook'
@@ -87,7 +93,16 @@ const GroupListPage = () => {
         {isListEmpty ? (
           <SectionPlaceholder
             text="There are no groups."
-            content={<CreateGroupButton />}
+            content={
+              <Button
+                as={Link}
+                to="/new/group"
+                leftIcon={<IconAdd />}
+                variant="solid"
+              >
+                New Group
+              </Button>
+            }
           />
         ) : null}
         {isListReady ? (
