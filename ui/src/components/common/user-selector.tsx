@@ -58,6 +58,7 @@ const UserSelector = ({
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<User>()
+  const size = 5
   const {
     data: list,
     error: listError,
@@ -70,7 +71,7 @@ const UserSelector = ({
       groupId,
       excludeGroupMembers,
       page,
-      size: 5,
+      size,
       sortOrder: SortOrder.Desc,
     },
     swrConfig(),
@@ -78,7 +79,7 @@ const UserSelector = ({
   const { hasPageSwitcher } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
-    steps: [5],
+    steps: [size],
   })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0

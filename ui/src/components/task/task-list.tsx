@@ -25,16 +25,17 @@ import TaskDrawerItem from './task-item'
 const TasksList = () => {
   const dispatch = useAppDispatch()
   const [page, setPage] = useState(1)
+  const size = 5
   const {
     data: list,
     error: listError,
     isLoading: isListLoading,
     mutate: mutateList,
-  } = TaskAPI.useList({ page, size: 5, sortOrder: SortOrder.Asc }, swrConfig())
+  } = TaskAPI.useList({ page, size, sortOrder: SortOrder.Asc }, swrConfig())
   const { hasPageSwitcher } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
-    steps: [5],
+    steps: [size],
   })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0

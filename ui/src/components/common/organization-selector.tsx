@@ -50,19 +50,20 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<Organization>()
   const [confirmed, setConfirmed] = useState<Organization>()
+  const size = 5
   const {
     data: list,
     error: listError,
     isLoading: isListLoading,
     mutate,
   } = OrganizationAPI.useList(
-    { query, page, size: 5, sortOrder: SortOrder.Desc },
+    { query, page, size, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
   const { hasPageSwitcher } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
-    steps: [5],
+    steps: [size],
   })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0

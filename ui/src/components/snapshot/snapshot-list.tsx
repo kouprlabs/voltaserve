@@ -55,6 +55,7 @@ const SnapshotList = () => {
   const [isActivating, setIsActivating] = useState(false)
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Snapshot>()
+  const size = 5
   const {
     data: list,
     error: listError,
@@ -64,7 +65,7 @@ const SnapshotList = () => {
     {
       fileId,
       page,
-      size: 5,
+      size,
       sortBy: SortBy.Version,
       sortOrder: SortOrder.Desc,
     },
@@ -73,7 +74,7 @@ const SnapshotList = () => {
   const { hasPageSwitcher } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
-    steps: [5],
+    steps: [size],
   })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0

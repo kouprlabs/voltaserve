@@ -31,6 +31,7 @@ const InsightsOverviewEntities = () => {
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState<string | undefined>(undefined)
   const { data: metadata } = InsightsAPI.useGetInfo(id, swrConfig())
+  const size = 5
   const {
     data: list,
     error: listError,
@@ -41,7 +42,7 @@ const InsightsOverviewEntities = () => {
     {
       query,
       page,
-      size: 5,
+      size,
       sortBy: SortBy.Frequency,
       sortOrder: SortOrder.Desc,
     },
@@ -50,7 +51,7 @@ const InsightsOverviewEntities = () => {
   const { hasPageSwitcher } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
-    steps: [5],
+    steps: [size],
   })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
