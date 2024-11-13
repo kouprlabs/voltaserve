@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { SectionPlaceholder, SectionSpinner } from '@koupr/ui'
+import { SectionPlaceholder } from '@koupr/ui'
 import {
   DndContext,
   useSensors,
