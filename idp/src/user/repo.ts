@@ -243,7 +243,6 @@ class UserRepoImpl {
   async enoughActiveAdmins() {
     const { rows } = await client.query(
       'SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',
-      [],
     )
     return rows[0].count > 1
   }

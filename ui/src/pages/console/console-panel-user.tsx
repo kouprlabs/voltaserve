@@ -16,22 +16,14 @@ import {
   Grid,
   GridItem,
   Heading,
-  IconButton,
-  IconButtonProps,
   Spacer,
   Table,
   Text,
   Th,
   Thead,
-  Tooltip,
   Tr,
 } from '@chakra-ui/react'
 import {
-  Form,
-  IconClose,
-  IconEdit,
-  IconSync,
-  IconWarning,
   PagePagination,
   RelativeDate,
   SectionError,
@@ -44,16 +36,6 @@ import ConsoleAPI from '@/client/console/console'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { getPictureUrlById } from '@/lib/helpers/picture'
-import { truncateEnd } from '@/lib/helpers/truncate-end'
-import truncateMiddle from '@/lib/helpers/truncate-middle'
-
-const EditButton = (props: IconButtonProps) => (
-  <IconButton
-    icon={props.icon ? props.icon : <IconEdit />}
-    className={cx('h-[40px]', 'w-[40px]')}
-    {...props}
-  />
-)
 
 const ConsolePanelUser = () => {
   const { id } = useParams()
@@ -150,110 +132,9 @@ const ConsolePanelUser = () => {
                     'dark:border-gray-700',
                   )}
                 />
-                {user.picture ? (
-                  <IconButton
-                    icon={<IconClose />}
-                    variant="solid"
-                    colorScheme="red"
-                    right="5px"
-                    bottom="10px"
-                    position="absolute"
-                    zIndex={1000}
-                    title="Delete picture"
-                    aria-label="Delete picture"
-                    isDisabled={true}
-                  />
-                ) : null}
               </div>
             </GridItem>
-            <GridItem colSpan={8}>
-              <Form
-                sections={[
-                  {
-                    title: 'Basics',
-                    rows: [
-                      {
-                        label: 'Full name',
-                        content: (
-                          <>
-                            <span>{truncateEnd(user.fullName, 50)}</span>
-                            <EditButton
-                              title="Edit full name"
-                              aria-label="Edit full name"
-                              isDisabled={true}
-                            />
-                          </>
-                        ),
-                      },
-                    ],
-                  },
-                  {
-                    title: 'Credentials',
-                    rows: [
-                      {
-                        label: 'Email',
-                        content: (
-                          <>
-                            {user.pendingEmail ? (
-                              <div
-                                className={cx(
-                                  'flex',
-                                  'flex-row',
-                                  'gap-0.5',
-                                  'items-center',
-                                )}
-                              >
-                                <Tooltip label="Please check your inbox to confirm your email.">
-                                  <div
-                                    className={cx(
-                                      'flex',
-                                      'items-center',
-                                      'justify-center',
-                                      'cursor-default',
-                                    )}
-                                  >
-                                    <IconWarning
-                                      className={cx('text-yellow-400')}
-                                    />
-                                  </div>
-                                </Tooltip>
-                                <span>
-                                  {truncateMiddle(user.pendingEmail, 50)}
-                                </span>
-                              </div>
-                            ) : null}
-                            {!user.pendingEmail ? (
-                              <span>
-                                {truncateMiddle(
-                                  user.pendingEmail || user.email,
-                                  50,
-                                )}
-                              </span>
-                            ) : null}
-                            <EditButton
-                              title="Edit email"
-                              aria-label="Edit email"
-                              isDisabled={true}
-                            />
-                          </>
-                        ),
-                      },
-                      {
-                        label: 'Force change password',
-                        content: (
-                          <EditButton
-                            title="Force change password"
-                            aria-label="Force change password"
-                            icon={<IconSync />}
-                            isDisabled={true}
-                          />
-                        ),
-                      },
-                    ],
-                  },
-                ]}
-              />
-            </GridItem>
+            <GridItem colSpan={8}></GridItem>
             <GridItem colSpan={3}>
               {isOrgListLoading ? (
                 <ListSekeleton header="Organizations">
