@@ -37,7 +37,6 @@ snapshot_api_router = APIRouter(
 logger = base_logger.getChild("snapshot")
 
 
-# --- GET --- #
 @snapshot_api_router.get(
     path="", responses={status.HTTP_200_OK: {"model": SnapshotResponse}}
 )
@@ -76,12 +75,3 @@ async def get_all_snapshots(data: Annotated[SnapshotListRequest, Depends()]):
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
-
-
-# --- PATCH --- #
-
-# --- POST --- #
-
-# --- PUT --- #
-
-# --- DELETE --- #

@@ -70,22 +70,16 @@ const LayoutConsole = () => {
           secondaryText: 'Basic information about your instance',
         },
         {
-          href: '/console/users',
-          icon: <IconPerson />,
-          primaryText: 'Users',
-          secondaryText: 'Manage users',
+          href: '/console/workspaces',
+          icon: <IconWorkspaces />,
+          primaryText: 'Workspaces',
+          secondaryText: 'Manage workspaces',
         },
         {
           href: '/console/groups',
           icon: <IconGroup />,
           primaryText: 'Groups',
           secondaryText: 'Manage groups',
-        },
-        {
-          href: '/console/workspaces',
-          icon: <IconWorkspaces />,
-          primaryText: 'Workspaces',
-          secondaryText: 'Manage workspaces',
         },
         {
           href: '/console/organizations',
@@ -98,6 +92,12 @@ const LayoutConsole = () => {
           icon: <IconInvitations />,
           primaryText: 'Invitations',
           secondaryText: 'Manage invitations',
+        },
+        {
+          href: '/console/users',
+          icon: <IconPerson />,
+          primaryText: 'Users',
+          secondaryText: 'Manage users',
         },
       ]}
       navigateFn={navigate}

@@ -7,6 +7,7 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+
 import time
 import uuid
 
@@ -24,6 +25,7 @@ from .routers import (
     invitation_api_router,
     users_api_router,
     overview_api_router,
+    user_permission_api_router,
 )
 
 
@@ -92,6 +94,7 @@ app.include_router(organization_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
 app.include_router(overview_api_router)
+app.include_router(user_permission_api_router)
 
 
 @app.middleware("http")

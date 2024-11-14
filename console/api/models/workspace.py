@@ -23,18 +23,8 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class WorkspaceRequest(GenericRequest):
     pass
-
-
-class UpdateWorkspaceRequest(GenericRequest):
-    name: str | None = Field(None)
-    organizationId: str | None = Field(None)
-    storageCapacity: float | None = Field(None)
-    rootId: str | None = Field(None)
-    bucket: str | None = Field(None)
-    updateTime: datetime.datetime | None = Field(default_factory=datetime.datetime.now)
 
 
 class WorkspaceListRequest(GenericPaginationRequest):
@@ -49,7 +39,6 @@ class WorkspaceOrganizationListRequest(WorkspaceRequest, WorkspaceListRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class WorkspaceResponse(GenericResponse):
     name: str
     organization: OrganizationResponse

@@ -23,7 +23,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class GroupRequest(GenericRequest):
     pass
 
@@ -36,12 +35,6 @@ class GroupSearchRequest(GenericSearchRequest):
     pass
 
 
-class UpdateGroupRequest(GenericRequest):
-    name: str | None = Field(None)
-    updateTime: datetime.datetime | None = Field(default_factory=datetime.datetime.now)
-
-
-# --- RESPONSE MODELS --- #
 class GroupResponse(GenericResponse):
     name: str
     organization: OrganizationResponse

@@ -14,3 +14,4 @@ from .organization import organization_api_router
 from .workspace import workspace_api_router
 from .invitation import invitation_api_router
 from .overview import overview_api_router
+from .userpermission import user_permission_api_router

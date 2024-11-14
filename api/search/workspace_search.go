@@ -24,6 +24,15 @@ type WorkspaceSearch struct {
 	workspaceRepo repo.WorkspaceRepo
 }
 
+type workspaceEntity struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+func (w workspaceEntity) GetID() string {
+	return w.ID
+}
+
 func NewWorkspaceSearch() *WorkspaceSearch {
 	return &WorkspaceSearch{
 		index:         infra.WorkspaceSearchIndex,
@@ -38,7 +47,7 @@ func (s *WorkspaceSearch) Index(workspaces []model.Workspace) error {
 	}
 	var res []infra.SearchModel
 	for _, w := range workspaces {
-		res = append(res, w)
+		res = append(res, s.mapEntity(w))
 	}
 	if err := s.search.Index(s.index, res); err != nil {
 		return err
@@ -52,7 +61,7 @@ func (s *WorkspaceSearch) Update(workspaces []model.Workspace) error {
 	}
 	var res []infra.SearchModel
 	for _, w := range workspaces {
-		res = append(res, w)
+		res = append(res, s.mapEntity(w))
 	}
 	if err := s.search.Update(s.index, res); err != nil {
 		return err
@@ -89,4 +98,11 @@ func (s *WorkspaceSearch) Query(query string, opts infra.QueryOptions) ([]model.
 		res = append(res, workspace)
 	}
 	return res, nil
+}
+
+func (s *WorkspaceSearch) mapEntity(workspace model.Workspace) *workspaceEntity {
+	return &workspaceEntity{
+		ID:   workspace.GetID(),
+		Name: workspace.GetName(),
+	}
 }

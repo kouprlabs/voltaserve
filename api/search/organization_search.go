@@ -24,6 +24,15 @@ type OrganizationSearch struct {
 	orgRepo repo.OrganizationRepo
 }
 
+type organizationEntity struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+func (o organizationEntity) GetID() string {
+	return o.ID
+}
+
 func NewOrganizationSearch() *OrganizationSearch {
 	return &OrganizationSearch{
 		index:   infra.OrganizationSearchIndex,
@@ -38,7 +47,7 @@ func (s *OrganizationSearch) Index(orgs []model.Organization) error {
 	}
 	var res []infra.SearchModel
 	for _, o := range orgs {
-		res = append(res, o)
+		res = append(res, s.mapEntity(o))
 	}
 	if err := s.search.Index(s.index, res); err != nil {
 		return err
@@ -52,7 +61,7 @@ func (s *OrganizationSearch) Update(orgs []model.Organization) error {
 	}
 	var res []infra.SearchModel
 	for _, o := range orgs {
-		res = append(res, o)
+		res = append(res, s.mapEntity(o))
 	}
 	if err := s.search.Update(s.index, res); err != nil {
 		return err
@@ -89,4 +98,11 @@ func (s *OrganizationSearch) Query(query string, opts infra.QueryOptions) ([]mod
 		res = append(res, org)
 	}
 	return res, nil
+}
+
+func (s *OrganizationSearch) mapEntity(org model.Organization) *organizationEntity {
+	return &organizationEntity{
+		ID:   org.GetID(),
+		Name: org.GetName(),
+	}
 }

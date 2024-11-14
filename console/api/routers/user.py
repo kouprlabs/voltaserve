@@ -45,7 +45,6 @@ users_api_router = APIRouter(
 logger = base_logger.getChild("user")
 
 
-# --- GET --- #
 @users_api_router.get(
     path="/organizations",
     responses={status.HTTP_200_OK: {"model": UserOrganizationListResponse}},
@@ -140,12 +139,3 @@ async def get_user_count():
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
-
-
-# --- PATCH --- #
-
-# --- POST --- #
-
-# --- PUT --- #
-
-# --- DELETE --- #

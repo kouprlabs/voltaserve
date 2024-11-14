@@ -17,7 +17,6 @@ from .organization import (
     fetch_organization_users,
     fetch_organization_workspaces,
     fetch_organization_groups,
-    update_organization,
     fetch_organization_count,
 )
 from .snapshot import fetch_snapshot, fetch_snapshots
@@ -31,7 +30,7 @@ from .user import (
 from .workspace import (
     fetch_workspace,
     fetch_workspaces,
-    update_workspace,
     fetch_workspace_count,
 )
 from .overview import fetch_version
+from .userpermission import grant_user_permission, revoke_user_permission

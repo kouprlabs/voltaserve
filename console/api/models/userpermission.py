@@ -9,7 +9,9 @@
 # licenses/AGPL.txt.
 
 import datetime
-from typing import List
+from typing import List, Literal
+
+from pydantic import BaseModel
 
 from .generic import (
     GenericPaginationRequest,
@@ -19,7 +21,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class UserPermissionRequest(GenericRequest):
     pass
 
@@ -28,7 +29,19 @@ class UserPermissionListRequest(GenericPaginationRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
+class UserPermissionGrantRequest(BaseModel):
+    userId: str
+    resourceId: str
+    resourceType: Literal["file", "group", "organization", "workspace"]
+    permission: str
+
+
+class UserPermissionRevokeRequest(BaseModel):
+    userId: str
+    resourceId: str
+    resourceType: Literal["file", "group", "organization", "workspace"]
+
+
 class UserPermissionResponse(GenericResponse):
     user_id: str
     resource_id: str

@@ -220,9 +220,17 @@ func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.
 		if err != nil {
 			return nil, err
 		}
-		groups, err := svc.groupSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		hits, err := svc.groupSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
+		}
+		var groups []model.Group
+		for _, hit := range hits {
+			group, err := svc.groupCache.Get(hit.GetID())
+			if err != nil {
+				continue
+			}
+			groups = append(groups, group)
 		}
 		var filtered []model.Group
 		if opts.OrganizationID == "" {

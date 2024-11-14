@@ -7,8 +7,12 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
-from datetime import datetime
+import sys
+from datetime import datetime, timezone
 from functools import reduce
+import uuid
+import time
+from sqids import Sqids
 
 
 def camel_to_snake(data: str):
@@ -35,3 +39,11 @@ def parse_sql_update_query(tablename: str, data: dict):
             """
         )
     )
+
+
+def new_id() -> str:
+    return Sqids().encode([uuid.uuid4().int % sys.maxsize, time.time_ns()])
+
+
+def new_timestamp() -> str:
+    return datetime.now(timezone.utc).isoformat() + "Z"

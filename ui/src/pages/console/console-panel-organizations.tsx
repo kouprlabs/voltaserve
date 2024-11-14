@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useCallback, useState } from 'react'
+import { ReactElement, useState } from 'react'
 import {
   useLocation,
   useNavigate,
@@ -17,7 +17,8 @@ import {
 import { Avatar, Heading, Link as ChakraLink } from '@chakra-ui/react'
 import {
   DataTable,
-  IconEdit,
+  IconRemoveModerator,
+  IconShield,
   PagePagination,
   RelativeDate,
   SectionError,
@@ -31,8 +32,11 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleAPI, { ConsoleOrganization } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
-import ConsoleRenameModal from '@/components/console/console-rename-modal'
+import ConsoleConfirmationModal, {
+  ConsoleConfirmationModalRequest,
+} from '@/components/console/console-confirmation-modal'
 import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
+import { getUserId } from '@/infra/token'
 import { decodeQuery } from '@/lib/helpers/query'
 
 const ConsolePanelOrganizations = () => {
@@ -45,9 +49,13 @@ const ConsolePanelOrganizations = () => {
     searchFn: () => location.search,
     storage: consoleOrganizationsPaginationStorage(),
   })
-  const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
-  const [currentName, setCurrentName] = useState<string>('')
-  const [organizationId, setOrganizationId] = useState<string>()
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
+  const [isConfirmationDestructive, setIsConfirmationDestructive] =
+    useState(false)
+  const [confirmationHeader, setConfirmationHeader] = useState<ReactElement>()
+  const [confirmationBody, setConfirmationBody] = useState<ReactElement>()
+  const [confirmationRequest, setConfirmationRequest] =
+    useState<ConsoleConfirmationModalRequest>()
   const {
     data: list,
     error: listError,
@@ -66,19 +74,6 @@ const ConsolePanelOrganizations = () => {
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
-
-  const renameRequest = useCallback(
-    async (name: string) => {
-      if (organizationId) {
-        await ConsoleAPI.renameObject(
-          { id: organizationId, name },
-          'organization',
-        )
-        await mutate()
-      }
-    },
-    [organizationId],
-  )
 
   return (
     <>
@@ -140,12 +135,52 @@ const ConsolePanelOrganizations = () => {
             ]}
             actions={[
               {
-                label: 'Edit Name',
-                icon: <IconEdit />,
-                onClick: async (organization) => {
-                  setCurrentName(organization.name)
-                  setOrganizationId(organization.id)
-                  setIsConfirmRenameOpen(true)
+                label: 'Grant Owner Permission',
+                icon: <IconShield />,
+                onClick: async (workspace) => {
+                  setConfirmationHeader(<>Grant Owner Permission</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to grant yourself owner permission
+                      on{' '}
+                      <span className={cx('font-bold')}>{workspace.name}</span>?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await ConsoleAPI.grantUserPermission({
+                      userId: getUserId(),
+                      resourceId: workspace.id,
+                      resourceType: 'organization',
+                      permission: 'owner',
+                    })
+                    await mutate()
+                  })
+                  setIsConfirmationDestructive(false)
+                  setIsConfirmationOpen(true)
+                },
+              },
+              {
+                label: 'Revoke Permission',
+                icon: <IconRemoveModerator />,
+                isDestructive: true,
+                onClick: async (workspace) => {
+                  setConfirmationHeader(<>Revoke Permission</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to revoke your permission on{' '}
+                      <span className={cx('font-bold')}>{workspace.name}</span>?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await ConsoleAPI.revokeUserPermission({
+                      userId: getUserId(),
+                      resourceId: workspace.id,
+                      resourceType: 'organization',
+                    })
+                    await mutate()
+                  })
+                  setIsConfirmationDestructive(true)
+                  setIsConfirmationOpen(true)
                 },
               },
             ]}
@@ -165,12 +200,16 @@ const ConsolePanelOrganizations = () => {
           />
         ) : null}
       </div>
-      <ConsoleRenameModal
-        currentName={currentName}
-        isOpen={isConfirmRenameOpen}
-        onClose={() => setIsConfirmRenameOpen(false)}
-        onRequest={renameRequest}
-      />
+      {confirmationHeader && confirmationBody && confirmationRequest ? (
+        <ConsoleConfirmationModal
+          header={confirmationHeader}
+          body={confirmationBody}
+          isDestructive={isConfirmationDestructive}
+          isOpen={isConfirmationOpen}
+          onClose={() => setIsConfirmationOpen(false)}
+          onRequest={confirmationRequest}
+        />
+      ) : null}
     </>
   )
 }

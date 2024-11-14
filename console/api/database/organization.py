@@ -7,6 +7,7 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+
 from typing import Dict, Tuple, Iterable
 
 from psycopg import DatabaseError
@@ -16,7 +17,6 @@ from ..dependencies import conn, parse_sql_update_query
 from ..errors import EmptyDataException, NotFoundException
 
 
-# --- FETCH --- #
 def fetch_organization(organization_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
@@ -170,21 +170,3 @@ def fetch_organization_groups(
             return data, count["count"]
     except DatabaseError as error:
         raise error
-
-
-# --- UPDATE --- #
-def update_organization(data: Dict) -> None:
-    try:
-        with conn.cursor() as curs:
-            if not exists(curs=curs, _id=data["id"], tablename="organization"):
-                raise NotFoundException(
-                    f"Organization with id={data['id']} does not exist!"
-                )
-            curs.execute(parse_sql_update_query("organization", data))
-    except DatabaseError as error:
-        raise error
-
-
-# --- CREATE --- #
-
-# --- DELETE --- #

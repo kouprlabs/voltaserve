@@ -7,6 +7,7 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+
 from typing import Annotated
 
 from aiohttp import ClientSession
@@ -24,7 +25,6 @@ overview_api_router = APIRouter(
 logger = base_logger.getChild("overview")
 
 
-# --- GET --- #
 async def get_dockerhub_version(
     sess: ClientSession, id: str, response: dict, params: dict
 ) -> dict:

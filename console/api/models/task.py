@@ -19,7 +19,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class TaskRequest(GenericRequest):
     pass
 
@@ -28,7 +27,6 @@ class TaskListRequest(GenericPaginationRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class TaskResponse(GenericResponse):
     name: str
     error: str

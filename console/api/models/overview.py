@@ -15,12 +15,10 @@ from pydantic import BaseModel, AnyHttpUrl
 from . import GenericListResponse, GenericRequest
 
 
-# --- REQUEST MODELS --- #
 class VersionRequest(GenericRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class VersionResponse(BaseModel):
     name: str
     currentVersion: str

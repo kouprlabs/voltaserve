@@ -233,7 +233,7 @@ func NewCannotRemoveSoleOwnerOfGroupError(group model.Group) *ErrorResponse {
 	)
 }
 
-func NewGroupPermissionError(userID string, org model.Organization, permission string) *ErrorResponse {
+func NewGroupPermissionError(userID string, org model.Group, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_group_permission",
 		http.StatusForbidden,

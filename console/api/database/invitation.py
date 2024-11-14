@@ -7,6 +7,7 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+
 from typing import Dict, Tuple, Iterable
 
 from psycopg import DatabaseError
@@ -16,7 +17,6 @@ from ..dependencies import conn, parse_sql_update_query
 from ..errors import EmptyDataException, NotFoundException
 
 
-# --- FETCH --- #
 def fetch_invitation(_id: str) -> Dict | None:
     try:
         with conn.cursor() as curs:
@@ -83,7 +83,6 @@ def fetch_invitations(page=1, size=10) -> Tuple[Iterable[Dict], int]:
         raise error
 
 
-# --- UPDATE --- #
 def update_invitation(data: dict) -> None:
     try:
         data = {
@@ -94,33 +93,3 @@ def update_invitation(data: dict) -> None:
             curs.execute(parse_sql_update_query("invitation", data))
     except DatabaseError as error:
         raise error
-
-
-# def accept_invitation(data: dict):
-#     try:
-#         with conn.cursor() as curs:
-#             user = curs.execute(f'SELECT id FROM "user" WHERE email = \'{data.get('email')}\'').fetchone()
-#             if len(user) != 1:
-#                 ...
-#
-#             inv = fetch_invitation(_id=data.get('id'))
-#             if inv is None:
-#                 ...
-#
-#             if inv.get('status') != 'pending':
-#                 ...
-#
-#             update_invitation(data=data)
-#             curs.execute(f'INSERT INTO "organization_user" (organization_id, user_id) '
-#                          f'VALUES {inv.get("organization_id")}, {user.get("id")}')
-#
-#             curs.execute(f'INSERT INTO "userpermission" (id, user_id, resource_id, permission) '
-#                          f'VALUES ({}) ON CONFLICT (user_id, resource_id) '
-#                          f'DO UPDATE SET permission = ?')
-#
-#     except DatabaseError as error:
-#         raise error
-
-# --- CREATE --- #
-
-# --- DELETE --- #

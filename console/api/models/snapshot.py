@@ -19,7 +19,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class SnapshotRequest(GenericRequest):
     pass
 
@@ -28,7 +27,6 @@ class SnapshotListRequest(GenericPaginationRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class SnapshotResponse(GenericResponse):
     version: str
     original: dict

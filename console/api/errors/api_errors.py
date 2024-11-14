@@ -13,15 +13,11 @@ from fastapi import status, HTTPException
 from .error_codes import errors
 
 
-# --- REQUIRED FOR AUTHORIZATION --- #
 class GenericForbiddenException(HTTPException):
     def __init__(
         self, status_code: int = status.HTTP_403_FORBIDDEN, detail="Forbidden"
     ):
         super().__init__(status_code=status_code, detail=detail)
-
-
-# /--- REQUIRED FOR AUTHORIZATION ---/ #
 
 
 class GenericError(JSONResponse):

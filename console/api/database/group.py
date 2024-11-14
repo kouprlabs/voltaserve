@@ -7,6 +7,7 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+
 from typing import Tuple, Iterable, Dict
 
 from psycopg import DatabaseError
@@ -16,7 +17,6 @@ from ..errors import EmptyDataException, NotFoundException
 from .generic import exists
 
 
-# --- FETCH --- #
 def fetch_group(_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
@@ -101,20 +101,3 @@ def fetch_groups(page=1, size=10) -> Tuple[Iterable[Dict], int]:
 
     except DatabaseError as error:
         raise error
-
-
-# --- UPDATE --- #
-def update_group(data: dict) -> None:
-    try:
-        with conn.cursor() as curs:
-            if not exists(curs=curs, _id=data["id"], tablename="group"):
-                raise NotFoundException(f"Group with id={data['id']} does not exist!")
-
-            curs.execute(parse_sql_update_query("group", data))
-    except DatabaseError as error:
-        raise error
-
-
-# --- CREATE --- #
-
-# --- DELETE --- #

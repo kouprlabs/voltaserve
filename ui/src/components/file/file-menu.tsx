@@ -449,11 +449,11 @@ const FileMenu = ({
                   <span>Info</span>
                   {isMacOS ? (
                     <div>
-                      <Kbd>⌘</Kbd>+<Kbd>E</Kbd>
+                      <Kbd>⌘</Kbd>+<Kbd>I</Kbd>
                     </div>
                   ) : (
                     <div>
-                      <Kbd>Ctrl</Kbd>+<Kbd>E</Kbd>
+                      <Kbd>Ctrl</Kbd>+<Kbd>I</Kbd>
                     </div>
                   )}
                 </div>

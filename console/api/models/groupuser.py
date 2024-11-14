@@ -19,7 +19,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class UserGroupRequest(GenericRequest):
     pass
 
@@ -28,7 +27,6 @@ class UserGroupListRequest(GenericPaginationRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class UserGroupResponse(GenericResponse):
     group_id: str
     user_id: str

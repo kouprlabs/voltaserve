@@ -39,7 +39,6 @@ invitation_api_router = APIRouter(
 logger = base_logger.getChild("invitation")
 
 
-# --- GET --- #
 @invitation_api_router.get(
     path="", responses={status.HTTP_200_OK: {"model": InvitationResponse}}
 )
@@ -81,7 +80,6 @@ async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()])
         return UnknownApiError()
 
 
-# --- PATCH --- #
 @invitation_api_router.patch(
     path="",
     responses={status.HTTP_202_ACCEPTED: {"model": GenericAcceptedResponse}},
@@ -100,10 +98,3 @@ async def patch_invitation(data: ConfirmInvitationRequest, response: Response):
 
     response.status_code = status.HTTP_202_ACCEPTED
     return None
-
-
-# --- POST --- #
-
-# --- PUT --- #
-
-# --- DELETE --- #

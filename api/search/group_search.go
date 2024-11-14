@@ -24,6 +24,15 @@ type GroupSearch struct {
 	groupRepo repo.GroupRepo
 }
 
+type groupEntity struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+func (g groupEntity) GetID() string {
+	return g.ID
+}
+
 func NewGroupSearch() *GroupSearch {
 	return &GroupSearch{
 		index:     infra.GroupSearchIndex,
@@ -38,7 +47,7 @@ func (s *GroupSearch) Index(groups []model.Group) error {
 	}
 	var res []infra.SearchModel
 	for _, g := range groups {
-		res = append(res, g)
+		res = append(res, s.mapEntity(g))
 	}
 	if err := s.search.Index(s.index, res); err != nil {
 		return err
@@ -52,7 +61,7 @@ func (s *GroupSearch) Update(groups []model.Group) error {
 	}
 	var res []infra.SearchModel
 	for _, g := range groups {
-		res = append(res, g)
+		res = append(res, s.mapEntity(g))
 	}
 	if err := s.search.Update(s.index, res); err != nil {
 		return err
@@ -89,4 +98,11 @@ func (s *GroupSearch) Query(query string, opts infra.QueryOptions) ([]model.Grou
 		res = append(res, group)
 	}
 	return res, nil
+}
+
+func (s *GroupSearch) mapEntity(group model.Group) *groupEntity {
+	return &groupEntity{
+		ID:   group.GetID(),
+		Name: group.GetName(),
+	}
 }

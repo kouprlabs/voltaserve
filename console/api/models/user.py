@@ -21,7 +21,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class UserRequest(GenericRequest):
     pass
 
@@ -54,7 +53,6 @@ class UserGroupListRequest(UserGroupRequest, GenericPaginationRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class UserResponse(GenericResponse):
     fullName: str
     username: str

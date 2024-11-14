@@ -15,7 +15,6 @@ from fastapi import APIRouter, Depends, status, Response
 from ..database import (
     fetch_workspace,
     fetch_workspaces,
-    update_workspace,
     fetch_workspace_count,
 )
 from ..dependencies import JWTBearer, meilisearch_client, redis_conn
@@ -32,7 +31,6 @@ from ..models import (
     WorkspaceRequest,
     WorkspaceListResponse,
     WorkspaceListRequest,
-    UpdateWorkspaceRequest,
     GenericUnexpectedErrorResponse,
     GenericAcceptedResponse,
     CountResponse,
@@ -55,7 +53,6 @@ workspace_api_router = APIRouter(
 logger = base_logger.getChild("workspace")
 
 
-# --- GET --- #
 @workspace_api_router.get(
     path="", responses={status.HTTP_200_OK: {"model": WorkspaceResponse}}
 )
@@ -135,37 +132,3 @@ async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends(
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
-
-
-# --- PATCH --- #
-@workspace_api_router.patch(path="", status_code=status.HTTP_202_ACCEPTED)
-async def patch_workspace(data: UpdateWorkspaceRequest, response: Response):
-    try:
-        await redis_conn.delete(f"workspace:{data.id}")
-        update_workspace(data=data.model_dump(exclude_none=True))
-        meilisearch_client.index("workspace").update_documents(
-            [
-                {
-                    "id": data.id,
-                    "name": data.name,
-                    "storageCapacity": data.storageCapacity,
-                    "updateTime": data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                }
-            ]
-        )
-    except NotFoundException as e:
-        logger.error(e)
-        return NotFoundError(message=str(e))
-    except Exception as e:
-        logger.exception(e)
-        return UnknownApiError()
-
-    response.status_code = status.HTTP_202_ACCEPTED
-    return None
-
-
-# --- POST --- #
-
-# --- PUT --- #
-
-# --- DELETE --- #
