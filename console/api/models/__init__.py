@@ -30,7 +30,6 @@ from .group import (
     GroupListRequest,
     GroupResponse,
     GroupListResponse,
-    UpdateGroupRequest,
     GroupSearchRequest,
 )
 from .grouppermission import (
@@ -51,7 +50,6 @@ from .organization import (
     OrganizationListRequest,
     OrganizationResponse,
     OrganizationListResponse,
-    UpdateOrganizationRequest,
     OrganizationWorkspaceResponse,
     OrganizationUserListResponse,
     OrganizationUserResponse,
@@ -106,7 +104,6 @@ from .workspace import (
     WorkspaceResponse,
     WorkspaceListResponse,
     WorkspaceOrganizationListRequest,
-    UpdateWorkspaceRequest,
     WorkspaceSearchRequest,
 )
 from .token import TokenResponse, TokenPayload

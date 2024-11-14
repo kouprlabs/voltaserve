@@ -13,7 +13,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_groups, fetch_group
-from ..database.group import update_group, fetch_group_count
+from ..database.group import fetch_group_count
 from ..dependencies import JWTBearer, meilisearch_client
 from ..log import base_logger
 from ..errors import (
@@ -28,7 +28,6 @@ from ..models import (
     GroupListRequest,
     GroupListResponse,
     GroupRequest,
-    UpdateGroupRequest,
     CountResponse,
     GroupSearchRequest,
 )
@@ -121,32 +120,6 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
-
-
-# --- PATCH --- #
-@group_api_router.patch(path="", status_code=status.HTTP_202_ACCEPTED)
-async def patch_group(data: UpdateGroupRequest, response: Response):
-    try:
-        await redis_conn.delete(f"group:{data.id}")
-        update_group(data=data.model_dump(exclude_none=True))
-        meilisearch_client.index("group").update_documents(
-            [
-                {
-                    "id": data.id,
-                    "name": data.name,
-                    "updateTime": data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                }
-            ]
-        )
-    except NotFoundException as e:
-        logger.error(e)
-        return NotFoundError(message=str(e))
-    except Exception as e:
-        logger.exception(e)
-        return UnknownApiError()
-
-    response.status_code = status.HTTP_202_ACCEPTED
-    return None
 
 
 # --- POST --- #

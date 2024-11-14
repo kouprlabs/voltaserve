@@ -109,15 +109,6 @@ def fetch_workspaces(page=1, size=10) -> Tuple[Iterable[Dict], int]:
         raise error
 
 
-# --- UPDATE --- #
-def update_workspace(data: dict) -> None:
-    try:
-        with conn.cursor() as curs:
-            curs.execute(parse_sql_update_query("workspace", data))
-    except DatabaseError as error:
-        raise error
-
-
 # --- CREATE --- #
 
 # --- DELETE --- #

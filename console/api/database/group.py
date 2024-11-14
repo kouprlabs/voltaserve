@@ -104,18 +104,6 @@ def fetch_groups(page=1, size=10) -> Tuple[Iterable[Dict], int]:
         raise error
 
 
-# --- UPDATE --- #
-def update_group(data: dict) -> None:
-    try:
-        with conn.cursor() as curs:
-            if not exists(curs=curs, _id=data["id"], tablename="group"):
-                raise NotFoundException(f"Group with id={data['id']} does not exist!")
-
-            curs.execute(parse_sql_update_query("group", data))
-    except DatabaseError as error:
-        raise error
-
-
 # --- CREATE --- #
 
 # --- DELETE --- #

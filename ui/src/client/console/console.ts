@@ -112,6 +112,19 @@ export interface InvitationStatusRequest extends BaseIDRequest {
   accept: boolean
 }
 
+export type GrantUserPermissionOptions = {
+  userId: string
+  resourceId: string
+  resourceType: 'file' | 'group' | 'organization' | 'workspace'
+  permission: string
+}
+
+export type RevokeUserPermissionOptions = {
+  userId: string
+  resourceId: string
+  resourceType: 'file' | 'group' | 'organization' | 'workspace'
+}
+
 export interface CountResponse {
   count: number
 }
@@ -380,6 +393,22 @@ export default class ConsoleAPI {
     } else {
       return this.useListObject<T>(object, options, swrOptions)
     }
+  }
+
+  static grantUserPermission(options: GrantUserPermissionOptions) {
+    return consoleFetcher({
+      url: '/user_permission/grant',
+      method: 'POST',
+      body: JSON.stringify(options),
+    }) as Promise<void>
+  }
+
+  static revokeUserPermission(options: RevokeUserPermissionOptions) {
+    return consoleFetcher({
+      url: '/user_permission/revoke',
+      method: 'POST',
+      body: JSON.stringify(options),
+    }) as Promise<void>
   }
 
   static paramsFromListOptions = (options: ListOptions): URLSearchParams => {

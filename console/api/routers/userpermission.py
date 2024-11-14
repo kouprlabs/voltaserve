@@ -26,10 +26,10 @@ user_permission_api_router = APIRouter(
 
 @user_permission_api_router.post(path="/grant", status_code=status.HTTP_200_OK)
 async def post_grant_user_permission(data: UserPermissionGrantRequest):
-    await redis_conn.delete(f"{data.resource_type}:{data.resource_id}")
+    await redis_conn.delete(f"{data.resourceType}:{data.resourceId}")
     grant_user_permission(
-        user_id=data.user_id,
-        resource_id=data.resource_id,
+        user_id=data.userId,
+        resource_id=data.resourceId,
         permission=data.permission,
     )
     return Response(status_code=status.HTTP_200_OK)
@@ -37,9 +37,9 @@ async def post_grant_user_permission(data: UserPermissionGrantRequest):
 
 @user_permission_api_router.post(path="/revoke", status_code=status.HTTP_200_OK)
 async def post_revoke_user_permission(data: UserPermissionRevokeRequest):
-    await redis_conn.delete(f"{data.resource_type}:{data.resource_id}")
+    await redis_conn.delete(f"{data.resourceType}:{data.resourceId}")
     revoke_user_permission(
-        user_id=data.user_id,
-        resource_id=data.resource_id,
+        user_id=data.userId,
+        resource_id=data.resourceId,
     )
     return Response(status_code=status.HTTP_200_OK)

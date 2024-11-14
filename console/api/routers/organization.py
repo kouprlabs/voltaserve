@@ -17,7 +17,6 @@ from ..database import (
     fetch_organizations,
     fetch_organization_users,
     fetch_organization_workspaces,
-    update_organization,
     fetch_organization_groups,
     fetch_organization_count,
 )
@@ -36,7 +35,6 @@ from ..models import (
     OrganizationListResponse,
     OrganizationListRequest,
     OrganizationWorkspaceListRequest,
-    UpdateOrganizationRequest,
     OrganizationWorkspaceListResponse,
     OrganizationGroupListResponse,
     OrganizationGroupListRequest,
@@ -227,32 +225,6 @@ async def get_organization_groups(
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
-
-
-# --- PATCH --- #
-@organization_api_router.patch(path="", status_code=status.HTTP_202_ACCEPTED)
-async def patch_organization(data: UpdateOrganizationRequest, response: Response):
-    try:
-        await redis_conn.delete(f"organization:{data.id}")
-        update_organization(data=data.model_dump(exclude_none=True))
-        meilisearch_client.index("organization").update_documents(
-            [
-                {
-                    "id": data.id,
-                    "name": data.name,
-                    "updateTime": data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                }
-            ]
-        )
-    except NotFoundException as e:
-        logger.error(e)
-        return NotFoundError(message=str(e))
-    except Exception as e:
-        logger.exception(e)
-        return UnknownApiError()
-
-    response.status_code = status.HTTP_202_ACCEPTED
-    return None
 
 
 # --- POST --- #

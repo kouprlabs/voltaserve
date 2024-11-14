@@ -31,16 +31,16 @@ class UserPermissionListRequest(GenericPaginationRequest):
 
 
 class UserPermissionGrantRequest(BaseModel):
-    user_id: str
-    resource_id: str
-    resource_type: Literal["file", "group", "organization", "workspace"]
+    userId: str
+    resourceId: str
+    resourceType: Literal["file", "group", "organization", "workspace"]
     permission: str
 
 
 class UserPermissionRevokeRequest(BaseModel):
-    user_id: str
-    resource_id: str
-    resource_type: Literal["file", "group", "organization", "workspace"]
+    userId: str
+    resourceId: str
+    resourceType: Literal["file", "group", "organization", "workspace"]
 
 
 # --- RESPONSE MODELS --- #

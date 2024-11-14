@@ -47,11 +47,6 @@ class OrganizationGroupListRequest(GenericRequest, GenericPaginationRequest):
     pass
 
 
-class UpdateOrganizationRequest(GenericRequest):
-    name: str = Field(None)
-    updateTime: datetime.datetime = Field(default_factory=datetime.datetime.now)
-
-
 # --- RESPONSE MODELS --- #
 class OrganizationResponse(GenericResponse):
     name: str
