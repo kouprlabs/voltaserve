@@ -334,9 +334,17 @@ func (svc *WorkspaceService) findAll(opts WorkspaceListOptions, userID string) (
 		if err != nil {
 			return nil, err
 		}
-		workspaces, err := svc.workspaceSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		hits, err := svc.workspaceSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
+		}
+		var workspaces []model.Workspace
+		for _, hit := range hits {
+			workspace, err := svc.workspaceCache.Get(hit.GetID())
+			if err != nil {
+				continue
+			}
+			workspaces = append(workspaces, workspace)
 		}
 		res, err = svc.doAuthorization(workspaces, userID)
 		if err != nil {

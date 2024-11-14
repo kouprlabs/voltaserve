@@ -25,7 +25,7 @@ from .routers import (
     invitation_api_router,
     users_api_router,
     overview_api_router,
-    userpermission_api_router,
+    user_permission_api_router,
 )
 
 
@@ -94,7 +94,7 @@ app.include_router(organization_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
 app.include_router(overview_api_router)
-app.include_router(userpermission_api_router)
+app.include_router(user_permission_api_router)
 
 
 @app.middleware("http")

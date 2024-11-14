@@ -240,9 +240,17 @@ func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Ta
 		if err != nil {
 			return nil, err
 		}
-		tasks, err := svc.taskSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		hits, err := svc.taskSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
+		}
+		var tasks []model.Task
+		for _, hit := range hits {
+			task, err := svc.taskCache.Get(hit.GetID())
+			if err != nil {
+				continue
+			}
+			tasks = append(tasks, task)
 		}
 		res, err = svc.doAuthorization(tasks, userID)
 		if err != nil {

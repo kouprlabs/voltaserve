@@ -9,7 +9,7 @@
 # licenses/AGPL.txt.
 
 import datetime
-from typing import List
+from typing import List, Literal
 
 from pydantic import BaseModel
 
@@ -33,12 +33,14 @@ class UserPermissionListRequest(GenericPaginationRequest):
 class UserPermissionGrantRequest(BaseModel):
     user_id: str
     resource_id: str
+    resource_type: Literal["file", "group", "organization", "workspace"]
     permission: str
 
 
 class UserPermissionRevokeRequest(BaseModel):
     user_id: str
     resource_id: str
+    resource_type: Literal["file", "group", "organization", "workspace"]
 
 
 # --- RESPONSE MODELS --- #

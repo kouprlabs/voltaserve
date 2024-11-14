@@ -194,9 +194,17 @@ func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID str
 		if err != nil {
 			return nil, err
 		}
-		orgs, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		hits, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
+		}
+		var orgs []model.Organization
+		for _, hit := range hits {
+			org, err := svc.orgCache.Get(hit.GetID())
+			if err != nil {
+				continue
+			}
+			orgs = append(orgs, org)
 		}
 		res, err = svc.doAuthorization(orgs, userID)
 		if err != nil {
