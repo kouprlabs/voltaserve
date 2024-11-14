@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-FROM python:3.12.5-alpine
+FROM python:3.11.9-alpine
 
 ARG USERNAME=voltaserve
 ARG GROUPNAME=$USERNAME

@@ -35,3 +35,4 @@ from .workspace import (
     fetch_workspace_count,
 )
 from .overview import fetch_version
+from .userpermission import grant_user_permission, revoke_user_permission

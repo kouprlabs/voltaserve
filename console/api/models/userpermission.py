@@ -11,6 +11,8 @@
 import datetime
 from typing import List
 
+from pydantic import BaseModel
+
 from .generic import (
     GenericPaginationRequest,
     GenericResponse,
@@ -26,6 +28,17 @@ class UserPermissionRequest(GenericRequest):
 
 class UserPermissionListRequest(GenericPaginationRequest):
     pass
+
+
+class UserPermissionGrantRequest(BaseModel):
+    user_id: str
+    resource_id: str
+    permission: str
+
+
+class UserPermissionRevokeRequest(BaseModel):
+    user_id: str
+    resource_id: str
 
 
 # --- RESPONSE MODELS --- #
