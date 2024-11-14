@@ -27,6 +27,16 @@ type FileSearch struct {
 	snapshotRepo repo.SnapshotRepo
 }
 
+type fileEntity struct {
+	ID   string  `json:"id"`
+	Name string  `json:"name"`
+	Text *string `json:"text,omitempty"`
+}
+
+func (f fileEntity) GetID() string {
+	return f.ID
+}
+
 func NewFileSearch() *FileSearch {
 	return &FileSearch{
 		index:        infra.FileSearchIndex,
@@ -45,7 +55,7 @@ func (s *FileSearch) Index(files []model.File) (err error) {
 	}
 	var res []infra.SearchModel
 	for _, f := range files {
-		res = append(res, f)
+		res = append(res, s.mapEntity(f))
 	}
 	if err := s.search.Index(s.index, res); err != nil {
 		return err
@@ -62,7 +72,7 @@ func (s *FileSearch) Update(files []model.File) (err error) {
 	}
 	var res []infra.SearchModel
 	for _, f := range files {
-		res = append(res, f)
+		res = append(res, s.mapEntity(f))
 	}
 	if err := s.search.Update(s.index, res); err != nil {
 		return err
@@ -118,4 +128,12 @@ func (s *FileSearch) populateTextField(files []model.File) error {
 		}
 	}
 	return nil
+}
+
+func (s *FileSearch) mapEntity(file model.File) *fileEntity {
+	return &fileEntity{
+		ID:   file.GetID(),
+		Name: file.GetName(),
+		Text: file.GetText(),
+	}
 }

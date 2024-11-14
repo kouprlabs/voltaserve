@@ -24,6 +24,15 @@ type TaskSearch struct {
 	taskRepo repo.TaskRepo
 }
 
+type taskEntity struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+func (t taskEntity) GetID() string {
+	return t.ID
+}
+
 func NewTaskSearch() *TaskSearch {
 	return &TaskSearch{
 		index:    infra.TaskSearchIndex,
@@ -37,8 +46,8 @@ func (s *TaskSearch) Index(tasks []model.Task) error {
 		return nil
 	}
 	var res []infra.SearchModel
-	for _, o := range tasks {
-		res = append(res, o)
+	for _, t := range tasks {
+		res = append(res, s.mapEntity(t))
 	}
 	if err := s.search.Index(s.index, res); err != nil {
 		return err
@@ -51,8 +60,8 @@ func (s *TaskSearch) Update(orgs []model.Task) error {
 		return nil
 	}
 	var res []infra.SearchModel
-	for _, o := range orgs {
-		res = append(res, o)
+	for _, t := range orgs {
+		res = append(res, s.mapEntity(t))
 	}
 	if err := s.search.Update(s.index, res); err != nil {
 		return err
@@ -89,4 +98,11 @@ func (s *TaskSearch) Query(query string, opts infra.QueryOptions) ([]model.Task,
 		res = append(res, org)
 	}
 	return res, nil
+}
+
+func (s *TaskSearch) mapEntity(task model.Task) *taskEntity {
+	return &taskEntity{
+		ID:   task.GetID(),
+		Name: task.GetName(),
+	}
 }

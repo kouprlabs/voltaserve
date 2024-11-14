@@ -150,6 +150,7 @@ const FileList = ({ list, scale }: FileListProps) => {
 
   const handleKeyDown = useCallback(
     (keyName: string, event: KeyboardEvent) => {
+      console.log(keyName)
       if (isModalOpen) {
         return
       }
@@ -174,8 +175,8 @@ const FileList = ({ list, scale }: FileListProps) => {
           dispatch(moveModalDidOpen())
         }
       } else if (
-        (keyName === 'command+e' && isMacOS()) ||
-        (keyName === 'ctrl+e' && !isMacOS())
+        (keyName === 'command+i' && isMacOS()) ||
+        (keyName === 'ctrl+i' && !isMacOS())
       ) {
         if (selection.length > 0) {
           dispatch(infoModalDidOpen())
@@ -205,6 +206,7 @@ const FileList = ({ list, scale }: FileListProps) => {
         command+a,ctrl+a,
         command+c,ctrl+c,
         command+x,ctrl+x,
+        command+i,ctrl+i,
         command+e,f2,
         command+backspace,del`}
       onKeyDown={handleKeyDown}
