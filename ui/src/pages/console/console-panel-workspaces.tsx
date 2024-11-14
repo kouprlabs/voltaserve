@@ -163,8 +163,20 @@ const ConsolePanelWorkspaces = () => {
                   setConfirmationRequest(() => async () => {
                     await ConsoleAPI.grantUserPermission({
                       userId: getUserId(),
+                      resourceId: workspace.organization.id,
+                      resourceType: 'organization',
+                      permission: 'owner',
+                    })
+                    await ConsoleAPI.grantUserPermission({
+                      userId: getUserId(),
                       resourceId: workspace.id,
                       resourceType: 'workspace',
+                      permission: 'owner',
+                    })
+                    await ConsoleAPI.grantUserPermission({
+                      userId: getUserId(),
+                      resourceId: workspace.rootId,
+                      resourceType: 'file',
                       permission: 'owner',
                     })
                     await mutate()
@@ -186,6 +198,11 @@ const ConsolePanelWorkspaces = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
+                    await ConsoleAPI.revokeUserPermission({
+                      userId: getUserId(),
+                      resourceId: workspace.rootId,
+                      resourceType: 'file',
+                    })
                     await ConsoleAPI.revokeUserPermission({
                       userId: getUserId(),
                       resourceId: workspace.id,
