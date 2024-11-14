@@ -23,7 +23,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class WorkspaceRequest(GenericRequest):
     pass
 
@@ -40,7 +39,6 @@ class WorkspaceOrganizationListRequest(WorkspaceRequest, WorkspaceListRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class WorkspaceResponse(GenericResponse):
     name: str
     organization: OrganizationResponse

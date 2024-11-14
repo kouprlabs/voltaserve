@@ -17,7 +17,6 @@ from ..dependencies import conn
 from ..errors import EmptyDataException, NotFoundException
 
 
-# --- FETCH --- #
 def fetch_snapshot(_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
@@ -60,10 +59,3 @@ def fetch_snapshots(page=1, size=10) -> Tuple[Iterable[Dict], int]:
             return data, count["count"]
     except DatabaseError as error:
         raise error
-
-
-# --- UPDATE --- #
-
-# --- CREATE --- #
-
-# --- DELETE --- #

@@ -17,7 +17,6 @@ from ..dependencies import conn, parse_sql_update_query
 from ..errors import EmptyDataException, NotFoundException
 
 
-# --- FETCH --- #
 def fetch_organization(organization_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
@@ -171,8 +170,3 @@ def fetch_organization_groups(
             return data, count["count"]
     except DatabaseError as error:
         raise error
-
-
-# --- CREATE --- #
-
-# --- DELETE --- #

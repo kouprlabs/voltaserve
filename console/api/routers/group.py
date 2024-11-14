@@ -41,7 +41,6 @@ group_api_router = APIRouter(
 logger = base_logger.getChild("group")
 
 
-# --- GET --- #
 @group_api_router.get(path="", responses={status.HTTP_200_OK: {"model": GroupResponse}})
 async def get_group(data: Annotated[GroupRequest, Depends()]):
     try:
@@ -120,10 +119,3 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
-
-
-# --- POST --- #
-
-# --- PUT --- #
-
-# --- DELETE --- #

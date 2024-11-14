@@ -22,7 +22,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class OrganizationRequest(GenericRequest):
     pass
 
@@ -47,7 +46,6 @@ class OrganizationGroupListRequest(GenericRequest, GenericPaginationRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class OrganizationResponse(GenericResponse):
     name: str
     createTime: datetime.datetime = Field(None)

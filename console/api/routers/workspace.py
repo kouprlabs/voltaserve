@@ -53,7 +53,6 @@ workspace_api_router = APIRouter(
 logger = base_logger.getChild("workspace")
 
 
-# --- GET --- #
 @workspace_api_router.get(
     path="", responses={status.HTTP_200_OK: {"model": WorkspaceResponse}}
 )
@@ -133,10 +132,3 @@ async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends(
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
-
-
-# --- POST --- #
-
-# --- PUT --- #
-
-# --- DELETE --- #

@@ -25,7 +25,6 @@ overview_api_router = APIRouter(
 logger = base_logger.getChild("overview")
 
 
-# --- GET --- #
 async def get_dockerhub_version(
     sess: ClientSession, id: str, response: dict, params: dict
 ) -> dict:

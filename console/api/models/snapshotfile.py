@@ -19,7 +19,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class SnapshotFileRequest(GenericRequest):
     pass
 
@@ -28,7 +27,6 @@ class SnapshotFileListRequest(GenericPaginationRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class SnapshotFileResponse(GenericResponse):
     snapshot_id: str
     file_id: str

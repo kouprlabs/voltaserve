@@ -19,7 +19,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class GroupPermissionRequest(GenericRequest):
     pass
 
@@ -28,7 +27,6 @@ class GroupPermissionListRequest(GenericPaginationRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class GroupPermissionResponse(GenericResponse):
     group_id: str
     user_id: str

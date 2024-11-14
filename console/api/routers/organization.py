@@ -52,7 +52,6 @@ organization_api_router = APIRouter(
 logger = base_logger.getChild("organization")
 
 
-# --- GET --- #
 @organization_api_router.get(
     path="", responses={status.HTTP_200_OK: {"model": OrganizationResponse}}
 )
@@ -225,10 +224,3 @@ async def get_organization_groups(
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
-
-
-# --- POST --- #
-
-# --- PUT --- #
-
-# --- DELETE --- #

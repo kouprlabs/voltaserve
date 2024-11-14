@@ -15,16 +15,8 @@ from fastapi import status
 from pydantic import BaseModel, Field
 
 
-# --- REQUEST MODELS --- #
 class GenericRequest(BaseModel):
     id: str = Field(...)
-
-    # @model_validator(mode='after')
-    # def not_null(self) -> Self:
-    #     if not any(self.model_dump(exclude={'id'}).values()):
-    #         raise ValueError('At lease one value must be set!')
-    #
-    #     return self
 
 
 class GenericPaginationRequest(BaseModel):
@@ -36,7 +28,6 @@ class GenericSearchRequest(GenericPaginationRequest):
     query: str | None = Field("")
 
 
-# --- RESPONSE MODELS --- #
 class GenericResponse(BaseModel):
     id: str
 
@@ -85,7 +76,6 @@ class GenericAcceptedResponse(BaseModel):
     pass
 
 
-# --- TOKEN SPECIFIC --- #
 class GenericTokenPayload(BaseModel):
     sub: str
     iat: datetime.datetime

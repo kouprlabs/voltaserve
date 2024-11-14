@@ -21,7 +21,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class UserPermissionRequest(GenericRequest):
     pass
 
@@ -43,7 +42,6 @@ class UserPermissionRevokeRequest(BaseModel):
     resourceType: Literal["file", "group", "organization", "workspace"]
 
 
-# --- RESPONSE MODELS --- #
 class UserPermissionResponse(GenericResponse):
     user_id: str
     resource_id: str

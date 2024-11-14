@@ -23,7 +23,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class GroupRequest(GenericRequest):
     pass
 
@@ -36,7 +35,6 @@ class GroupSearchRequest(GenericSearchRequest):
     pass
 
 
-# --- RESPONSE MODELS --- #
 class GroupResponse(GenericResponse):
     name: str
     organization: OrganizationResponse

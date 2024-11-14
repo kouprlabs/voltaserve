@@ -17,7 +17,6 @@ from ..errors import EmptyDataException, NotFoundException
 from .generic import exists
 
 
-# --- FETCH --- #
 def fetch_group(_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
@@ -102,8 +101,3 @@ def fetch_groups(page=1, size=10) -> Tuple[Iterable[Dict], int]:
 
     except DatabaseError as error:
         raise error
-
-
-# --- CREATE --- #
-
-# --- DELETE --- #

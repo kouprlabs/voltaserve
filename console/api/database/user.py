@@ -17,9 +17,6 @@ from ..dependencies import conn
 from ..errors import EmptyDataException, NotFoundException
 
 
-# --- FETCH --- #
-
-
 def fetch_user_organizations(
     user_id: str, page=1, size=10
 ) -> Tuple[Iterable[Dict], int]:
@@ -141,10 +138,3 @@ def fetch_user_groups(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], in
             return data, count["count"]
     except DatabaseError as error:
         raise error
-
-
-# --- UPDATE --- #
-
-# --- CREATE --- #
-
-# --- DELETE --- #

@@ -22,7 +22,6 @@ from .generic import (
 )
 
 
-# --- REQUEST MODELS --- #
 class InvitationRequest(GenericRequest):
     pass
 
@@ -36,7 +35,6 @@ class ConfirmInvitationRequest(GenericRequest):
     updateTime: datetime.datetime | None = Field(default_factory=datetime.datetime.now)
 
 
-# --- RESPONSE MODELS --- #
 class InvitationResponse(GenericResponse):
     organization: OrganizationResponse
     ownerId: str
