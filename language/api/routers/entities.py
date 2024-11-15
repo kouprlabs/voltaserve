@@ -18,10 +18,7 @@ bp = Blueprint("entities", __name__)
 @bp.route("/v3/entities", methods=["POST"])
 def get_entities():
     content = request.json
-    text = content["text"]
-    language = content["language"]
-
-    entity_extractor = EntityExtractor(nlp[language])
-    dtos = entity_extractor.run(text)
+    entity_extractor = EntityExtractor(nlp[content["language"]])
+    dtos = entity_extractor.run(content["text"])
 
     return jsonify(dtos)
