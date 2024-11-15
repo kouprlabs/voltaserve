@@ -14,7 +14,6 @@ import AccountLayout from '@/pages/account/account-layout'
 import AccountSettingsPage from '@/pages/account/account-settings-page'
 import ConfirmEmailPage from '@/pages/confirm-email-page'
 import ConsolePanelGroups from '@/pages/console/console-panel-groups'
-import ConsolePanelInvitations from '@/pages/console/console-panel-invitations'
 import ConsolePanelOrganization from '@/pages/console/console-panel-organization'
 import ConsolePanelOrganizations from '@/pages/console/console-panel-organizations'
 import ConsolePanelOverview from '@/pages/console/console-panel-overview'
@@ -191,10 +190,6 @@ const router = createBrowserRouter([
           {
             path: '/console/workspaces',
             element: <ConsolePanelWorkspaces />,
-          },
-          {
-            path: '/console/invitations',
-            element: <ConsolePanelInvitations />,
           },
           {
             path: '/console/organizations',
