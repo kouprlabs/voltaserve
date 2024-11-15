@@ -9,26 +9,16 @@
 # licenses/AGPL.txt.
 
 from flask import Blueprint, request, jsonify
-import spacy.cli
+from ..services.models import nlp
 from ..services.entities import EntityExtractor
 
 bp = Blueprint("entities", __name__)
 
-multi_language_model = "xx_ent_wiki_sm"
-spacy.cli.download(multi_language_model)
-
-nlp = spacy.load(multi_language_model)
-nlp.add_pipe("sentencizer")
-
 
 @bp.route("/v3/entities", methods=["POST"])
 def get_entities():
-    global nlp
-
     content = request.json
-    text = content["text"]
-
-    entity_extractor = EntityExtractor(nlp)
-    dtos = entity_extractor.run(text)
+    entity_extractor = EntityExtractor(nlp[content["language"]])
+    dtos = entity_extractor.run(content["text"])
 
     return jsonify(dtos)
