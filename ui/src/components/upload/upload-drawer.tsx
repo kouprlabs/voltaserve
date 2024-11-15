@@ -15,6 +15,7 @@ import cx from 'classnames'
 import UploadList from '@/components/upload/upload-list'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { drawerDidClose } from '@/store/ui/uploads'
 
 const UploadDrawer = () => {
   const dispatch = useAppDispatch()
@@ -45,7 +46,10 @@ const UploadDrawer = () => {
     <AuxiliaryDrawer
       icon={<IconUpload />}
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        onClose()
+        dispatch(drawerDidClose())
+      }}
       onOpen={onOpen}
       hasBadge={hasPendingUploads}
       header="Uploads"

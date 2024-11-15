@@ -15,7 +15,7 @@ import cx from 'classnames'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { mutateCountUpdated } from '@/store/ui/tasks'
+import { drawerDidClose, mutateCountUpdated } from '@/store/ui/tasks'
 import TasksList from './task-list'
 
 const TaskDrawer = () => {
@@ -61,7 +61,10 @@ const TaskDrawer = () => {
     <AuxiliaryDrawer
       icon={<IconStacks />}
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        onClose()
+        dispatch(drawerDidClose())
+      }}
       onOpen={onOpen}
       hasBadge={count !== undefined && count > 0}
       header="Tasks"
