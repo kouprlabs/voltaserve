@@ -8,7 +8,6 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-from typing import TypedDict
 from flask import Blueprint, request, jsonify
 from ..services.models import nlp
 from ..services.entities import EntityExtractor
@@ -18,8 +17,6 @@ bp = Blueprint("entities", __name__)
 
 @bp.route("/v3/entities", methods=["POST"])
 def get_entities():
-    global nlp
-
     content = request.json
     text = content["text"]
     language = content["language"]
