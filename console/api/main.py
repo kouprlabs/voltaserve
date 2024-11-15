@@ -22,7 +22,6 @@ from .routers import (
     group_api_router,
     organization_api_router,
     workspace_api_router,
-    invitation_api_router,
     users_api_router,
     overview_api_router,
     user_permission_api_router,
@@ -43,7 +42,6 @@ app = FastAPI(
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": GenericErrorResponse},
     },
     exception_handlers={status.HTTP_403_FORBIDDEN: custom_http_exception_handler},
-    # Comment below to enable swagger and redoc docs
     redoc_url=None,
     docs_url=None,
 )
@@ -92,7 +90,6 @@ app.include_router(users_api_router)
 app.include_router(group_api_router)
 app.include_router(organization_api_router)
 app.include_router(workspace_api_router)
-app.include_router(invitation_api_router)
 app.include_router(overview_api_router)
 app.include_router(user_permission_api_router)
 

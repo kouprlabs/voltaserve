@@ -10,16 +10,8 @@
 import useSWR, { SWRConfiguration } from 'swr'
 import { PermissionType } from '@/client/api/permission'
 import { consoleFetcher } from '@/client/fetcher'
-import { getConfig } from '@/config/config'
-import { getAccessToken } from '@/infra/token'
 
-export type ConsoleObject =
-  | 'workspace'
-  | 'organization'
-  | 'group'
-  | 'user'
-  | 'invitation'
-  | 'index'
+export type ConsoleObject = 'workspace' | 'organization' | 'group' | 'user'
 
 export interface ListResponse<T> {
   totalElements: number
@@ -138,20 +130,6 @@ export interface ComponentVersion {
 }
 
 export default class ConsoleAPI {
-  static async checkIndexesAvailability() {
-    const response = await fetch(`${getConfig().consoleURL}/index/all`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${getAccessToken()}`,
-      },
-    })
-    if (response) {
-      return response.ok
-    } else {
-      return false
-    }
-  }
-
   static useListUsersByOrganization(
     options: ListOptions,
     swrOptions?: SWRConfiguration,
@@ -325,22 +303,6 @@ export default class ConsoleAPI {
       url: `/overview/version/internal?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<ComponentVersion>
-  }
-
-  static renameObject(options: BaseNameRequest, object: ConsoleObject) {
-    return consoleFetcher({
-      url: `/${object}`,
-      method: 'PATCH',
-      body: JSON.stringify(options),
-    }) as Promise<void>
-  }
-
-  static invitationChangeStatus(options: InvitationStatusRequest) {
-    return consoleFetcher({
-      url: `/invitation`,
-      method: 'PATCH',
-      body: JSON.stringify(options),
-    }) as Promise<void>
   }
 
   static useListObject<T>(

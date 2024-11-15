@@ -13,7 +13,6 @@ import { useToast } from '@chakra-ui/react'
 import {
   IconWorkspaces,
   IconHome,
-  IconInvitations,
   IconGroup,
   IconFlag,
   IconPerson,
@@ -86,12 +85,6 @@ const LayoutConsole = () => {
           icon: <IconFlag />,
           primaryText: 'Organizations',
           secondaryText: 'Manage workspaces',
-        },
-        {
-          href: '/console/invitations',
-          icon: <IconInvitations />,
-          primaryText: 'Invitations',
-          secondaryText: 'Manage invitations',
         },
         {
           href: '/console/users',

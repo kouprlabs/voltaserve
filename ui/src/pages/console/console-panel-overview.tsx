@@ -189,20 +189,6 @@ const ConsolePanelOverview = () => {
                 <Tr>
                   <Th>
                     <Flex padding={1}>
-                      <span className={cx('font-bold')}>Statistics</span>
-                      <Spacer />
-                    </Flex>
-                  </Th>
-                </Tr>
-              </Thead>
-            </Table>
-          </GridItem>
-          <GridItem colSpan={2}>
-            <Table>
-              <Thead>
-                <Tr>
-                  <Th>
-                    <Flex padding={1}>
                       Components
                       <Spacer />
                       {componentsData.filter(
@@ -249,6 +235,7 @@ const ConsolePanelOverview = () => {
               </Tbody>
             </Table>
           </GridItem>
+          <GridItem colSpan={2}></GridItem>
         </Grid>
       </div>
     </>
