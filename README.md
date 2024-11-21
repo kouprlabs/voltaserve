@@ -147,4 +147,4 @@ To setup a development environment for the purpose of developing and debugging V
 
 ## Licensing
 
-Voltaserve is released under the [Business Source License 1.1](LICENSE in the root of this repository).
+Voltaserve is released under the [Business Source License 1.1](LICENSE).
