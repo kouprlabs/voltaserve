@@ -91,7 +91,7 @@ const SignUpPage = () => {
           >
             <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
               <div className={cx('w-[64px]')}>
-                <Logo isGlossy={true} />
+                <Logo type="voltaserve" size="md" isGlossy={true} />
               </div>
               <Heading className={cx('text-heading')}>
                 Thanks! We just sent you a confirmation email
@@ -114,7 +114,7 @@ const SignUpPage = () => {
             )}
           >
             <div className={cx('w-[64px]')}>
-              <Logo isGlossy={true} />
+              <Logo type="voltaserve" size="md" isGlossy={true} />
             </div>
             <Heading className={cx('text-heading')}>
               Sign Up to Voltaserve

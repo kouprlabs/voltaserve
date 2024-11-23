@@ -48,7 +48,7 @@ const UpdateEmailPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'items-center', 'gap-3')}>
         <div className={cx('w-[64px]')}>
-          <Logo isGlossy={true} />
+          <Logo type="voltaserve" size="md" isGlossy={true} />
         </div>
         {!isCompleted && !isFailed ? (
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>

@@ -54,7 +54,7 @@ const LayoutConsole = () => {
       storage={{ prefix: 'voltaserve', namespace: 'main' }}
       logo={
         <div className={cx('w-[16px]')}>
-          <Logo type="voltaserve" />
+          <Logo type="voltaserve" size="sm" />
         </div>
       }
       homeHref={

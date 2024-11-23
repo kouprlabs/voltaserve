@@ -77,7 +77,7 @@ const ForgotPasswordPage = () => {
           )}
         >
           <div className={cx('w-[64px]')}>
-            <Logo isGlossy={true} />
+            <Logo type="voltaserve" size="md" isGlossy={true} />
           </div>
           <Heading className={cx('text-heading')}>Forgot Password</Heading>
           {isCompleted ? (
