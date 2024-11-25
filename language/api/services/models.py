@@ -32,4 +32,4 @@ for key in models.keys():
     nlp[key].add_pipe("sentencizer")
 
     highlighted_package = f"\033[1m{package.ljust(package_max_length)}\033[0m"
-    print(f"🧠 Model {highlighted_package} is ready.")
+    print(f"🧠 Model {highlighted_package} loaded.")
