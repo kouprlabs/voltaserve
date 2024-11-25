@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { useColorMode } from '@chakra-ui/react'
+import { useColorMode, useToken } from '@chakra-ui/react'
 import { SectionError, SectionPlaceholder, SectionSpinner } from '@koupr/ui'
 import { ResponsivePie } from '@nivo/pie'
 import cx from 'classnames'
@@ -17,6 +17,8 @@ import { useAppSelector } from '@/store/hook'
 
 const InsightsOverviewChart = () => {
   const { colorMode } = useColorMode()
+  const colors = useToken('colors', ['gray.200'])
+  const colorsDark = useToken('colors', ['gray.500'])
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
@@ -54,12 +56,12 @@ const InsightsOverviewChart = () => {
         >
           <ResponsivePie
             data={list.data.map((entity) => ({
-              id: entity.text,
-              label: entity.text,
+              id: `${entity.text} (${entity.frequency})`,
+              label: `${entity.text} (${entity.frequency})`,
               value: entity.frequency,
             }))}
             tooltip={() => null}
-            colors={{ scheme: 'nivo' }}
+            colors={colorMode === 'dark' ? colorsDark : colors}
             margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
             innerRadius={0.6}
             padAngle={3}
@@ -70,6 +72,7 @@ const InsightsOverviewChart = () => {
               from: 'color',
               modifiers: [['darker', 0.2]],
             }}
+            arcLabel={() => ''}
             arcLinkLabelsSkipAngle={10}
             arcLinkLabelsTextColor={
               colorMode === 'light' ? 'rgb(26, 32, 44)' : 'white'
