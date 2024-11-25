@@ -58,7 +58,8 @@ const InsightsOverviewChart = () => {
               label: entity.text,
               value: entity.frequency,
             }))}
-            colors={{ scheme: colorMode === 'light' ? 'greys' : 'nivo' }}
+            tooltip={() => null}
+            colors={{ scheme: 'nivo' }}
             margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
             innerRadius={0.6}
             padAngle={3}
