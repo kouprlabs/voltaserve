@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useEffect, useState } from 'react'
-import { Badge, Table, Tbody, Td, Tooltip, Tr } from '@chakra-ui/react'
+import { Badge, Table, Tbody, Td, Tr } from '@chakra-ui/react'
 import {
   Pagination,
   SearchInput,
@@ -112,17 +112,6 @@ const InsightsOverviewEntities = () => {
                       )}
                     >
                       <span className={cx('text-base')}>{entity.text}</span>
-                      {getEntityDescription(entity.label) ? (
-                        <Tooltip label={getEntityDescription(entity.label)}>
-                          <Badge className={cx('cursor-default')}>
-                            {entity.label}
-                          </Badge>
-                        </Tooltip>
-                      ) : (
-                        <Badge className={cx('cursor-default')}>
-                          {entity.label}
-                        </Badge>
-                      )}
                       <Badge>{entity.frequency}</Badge>
                     </div>
                   </Td>
@@ -144,51 +133,6 @@ const InsightsOverviewEntities = () => {
       ) : null}
     </div>
   )
-}
-
-function getEntityDescription(label: string) {
-  switch (label) {
-    case 'PER':
-      return 'People, including fictional characters.'
-    case 'NORP':
-      return 'Nationalities or religious or political groups.'
-    case 'FAC':
-      return 'Buildings, airports, highways, bridges, etc.'
-    case 'ORG':
-      return 'Companies, agencies, institutions, etc.'
-    case 'GPE':
-      return 'Countries, cities, states.'
-    case 'LOC':
-      return 'Non-GPE locations, such as mountain ranges, bodies of water.'
-    case 'PRODUCT':
-      return 'Objects, vehicles, foods, etc.'
-    case 'EVENT':
-      return 'Named hurricanes, battles, wars, sports events, etc.'
-    case 'WORK_OF_ART':
-      return 'Titles of books, songs, etc.'
-    case 'LAW':
-      return 'Named legal documents.'
-    case 'LANGUAGE':
-      return 'Any named language.'
-    case 'DATE':
-      return 'Absolute or relative dates or periods.'
-    case 'TIME':
-      return 'Times smaller than a day.'
-    case 'PERCENT':
-      return 'Percentages, including the symbol "%".'
-    case 'MONEY':
-      return 'Monetary values, including units.'
-    case 'QUANTITY':
-      return 'Measurements of weight, distance, etc.'
-    case 'ORDINAL':
-      return '“First”, “second”, etc.'
-    case 'CARDINAL':
-      return 'Numerals that do not fall under another type.'
-    case 'MISC':
-      return 'Miscellaneous entities, e.g., events, nationalities, products, etc.'
-    default:
-      return undefined
-  }
 }
 
 export default InsightsOverviewEntities
