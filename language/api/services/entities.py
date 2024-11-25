@@ -9,6 +9,7 @@
 # AGPL-3.0-only in the root of this repository.
 
 import string
+import re
 from spacy.language import Language
 
 
@@ -42,7 +43,7 @@ class EntityExtractor:
             list: A list of entities
         """
         return [
-            {"text": ent.text, "label": ent.label_}
+            {"text": re.sub(r"\n+", " ", ent.text).strip(), "label": ent.label_}
             for doc in self.nlp.pipe([text], disable=["tagger"])
             for sent in doc.sents
             for ent in sent.ents
