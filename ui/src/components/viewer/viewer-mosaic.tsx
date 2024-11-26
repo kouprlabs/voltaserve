@@ -7,9 +7,16 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { useEffect, useMemo, useRef, useState, MouseEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  MouseEvent,
+  useCallback,
+} from 'react'
 import { Select } from '@koupr/ui'
-import { OptionBase } from 'chakra-react-select'
+import { OptionBase, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import MosaicAPI, { Metadata, ZoomLevel } from '@/client/api/mosaic'
@@ -23,6 +30,16 @@ export type ViewerImageProps = {
 interface ZoomLevelOption extends OptionBase {
   value: number
   label: string
+}
+
+type TileCoordinate = {
+  row: number
+  column: number
+}
+
+type MouseCoordinate = {
+  x: number
+  y: number
 }
 
 const ViewerMosaic = ({ file }: ViewerImageProps) => {
@@ -45,162 +62,166 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
 
   useEffect(() => {
     ;(async function () {
-      if (!metadata || !canvasRef.current) return
-
+      if (!metadata) {
+        return
+      }
       const canvas = canvasRef.current
-      const ctx = canvas.getContext('2d')
-
-      if (!ctx) return
-
+      if (!canvas) {
+        return
+      }
+      const context = canvas.getContext('2d')
+      if (!context) {
+        return
+      }
       const currentZoomLevel = metadata.zoomLevels[zoomLevel]
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-
-      // Clear the visible canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      const visibleTiles = getVisibleTiles(
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      getVisibleTileCoordinates(
         currentZoomLevel,
         canvas.width,
         canvas.height,
         offset,
-      )
-
-      visibleTiles.forEach(({ row, col }) => {
-        const tileKey = `${zoomLevel}-${row}-${col}`
+      ).forEach(({ row, column }) => {
+        const tileKey = `${zoomLevel}-${row}-${column}`
         const cachedTile = tileCache.current.get(tileKey)
-
         if (cachedTile) {
-          drawTile(ctx, cachedTile, currentZoomLevel, row, col)
+          drawTile(context, cachedTile, currentZoomLevel, row, column)
         } else {
-          const img = new Image()
+          const image = new Image()
           let extension =
             file.snapshot?.preview?.extension ||
             file.snapshot?.original?.extension
           extension = extension?.replaceAll('.', '')
-          img.src = `${getConfig().apiURL}/mosaics/${file.id}/zoom_level/${zoomLevel}/row/${row}/column/${col}/extension/${extension}?access_token=${accessToken}`
-
-          img.onload = () => {
-            tileCache.current.set(tileKey, img)
-            drawTile(ctx, img, currentZoomLevel, row, col)
+          image.src = `${getConfig().apiURL}/mosaics/${file.id}/zoom_level/${zoomLevel}/row/${row}/column/${column}/extension/${extension}?access_token=${accessToken}`
+          image.onload = () => {
+            tileCache.current.set(tileKey, image)
+            drawTile(context, image, currentZoomLevel, row, column)
           }
         }
       })
     })()
-  }, [metadata, zoomLevel, offset, file, accessToken])
+  }, [file, metadata, zoomLevel, offset, accessToken, canvasRef, tileCache])
 
-  const drawTile = (
-    ctx: CanvasRenderingContext2D,
-    img: HTMLImageElement,
-    zoomLevel: ZoomLevel,
-    row: number,
-    col: number,
-  ) => {
-    const tileWidth =
-      col === zoomLevel.cols - 1
-        ? zoomLevel.tile.lastColWidth
-        : zoomLevel.tile.width
-    const tileHeight =
-      row === zoomLevel.rows - 1
-        ? zoomLevel.tile.lastRowHeight
-        : zoomLevel.tile.height
-    ctx.drawImage(
-      img,
-      col * zoomLevel.tile.width + offset.x,
-      row * zoomLevel.tile.height + offset.y,
-      tileWidth,
-      tileHeight,
-    )
-  }
+  const drawTile = useCallback(
+    (
+      context: CanvasRenderingContext2D,
+      image: HTMLImageElement,
+      zoomLevel: ZoomLevel,
+      row: number,
+      column: number,
+    ) => {
+      const tileWidth =
+        column === zoomLevel.cols - 1
+          ? zoomLevel.tile.lastColWidth
+          : zoomLevel.tile.width
+      const tileHeight =
+        row === zoomLevel.rows - 1
+          ? zoomLevel.tile.lastRowHeight
+          : zoomLevel.tile.height
+      context.drawImage(
+        image,
+        column * zoomLevel.tile.width + offset.x,
+        row * zoomLevel.tile.height + offset.y,
+        tileWidth,
+        tileHeight,
+      )
+    },
+    [canvasRef, offset],
+  )
 
-  const getVisibleTiles = (
-    zoomLevel: ZoomLevel,
-    viewportWidth: number,
-    viewportHeight: number,
-    offset: { x: number; y: number },
-  ) => {
-    const tiles: { row: number; col: number }[] = []
-    const startX = Math.max(0, Math.floor(-offset.x / zoomLevel.tile.width))
-    const startY = Math.max(0, Math.floor(-offset.y / zoomLevel.tile.height))
-    const endX = Math.min(
-      zoomLevel.cols,
-      Math.ceil((viewportWidth - offset.x) / zoomLevel.tile.width),
-    )
-    const endY = Math.min(
-      zoomLevel.rows,
-      Math.ceil((viewportHeight - offset.y) / zoomLevel.tile.height),
-    )
-
-    for (let row = startY; row < endY; row++) {
-      for (let col = startX; col < endX; col++) {
-        tiles.push({ row, col })
+  const getVisibleTileCoordinates = useCallback(
+    (
+      zoomLevel: ZoomLevel,
+      viewportWidth: number,
+      viewportHeight: number,
+      offset: MouseCoordinate,
+    ): TileCoordinate[] => {
+      const coordinates: TileCoordinate[] = []
+      const startX = Math.max(0, Math.floor(-offset.x / zoomLevel.tile.width))
+      const startY = Math.max(0, Math.floor(-offset.y / zoomLevel.tile.height))
+      const endX = Math.min(
+        zoomLevel.cols,
+        Math.ceil((viewportWidth - offset.x) / zoomLevel.tile.width),
+      )
+      const endY = Math.min(
+        zoomLevel.rows,
+        Math.ceil((viewportHeight - offset.y) / zoomLevel.tile.height),
+      )
+      for (let row = startY; row < endY; row++) {
+        for (let column = startX; column < endX; column++) {
+          coordinates.push({ row, column: column })
+        }
       }
-    }
-    return tiles
-  }
+      return coordinates
+    },
+    [],
+  )
 
-  const handleMouseDown = () => {
+  const handleMouseDown = useCallback(() => {
     setDragging(true)
-  }
+  }, [])
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setDragging(false)
-  }
+  }, [])
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (dragging) {
-      setOffset((prev) => ({
-        x: prev.x + e.movementX,
-        y: prev.y + e.movementY,
-      }))
-    }
-  }
+  const handleMouseMove = useCallback(
+    (event: MouseEvent) => {
+      if (dragging) {
+        setOffset((previous) => ({
+          x: previous.x + event.movementX,
+          y: previous.y + event.movementY,
+        }))
+      }
+    },
+    [dragging],
+  )
 
-  const handleZoomChange = (value: number) => {
-    setZoomLevel(value)
-    setOffset({ x: 0, y: 0 })
-  }
-
-  if (!metadata) {
-    return null
-  }
+  const handleZoomChange = useCallback(
+    (newValue: SingleValue<ZoomLevelOption>) => {
+      if (newValue?.value !== undefined) {
+        setZoomLevel(newValue.value)
+        setOffset({ x: 0, y: 0 })
+      }
+    },
+    [],
+  )
 
   return (
-    <div className={cx('absolute', 'top-0', 'left-0')}>
-      <Select<ZoomLevelOption, false>
-        className={cx(
-          'absolute',
-          'top-[15px]',
-          'left-[15px]',
-          'z-10',
-          'w-[200px]',
-        )}
-        defaultValue={{
-          value: metadata.zoomLevels[0].index,
-          label: `Zoom ${Math.round(metadata.zoomLevels[0].scaleDownPercentage)}%`,
-        }}
-        options={metadata.zoomLevels.map((zoomLevel) => ({
-          value: zoomLevel.index,
-          label: `Zoom ${Math.round(zoomLevel.scaleDownPercentage)}%`,
-        }))}
-        placeholder="Zoom Level"
-        selectedOptionStyle="check"
-        onChange={(newValue) => {
-          if (newValue?.value !== undefined) {
-            handleZoomChange(newValue.value)
-          }
-        }}
-      />
-      <canvas
-        className={cx('absolute', 'top-0', 'left-0', 'z-0')}
-        ref={canvasRef}
-        width={window.innerWidth}
-        height={window.innerHeight}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-      ></canvas>
-    </div>
+    <>
+      {metadata ? (
+        <div className={cx('absolute', 'top-0', 'left-0')}>
+          <Select<ZoomLevelOption, false>
+            className={cx(
+              'absolute',
+              'top-[15px]',
+              'left-[15px]',
+              'z-10',
+              'w-[200px]',
+            )}
+            defaultValue={{
+              value: metadata.zoomLevels[0].index,
+              label: `Zoom ${Math.round(metadata.zoomLevels[0].scaleDownPercentage)}%`,
+            }}
+            options={metadata.zoomLevels.map((zoomLevel) => ({
+              value: zoomLevel.index,
+              label: `Zoom ${Math.round(zoomLevel.scaleDownPercentage)}%`,
+            }))}
+            placeholder="Zoom Level"
+            selectedOptionStyle="check"
+            onChange={handleZoomChange}
+          />
+          <canvas
+            className={cx('absolute', 'top-0', 'left-0', 'z-0')}
+            ref={canvasRef}
+            width={window.innerWidth}
+            height={window.innerHeight}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+          />
+        </div>
+      ) : null}
+    </>
   )
 }
 
