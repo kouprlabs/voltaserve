@@ -38,8 +38,8 @@ const ViewerVideo = ({ file }: ViewerVideoProps) => {
       controls
       autoPlay
       style={{
-        maxWidth: '100%',
-        maxHeight: '100%',
+        maxWidth: '90%',
+        maxHeight: '90%',
         borderRadius: variables.borderRadius,
       }}
     >

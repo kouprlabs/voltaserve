@@ -9,7 +9,7 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useMemo } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { Button, Text } from '@chakra-ui/react'
+import { Button } from '@chakra-ui/react'
 import { Sidenav, IconDownload, Spinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -127,7 +127,7 @@ const ViewerPage = () => {
       hasGLB,
     ],
   )
-  const isPresentational = hasVideo || (hasImage && !hasMosaicImage)
+  const isTheaterMode = hasVideo || (hasImage && !hasMosaicImage)
 
   return (
     <>
@@ -141,28 +141,15 @@ const ViewerPage = () => {
               <DrawerContent file={file} />
             </Sidenav>
             <div
-              className={cx('flex', 'flex-col', 'gap-0', 'grow', 'h-[100vh]')}
+              className={cx(
+                'relative',
+                'flex',
+                'flex-col',
+                'gap-0',
+                'grow',
+                'h-[100vh]',
+              )}
             >
-              <div
-                className={cx(
-                  'flex',
-                  'items-center',
-                  'justify-center',
-                  'w-full',
-                  'h-[80px]',
-                  'min-h-[80px]',
-                  { 'bg-black': isPresentational },
-                )}
-              >
-                <Text
-                  className={cx('font-medium', 'text-[16px]', 'px-3.5', {
-                    'text-white': isPresentational,
-                  })}
-                  noOfLines={1}
-                >
-                  {file.name}
-                </Text>
-              </div>
               <div
                 className={cx(
                   'flex',
@@ -172,7 +159,7 @@ const ViewerPage = () => {
                   'h-full',
                   'overflow-hidden',
                   'relative',
-                  { 'bg-black': isPresentational },
+                  { 'bg-black': isTheaterMode },
                 )}
               >
                 {renderViewer(file)}

@@ -52,8 +52,8 @@ const ViewerImage = ({ file }: ViewerImageProps) => {
           src={url}
           style={{
             objectFit: 'contain',
-            width: isLoading ? 0 : 'auto',
-            height: isLoading ? 0 : '90%',
+            maxWidth: isLoading ? 0 : '90%',
+            maxHeight: isLoading ? 0 : '90%',
             visibility: isLoading ? 'hidden' : 'visible',
             borderRadius: variables.borderRadius,
           }}

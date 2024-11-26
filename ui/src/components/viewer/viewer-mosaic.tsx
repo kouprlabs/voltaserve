@@ -193,8 +193,8 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
           <Select<ZoomLevelOption, false>
             className={cx(
               'absolute',
-              'top-[15px]',
-              'left-[15px]',
+              'top-1.5',
+              'left-1.5',
               'z-10',
               'w-[200px]',
             )}
