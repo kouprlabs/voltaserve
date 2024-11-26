@@ -48,7 +48,7 @@ const InsightsOverviewChart = () => {
         <div
           className={cx(
             'w-full',
-            'h-[320px]',
+            'h-[300px]',
             'flex',
             'items-center',
             'justify-center',
@@ -63,25 +63,17 @@ const InsightsOverviewChart = () => {
             tooltip={() => null}
             colors={colorMode === 'dark' ? colorsDark : colors}
             margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
-            innerRadius={0.6}
+            innerRadius={0.65}
             padAngle={3}
-            cornerRadius={3}
+            cornerRadius={4}
             activeOuterRadiusOffset={8}
-            borderWidth={2}
-            borderColor={{
-              from: 'color',
-              modifiers: [['darker', 0.2]],
-            }}
             arcLabel={() => ''}
             arcLinkLabelsSkipAngle={10}
             arcLinkLabelsTextColor={
               colorMode === 'light' ? 'rgb(26, 32, 44)' : 'white'
             }
             arcLinkLabelsThickness={2}
-            arcLinkLabelsColor={{
-              from: 'color',
-              modifiers: [['darker', 0.2]],
-            }}
+            arcLinkLabelsColor={{ from: 'color' }}
             arcLabelsSkipAngle={10}
             arcLabelsTextColor={{
               from: 'color',
