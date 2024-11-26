@@ -13,9 +13,9 @@ import FileInfoItemCount from '@/components/file/info/file-info-item-count'
 import FileInfoCreateTime from './file-info-create-time'
 import FileInfoExtension from './file-info-extension'
 import FileInfoImage from './file-info-image'
+import FileInfoName from './file-info-name'
 import FileInfoPermission from './file-info-permission'
-import FileInfoSize from './file-info-size'
-import FileInfoStorageUsage from './file-info-storage-usage'
+import FileInfoStorage from './file-info-storage'
 import FileInfoUpdateTime from './file-info-update-time'
 
 export type FileInfoEmbedProps = {
@@ -24,11 +24,11 @@ export type FileInfoEmbedProps = {
 
 const FileInfoEmbed = ({ file }: FileInfoEmbedProps) => (
   <div className={cx('flex', 'flex-col', 'gap-1')}>
+    <FileInfoName file={file} />
     <FileInfoImage file={file} />
-    <FileInfoSize file={file} />
     <FileInfoExtension file={file} />
     <FileInfoItemCount file={file} />
-    <FileInfoStorageUsage file={file} />
+    <FileInfoStorage file={file} />
     <FileInfoPermission file={file} />
     <FileInfoCreateTime file={file} />
     <FileInfoUpdateTime file={file} />
