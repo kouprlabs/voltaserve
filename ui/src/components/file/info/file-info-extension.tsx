@@ -21,7 +21,7 @@ const FileInfoExtension = ({ file }: FileInfoExtensionProps) => {
   }
   return (
     <Stat>
-      <StatLabel>File type</StatLabel>
+      <StatLabel>Extension</StatLabel>
       <StatNumber className={cx('text-base')}>
         <Badge>{file.snapshot?.original.extension}</Badge>
       </StatNumber>

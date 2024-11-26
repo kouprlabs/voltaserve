@@ -13,15 +13,15 @@ import { File } from '@/client/api/file'
 import StorageAPI from '@/client/api/storage'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 
-export type FileInfoStorageUsageProps = {
+export type FileInfoStorageProps = {
   file: File
 }
 
-const FileInfoStorageUsage = ({ file }: FileInfoStorageUsageProps) => {
+const FileInfoStorage = ({ file }: FileInfoStorageProps) => {
   const { data: usage, error } = StorageAPI.useGetFileUsage(file.id)
   return (
     <Stat>
-      <StatLabel>Storage usage</StatLabel>
+      <StatLabel>Storage</StatLabel>
       <StatNumber className={cx('text-base')}>
         <div className={cx('flex', 'flex-col', 'gap-0.5')}>
           {error ? (
@@ -47,4 +47,4 @@ const FileInfoStorageUsage = ({ file }: FileInfoStorageUsageProps) => {
   )
 }
 
-export default FileInfoStorageUsage
+export default FileInfoStorage
