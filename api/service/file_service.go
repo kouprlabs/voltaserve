@@ -608,7 +608,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 }
 
 type FileQuery struct {
-	Text             string  `json:"text"                       validate:"required"`
+	Text             *string `json:"text"                       validate:"required"`
 	Type             *string `json:"type,omitempty"             validate:"omitempty,oneof=file folder"`
 	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
 	CreateTimeBefore *int64  `json:"createTimeBefore,omitempty"`
@@ -669,12 +669,12 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 		return nil, err
 	}
 	var data []model.File
-	if opts.Query != nil && opts.Query.Text != "" {
+	if opts.Query != nil && opts.Query.Text != nil {
 		count, err := svc.fileRepo.Count()
 		if err != nil {
 			return nil, err
 		}
-		data, err = svc.fileSearch.Query(opts.Query.Text, infra.QueryOptions{Limit: count})
+		data, err = svc.fileSearch.Query(*opts.Query.Text, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
 		}
