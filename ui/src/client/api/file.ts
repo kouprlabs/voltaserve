@@ -70,7 +70,7 @@ export type GroupPermission = {
 }
 
 export type Query = {
-  text: string
+  text?: string
   type?: FileType
   createTimeAfter?: number
   createTimeBefore?: number
@@ -81,7 +81,6 @@ export type Query = {
 export type ListOptions = {
   size?: number
   page?: number
-  type?: FileType
   sortBy?: SortBy
   sortOrder?: SortOrder
   query?: Query
@@ -288,9 +287,6 @@ export default class FileAPI {
     }
     if (options?.sortOrder) {
       params.sort_order = options.sortOrder.toString()
-    }
-    if (options?.type) {
-      params.type = options.type
     }
     if (options?.query) {
       params.query = encodeQuery(JSON.stringify(options.query))
