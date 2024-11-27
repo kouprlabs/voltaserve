@@ -36,8 +36,8 @@ export function newInvalidJwtError() {
 export function newUsernameUnavailableError() {
   return newError({
     code: ErrorCode.UsernameUnavailable,
-    message: `Username is not available.`,
-    userMessage: `Username is not available.`,
+    message: `Username not available.`,
+    userMessage: `Username not available.`,
   })
 }
 
