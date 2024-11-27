@@ -1239,10 +1239,6 @@ paths:
         name: id
         required: true
         type: string
-      - description: Type
-        in: query
-        name: type
-        type: string
       - description: Page
         in: query
         name: page

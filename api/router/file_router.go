@@ -326,7 +326,6 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 //	@Id				files_list
 //	@Produce		json
 //	@Param			id			path		string	true	"ID"
-//	@Param			type		query		string	false	"Type"
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
@@ -343,17 +342,9 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	var res *service.FileList
-	if c.Query("query") != "" {
-		res, err = r.fileSvc.Search(id, *opts, userID)
-		if err != nil {
-			return err
-		}
-	} else {
-		res, err = r.fileSvc.List(id, *opts, userID)
-		if err != nil {
-			return err
-		}
+	res, err := r.fileSvc.List(id, *opts, userID)
+	if err != nil {
+		return err
 	}
 	return c.JSON(res)
 }
@@ -421,10 +412,6 @@ func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOption
 	if !IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	fileType := c.Query("type")
-	if fileType != model.FileTypeFile && fileType != model.FileTypeFolder && fileType != "" {
-		return nil, errorpkg.NewInvalidQueryParamError("type")
-	}
 	query, err := url.QueryUnescape(c.Query("query"))
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
@@ -442,12 +429,6 @@ func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOption
 		}
 		if err := json.Unmarshal(b, &opts.Query); err != nil {
 			return nil, errorpkg.NewInvalidQueryParamError("query")
-		}
-	} else {
-		if fileType != "" {
-			opts.Query = &service.FileQuery{
-				Type: &fileType,
-			}
 		}
 	}
 	return &opts, nil
