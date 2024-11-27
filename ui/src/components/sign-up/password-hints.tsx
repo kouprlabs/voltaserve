@@ -40,28 +40,32 @@ function hasMinLength(value: string, minimum: number): boolean {
 
 function hasMinLowerCase(value: string, minimum: number): boolean {
   const lowerCaseCount = Array.from(value).filter(
-    (char) => char === char.toLowerCase() && char !== char.toUpperCase(),
+    (character) =>
+      character === character.toLowerCase() &&
+      character !== character.toUpperCase(),
   ).length
   return lowerCaseCount >= minimum
 }
 
 function hasMinUpperCase(value: string, minimum: number): boolean {
   const upperCaseCount = Array.from(value).filter(
-    (char) => char === char.toUpperCase() && char !== char.toLowerCase(),
+    (character) =>
+      character === character.toUpperCase() &&
+      character !== character.toLowerCase(),
   ).length
   return upperCaseCount >= minimum
 }
 
 function hasMinNumbers(value: string, minimum: number): boolean {
   const numbersCount = Array.from(value).filter(
-    (char) => !isNaN(Number(char)),
+    (character) => !isNaN(Number(character)),
   ).length
   return numbersCount >= minimum
 }
 
 function hasMinSymbols(value: string, minimum: number): boolean {
   const symbolsCount = Array.from(value).filter(
-    (char) => !char.match(/[a-zA-Z0-9\s]/),
+    (character) => !character.match(/[a-zA-Z0-9\s]/),
   ).length
   return symbolsCount >= minimum
 }

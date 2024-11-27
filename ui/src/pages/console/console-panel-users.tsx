@@ -144,7 +144,11 @@ const ConsolePanelUsers = () => {
               {
                 title: 'Updated',
                 renderCell: (user) => (
-                  <RelativeDate date={new Date(user.updateTime)} />
+                  <>
+                    {user.updateTime ? (
+                      <RelativeDate date={new Date(user.updateTime)} />
+                    ) : null}
+                  </>
                 ),
               },
               {
