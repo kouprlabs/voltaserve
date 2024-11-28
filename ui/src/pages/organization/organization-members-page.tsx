@@ -29,7 +29,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import OrganizationAPI from '@/client/api/organization'
-import { geEditorPermission } from '@/client/api/permission'
+import { geOwnerPermission } from '@/client/api/permission'
 import UserAPI, { SortBy, SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
@@ -107,7 +107,7 @@ const OrganizationMembersPage = () => {
             <SectionPlaceholder
               text="This organization has no members."
               content={
-                geEditorPermission(org.permission) ? (
+                geOwnerPermission(org.permission) ? (
                   <Button
                     leftIcon={<IconPersonAdd />}
                     onClick={() => dispatch(inviteModalDidOpen())}

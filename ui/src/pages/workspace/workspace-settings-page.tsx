@@ -18,7 +18,7 @@ import {
   SectionSpinner,
 } from '@koupr/ui'
 import cx from 'classnames'
-import { geEditorPermission } from '@/client/api/permission'
+import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
 import StorageAPI from '@/client/api/storage'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
@@ -48,6 +48,10 @@ const WorkspaceSettingsPage = () => {
   } = StorageAPI.useGetWorkspaceUsage(id, swrConfig())
   const hasEditPermission = useMemo(
     () => workspace && geEditorPermission(workspace.permission),
+    [workspace],
+  )
+  const hasOwnerPermission = useMemo(
+    () => workspace && geOwnerPermission(workspace.permission),
     [workspace],
   )
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
@@ -121,7 +125,7 @@ const WorkspaceSettingsPage = () => {
                         <EditButton
                           title="Edit storage capacity"
                           aria-label="Edit storage capacity"
-                          isDisabled={!hasEditPermission}
+                          isDisabled={!hasOwnerPermission}
                           onClick={() => setIsStorageCapacityModalOpen(true)}
                         />
                       </>
@@ -158,7 +162,7 @@ const WorkspaceSettingsPage = () => {
                         icon={<IconDelete />}
                         variant="solid"
                         colorScheme="red"
-                        isDisabled={!hasEditPermission}
+                        isDisabled={!hasOwnerPermission}
                         title="Delete workspace"
                         aria-label="Delete workspace"
                         onClick={() => setIsDeleteModalOpen(true)}
