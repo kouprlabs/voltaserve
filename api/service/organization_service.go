@@ -267,8 +267,10 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return err
 	}
 
-	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
-		return err
+	if memberID != userID {
+		if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
+			return err
+		}
 	}
 
 	/* Make sure member is not the last remaining owner of the organization */

@@ -236,7 +236,7 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionEditor); err != nil {
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	size, err := svc.fileRepo.ComputeSize(workspace.GetRootID())
