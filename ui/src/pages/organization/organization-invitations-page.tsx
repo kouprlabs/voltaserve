@@ -25,7 +25,7 @@ import {
 } from '@koupr/ui'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import OrganizationAPI from '@/client/api/organization'
-import { geEditorPermission } from '@/client/api/permission'
+import { geOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationStatus from '@/components/organization/organization-status'
@@ -113,7 +113,7 @@ const OrganizationInvitationsPage = () => {
             <SectionPlaceholder
               text="There are no invitations."
               content={
-                geEditorPermission(org.permission) ? (
+                geOwnerPermission(org.permission) ? (
                   <Button
                     leftIcon={<IconPersonAdd />}
                     onClick={() => {
