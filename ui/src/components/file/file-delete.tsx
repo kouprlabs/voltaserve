@@ -62,16 +62,14 @@ const FileDelete = () => {
       <ModalOverlay />
       <ModalContent>
         {selection.length > 1 ? (
-          <ModalHeader>Delete {selection.length} Item(s)</ModalHeader>
+          <ModalHeader>Delete ({selection.length}) Items</ModalHeader>
         ) : (
           <ModalHeader>Delete Item</ModalHeader>
         )}
         <ModalCloseButton />
         <ModalBody>
           {selection.length > 1 ? (
-            <span>
-              Are you sure you want to delete ({selection.length}) item(s)?
-            </span>
+            <span>Are you sure you want to delete these items?</span>
           ) : (
             <span>Are you sure you want to delete this item?</span>
           )}
