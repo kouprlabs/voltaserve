@@ -65,7 +65,7 @@ const FileMove = () => {
       <ModalContent>
         <ModalHeader>
           {selection.length > 1
-            ? `Move (${selection.length}) Item(s) To…`
+            ? `Move (${selection.length}) Items To…`
             : 'Move Item To…'}
         </ModalHeader>
         <ModalCloseButton />

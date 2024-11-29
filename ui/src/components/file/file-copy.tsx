@@ -69,7 +69,7 @@ const FileCopy = () => {
       <ModalContent>
         <ModalHeader>
           {selection.length > 1
-            ? `Copy (${selection.length}) Item(s) to…`
+            ? `Copy (${selection.length}) Items to…`
             : 'Copy Item to…'}
         </ModalHeader>
         <ModalCloseButton />
