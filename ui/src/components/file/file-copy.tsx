@@ -67,7 +67,11 @@ const FileCopy = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Copy {selection.length} Item(s) to…</ModalHeader>
+        <ModalHeader>
+          {selection.length > 1
+            ? `Copy (${selection.length}) Item(s) to…`
+            : 'Copy Item to…'}
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <FileBrowse onChange={(id) => setTargetId(id)} />
