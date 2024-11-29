@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
-import { IconChevronRight, Text, SectionSpinner } from '@koupr/ui'
+import { IconChevronRight, Text, SectionSpinner, SearchInput } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI, { File, FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -28,8 +28,9 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-  const [isSpinnerVisible, setIsSpinnerVisible] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [fileId, setFileId] = useState<string>()
+  const [query, setQuery] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (workspace) {
@@ -41,7 +42,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
     ;(async () => {
       if (fileId) {
         try {
-          const timeoutId = setTimeout(() => setIsSpinnerVisible(true), 250)
+          const timeoutId = setTimeout(() => setIsLoading(true), 250)
           const result = await FileAPI.list(fileId, {
             page: 1,
             query: {
@@ -51,8 +52,9 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
           clearTimeout(timeoutId)
           setTotalPages(result.totalPages)
           setFolders(result.data)
+          setQuery(undefined)
         } finally {
-          setIsSpinnerVisible(false)
+          setIsLoading(false)
         }
       }
     })()
@@ -64,29 +66,87 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
     }
   }, [fileId, onChange])
 
-  const handleLoadMore = useCallback(async (fileId: string, page: number) => {
-    try {
-      setIsLoading(true)
-      const result = await FileAPI.list(fileId, {
-        page,
-        query: {
-          type: FileType.Folder,
-        },
-      })
-      setTotalPages(result.totalPages)
-      setFolders(result.data)
-      setPage(page + 1)
-    } finally {
-      setIsLoading(false)
+  const handleLoadMore = useCallback(
+    async (fileId: string, page: number, query?: string) => {
+      try {
+        setIsLoadingMore(true)
+        const result = await FileAPI.list(fileId, {
+          page,
+          query: {
+            text: query,
+            type: FileType.Folder,
+          },
+        })
+        setTotalPages(result.totalPages)
+        setFolders(result.data)
+        setPage(page + 1)
+      } finally {
+        setIsLoadingMore(false)
+      }
+    },
+    [],
+  )
+
+  const handleSearchInputValue = useCallback(
+    async (fileId: string, value?: string) => {
+      if (fileId) {
+        try {
+          const timeoutId = setTimeout(() => setIsLoading(true), 250)
+          const result = await FileAPI.list(fileId, {
+            page: 1,
+            query: {
+              text: value,
+              type: FileType.Folder,
+            },
+          })
+          clearTimeout(timeoutId)
+          setTotalPages(result.totalPages)
+          setFolders(result.data)
+          setPage(1)
+          setQuery(value)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+    },
+    [],
+  )
+
+  const handleSearchInputClear = useCallback(async (fileId: string) => {
+    if (fileId) {
+      try {
+        const timeoutId = setTimeout(() => setIsLoading(true), 250)
+        const result = await FileAPI.list(fileId, {
+          page: 1,
+          query: {
+            type: FileType.Folder,
+          },
+        })
+        clearTimeout(timeoutId)
+        setTotalPages(result.totalPages)
+        setFolders(result.data)
+        setPage(1)
+        setQuery(undefined)
+      } finally {
+        setIsLoading(false)
+      }
     }
   }, [])
 
   return (
     <>
-      {isSpinnerVisible ? (
+      {isLoading ? (
         <SectionSpinner />
       ) : (
         <div className={cx('flex', 'flex-col', 'gap-1')}>
+          {fileId ? (
+            <SearchInput
+              placeholder="Search Folders"
+              query={query}
+              onValue={(value) => handleSearchInputValue(fileId, value)}
+              onClear={() => handleSearchInputClear(fileId)}
+            />
+          ) : null}
           {workspace && fileId ? (
             <Path
               rootId={workspace.rootId}
@@ -162,8 +222,8 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
               )}
             >
               <Button
-                onClick={() => handleLoadMore(fileId, page)}
-                isLoading={isLoading}
+                onClick={() => handleLoadMore(fileId, page, query)}
+                isLoading={isLoadingMore}
               >
                 Load More
               </Button>
