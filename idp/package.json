@@ -21,7 +21,7 @@
     "hashids": "2.3.0",
     "jose": "5.9.6",
     "js-yaml": "4.1.0",
-    "meilisearch": "0.44.1",
+    "meilisearch": "0.45.0",
     "mime-types": "2.1.35",
     "morgan": "1.10.0",
     "multer": "1.4.5-lts.1",

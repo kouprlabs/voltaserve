@@ -16,7 +16,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/config"
 )
 
-var searchClient *meilisearch.Client
+var searchClient meilisearch.ServiceManager
 
 const (
 	FileSearchIndex         = "file"
@@ -37,9 +37,7 @@ type SearchManager struct {
 
 func NewSearchManager() *SearchManager {
 	if searchClient == nil {
-		searchClient = meilisearch.NewClient(meilisearch.ClientConfig{
-			Host: config.GetConfig().Search.URL,
-		})
+		searchClient = meilisearch.New(config.GetConfig().Search.URL)
 		/* Configure file index */
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        FileSearchIndex,

@@ -41,7 +41,7 @@ services:
       - minio:/data
     command: server /data --console-address ":9001"
   meilisearch:
-    image: getmeili/meilisearch:v1.10.1
+    image: getmeili/meilisearch:v1.11.3
     ports:
       - ${VOLTASERVE_MEILISEARCH_PORT}:7700
     volumes:
