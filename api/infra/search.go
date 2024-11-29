@@ -47,6 +47,15 @@ func NewSearchManager() *SearchManager {
 		}
 		if _, err := searchClient.Index(FileSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"name", "text"},
+			FilterableAttributes: []string{
+				"id",
+				"workspaceId",
+				"type",
+				"parentId",
+				"snapshotId",
+				"createTime",
+				"updateTime",
+			},
 		}); err != nil {
 			panic(err)
 		}
@@ -59,6 +68,13 @@ func NewSearchManager() *SearchManager {
 		}
 		if _, err := searchClient.Index(GroupSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"name"},
+			FilterableAttributes: []string{
+				"id",
+				"organizationId",
+				"members",
+				"createTime",
+				"updateTime",
+			},
 		}); err != nil {
 			panic(err)
 		}
@@ -71,6 +87,15 @@ func NewSearchManager() *SearchManager {
 		}
 		if _, err := searchClient.Index(WorkspaceSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"name"},
+			FilterableAttributes: []string{
+				"id",
+				"storageCapacity",
+				"rootId",
+				"organizationId",
+				"bucket",
+				"createTime",
+				"updateTime",
+			},
 		}); err != nil {
 			panic(err)
 		}
@@ -83,6 +108,12 @@ func NewSearchManager() *SearchManager {
 		}
 		if _, err := searchClient.Index(OrganizationSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"name"},
+			FilterableAttributes: []string{
+				"id",
+				"members",
+				"createTime",
+				"updateTime",
+			},
 		}); err != nil {
 			panic(err)
 		}
@@ -94,7 +125,13 @@ func NewSearchManager() *SearchManager {
 			panic(err)
 		}
 		if _, err := searchClient.Index(UserSearchIndex).UpdateSettings(&meilisearch.Settings{
-			SearchableAttributes: []string{"fullName", "email"},
+			SearchableAttributes: []string{"fullName", "username", "email"},
+			FilterableAttributes: []string{
+				"id",
+				"isEmailConfirmed",
+				"createTime",
+				"updateTime",
+			},
 		}); err != nil {
 			panic(err)
 		}
@@ -107,6 +144,16 @@ func NewSearchManager() *SearchManager {
 		}
 		if _, err := searchClient.Index(TaskSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"name"},
+			FilterableAttributes: []string{
+				"id",
+				"error",
+				"percentage",
+				"isIndeterminate",
+				"userId",
+				"status",
+				"createTime",
+				"updateTime",
+			},
 		}); err != nil {
 			panic(err)
 		}
@@ -117,11 +164,15 @@ func NewSearchManager() *SearchManager {
 }
 
 type QueryOptions struct {
-	Limit int64
+	Limit  int64
+	Filter interface{}
 }
 
 func (mgr *SearchManager) Query(index string, query string, opts QueryOptions) ([]interface{}, error) {
-	res, err := searchClient.Index(index).Search(query, &meilisearch.SearchRequest{Limit: opts.Limit})
+	res, err := searchClient.Index(index).Search(query, &meilisearch.SearchRequest{
+		Limit:  opts.Limit,
+		Filter: opts.Filter,
+	})
 	if err != nil {
 		return nil, err
 	}

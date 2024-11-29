@@ -190,11 +190,7 @@ func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID str
 			return nil, err
 		}
 	} else {
-		count, err := svc.groupRepo.Count()
-		if err != nil {
-			return nil, err
-		}
-		hits, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		hits, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -202,7 +198,13 @@ func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID str
 		for _, hit := range hits {
 			org, err := svc.orgCache.Get(hit.GetID())
 			if err != nil {
-				continue
+				var e *errorpkg.ErrorResponse
+				// We don't want to break if the search engine contains organizations that shouldn't be there
+				if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
+					continue
+				} else {
+					return nil, err
+				}
 			}
 			orgs = append(orgs, org)
 		}

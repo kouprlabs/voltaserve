@@ -25,8 +25,15 @@ type TaskSearch struct {
 }
 
 type taskEntity struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	Error           *string `json:"error,omitempty"`
+	Percentage      *int    `json:"percentage,omitempty"`
+	IsIndeterminate bool    `json:"isIndeterminate"`
+	UserID          string  `json:"userId"`
+	Status          string  `json:"status"`
+	CreateTime      string  `json:"createTime"`
+	UpdateTime      *string `json:"updateTime,omitempty"`
 }
 
 func (t taskEntity) GetID() string {
@@ -102,7 +109,14 @@ func (s *TaskSearch) Query(query string, opts infra.QueryOptions) ([]model.Task,
 
 func (s *TaskSearch) mapEntity(task model.Task) *taskEntity {
 	return &taskEntity{
-		ID:   task.GetID(),
-		Name: task.GetName(),
+		ID:              task.GetID(),
+		Name:            task.GetName(),
+		Error:           task.GetError(),
+		Percentage:      task.GetPercentage(),
+		IsIndeterminate: task.GetIsIndeterminate(),
+		UserID:          task.GetUserID(),
+		Status:          task.GetStatus(),
+		CreateTime:      task.GetCreateTime(),
+		UpdateTime:      task.GetUpdateTime(),
 	}
 }

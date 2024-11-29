@@ -670,11 +670,11 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 	}
 	var data []model.File
 	if opts.Query != nil && opts.Query.Text != nil {
-		count, err := svc.fileRepo.Count()
-		if err != nil {
-			return nil, err
+		filter := fmt.Sprintf("workspaceId=\"%s\"", workspace.GetID())
+		if opts.Query.Type != nil {
+			filter += fmt.Sprintf(" AND type=\"%s\"", *opts.Query.Type)
 		}
-		hits, err := svc.fileSearch.Query(*opts.Query.Text, infra.QueryOptions{Limit: count})
+		hits, err := svc.fileSearch.Query(*opts.Query.Text, infra.QueryOptions{Filter: filter})
 		if err != nil {
 			return nil, err
 		}
@@ -682,7 +682,13 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 			var f model.File
 			f, err := svc.fileCache.Get(hit.GetID())
 			if err != nil {
-				return nil, err
+				var e *errorpkg.ErrorResponse
+				// We don't want to break if the search engine contains files that shouldn't be there
+				if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {
+					continue
+				} else {
+					return nil, err
+				}
 			}
 			data = append(data, f)
 		}

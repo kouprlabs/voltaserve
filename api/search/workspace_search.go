@@ -25,8 +25,14 @@ type WorkspaceSearch struct {
 }
 
 type workspaceEntity struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	StorageCapacity int64   `json:"storageCapacity"`
+	RootID          *string `json:"rootId"`
+	OrganizationID  string  `json:"organizationId"`
+	Bucket          string  `json:"bucket"`
+	CreateTime      string  `json:"createTime"`
+	UpdateTime      *string `json:"updateTime,omitempty"`
 }
 
 func (w workspaceEntity) GetID() string {
@@ -101,8 +107,18 @@ func (s *WorkspaceSearch) Query(query string, opts infra.QueryOptions) ([]model.
 }
 
 func (s *WorkspaceSearch) mapEntity(workspace model.Workspace) *workspaceEntity {
-	return &workspaceEntity{
-		ID:   workspace.GetID(),
-		Name: workspace.GetName(),
+	entity := &workspaceEntity{
+		ID:              workspace.GetID(),
+		Name:            workspace.GetName(),
+		StorageCapacity: workspace.GetStorageCapacity(),
+		OrganizationID:  workspace.GetOrganizationID(),
+		Bucket:          workspace.GetBucket(),
+		CreateTime:      workspace.GetCreateTime(),
+		UpdateTime:      workspace.GetUpdateTime(),
 	}
+	if workspace.GetRootID() != "" {
+		rootID := workspace.GetRootID()
+		entity.RootID = &rootID
+	}
+	return entity
 }

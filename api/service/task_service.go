@@ -236,11 +236,7 @@ func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Ta
 			return nil, err
 		}
 	} else {
-		count, err := svc.taskRepo.Count()
-		if err != nil {
-			return nil, err
-		}
-		hits, err := svc.taskSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		hits, err := svc.taskSearch.Query(opts.Query, infra.QueryOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -248,7 +244,13 @@ func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Ta
 		for _, hit := range hits {
 			task, err := svc.taskCache.Get(hit.GetID())
 			if err != nil {
-				continue
+				var e *errorpkg.ErrorResponse
+				// We don't want to break if the search engine contains tasks that shouldn't be there
+				if errors.As(err, &e) && e.Code == errorpkg.NewTaskNotFoundError(nil).Code {
+					continue
+				} else {
+					return nil, err
+				}
 			}
 			tasks = append(tasks, task)
 		}
