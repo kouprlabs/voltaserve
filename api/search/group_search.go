@@ -25,8 +25,12 @@ type GroupSearch struct {
 }
 
 type groupEntity struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID             string   `json:"id"`
+	Name           string   `json:"name"`
+	OrganizationID string   `json:"organizationId"`
+	Members        []string `json:"members"`
+	CreateTime     string   `json:"createTime"`
+	UpdateTime     *string  `json:"updateTime"`
 }
 
 func (g groupEntity) GetID() string {
@@ -102,7 +106,11 @@ func (s *GroupSearch) Query(query string, opts infra.QueryOptions) ([]model.Grou
 
 func (s *GroupSearch) mapEntity(group model.Group) *groupEntity {
 	return &groupEntity{
-		ID:   group.GetID(),
-		Name: group.GetName(),
+		ID:             group.GetID(),
+		Name:           group.GetName(),
+		OrganizationID: group.GetOrganizationID(),
+		Members:        group.GetMembers(),
+		CreateTime:     group.GetCreateTime(),
+		UpdateTime:     group.GetUpdateTime(),
 	}
 }

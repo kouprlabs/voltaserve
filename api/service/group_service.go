@@ -216,11 +216,7 @@ func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.
 			}
 		}
 	} else {
-		count, err := svc.groupRepo.Count()
-		if err != nil {
-			return nil, err
-		}
-		hits, err := svc.groupSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		hits, err := svc.groupSearch.Query(opts.Query, infra.QueryOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -228,7 +224,13 @@ func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.
 		for _, hit := range hits {
 			group, err := svc.groupCache.Get(hit.GetID())
 			if err != nil {
-				continue
+				var e *errorpkg.ErrorResponse
+				// We don't want to break if the search engine contains groups that shouldn't be there
+				if errors.As(err, &e) && e.Code == errorpkg.NewGroupNotFoundError(nil).Code {
+					continue
+				} else {
+					return nil, err
+				}
 			}
 			groups = append(groups, group)
 		}

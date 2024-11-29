@@ -28,9 +28,15 @@ type FileSearch struct {
 }
 
 type fileEntity struct {
-	ID   string  `json:"id"`
-	Name string  `json:"name"`
-	Text *string `json:"text,omitempty"`
+	ID          string  `json:"id"`
+	WorkspaceID string  `json:"workspaceId"`
+	Name        string  `json:"name"`
+	Type        string  `json:"type"`
+	ParentID    *string `json:"parentId,omitempty"`
+	Text        *string `json:"text,omitempty"`
+	SnapshotID  *string `json:"snapshotId,omitempty"`
+	CreateTime  string  `json:"createTime"`
+	UpdateTime  *string `json:"updateTime,omitempty"`
 }
 
 func (f fileEntity) GetID() string {
@@ -132,8 +138,14 @@ func (s *FileSearch) populateTextField(files []model.File) error {
 
 func (s *FileSearch) mapEntity(file model.File) *fileEntity {
 	return &fileEntity{
-		ID:   file.GetID(),
-		Name: file.GetName(),
-		Text: file.GetText(),
+		ID:          file.GetID(),
+		WorkspaceID: file.GetWorkspaceID(),
+		Name:        file.GetName(),
+		Type:        file.GetType(),
+		ParentID:    file.GetParentID(),
+		Text:        file.GetText(),
+		SnapshotID:  file.GetSnapshotID(),
+		CreateTime:  file.GetCreateTime(),
+		UpdateTime:  file.GetUpdateTime(),
 	}
 }

@@ -330,11 +330,7 @@ func (svc *WorkspaceService) findAll(opts WorkspaceListOptions, userID string) (
 			return nil, err
 		}
 	} else {
-		count, err := svc.workspaceRepo.Count()
-		if err != nil {
-			return nil, err
-		}
-		hits, err := svc.workspaceSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		hits, err := svc.workspaceSearch.Query(opts.Query, infra.QueryOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -342,7 +338,13 @@ func (svc *WorkspaceService) findAll(opts WorkspaceListOptions, userID string) (
 		for _, hit := range hits {
 			workspace, err := svc.workspaceCache.Get(hit.GetID())
 			if err != nil {
-				continue
+				var e *errorpkg.ErrorResponse
+				// We don't want to break if the search engine contains workspaces that shouldn't be there
+				if errors.As(err, &e) && e.Code == errorpkg.NewWorkspaceNotFoundError(nil).Code {
+					continue
+				} else {
+					return nil, err
+				}
 			}
 			workspaces = append(workspaces, workspace)
 		}

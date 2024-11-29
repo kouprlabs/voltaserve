@@ -25,8 +25,11 @@ type OrganizationSearch struct {
 }
 
 type organizationEntity struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID         string   `json:"id"`
+	Name       string   `json:"name"`
+	Members    []string `json:"members"`
+	CreateTime string   `json:"createTime"`
+	UpdateTime *string  `json:"updateTime,omitempty"`
 }
 
 func (o organizationEntity) GetID() string {
@@ -102,7 +105,10 @@ func (s *OrganizationSearch) Query(query string, opts infra.QueryOptions) ([]mod
 
 func (s *OrganizationSearch) mapEntity(org model.Organization) *organizationEntity {
 	return &organizationEntity{
-		ID:   org.GetID(),
-		Name: org.GetName(),
+		ID:         org.GetID(),
+		Name:       org.GetName(),
+		Members:    org.GetMembers(),
+		CreateTime: org.GetCreateTime(),
+		UpdateTime: org.GetUpdateTime(),
 	}
 }
