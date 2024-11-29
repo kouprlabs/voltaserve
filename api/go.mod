@@ -13,7 +13,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gosimple/slug v1.14.0
 	github.com/joho/godotenv v1.5.1
-	github.com/meilisearch/meilisearch-go v0.27.0
+	github.com/meilisearch/meilisearch-go v0.29.0
 	github.com/minio/minio-go/v7 v7.0.73
 	github.com/reactivex/rxgo/v2 v2.5.0
 	github.com/redis/go-redis/v9 v9.5.3

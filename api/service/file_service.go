@@ -674,9 +674,17 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 		if err != nil {
 			return nil, err
 		}
-		data, err = svc.fileSearch.Query(*opts.Query.Text, infra.QueryOptions{Limit: count})
+		hits, err := svc.fileSearch.Query(*opts.Query.Text, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
+		}
+		for _, hit := range hits {
+			var f model.File
+			f, err := svc.fileCache.Get(hit.GetID())
+			if err != nil {
+				return nil, err
+			}
+			data = append(data, f)
 		}
 	} else {
 		ids, err := svc.fileRepo.FindChildrenIDs(id)
