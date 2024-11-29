@@ -357,7 +357,6 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 //	@Id				files_probe
 //	@Produce		json
 //	@Param			id			path		string	true	"ID"
-//	@Param			type		query		string	false	"Type"
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
