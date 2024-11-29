@@ -63,7 +63,11 @@ const FileMove = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Move {selection.length} Item(s) to…</ModalHeader>
+        <ModalHeader>
+          {selection.length > 1
+            ? `Move (${selection.length}) Items To…`
+            : 'Move Item To…'}
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <FileBrowse onChange={(id) => setTargetId(id)} />
