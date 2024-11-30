@@ -9,11 +9,20 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Button } from '@chakra-ui/react'
-import { IconChevronRight, Text, SectionSpinner, SearchInput } from '@koupr/ui'
+import {
+  IconChevronRight,
+  Text,
+  SectionSpinner,
+  SearchInput,
+  usePageMonitor,
+  SectionError,
+  SectionPlaceholder,
+  Pagination,
+} from '@koupr/ui'
 import cx from 'classnames'
-import FileAPI, { File, FileType } from '@/client/api/file'
+import FileAPI, { FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
+import { swrConfig } from '@/client/options'
 import Path from '@/components/common/path'
 import FolderSvg from '@/components/file/list/item/icon/icon-folder/assets/icon-folder.svg'
 
@@ -23,14 +32,36 @@ export type FileBrowseProps = {
 
 const FileBrowse = ({ onChange }: FileBrowseProps) => {
   const { id } = useParams()
-  const { data: workspace } = WorkspaceAPI.useGet(id)
-  const [folders, setFolders] = useState<File[]>([])
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [fileId, setFileId] = useState<string>()
+  const [page, setPage] = useState(1)
   const [query, setQuery] = useState<string | undefined>(undefined)
+  const { data: workspace } = WorkspaceAPI.useGet(id)
+  const size = 5
+  const {
+    data: list,
+    error: listError,
+    isLoading: isListLoading,
+    mutate,
+  } = FileAPI.useList(
+    fileId,
+    {
+      page,
+      size,
+      query: {
+        text: query,
+        type: FileType.Folder,
+      },
+    },
+    swrConfig(),
+  )
+  const { hasPageSwitcher } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps: [size],
+  })
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (workspace) {
@@ -39,122 +70,47 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
   }, [workspace])
 
   useEffect(() => {
-    ;(async () => {
-      if (fileId) {
-        try {
-          const timeoutId = setTimeout(() => setIsLoading(true), 250)
-          const result = await FileAPI.list(fileId, {
-            page: 1,
-            query: {
-              type: FileType.Folder,
-            },
-          })
-          clearTimeout(timeoutId)
-          setTotalPages(result.totalPages)
-          setFolders(result.data)
-          setQuery(undefined)
-        } finally {
-          setIsLoading(false)
-        }
-      }
-    })()
-  }, [fileId])
-
-  useEffect(() => {
     if (fileId) {
+      setQuery(undefined)
       onChange?.(fileId)
     }
   }, [fileId, onChange])
 
-  const handleLoadMore = useCallback(
-    async (fileId: string, page: number, query?: string) => {
-      try {
-        setIsLoadingMore(true)
-        const result = await FileAPI.list(fileId, {
-          page,
-          query: {
-            text: query,
-            type: FileType.Folder,
-          },
-        })
-        setTotalPages(result.totalPages)
-        setFolders(result.data)
-        setPage(page + 1)
-      } finally {
-        setIsLoadingMore(false)
-      }
-    },
-    [],
-  )
+  useEffect(() => {
+    mutate().then()
+  }, [page, query, mutate])
 
-  const handleSearchInputValue = useCallback(
-    async (fileId: string, value?: string) => {
-      if (fileId) {
-        try {
-          const timeoutId = setTimeout(() => setIsLoading(true), 250)
-          const result = await FileAPI.list(fileId, {
-            page: 1,
-            query: {
-              text: value,
-              type: FileType.Folder,
-            },
-          })
-          clearTimeout(timeoutId)
-          setTotalPages(result.totalPages)
-          setFolders(result.data)
-          setPage(1)
-          setQuery(value)
-        } finally {
-          setIsLoading(false)
-        }
-      }
-    },
-    [],
-  )
+  const handleSearchInputValue = useCallback((value: string) => {
+    setPage(1)
+    setQuery(value)
+  }, [])
 
-  const handleSearchInputClear = useCallback(async (fileId: string) => {
-    if (fileId) {
-      try {
-        const timeoutId = setTimeout(() => setIsLoading(true), 250)
-        const result = await FileAPI.list(fileId, {
-          page: 1,
-          query: {
-            type: FileType.Folder,
-          },
-        })
-        clearTimeout(timeoutId)
-        setTotalPages(result.totalPages)
-        setFolders(result.data)
-        setPage(1)
-        setQuery(undefined)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  const handleSearchInputClear = useCallback(() => {
+    setPage(1)
+    setQuery(undefined)
   }, [])
 
   return (
-    <>
-      {isLoading ? (
-        <SectionSpinner />
-      ) : (
-        <div className={cx('flex', 'flex-col', 'gap-1')}>
-          {fileId ? (
-            <SearchInput
-              placeholder="Search Folders"
-              query={query}
-              onValue={(value) => handleSearchInputValue(fileId, value)}
-              onClear={() => handleSearchInputClear(fileId)}
-            />
-          ) : null}
-          {workspace && fileId ? (
-            <Path
-              rootId={workspace.rootId}
-              fileId={fileId}
-              maxCharacters={10}
-              onClick={(fileId) => setFileId(fileId)}
-            />
-          ) : null}
+    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+      <SearchInput
+        placeholder="Search Entities"
+        query={query}
+        onValue={handleSearchInputValue}
+        onClear={handleSearchInputClear}
+      />
+      {workspace && fileId ? (
+        <Path
+          rootId={workspace.rootId}
+          fileId={fileId}
+          maxCharacters={10}
+          onClick={(fileId) => setFileId(fileId)}
+        />
+      ) : null}
+      {isListLoading ? <SectionSpinner /> : null}
+      {isListError ? <SectionError text="Failed to load items." /> : null}
+      {isListEmpty ? <SectionPlaceholder text="There are no items." /> : null}
+      {isListReady ? (
+        <>
           <div
             className={cx(
               'flex',
@@ -162,76 +118,54 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
               'gap-0',
               'border-t',
               'pt-1.5',
-              'h-[250px]',
-              'xl:h-[400px]',
               'overflow-y-scroll',
               'border-t-gray-300',
               'dark:border-t-gray-600',
             )}
           >
-            {folders.length > 0 ? (
-              folders.map((f) => (
-                <div
-                  key={f.id}
-                  className={cx(
-                    'flex',
-                    'flex-row',
-                    'gap-1.5',
-                    'items-center',
-                    'cursor-pointer',
-                    'select-none',
-                    'p-1',
-                    'rounded-md',
-                    'hover:bg-gray-100',
-                    'hover:dark:bg-gray-700',
-                    'active:bg-gray-100',
-                    'active:dark:bg-gray-700',
-                  )}
-                  onClick={() => setFileId(f.id)}
-                >
-                  <img
-                    src={FolderSvg}
-                    className={cx('shrink-0', 'w-[36px]', 'h-[28.84px]')}
-                  />
-                  <Text noOfLines={1}>{f.name}</Text>
-                  <div className={cx('grow')} />
-                  <IconChevronRight />
-                </div>
-              ))
-            ) : (
+            {list.data.map((f) => (
               <div
+                key={f.id}
                 className={cx(
                   'flex',
+                  'flex-row',
+                  'gap-1.5',
                   'items-center',
-                  'justify-center',
-                  'h-full',
+                  'cursor-pointer',
+                  'select-none',
+                  'p-1',
+                  'rounded-md',
+                  'hover:bg-gray-100',
+                  'hover:dark:bg-gray-700',
+                  'active:bg-gray-100',
+                  'active:dark:bg-gray-700',
                 )}
+                onClick={() => setFileId(f.id)}
               >
-                <span>There are no folders.</span>
+                <img
+                  src={FolderSvg}
+                  className={cx('shrink-0', 'w-[36px]', 'h-[28.84px]')}
+                />
+                <Text noOfLines={1}>{f.name}</Text>
+                <div className={cx('grow')} />
+                <IconChevronRight />
               </div>
-            )}
+            ))}
           </div>
-          {totalPages > page && fileId ? (
-            <div
-              className={cx(
-                'flex',
-                'items-center',
-                'justify-center',
-                'w-full',
-                'p-1.5',
-              )}
-            >
-              <Button
-                onClick={() => handleLoadMore(fileId, page, query)}
-                isLoading={isLoadingMore}
-              >
-                Load More
-              </Button>
+          {hasPageSwitcher ? (
+            <div className={cx('self-end')}>
+              <Pagination
+                maxButtons={3}
+                size="sm"
+                page={page}
+                totalPages={list.totalPages}
+                onPageChange={(value) => setPage(value)}
+              />
             </div>
           ) : null}
-        </div>
-      )}
-    </>
+        </>
+      ) : null}
+    </div>
   )
 }
 

@@ -46,7 +46,7 @@ const InsightsOverviewEntities = () => {
       sortBy: SortBy.Frequency,
       sortOrder: SortOrder.Desc,
     },
-    query ? undefined : swrConfig(),
+    swrConfig(),
   )
   const { hasPageSwitcher } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
