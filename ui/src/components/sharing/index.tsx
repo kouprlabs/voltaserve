@@ -60,7 +60,7 @@ const Sharing = () => {
       <ModalOverlay />
       <ModalContent>
         {selection.length > 1 ? (
-          <ModalHeader>Sharing {selection.length} Items(s)</ModalHeader>
+          <ModalHeader>Sharing ({selection.length}) Items</ModalHeader>
         ) : (
           <ModalHeader>Sharing</ModalHeader>
         )}
