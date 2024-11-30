@@ -30,6 +30,7 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import OrganizationAPI from '@/client/api/organization'
+import { swrConfig } from '@/client/options'
 import OrganizationSelector from '@/components/common/organization-selector'
 import { useAppSelector } from '@/store/hook'
 
@@ -47,7 +48,10 @@ const NewGroupPage = () => {
     name: Yup.string().required('Name is required').max(255),
     organizationId: Yup.string().required('Organization is required'),
   })
-  const { data: organization } = OrganizationAPI.useGet(searchParams.get('org'))
+  const { data: organization } = OrganizationAPI.useGet(
+    searchParams.get('org'),
+    swrConfig(),
+  )
 
   const handleSubmit = useCallback(
     async (
