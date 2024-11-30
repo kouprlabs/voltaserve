@@ -62,6 +62,7 @@ func (r *UserRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Param			sort_by					query		string	false	"Sort By"
 //	@Param			sort_order				query		string	false	"Sort Order"
 //	@Param			exclude_group_members	query		bool	false	"Exclude Group Members"
+//	@Param			exclude_me				query		bool	false	"Exclude Me"
 //	@Success		200						{object}	service.UserList
 //	@Failure		404						{object}	errorpkg.ErrorResponse
 //	@Failure		500						{object}	errorpkg.ErrorResponse
@@ -140,6 +141,13 @@ func (r *UserRouter) parseListQueryParams(c *fiber.Ctx) (*service.UserListOption
 			return nil, err
 		}
 	}
+	var excludeMe bool
+	if c.Query("exclude_me") != "" {
+		excludeMe, err = strconv.ParseBool(c.Query("exclude_me"))
+		if err != nil {
+			return nil, err
+		}
+	}
 	query, err := url.QueryUnescape(c.Query("query"))
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
@@ -149,6 +157,7 @@ func (r *UserRouter) parseListQueryParams(c *fiber.Ctx) (*service.UserListOption
 		OrganizationID:      c.Query("organization_id"),
 		GroupID:             c.Query("group_id"),
 		ExcludeGroupMembers: excludeGroupMembers,
+		ExcludeMe:           excludeMe,
 		SortBy:              sortBy,
 		SortOrder:           sortOrder,
 		Page:                page,
