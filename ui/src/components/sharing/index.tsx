@@ -27,8 +27,8 @@ import { geOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
-import SharingGroups from './sharing-groups'
-import SharingUsers from './sharing-users'
+import SharingGroupOverview from './sharing-group-overview'
+import SharingUserOverview from './sharing-user-overview'
 
 const Sharing = () => {
   const dispatch = useAppDispatch()
@@ -91,10 +91,10 @@ const Sharing = () => {
             </TabList>
             <TabPanels>
               <TabPanel>
-                <SharingUsers />
+                <SharingUserOverview />
               </TabPanel>
               <TabPanel>
-                <SharingGroups />
+                <SharingGroupOverview />
               </TabPanel>
             </TabPanels>
           </Tabs>

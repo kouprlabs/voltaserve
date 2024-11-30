@@ -9,29 +9,11 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import {
-  Button,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  IconButton,
-  Badge,
-  Avatar,
-} from '@chakra-ui/react'
-import {
-  IconAdd,
-  IconCheck,
-  IconDelete,
-  Spinner,
-  Text,
-  Select,
-} from '@koupr/ui'
+import { Button } from '@chakra-ui/react'
+import { IconAdd, IconCheck, Select } from '@koupr/ui'
 import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
-import FileAPI, { GroupPermission } from '@/client/api/file'
+import FileAPI from '@/client/api/file'
 import GroupAPI, { Group } from '@/client/api/group'
 import {
   geEditorPermission,
@@ -44,19 +26,19 @@ import GroupSelector from '@/components/common/group-selector'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import SharingFormSkeleton from './sharing-form-skeleton'
+import SharingGroupPermissions from './sharing-group-permissions'
 
 interface PermissionTypeOption extends OptionBase {
   value: PermissionType
   label: string
 }
 
-const SharingGroups = () => {
+const SharingGroupOverview = () => {
   const { id: workspaceId, fileId } = useParams()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const [isGranting, setIsGranting] = useState(false)
-  const [revokedPermission, setRevokedPermission] = useState<string>()
   const [group, setGroup] = useState<Group>()
   const [permission, setPermission] = useState<string>()
   const { data: workspace } = WorkspaceAPI.useGet(workspaceId)
@@ -67,11 +49,9 @@ const SharingGroups = () => {
     },
     swrConfig(),
   )
-  const { data: permissions, mutate: mutatePermissions } =
-    FileAPI.useGetGroupPermissions(
-      file && geOwnerPermission(file.permission) ? file.id : undefined,
-      swrConfig(),
-    )
+  const { mutate: mutatePermissions } = FileAPI.useGetGroupPermissions(
+    file && geOwnerPermission(file.permission) ? file.id : undefined,
+  )
   const isSingleSelection = selection.length === 1
 
   const handleGrantPermission = useCallback(async () => {
@@ -106,25 +86,6 @@ const SharingGroups = () => {
     mutateFiles,
     mutatePermissions,
   ])
-
-  const handleRevokePermission = useCallback(
-    async (permission: GroupPermission) => {
-      try {
-        setRevokedPermission(permission.id)
-        await FileAPI.revokeGroupPermission({
-          ids: selection,
-          groupId: permission.group.id,
-        })
-        await mutateFiles?.()
-        if (isSingleSelection) {
-          await mutatePermissions()
-        }
-      } finally {
-        setRevokedPermission(undefined)
-      }
-    },
-    [fileId, selection, isSingleSelection, mutateFiles, mutatePermissions],
-  )
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
@@ -178,70 +139,9 @@ const SharingGroups = () => {
           </div>
         </div>
       ) : null}
-      {isSingleSelection ? (
-        <>
-          <hr />
-          {!permissions ? (
-            <div className={cx('flex', 'items-center', 'justify-center')}>
-              <Spinner />
-            </div>
-          ) : null}
-          {permissions && permissions.length === 0 ? (
-            <div className={cx('flex', 'items-center', 'justify-center')}>
-              <span>Not shared with any groups.</span>
-            </div>
-          ) : null}
-          {permissions && permissions.length > 0 ? (
-            <Table>
-              <Thead>
-                <Tr>
-                  <Th>Group</Th>
-                  <Th>Permission</Th>
-                  <Th />
-                </Tr>
-              </Thead>
-              <Tbody>
-                {permissions.map((p) => (
-                  <Tr key={p.id}>
-                    <Td className={cx('p-1')}>
-                      <div
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'items-center',
-                          'gap-1',
-                        )}
-                      >
-                        <Avatar
-                          name={p.group.name}
-                          size="sm"
-                          className={cx('w-[40px]', 'h-[40px]')}
-                        />
-                        <Text noOfLines={1}>{p.group.name}</Text>
-                      </div>
-                    </Td>
-                    <Td>
-                      <Badge>{p.permission}</Badge>
-                    </Td>
-                    <Td className={cx('text-end')}>
-                      <IconButton
-                        icon={<IconDelete />}
-                        colorScheme="red"
-                        title="Revoke group permission"
-                        aria-label="Revoke group permission"
-                        isLoading={revokedPermission === p.id}
-                        onClick={() => handleRevokePermission(p)}
-                      />
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          ) : null}
-        </>
-      ) : null}
+      {isSingleSelection ? <SharingGroupPermissions /> : null}
     </div>
   )
 }
 
-export default SharingGroups
+export default SharingGroupOverview
