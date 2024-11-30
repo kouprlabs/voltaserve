@@ -59,7 +59,7 @@ const SharingUsers = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
-  const [isGrantLoading, setIsGrantLoading] = useState(false)
+  const [isGranting, setIsGranting] = useState(false)
   const [revokedPermission, setRevokedPermission] = useState<string>()
   const [user, setUser] = useState<User>()
   const [permission, setPermission] = useState<string>()
@@ -84,23 +84,23 @@ const SharingUsers = () => {
       return
     }
     try {
-      setIsGrantLoading(true)
+      setIsGranting(true)
       await FileAPI.grantUserPermission({
         ids: selection,
         userId: user.id,
-        permission: permission,
+        permission,
       })
       await mutateFiles?.()
       if (isSingleSelection) {
         await mutatePermissions()
       }
       setUser(undefined)
-      setIsGrantLoading(false)
+      setIsGranting(false)
       if (!isSingleSelection) {
         dispatch(sharingModalDidClose())
       }
     } catch {
-      setIsGrantLoading(false)
+      setIsGranting(false)
     }
   }, [
     fileId,
@@ -183,7 +183,7 @@ const SharingUsers = () => {
           <Button
             leftIcon={<IconCheck />}
             colorScheme="blue"
-            isLoading={isGrantLoading}
+            isLoading={isGranting}
             isDisabled={!user || !permission}
             onClick={() => handleGrantPermission()}
           >
@@ -205,72 +205,70 @@ const SharingUsers = () => {
             </div>
           ) : null}
           {permissions && permissions.length > 0 ? (
-            <>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th>User</Th>
-                    <Th>Permission</Th>
-                    <Th />
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {permissions.map((p) => (
-                    <Tr key={p.id}>
-                      <Td className={cx('p-1')}>
-                        <div
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>User</Th>
+                  <Th>Permission</Th>
+                  <Th />
+                </Tr>
+              </Thead>
+              <Tbody>
+                {permissions.map((p) => (
+                  <Tr key={p.id}>
+                    <Td className={cx('p-1')}>
+                      <div
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'items-center',
+                          'gap-1',
+                        )}
+                      >
+                        <Avatar
+                          name={p.user.fullName}
+                          src={
+                            p.user.picture
+                              ? getPictureUrlById(p.user.id, p.user.picture, {
+                                  organizationId: workspace?.organization.id,
+                                })
+                              : undefined
+                          }
+                          size="sm"
                           className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1',
+                            'w-[40px]',
+                            'h-[40px]',
+                            'border',
+                            'border-gray-300',
+                            'dark:border-gray-700',
                           )}
-                        >
-                          <Avatar
-                            name={p.user.fullName}
-                            src={
-                              p.user.picture
-                                ? getPictureUrlById(p.user.id, p.user.picture, {
-                                    organizationId: workspace?.organization.id,
-                                  })
-                                : undefined
-                            }
-                            size="sm"
-                            className={cx(
-                              'w-[40px]',
-                              'h-[40px]',
-                              'border',
-                              'border-gray-300',
-                              'dark:border-gray-700',
-                            )}
-                          />
-                          <div className={cx('flex', 'flex-col', 'gap-0.5')}>
-                            <Text noOfLines={1}>{p.user.fullName}</Text>
-                            <span className={cx('text-gray-500')}>
-                              {p.user.email}
-                            </span>
-                          </div>
-                        </div>
-                      </Td>
-                      <Td>
-                        <Badge>{p.permission}</Badge>
-                      </Td>
-                      <Td className={cx('text-end')}>
-                        <IconButton
-                          icon={<IconDelete />}
-                          colorScheme="red"
-                          title="Revoke user permission"
-                          aria-label="Revoke user permission"
-                          isLoading={revokedPermission === p.id}
-                          isDisabled={me?.id === p.user.id}
-                          onClick={() => handleRevokePermission(p)}
                         />
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </>
+                        <div className={cx('flex', 'flex-col', 'gap-0.5')}>
+                          <Text noOfLines={1}>{p.user.fullName}</Text>
+                          <span className={cx('text-gray-500')}>
+                            {p.user.email}
+                          </span>
+                        </div>
+                      </div>
+                    </Td>
+                    <Td>
+                      <Badge>{p.permission}</Badge>
+                    </Td>
+                    <Td className={cx('text-end')}>
+                      <IconButton
+                        icon={<IconDelete />}
+                        colorScheme="red"
+                        title="Revoke user permission"
+                        aria-label="Revoke user permission"
+                        isLoading={revokedPermission === p.id}
+                        isDisabled={me?.id === p.user.id}
+                        onClick={() => handleRevokePermission(p)}
+                      />
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
           ) : null}
         </>
       ) : null}

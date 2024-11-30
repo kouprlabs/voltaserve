@@ -55,7 +55,7 @@ const SharingGroups = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
-  const [isGrantLoading, setIsGrantLoading] = useState(false)
+  const [isGranting, setIsGranting] = useState(false)
   const [revokedPermission, setRevokedPermission] = useState<string>()
   const [group, setGroup] = useState<Group>()
   const [permission, setPermission] = useState<string>()
@@ -77,23 +77,23 @@ const SharingGroups = () => {
   const handleGrantPermission = useCallback(async () => {
     if (group && permission) {
       try {
-        setIsGrantLoading(true)
+        setIsGranting(true)
         await FileAPI.grantGroupPermission({
           ids: selection,
           groupId: group.id,
-          permission: permission,
+          permission,
         })
         await mutateFiles?.()
         if (isSingleSelection) {
           await mutatePermissions()
         }
         setGroup(undefined)
-        setIsGrantLoading(false)
+        setIsGranting(false)
         if (!isSingleSelection) {
           dispatch(sharingModalDidClose())
         }
       } catch {
-        setIsGrantLoading(false)
+        setIsGranting(false)
       }
     }
   }, [
@@ -153,7 +153,7 @@ const SharingGroups = () => {
           <Button
             leftIcon={<IconCheck />}
             colorScheme="blue"
-            isLoading={isGrantLoading}
+            isLoading={isGranting}
             isDisabled={!group || !permission}
             onClick={() => handleGrantPermission()}
           >
