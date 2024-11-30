@@ -7,8 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
 import {
   Modal,
   ModalOverlay,
@@ -24,51 +22,31 @@ import {
   Tag,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI, { List } from '@/client/api/file'
-import GroupAPI from '@/client/api/group'
+import FileAPI from '@/client/api/file'
 import { geOwnerPermission } from '@/client/api/permission'
-import UserAPI from '@/client/api/user'
-import WorkspaceAPI from '@/client/api/workspace'
+import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import SharingGroups from './sharing-groups'
 import SharingUsers from './sharing-users'
 
-export type FileSharingProps = {
-  list: List
-}
-
-const Sharing = ({ list }: FileSharingProps) => {
-  const { id } = useParams()
+const Sharing = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
-  const singleFile = useMemo(() => {
-    if (selection.length === 1) {
-      return list.data.find((e) => e.id === selection[0])
-    } else {
-      return undefined
-    }
-  }, [list.data, selection])
-  const { data: workspace } = WorkspaceAPI.useGet(id)
-  const { data: users } = UserAPI.useList({
-    organizationId: workspace?.organization.id,
-  })
-  const { data: groups } = GroupAPI.useList({
-    organizationId: workspace?.organization.id,
-  })
-  const { data: userPermissions, mutate: mutateUserPermissions } =
-    FileAPI.useGetUserPermissions(
-      singleFile && geOwnerPermission(singleFile.permission)
-        ? singleFile.id
-        : undefined,
-    )
-  const { data: groupPermissions, mutate: mutateGroupPermissions } =
-    FileAPI.useGetGroupPermissions(
-      singleFile && geOwnerPermission(singleFile.permission)
-        ? singleFile.id
-        : undefined,
-    )
+  const { data: singleFile } = FileAPI.useGet(selection[0], swrConfig())
+  const { data: userPermissions } = FileAPI.useGetUserPermissions(
+    singleFile && geOwnerPermission(singleFile.permission)
+      ? singleFile.id
+      : undefined,
+    swrConfig(),
+  )
+  const { data: groupPermissions } = FileAPI.useGetGroupPermissions(
+    singleFile && geOwnerPermission(singleFile.permission)
+      ? singleFile.id
+      : undefined,
+    swrConfig(),
+  )
 
   return (
     <Modal
@@ -121,18 +99,10 @@ const Sharing = ({ list }: FileSharingProps) => {
             </TabList>
             <TabPanels>
               <TabPanel>
-                <SharingUsers
-                  users={users?.data}
-                  permissions={userPermissions}
-                  mutateUserPermissions={mutateUserPermissions}
-                />
+                <SharingUsers />
               </TabPanel>
               <TabPanel>
-                <SharingGroups
-                  groups={groups?.data}
-                  permissions={groupPermissions}
-                  mutateGroupPermissions={mutateGroupPermissions}
-                />
+                <SharingGroups />
               </TabPanel>
             </TabPanels>
           </Tabs>

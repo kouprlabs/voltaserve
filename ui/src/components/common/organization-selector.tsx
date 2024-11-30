@@ -190,6 +190,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                     {hasPageSwitcher ? (
                       <Pagination
                         maxButtons={3}
+                        size="sm"
                         page={page}
                         totalPages={list.totalPages}
                         onPageChange={(value) => setPage(value)}

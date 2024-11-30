@@ -56,6 +56,9 @@ const WorkspaceFilesPage = () => {
   const isSnapshotDetachModalOpen = useAppSelector(
     (state) => state.ui.snapshots.isDetachModalOpen,
   )
+  const isShareModalOpen = useAppSelector(
+    (state) => state.ui.files.isShareModalOpen,
+  )
   const isMoveModalOpen = useAppSelector(
     (state) => state.ui.files.isMoveModalOpen,
   )
@@ -219,7 +222,7 @@ const WorkspaceFilesPage = () => {
               ) : null}
             </div>
           </div>
-          {list ? <Sharing list={list} /> : null}
+          {isShareModalOpen ? <Sharing /> : null}
           {isSnapshotListModalOpen ? <SnapshotList /> : null}
           {isSnapshotDetachModalOpen ? <SnapshotDetach /> : null}
           {isMoveModalOpen ? <FileMove /> : null}

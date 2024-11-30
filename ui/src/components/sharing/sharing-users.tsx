@@ -29,14 +29,18 @@ import {
   Spinner,
   Text,
 } from '@koupr/ui'
-import { KeyedMutator } from 'swr'
 import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI, { UserPermission } from '@/client/api/file'
-import { geEditorPermission, PermissionType } from '@/client/api/permission'
-import { User } from '@/client/api/user'
+import {
+  geEditorPermission,
+  geOwnerPermission,
+  PermissionType,
+} from '@/client/api/permission'
+import UserAPI, { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import IdPUserAPI from '@/client/idp/user'
+import { swrConfig } from '@/client/options'
 import UserSelector from '@/components/common/user-selector'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -44,36 +48,40 @@ import { sharingModalDidClose } from '@/store/ui/files'
 import { inviteModalDidOpen } from '@/store/ui/organizations'
 import SharingFormSkeleton from './sharing-form-skeleton'
 
-export type SharingUsersProps = {
-  users?: User[]
-  permissions?: UserPermission[]
-  mutateUserPermissions: KeyedMutator<UserPermission[]>
-}
-
 interface PermissionTypeOption extends OptionBase {
   value: PermissionType
   label: string
 }
 
-const SharingUsers = ({
-  users,
-  permissions,
-  mutateUserPermissions,
-}: SharingUsersProps) => {
+const SharingUsers = () => {
   const navigate = useNavigate()
   const { id: workspaceId, fileId } = useParams()
   const dispatch = useAppDispatch()
-  const { data: workspace } = WorkspaceAPI.useGet(workspaceId)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeUser, setActiveUser] = useState<User>()
   const [activePermission, setActivePermission] = useState<string>()
+  const { data: singleFile } = FileAPI.useGet(selection[0], swrConfig())
+  const { data: workspace } = WorkspaceAPI.useGet(workspaceId)
   const { data: user } = IdPUserAPI.useGet()
+  const { data: users } = UserAPI.useList(
+    {
+      organizationId: workspace?.organization.id,
+    },
+    swrConfig(),
+  )
+  const { data: permissions, mutate: mutatePermissions } =
+    FileAPI.useGetUserPermissions(
+      singleFile && geOwnerPermission(singleFile.permission)
+        ? singleFile.id
+        : undefined,
+      swrConfig(),
+    )
   const isSingleSelection = selection.length === 1
 
-  const handleGrantUserPermission = useCallback(async () => {
+  const handleGrantPermission = useCallback(async () => {
     if (!activeUser || !activePermission) {
       return
     }
@@ -86,7 +94,7 @@ const SharingUsers = ({
       })
       await mutateList?.()
       if (isSingleSelection) {
-        await mutateUserPermissions()
+        await mutatePermissions()
       }
       setActiveUser(undefined)
       setIsGrantLoading(false)
@@ -104,10 +112,10 @@ const SharingUsers = ({
     isSingleSelection,
     mutateList,
     dispatch,
-    mutateUserPermissions,
+    mutatePermissions,
   ])
 
-  const handleRevokeUserPermission = useCallback(
+  const handleRevokePermission = useCallback(
     async (permission: UserPermission) => {
       try {
         setPermissionBeingRevoked(permission.id)
@@ -117,13 +125,13 @@ const SharingUsers = ({
         })
         await mutateList?.()
         if (isSingleSelection) {
-          await mutateUserPermissions()
+          await mutatePermissions()
         }
       } finally {
         setPermissionBeingRevoked(undefined)
       }
     },
-    [fileId, selection, isSingleSelection, mutateList, mutateUserPermissions],
+    [fileId, selection, isSingleSelection, mutateList, mutatePermissions],
   )
 
   const handleInviteMembersClick = useCallback(async () => {
@@ -137,7 +145,7 @@ const SharingUsers = ({
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {!users ? <SharingFormSkeleton /> : null}
-      {users && users.length === 0 ? (
+      {users && users.totalElements === 0 ? (
         <div className={cx('flex', 'items-center', 'justify-center')}>
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
             <span>This organization has no members.</span>
@@ -153,7 +161,7 @@ const SharingUsers = ({
           </div>
         </div>
       ) : null}
-      {users && users.length > 0 ? (
+      {users && users.totalElements > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <UserSelector
             value={activeUser}
@@ -179,7 +187,7 @@ const SharingUsers = ({
             colorScheme="blue"
             isLoading={isGrantLoading}
             isDisabled={!activeUser || !activePermission}
-            onClick={() => handleGrantUserPermission()}
+            onClick={() => handleGrantPermission()}
           >
             Apply to User
           </Button>
@@ -257,7 +265,7 @@ const SharingUsers = ({
                           aria-label="Revoke user permission"
                           isLoading={permissionBeingRevoked === p.id}
                           isDisabled={user?.id === p.user.id}
-                          onClick={() => handleRevokeUserPermission(p)}
+                          onClick={() => handleRevokePermission(p)}
                         />
                       </Td>
                     </Tr>

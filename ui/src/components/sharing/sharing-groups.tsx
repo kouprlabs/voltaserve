@@ -29,46 +29,54 @@ import {
   Text,
   Select,
 } from '@koupr/ui'
-import { KeyedMutator } from 'swr'
 import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI, { GroupPermission } from '@/client/api/file'
-import { Group } from '@/client/api/group'
-import { geEditorPermission, PermissionType } from '@/client/api/permission'
+import GroupAPI, { Group } from '@/client/api/group'
+import {
+  geEditorPermission,
+  geOwnerPermission,
+  PermissionType,
+} from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
+import { swrConfig } from '@/client/options'
 import GroupSelector from '@/components/common/group-selector'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import SharingFormSkeleton from './sharing-form-skeleton'
-
-export type SharingGroupsProps = {
-  groups?: Group[]
-  permissions?: GroupPermission[]
-  mutateGroupPermissions: KeyedMutator<GroupPermission[]>
-}
 
 interface PermissionTypeOption extends OptionBase {
   value: PermissionType
   label: string
 }
 
-const SharingGroups = ({
-  groups,
-  permissions,
-  mutateGroupPermissions,
-}: SharingGroupsProps) => {
+const SharingGroups = () => {
   const { id: workspaceId, fileId } = useParams()
   const dispatch = useAppDispatch()
-  const { data: workspace } = WorkspaceAPI.useGet(workspaceId)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeGroup, setActiveGroup] = useState<Group>()
   const [activePermission, setActivePermission] = useState<string>()
+  const { data: singleFile } = FileAPI.useGet(selection[0], swrConfig())
+  const { data: workspace } = WorkspaceAPI.useGet(workspaceId)
+  const { data: groups } = GroupAPI.useList(
+    {
+      organizationId: workspace?.organization.id,
+    },
+    swrConfig(),
+  )
+  const { data: permissions, mutate: mutatePermissions } =
+    FileAPI.useGetGroupPermissions(
+      singleFile && geOwnerPermission(singleFile.permission)
+        ? singleFile.id
+        : undefined,
+      swrConfig(),
+    )
   const isSingleSelection = selection.length === 1
 
-  const handleGrantGroupPermission = useCallback(async () => {
+  const handleGrantPermission = useCallback(async () => {
     if (activeGroup && activePermission) {
       try {
         setIsGrantLoading(true)
@@ -79,7 +87,7 @@ const SharingGroups = ({
         })
         await mutateList?.()
         if (isSingleSelection) {
-          await mutateGroupPermissions()
+          await mutatePermissions()
         }
         setActiveGroup(undefined)
         setIsGrantLoading(false)
@@ -98,10 +106,10 @@ const SharingGroups = ({
     isSingleSelection,
     mutateList,
     dispatch,
-    mutateGroupPermissions,
+    mutatePermissions,
   ])
 
-  const handleRevokeGroupPermission = useCallback(
+  const handleRevokePermission = useCallback(
     async (permission: GroupPermission) => {
       try {
         setPermissionBeingRevoked(permission.id)
@@ -111,19 +119,19 @@ const SharingGroups = ({
         })
         await mutateList?.()
         if (isSingleSelection) {
-          await mutateGroupPermissions()
+          await mutatePermissions()
         }
       } finally {
         setPermissionBeingRevoked(undefined)
       }
     },
-    [fileId, selection, isSingleSelection, mutateList, mutateGroupPermissions],
+    [fileId, selection, isSingleSelection, mutateList, mutatePermissions],
   )
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {!groups ? <SharingFormSkeleton /> : null}
-      {groups && groups.length > 0 ? (
+      {groups && groups.totalElements > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <GroupSelector
             value={activeGroup}
@@ -149,13 +157,13 @@ const SharingGroups = ({
             colorScheme="blue"
             isLoading={isGrantLoading}
             isDisabled={!activeGroup || !activePermission}
-            onClick={() => handleGrantGroupPermission()}
+            onClick={() => handleGrantPermission()}
           >
             Apply to Group
           </Button>
         </div>
       ) : null}
-      {groups && groups.length === 0 ? (
+      {groups && groups.totalElements === 0 ? (
         <div className={cx('flex', 'items-center', 'justify-center')}>
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
             <span>This organization has no groups.</span>
@@ -224,7 +232,7 @@ const SharingGroups = ({
                         title="Revoke group permission"
                         aria-label="Revoke group permission"
                         isLoading={permissionBeingRevoked === p.id}
-                        onClick={() => handleRevokeGroupPermission(p)}
+                        onClick={() => handleRevokePermission(p)}
                       />
                     </Td>
                   </Tr>
