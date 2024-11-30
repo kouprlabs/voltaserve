@@ -74,6 +74,7 @@ type UserListOptions struct {
 	OrganizationID      string
 	GroupID             string
 	ExcludeGroupMembers bool
+	ExcludeMe           bool
 	SortBy              string
 	SortOrder           string
 	Page                uint64
@@ -217,7 +218,17 @@ func (svc *UserService) findAll(opts UserListOptions, userID string) ([]model.Us
 			}
 		}
 	}
-	return res, nil
+	if opts.ExcludeMe {
+		withoutMe := make([]model.User, 0)
+		for _, u := range res {
+			if u.GetID() != userID {
+				withoutMe = append(withoutMe, u)
+			}
+		}
+		return withoutMe, nil
+	} else {
+		return res, nil
+	}
 }
 
 func (svc *UserService) doSorting(data []model.User, sortBy string, sortOrder string) []model.User {
