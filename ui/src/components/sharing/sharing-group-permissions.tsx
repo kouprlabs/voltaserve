@@ -8,7 +8,6 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
-import { useParams } from 'react-router-dom'
 import {
   Table,
   Thead,
@@ -20,25 +19,34 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { IconDelete, SectionPlaceholder, SectionSpinner, Text } from '@koupr/ui'
+import {
+  IconDelete,
+  SectionError,
+  SectionPlaceholder,
+  SectionSpinner,
+  Text,
+} from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI, { GroupPermission } from '@/client/api/file'
-import { geOwnerPermission } from '@/client/api/permission'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
 
 const SharingGroupPermissions = () => {
-  const { fileId } = useParams()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const [revokedPermission, setRevokedPermission] = useState<string>()
-  const { data: file } = FileAPI.useGet(selection[0], swrConfig())
-  const { data: permissions, mutate: mutatePermissions } =
-    FileAPI.useGetGroupPermissions(
-      file && geOwnerPermission(file.permission) ? file.id : undefined,
-      swrConfig(),
-    )
-  const isSingleSelection = selection.length === 1
+  const {
+    data: permissions,
+    error: permissionsError,
+    isLoading: isPermissionsLoading,
+    mutate: mutatePermissions,
+  } = FileAPI.useGetGroupPermissions(selection[0], swrConfig())
+  const isPermissionsError = !permissions && permissionsError
+  const isPermissionsEmpty =
+    permissions && !permissionsError && permissions.length === 0
+  const isPermissionsReady =
+    permissions && !permissionsError && permissions.length > 0
 
   const handleRevokePermission = useCallback(
     async (permission: GroupPermission) => {
@@ -49,23 +57,24 @@ const SharingGroupPermissions = () => {
           groupId: permission.group.id,
         })
         await mutateFiles?.()
-        if (isSingleSelection) {
-          await mutatePermissions()
-        }
+        await mutatePermissions()
       } finally {
         setRevokedPermission(undefined)
       }
     },
-    [fileId, selection, isSingleSelection, mutateFiles, mutatePermissions],
+    [selection, mutateFiles, mutatePermissions],
   )
 
   return (
     <>
-      {!permissions ? <SectionSpinner /> : null}
-      {permissions && permissions.length === 0 ? (
+      {isPermissionsLoading ? <SectionSpinner height="auto" /> : null}
+      {isPermissionsError ? (
+        <SectionError text={errorToString(permissionsError)} height="auto" />
+      ) : null}
+      {isPermissionsEmpty ? (
         <SectionPlaceholder text="Not shared with any groups." height="auto" />
       ) : null}
-      {permissions && permissions.length > 0 ? (
+      {isPermissionsReady ? (
         <Table>
           <Thead>
             <Tr>

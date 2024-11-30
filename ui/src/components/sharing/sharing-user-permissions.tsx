@@ -20,11 +20,17 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { IconDelete, SectionPlaceholder, SectionSpinner, Text } from '@koupr/ui'
+import {
+  IconDelete,
+  SectionError,
+  SectionPlaceholder,
+  SectionSpinner,
+  Text,
+} from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI, { UserPermission } from '@/client/api/file'
-import { geOwnerPermission } from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
+import { errorToString } from '@/client/error'
 import IdPUserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { getPictureUrlById } from '@/lib/helpers/picture'
@@ -35,14 +41,19 @@ const SharingUserPermissions = () => {
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const [revokedPermission, setRevokedPermission] = useState<string>()
-  const { data: workspace } = WorkspaceAPI.useGet(workspaceId)
-  const { data: file } = FileAPI.useGet(selection[0], swrConfig())
+  const { data: workspace } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const { data: me } = IdPUserAPI.useGet()
-  const { data: permissions, mutate: mutatePermissions } =
-    FileAPI.useGetUserPermissions(
-      file && geOwnerPermission(file.permission) ? file.id : undefined,
-      swrConfig(),
-    )
+  const {
+    data: permissions,
+    error: permissionsError,
+    isLoading: isPermissionsLoading,
+    mutate: mutatePermissions,
+  } = FileAPI.useGetUserPermissions(selection[0], swrConfig())
+  const isPermissionsError = !permissions && permissionsError
+  const isPermissionsEmpty =
+    permissions && !permissionsError && permissions.length === 0
+  const isPermissionsReady =
+    permissions && !permissionsError && permissions.length > 0
 
   const handleRevokePermission = useCallback(
     async (permission: UserPermission) => {
@@ -63,11 +74,14 @@ const SharingUserPermissions = () => {
 
   return (
     <>
-      {!permissions ? <SectionSpinner /> : null}
-      {permissions && permissions.length === 0 ? (
+      {isPermissionsLoading ? <SectionSpinner height="auto" /> : null}
+      {isPermissionsError ? (
+        <SectionError text={errorToString(permissionsError)} height="auto" />
+      ) : null}
+      {isPermissionsEmpty ? (
         <SectionPlaceholder text="Not shared with any users." height="auto" />
       ) : null}
-      {permissions && permissions.length > 0 ? (
+      {isPermissionsReady ? (
         <Table>
           <Thead>
             <Tr>

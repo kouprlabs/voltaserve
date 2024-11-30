@@ -10,17 +10,20 @@
 import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
-import { IconCheck, IconPersonAdd, SectionPlaceholder, Select } from '@koupr/ui'
+import {
+  IconCheck,
+  IconPersonAdd,
+  SectionError,
+  SectionPlaceholder,
+  Select,
+} from '@koupr/ui'
 import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
-import {
-  geEditorPermission,
-  geOwnerPermission,
-  PermissionType,
-} from '@/client/api/permission'
+import { geEditorPermission, PermissionType } from '@/client/api/permission'
 import UserAPI, { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import UserSelector from '@/components/common/user-selector'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -34,8 +37,8 @@ interface PermissionTypeOption extends OptionBase {
   label: string
 }
 
-const SharingUserOverview = () => {
-  const { id: workspaceId, fileId } = useParams()
+const SharingUserForm = () => {
+  const { id: workspaceId } = useParams()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
@@ -43,19 +46,31 @@ const SharingUserOverview = () => {
   const [isGranting, setIsGranting] = useState(false)
   const [user, setUser] = useState<User>()
   const [permission, setPermission] = useState<string>()
-  const { data: workspace } = WorkspaceAPI.useGet(workspaceId)
-  const { data: file } = FileAPI.useGet(selection[0], swrConfig())
-  const { data: users } = UserAPI.useList(
+  const {
+    data: workspace,
+    error: workspaceError,
+    isLoading: isWorkspaceLoading,
+  } = WorkspaceAPI.useGet(workspaceId, swrConfig())
+  const {
+    data: users,
+    error: usersError,
+    isLoading: isUsersLoading,
+  } = UserAPI.useList(
     {
       organizationId: workspace?.organization.id,
       excludeMe: true,
     },
     swrConfig(),
   )
-  const { mutate: mutatePermissions } = FileAPI.useGetUserPermissions(
-    file && geOwnerPermission(file.permission) ? file.id : undefined,
-  )
   const isSingleSelection = selection.length === 1
+  const { mutate: mutatePermissions } = FileAPI.useGetGroupPermissions(
+    isSingleSelection ? selection[0] : undefined,
+  )
+  const isWorkspaceError = !workspace && workspaceError
+  const isWorkspaceReady = workspace && !workspaceError
+  const isUsersError = !users && usersError
+  const isUsersEmpty = users && !usersError && users.totalElements === 0
+  const isUsersReady = users && !usersError && users.totalElements > 0
 
   const handleGrantPermission = useCallback(async () => {
     if (!user || !permission) {
@@ -81,7 +96,6 @@ const SharingUserOverview = () => {
       setIsGranting(false)
     }
   }, [
-    fileId,
     selection,
     user,
     permission,
@@ -101,8 +115,14 @@ const SharingUserOverview = () => {
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-      {!users ? <SharingFormSkeleton /> : null}
-      {users && users.totalElements === 0 ? (
+      {isWorkspaceLoading || isUsersLoading ? <SharingFormSkeleton /> : null}
+      {isWorkspaceError || isUsersError ? (
+        <SectionError
+          text={errorToString(workspaceError || isUsersError)}
+          height="auto"
+        />
+      ) : null}
+      {isWorkspaceReady && isUsersEmpty ? (
         <SectionPlaceholder
           text="This organization has no members."
           content={
@@ -121,7 +141,7 @@ const SharingUserOverview = () => {
           height="auto"
         />
       ) : null}
-      {users && users.totalElements > 0 ? (
+      {isWorkspaceReady && isUsersReady ? (
         <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <UserSelector
             value={user}
@@ -163,4 +183,4 @@ const SharingUserOverview = () => {
   )
 }
 
-export default SharingUserOverview
+export default SharingUserForm

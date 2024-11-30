@@ -23,24 +23,23 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
-import { geOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
-import SharingGroupOverview from './sharing-group-overview'
-import SharingUserOverview from './sharing-user-overview'
+import SharingGroupForm from './sharing-group-form'
+import SharingUserForm from './sharing-user-form'
 
 const Sharing = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
-  const { data: file } = FileAPI.useGet(selection[0], swrConfig())
+  const isSingleSelection = selection.length === 1
   const { data: userPermissions } = FileAPI.useGetUserPermissions(
-    file && geOwnerPermission(file.permission) ? file.id : undefined,
+    isSingleSelection ? selection[0] : undefined,
     swrConfig(),
   )
   const { data: groupPermissions } = FileAPI.useGetGroupPermissions(
-    file && geOwnerPermission(file.permission) ? file.id : undefined,
+    isSingleSelection ? selection[0] : undefined,
     swrConfig(),
   )
 
@@ -69,7 +68,7 @@ const Sharing = () => {
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
                   <span>Users</span>
-                  {file && userPermissions && userPermissions.length > 0 ? (
+                  {userPermissions && userPermissions.length > 0 ? (
                     <Tag className={cx('rounded-full')}>
                       {userPermissions.length}
                     </Tag>
@@ -81,7 +80,7 @@ const Sharing = () => {
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
                   <span>Groups</span>
-                  {file && groupPermissions && groupPermissions.length > 0 ? (
+                  {groupPermissions && groupPermissions.length > 0 ? (
                     <Tag className={cx('rounded-full')}>
                       {groupPermissions.length}
                     </Tag>
@@ -91,10 +90,10 @@ const Sharing = () => {
             </TabList>
             <TabPanels>
               <TabPanel>
-                <SharingUserOverview />
+                <SharingUserForm />
               </TabPanel>
               <TabPanel>
-                <SharingGroupOverview />
+                <SharingGroupForm />
               </TabPanel>
             </TabPanels>
           </Tabs>
