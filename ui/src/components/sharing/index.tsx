@@ -34,17 +34,13 @@ const Sharing = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
-  const { data: singleFile } = FileAPI.useGet(selection[0], swrConfig())
+  const { data: file } = FileAPI.useGet(selection[0], swrConfig())
   const { data: userPermissions } = FileAPI.useGetUserPermissions(
-    singleFile && geOwnerPermission(singleFile.permission)
-      ? singleFile.id
-      : undefined,
+    file && geOwnerPermission(file.permission) ? file.id : undefined,
     swrConfig(),
   )
   const { data: groupPermissions } = FileAPI.useGetGroupPermissions(
-    singleFile && geOwnerPermission(singleFile.permission)
-      ? singleFile.id
-      : undefined,
+    file && geOwnerPermission(file.permission) ? file.id : undefined,
     swrConfig(),
   )
 
@@ -73,9 +69,7 @@ const Sharing = () => {
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
                   <span>Users</span>
-                  {singleFile &&
-                  userPermissions &&
-                  userPermissions.length > 0 ? (
+                  {file && userPermissions && userPermissions.length > 0 ? (
                     <Tag className={cx('rounded-full')}>
                       {userPermissions.length}
                     </Tag>
@@ -87,9 +81,7 @@ const Sharing = () => {
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
                   <span>Groups</span>
-                  {singleFile &&
-                  groupPermissions &&
-                  groupPermissions.length > 0 ? (
+                  {file && groupPermissions && groupPermissions.length > 0 ? (
                     <Tag className={cx('rounded-full')}>
                       {groupPermissions.length}
                     </Tag>

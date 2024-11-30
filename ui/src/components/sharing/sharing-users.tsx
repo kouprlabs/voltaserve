@@ -58,14 +58,14 @@ const SharingUsers = () => {
   const { id: workspaceId, fileId } = useParams()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const mutateList = useAppSelector((state) => state.ui.files.mutate)
+  const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
-  const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
-  const [activeUser, setActiveUser] = useState<User>()
-  const [activePermission, setActivePermission] = useState<string>()
-  const { data: singleFile } = FileAPI.useGet(selection[0], swrConfig())
+  const [revokedPermission, setRevokedPermission] = useState<string>()
+  const [user, setUser] = useState<User>()
+  const [permission, setPermission] = useState<string>()
   const { data: workspace } = WorkspaceAPI.useGet(workspaceId)
-  const { data: user } = IdPUserAPI.useGet()
+  const { data: file } = FileAPI.useGet(selection[0], swrConfig())
+  const { data: me } = IdPUserAPI.useGet()
   const { data: users } = UserAPI.useList(
     {
       organizationId: workspace?.organization.id,
@@ -74,29 +74,27 @@ const SharingUsers = () => {
   )
   const { data: permissions, mutate: mutatePermissions } =
     FileAPI.useGetUserPermissions(
-      singleFile && geOwnerPermission(singleFile.permission)
-        ? singleFile.id
-        : undefined,
+      file && geOwnerPermission(file.permission) ? file.id : undefined,
       swrConfig(),
     )
   const isSingleSelection = selection.length === 1
 
   const handleGrantPermission = useCallback(async () => {
-    if (!activeUser || !activePermission) {
+    if (!user || !permission) {
       return
     }
     try {
       setIsGrantLoading(true)
       await FileAPI.grantUserPermission({
         ids: selection,
-        userId: activeUser.id,
-        permission: activePermission,
+        userId: user.id,
+        permission: permission,
       })
-      await mutateList?.()
+      await mutateFiles?.()
       if (isSingleSelection) {
         await mutatePermissions()
       }
-      setActiveUser(undefined)
+      setUser(undefined)
       setIsGrantLoading(false)
       if (!isSingleSelection) {
         dispatch(sharingModalDidClose())
@@ -107,31 +105,31 @@ const SharingUsers = () => {
   }, [
     fileId,
     selection,
-    activeUser,
-    activePermission,
+    user,
+    permission,
     isSingleSelection,
-    mutateList,
     dispatch,
+    mutateFiles,
     mutatePermissions,
   ])
 
   const handleRevokePermission = useCallback(
     async (permission: UserPermission) => {
       try {
-        setPermissionBeingRevoked(permission.id)
+        setRevokedPermission(permission.id)
         await FileAPI.revokeUserPermission({
           ids: selection,
           userId: permission.user.id,
         })
-        await mutateList?.()
+        await mutateFiles?.()
         if (isSingleSelection) {
           await mutatePermissions()
         }
       } finally {
-        setPermissionBeingRevoked(undefined)
+        setRevokedPermission(undefined)
       }
     },
-    [fileId, selection, isSingleSelection, mutateList, mutatePermissions],
+    [fileId, selection, isSingleSelection, mutateFiles, mutatePermissions],
   )
 
   const handleInviteMembersClick = useCallback(async () => {
@@ -164,9 +162,9 @@ const SharingUsers = () => {
       {users && users.totalElements > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <UserSelector
-            value={activeUser}
+            value={user}
             organizationId={workspace?.organization.id}
-            onConfirm={(value) => setActiveUser(value)}
+            onConfirm={(value) => setUser(value)}
           />
           <Select<PermissionTypeOption, false>
             options={[
@@ -178,7 +176,7 @@ const SharingUsers = () => {
             selectedOptionStyle="check"
             onChange={(newValue) => {
               if (newValue) {
-                setActivePermission(newValue.value)
+                setPermission(newValue.value)
               }
             }}
           />
@@ -186,7 +184,7 @@ const SharingUsers = () => {
             leftIcon={<IconCheck />}
             colorScheme="blue"
             isLoading={isGrantLoading}
-            isDisabled={!activeUser || !activePermission}
+            isDisabled={!user || !permission}
             onClick={() => handleGrantPermission()}
           >
             Apply to User
@@ -263,8 +261,8 @@ const SharingUsers = () => {
                           colorScheme="red"
                           title="Revoke user permission"
                           aria-label="Revoke user permission"
-                          isLoading={permissionBeingRevoked === p.id}
-                          isDisabled={user?.id === p.user.id}
+                          isLoading={revokedPermission === p.id}
+                          isDisabled={me?.id === p.user.id}
                           onClick={() => handleRevokePermission(p)}
                         />
                       </Td>
