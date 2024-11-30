@@ -105,7 +105,7 @@ const SharingUserForm = () => {
     mutatePermissions,
   ])
 
-  const handleInviteMembersClick = useCallback(async () => {
+  const handleInviteMembersClick = useCallback(() => {
     if (workspace) {
       dispatch(inviteModalDidOpen())
       dispatch(sharingModalDidClose())
