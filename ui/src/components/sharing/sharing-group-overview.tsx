@@ -10,7 +10,7 @@
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
-import { IconAdd, IconCheck, Select } from '@koupr/ui'
+import { IconAdd, IconCheck, SectionPlaceholder, Select } from '@koupr/ui'
 import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
@@ -123,23 +123,31 @@ const SharingGroupOverview = () => {
         </div>
       ) : null}
       {groups && groups.totalElements === 0 ? (
-        <div className={cx('flex', 'items-center', 'justify-center')}>
-          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <span>This organization has no groups.</span>
-            {workspace &&
-            geEditorPermission(workspace.organization.permission) ? (
-              <Button
-                as={Link}
-                leftIcon={<IconAdd />}
-                to={`/new/group?org=${workspace.organization.id}`}
-              >
-                New Group
-              </Button>
-            ) : null}
-          </div>
-        </div>
+        <SectionPlaceholder
+          text="This organization has no groups."
+          content={
+            <>
+              {workspace &&
+              geEditorPermission(workspace.organization.permission) ? (
+                <Button
+                  as={Link}
+                  leftIcon={<IconAdd />}
+                  to={`/new/group?org=${workspace.organization.id}`}
+                >
+                  New Group
+                </Button>
+              ) : null}
+            </>
+          }
+          height="auto"
+        />
       ) : null}
-      {isSingleSelection ? <SharingGroupPermissions /> : null}
+      {isSingleSelection ? (
+        <>
+          <hr />
+          <SharingGroupPermissions />
+        </>
+      ) : null}
     </div>
   )
 }

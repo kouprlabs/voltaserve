@@ -20,7 +20,7 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { IconDelete, Spinner, Text } from '@koupr/ui'
+import { IconDelete, SectionPlaceholder, SectionSpinner, Text } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI, { GroupPermission } from '@/client/api/file'
 import { geOwnerPermission } from '@/client/api/permission'
@@ -61,16 +61,9 @@ const SharingGroupPermissions = () => {
 
   return (
     <>
-      <hr />
-      {!permissions ? (
-        <div className={cx('flex', 'items-center', 'justify-center')}>
-          <Spinner />
-        </div>
-      ) : null}
+      {!permissions ? <SectionSpinner /> : null}
       {permissions && permissions.length === 0 ? (
-        <div className={cx('flex', 'items-center', 'justify-center')}>
-          <span>Not shared with any groups.</span>
-        </div>
+        <SectionPlaceholder text="Not shared with any groups." height="auto" />
       ) : null}
       {permissions && permissions.length > 0 ? (
         <Table>

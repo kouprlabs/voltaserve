@@ -10,7 +10,7 @@
 import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
-import { IconCheck, IconPersonAdd, Select } from '@koupr/ui'
+import { IconCheck, IconPersonAdd, SectionPlaceholder, Select } from '@koupr/ui'
 import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
@@ -48,6 +48,7 @@ const SharingUserOverview = () => {
   const { data: users } = UserAPI.useList(
     {
       organizationId: workspace?.organization.id,
+      excludeMe: true,
     },
     swrConfig(),
   )
@@ -102,20 +103,23 @@ const SharingUserOverview = () => {
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {!users ? <SharingFormSkeleton /> : null}
       {users && users.totalElements === 0 ? (
-        <div className={cx('flex', 'items-center', 'justify-center')}>
-          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <span>This organization has no members.</span>
-            {workspace &&
-            geEditorPermission(workspace.organization.permission) ? (
-              <Button
-                leftIcon={<IconPersonAdd />}
-                onClick={handleInviteMembersClick}
-              >
-                Invite Members
-              </Button>
-            ) : null}
-          </div>
-        </div>
+        <SectionPlaceholder
+          text="This organization has no members."
+          content={
+            <>
+              {workspace &&
+              geEditorPermission(workspace.organization.permission) ? (
+                <Button
+                  leftIcon={<IconPersonAdd />}
+                  onClick={handleInviteMembersClick}
+                >
+                  Invite Members
+                </Button>
+              ) : null}
+            </>
+          }
+          height="auto"
+        />
       ) : null}
       {users && users.totalElements > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-1.5')}>
@@ -149,7 +153,12 @@ const SharingUserOverview = () => {
           </Button>
         </div>
       ) : null}
-      {isSingleSelection ? <SharingUserPermissions /> : null}
+      {isSingleSelection ? (
+        <>
+          <hr />
+          <SharingUserPermissions />
+        </>
+      ) : null}
     </div>
   )
 }
