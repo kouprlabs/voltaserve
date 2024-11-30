@@ -42,6 +42,7 @@ export type ListOptions = {
   organizationId?: string
   groupId?: string
   excludeGroupMembers?: boolean
+  excludeMe?: boolean
   size?: number
   page?: number
   sortBy?: SortBy
@@ -57,6 +58,7 @@ type ListQueryParams = {
   organization_id?: string
   group_id?: string
   exclude_group_members?: string
+  exclude_me?: string
 }
 
 export default class UserAPI {
@@ -89,6 +91,9 @@ export default class UserAPI {
     }
     if (options?.excludeGroupMembers) {
       params.exclude_group_members = options.excludeGroupMembers.toString()
+    }
+    if (options?.excludeMe) {
+      params.exclude_me = options.excludeMe.toString()
     }
     if (options?.page) {
       params.page = options.page.toString()

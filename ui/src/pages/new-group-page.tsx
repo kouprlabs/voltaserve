@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Button,
   FormControl,
@@ -29,6 +29,8 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
+import OrganizationAPI from '@/client/api/organization'
+import { swrConfig } from '@/client/options'
 import OrganizationSelector from '@/components/common/organization-selector'
 import { useAppSelector } from '@/store/hook'
 
@@ -39,13 +41,17 @@ type FormValues = {
 
 const NewGroupPage = () => {
   const navigate = useNavigate()
-  const { org } = useParams()
+  const [searchParams] = useSearchParams()
   const mutate = useAppSelector((state) => state.ui.groups.mutate)
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
     organizationId: Yup.string().required('Organization is required'),
   })
+  const { data: organization } = OrganizationAPI.useGet(
+    searchParams.get('org'),
+    swrConfig(),
+  )
 
   const handleSubmit = useCallback(
     async (
@@ -80,7 +86,7 @@ const NewGroupPage = () => {
         <Heading className={cx('text-heading')}>New Group</Heading>
         <Formik
           enableReinitialize={true}
-          initialValues={{ name: '', organizationId: org || '' }}
+          initialValues={{ name: '', organizationId: organization?.id || '' }}
           validationSchema={formSchema}
           validateOnBlur={false}
           onSubmit={handleSubmit}
@@ -111,6 +117,7 @@ const NewGroupPage = () => {
                       >
                         <FormLabel>Organization</FormLabel>
                         <OrganizationSelector
+                          defaultValue={organization}
                           onConfirm={(value) =>
                             setFieldValue(field.name, value.id)
                           }

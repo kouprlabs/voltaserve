@@ -108,15 +108,15 @@ async function handleResponse(
     if (response.status === 401 && redirect) {
       window.location.href = '/sign-in'
     }
-    if (showError) {
-      let message
-      try {
-        message = errorToString(await response.json())
-      } catch {
-        message = 'Oops! something went wrong.'
-      }
-      store.dispatch(errorOccurred(message))
-      throw new Error(message)
+    let error
+    try {
+      error = await response.json()
+    } catch {
+      error = 'Oops! something went wrong.'
     }
+    if (showError) {
+      store.dispatch(errorOccurred(errorToString(error)))
+    }
+    throw error
   }
 }

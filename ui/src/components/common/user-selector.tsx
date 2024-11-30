@@ -223,6 +223,7 @@ const UserSelector = ({
                     <div className={cx('self-end')}>
                       <Pagination
                         maxButtons={3}
+                        size="sm"
                         page={page}
                         totalPages={list.totalPages}
                         onPageChange={(value) => setPage(value)}

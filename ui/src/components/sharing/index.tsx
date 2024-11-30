@@ -7,8 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
 import {
   Modal,
   ModalOverlay,
@@ -24,51 +22,26 @@ import {
   Tag,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI, { List } from '@/client/api/file'
-import GroupAPI from '@/client/api/group'
-import { geOwnerPermission } from '@/client/api/permission'
-import UserAPI from '@/client/api/user'
-import WorkspaceAPI from '@/client/api/workspace'
+import FileAPI from '@/client/api/file'
+import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
-import SharingGroups from './sharing-groups'
-import SharingUsers from './sharing-users'
+import SharingGroupForm from './sharing-group-form'
+import SharingUserForm from './sharing-user-form'
 
-export type FileSharingProps = {
-  list: List
-}
-
-const Sharing = ({ list }: FileSharingProps) => {
-  const { id } = useParams()
+const Sharing = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
-  const singleFile = useMemo(() => {
-    if (selection.length === 1) {
-      return list.data.find((e) => e.id === selection[0])
-    } else {
-      return undefined
-    }
-  }, [list.data, selection])
-  const { data: workspace } = WorkspaceAPI.useGet(id)
-  const { data: users } = UserAPI.useList({
-    organizationId: workspace?.organization.id,
-  })
-  const { data: groups } = GroupAPI.useList({
-    organizationId: workspace?.organization.id,
-  })
-  const { data: userPermissions, mutate: mutateUserPermissions } =
-    FileAPI.useGetUserPermissions(
-      singleFile && geOwnerPermission(singleFile.permission)
-        ? singleFile.id
-        : undefined,
-    )
-  const { data: groupPermissions, mutate: mutateGroupPermissions } =
-    FileAPI.useGetGroupPermissions(
-      singleFile && geOwnerPermission(singleFile.permission)
-        ? singleFile.id
-        : undefined,
-    )
+  const isSingleSelection = selection.length === 1
+  const { data: userPermissions } = FileAPI.useGetUserPermissions(
+    isSingleSelection ? selection[0] : undefined,
+    swrConfig(),
+  )
+  const { data: groupPermissions } = FileAPI.useGetGroupPermissions(
+    isSingleSelection ? selection[0] : undefined,
+    swrConfig(),
+  )
 
   return (
     <Modal
@@ -82,7 +55,7 @@ const Sharing = ({ list }: FileSharingProps) => {
       <ModalOverlay />
       <ModalContent>
         {selection.length > 1 ? (
-          <ModalHeader>Sharing {selection.length} Items(s)</ModalHeader>
+          <ModalHeader>Sharing ({selection.length}) Items</ModalHeader>
         ) : (
           <ModalHeader>Sharing</ModalHeader>
         )}
@@ -95,9 +68,7 @@ const Sharing = ({ list }: FileSharingProps) => {
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
                   <span>Users</span>
-                  {singleFile &&
-                  userPermissions &&
-                  userPermissions.length > 0 ? (
+                  {userPermissions && userPermissions.length > 0 ? (
                     <Tag className={cx('rounded-full')}>
                       {userPermissions.length}
                     </Tag>
@@ -109,9 +80,7 @@ const Sharing = ({ list }: FileSharingProps) => {
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
                   <span>Groups</span>
-                  {singleFile &&
-                  groupPermissions &&
-                  groupPermissions.length > 0 ? (
+                  {groupPermissions && groupPermissions.length > 0 ? (
                     <Tag className={cx('rounded-full')}>
                       {groupPermissions.length}
                     </Tag>
@@ -121,18 +90,10 @@ const Sharing = ({ list }: FileSharingProps) => {
             </TabList>
             <TabPanels>
               <TabPanel>
-                <SharingUsers
-                  users={users?.data}
-                  permissions={userPermissions}
-                  mutateUserPermissions={mutateUserPermissions}
-                />
+                <SharingUserForm />
               </TabPanel>
               <TabPanel>
-                <SharingGroups
-                  groups={groups?.data}
-                  permissions={groupPermissions}
-                  mutateGroupPermissions={mutateGroupPermissions}
-                />
+                <SharingGroupForm />
               </TabPanel>
             </TabPanels>
           </Tabs>

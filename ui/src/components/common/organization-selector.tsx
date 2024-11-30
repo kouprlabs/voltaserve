@@ -41,10 +41,14 @@ import OrganizationAPI, {
 import { swrConfig } from '@/client/options'
 
 export type OrganizationSelectorProps = {
+  defaultValue?: Organization
   onConfirm?: (organization: Organization) => void
 }
 
-const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
+const OrganizationSelector = ({
+  defaultValue,
+  onConfirm,
+}: OrganizationSelectorProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
@@ -68,6 +72,10 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
+
+  useEffect(() => {
+    setConfirmed(defaultValue)
+  }, [defaultValue])
 
   useEffect(() => {
     mutate().then()
