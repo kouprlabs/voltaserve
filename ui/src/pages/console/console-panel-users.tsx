@@ -46,16 +46,15 @@ import userToString from '@/lib/helpers/user-to-string'
 
 const ConsolePanelUsers = () => {
   const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
   const navigate = useNavigate()
   const location = useLocation()
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
-  const [isConfirmationDestructive, setIsConfirmationDestructive] =
-    useState(false)
+  // prettier-ignore
+  const [isConfirmationDestructive, setIsConfirmationDestructive] = useState(false)
   const [confirmationHeader, setConfirmationHeader] = useState<ReactElement>()
   const [confirmationBody, setConfirmationBody] = useState<ReactElement>()
-  const [confirmationRequest, setConfirmationRequest] =
-    useState<ConsoleConfirmationModalRequest>()
+  // prettier-ignore
+  const [confirmationRequest, setConfirmationRequest] = useState<ConsoleConfirmationModalRequest>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -66,7 +65,10 @@ const ConsolePanelUsers = () => {
     error: listError,
     isLoading: listIsLoading,
     mutate,
-  } = UserAPI.useList({ query, page, size }, swrConfig())
+  } = UserAPI.useList(
+    { query: decodeQuery(searchParams.get('q') as string), page, size },
+    swrConfig(),
+  )
   const { hasPagination } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,

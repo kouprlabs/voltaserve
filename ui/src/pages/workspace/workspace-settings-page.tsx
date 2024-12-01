@@ -56,8 +56,8 @@ const WorkspaceSettingsPage = () => {
     [workspace],
   )
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
-  const [isStorageCapacityModalOpen, setIsStorageCapacityModalOpen] =
-    useState(false)
+  // prettier-ignore
+  const [isStorageCapacityModalOpen, setIsStorageCapacityModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const workspaceIsReady = workspace && !workspaceError
   const storageUsageIsReady = storageUsage && !storageUsageError

@@ -65,10 +65,10 @@ const SharingUserForm = () => {
     isSingleSelection ? selection[0] : undefined,
   )
   const workspaceIsReady = workspace && !workspaceError
-  const userListIsEmpty =
-    userList && !userListError && userList.totalElements === 0
-  const userListIsReady =
-    userList && !userListError && userList.totalElements > 0
+  // prettier-ignore
+  const userListIsEmpty = userList && !userListError && userList.totalElements === 0
+  // prettier-ignore
+  const userListIsReady = userList && !userListError && userList.totalElements > 0
 
   const handleGrantPermission = useCallback(async () => {
     if (!user || !permission) {

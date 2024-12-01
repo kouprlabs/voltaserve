@@ -42,10 +42,10 @@ const SharingGroupPermissions = () => {
     isLoading: permissionsIsLoading,
     mutate: mutatePermissions,
   } = FileAPI.useGetGroupPermissions(selection[0], swrConfig())
-  const permissionsIsEmpty =
-    permissions && !permissionsError && permissions.length === 0
-  const permissionsIsReady =
-    permissions && !permissionsError && permissions.length > 0
+  // prettier-ignore
+  const permissionsIsEmpty = permissions && !permissionsError && permissions.length === 0
+  // prettier-ignore
+  const permissionsIsReady = permissions && !permissionsError && permissions.length > 0
 
   const handleRevokePermission = useCallback(
     async (permission: GroupPermission) => {

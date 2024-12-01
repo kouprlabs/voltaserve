@@ -52,12 +52,12 @@ const ConsolePanelGroups = () => {
     storage: consoleGroupsPaginationStorage(),
   })
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
-  const [isConfirmationDestructive, setIsConfirmationDestructive] =
-    useState(false)
+  // prettier-ignore
+  const [isConfirmationDestructive, setIsConfirmationDestructive] = useState(false)
   const [confirmationHeader, setConfirmationHeader] = useState<ReactElement>()
   const [confirmationBody, setConfirmationBody] = useState<ReactElement>()
-  const [confirmationRequest, setConfirmationRequest] =
-    useState<ConsoleConfirmationModalRequest>()
+  // prettier-ignore
+  const [confirmationRequest, setConfirmationRequest] = useState<ConsoleConfirmationModalRequest>()
   const {
     data: list,
     error: listError,

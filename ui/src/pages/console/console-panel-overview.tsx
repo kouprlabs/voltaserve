@@ -49,8 +49,8 @@ const internalComponents = [
   { id: 'console' },
   { id: 'conversion' },
 ]
-const compareFn = (a: ComponentVersion, b: ComponentVersion) =>
-  a.name > b.name ? 1 : 0
+// prettier-ignore
+const compareFn = (a: ComponentVersion, b: ComponentVersion) => a.name > b.name ? 1 : 0
 
 const ConsolePanelOverview = () => {
   const [userCount, setUserCount] = useState<number>()
