@@ -27,9 +27,12 @@ const slice = createSlice({
     modalDidClose: (state) => {
       state.isModalOpen = false
     },
+    allModalsDidClose: (state) => {
+      state.isModalOpen = false
+    },
   },
 })
 
-export const { modalDidOpen, modalDidClose } = slice.actions
+export const { modalDidOpen, modalDidClose, allModalsDidClose } = slice.actions
 
 export default slice.reducer

@@ -57,7 +57,7 @@ const WorkspaceFilesPage = () => {
     (state) => state.ui.snapshots.isDetachModalOpen,
   )
   const isShareModalOpen = useAppSelector(
-    (state) => state.ui.files.isShareModalOpen,
+    (state) => state.ui.files.isSharingModalOpen,
   )
   const isMoveModalOpen = useAppSelector(
     (state) => state.ui.files.isMoveModalOpen,

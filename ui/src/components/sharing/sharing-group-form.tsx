@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
 import {
   IconAdd,
@@ -38,7 +38,6 @@ interface PermissionTypeOption extends OptionBase {
 
 const SharingGroupForm = () => {
   const { id: workspaceId } = useParams()
-  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
@@ -103,13 +102,6 @@ const SharingGroupForm = () => {
     mutatePermissions,
   ])
 
-  const handleNewGroupClick = useCallback(() => {
-    if (workspace) {
-      dispatch(sharingModalDidClose())
-      navigate(`/new/group?org=${workspace.organization.id}`)
-    }
-  }, [workspace, navigate, dispatch])
-
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {isWorkspaceLoading || isGroupsLoading ? <SharingFormSkeleton /> : null}
@@ -126,7 +118,11 @@ const SharingGroupForm = () => {
             <>
               {workspace &&
               geEditorPermission(workspace.organization.permission) ? (
-                <Button leftIcon={<IconAdd />} onClick={handleNewGroupClick}>
+                <Button
+                  as={Link}
+                  to={`/new/group?org=${workspace.organization.id}`}
+                  leftIcon={<IconAdd />}
+                >
                   New Group
                 </Button>
               ) : null}

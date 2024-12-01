@@ -33,7 +33,7 @@ export type FilesState = {
   isCreateModalOpen: boolean
   isDeleteModalOpen: boolean
   isRenameModalOpen: boolean
-  isShareModalOpen: boolean
+  isSharingModalOpen: boolean
   isInfoModalOpen: boolean
   isContextMenuOpen: boolean
   isSelectionMode: boolean
@@ -55,7 +55,7 @@ const initialState: FilesState = {
   isCreateModalOpen: false,
   isDeleteModalOpen: false,
   isRenameModalOpen: false,
-  isShareModalOpen: false,
+  isSharingModalOpen: false,
   isInfoModalOpen: false,
   isContextMenuOpen: false,
   iconScale: loadIconScale() || 1,
@@ -105,7 +105,7 @@ const slice = createSlice({
       state.isRenameModalOpen = true
     },
     sharingModalDidOpen: (state) => {
-      state.isShareModalOpen = true
+      state.isSharingModalOpen = true
     },
     infoModalDidOpen: (state) => {
       state.isInfoModalOpen = true
@@ -129,9 +129,18 @@ const slice = createSlice({
       state.isRenameModalOpen = false
     },
     sharingModalDidClose: (state) => {
-      state.isShareModalOpen = false
+      state.isSharingModalOpen = false
     },
     infoModalDidClose: (state) => {
+      state.isInfoModalOpen = false
+    },
+    allModalsDidClose: (state) => {
+      state.isMoveModalOpen = false
+      state.isCopyModalOpen = false
+      state.isCreateModalOpen = false
+      state.isDeleteModalOpen = false
+      state.isRenameModalOpen = false
+      state.isSharingModalOpen = false
       state.isInfoModalOpen = false
     },
     contextMenuDidClose: (state) => {
@@ -197,6 +206,7 @@ export const {
   renameModalDidClose,
   sharingModalDidClose,
   infoModalDidClose,
+  allModalsDidClose,
   contextMenuDidClose,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
