@@ -64,10 +64,10 @@ const SharingGroupForm = () => {
     isSingleSelection ? selection[0] : undefined,
   )
   const workspaceIsReady = workspace && !workspaceError
-  const groupListIsEmpty =
-    groupList && !groupListError && groupList.totalElements === 0
-  const groupListIsReady =
-    groupList && !groupListError && groupList.totalElements > 0
+  // prettier-ignore
+  const groupListIsEmpty = groupList && !groupListError && groupList.totalElements === 0
+  // prettier-ignore
+  const groupListIsReady = groupList && !groupListError && groupList.totalElements > 0
 
   const handleGrantPermission = useCallback(async () => {
     if (!group || !permission) {

@@ -82,8 +82,8 @@ const OrganizationMembersPage = () => {
     (state) => state.ui.organizations.isInviteModalOpen,
   )
   const [userToRemove, setUserToRemove] = useState<User>()
-  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
-    useState<boolean>(false)
+  // prettier-ignore
+  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState<boolean>(false)
   const { hasPagination } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,

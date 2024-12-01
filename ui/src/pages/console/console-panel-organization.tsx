@@ -86,18 +86,18 @@ const ConsolePanelOrganization = () => {
     swrConfig(),
   )
   const orgIsReady = org && !orgError
-  const userListIsEmpty =
-    userList && !userListError && userList.totalElements === 0
-  const userListIsReady =
-    userList && !userListError && userList.totalElements > 0
-  const workspaceListIsEmpty =
-    workspaceList && !workspaceListError && workspaceList.totalElements === 0
-  const workspaceListIsReady =
-    workspaceList && !workspaceListError && workspaceList.totalElements > 0
-  const groupListIsEmpty =
-    groupList && !groupListError && groupList.totalElements === 0
-  const groupListIsReady =
-    groupList && !groupListError && groupList.totalElements > 0
+  // prettier-ignore
+  const userListIsEmpty = userList && !userListError && userList.totalElements === 0
+  // prettier-ignore
+  const userListIsReady = userList && !userListError && userList.totalElements > 0
+  // prettier-ignore
+  const workspaceListIsEmpty = workspaceList && !workspaceListError && workspaceList.totalElements === 0
+  // prettier-ignore
+  const workspaceListIsReady = workspaceList && !workspaceListError && workspaceList.totalElements > 0
+  // prettier-ignore
+  const groupListIsEmpty = groupList && !groupListError && groupList.totalElements === 0
+  // prettier-ignore
+  const groupListIsReady = groupList && !groupListError && groupList.totalElements > 0
 
   return (
     <>

@@ -37,8 +37,8 @@ const OrganizationSettingsPage = () => {
     isLoading: orgIsLoading,
   } = OrganizationAPI.useGet(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
-  const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
-    useState(false)
+  // prettier-ignore
+  const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] = useState(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const orgIsReady = org && !orgError

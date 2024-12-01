@@ -18,8 +18,8 @@ import { getPictureUrl } from '@/lib/helpers/picture'
 
 const AccountMenu = () => {
   const { data: user } = UserAPI.useGet(swrConfig())
-  const { data: invitationCount } =
-    InvitationAPI.useGetIncomingCount(swrConfig())
+  // prettier-ignore
+  const { data: invitationCount } = InvitationAPI.useGetIncomingCount(swrConfig())
 
   return (
     <KouprAccountMenu

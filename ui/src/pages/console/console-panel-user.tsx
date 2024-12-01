@@ -85,16 +85,16 @@ const ConsolePanelUser = () => {
     swrConfig(),
   )
   const userIsReady = user && !userError
-  const groupListIsEmpty =
-    groupList && !groupListError && groupList.totalElements === 0
-  const groupListIsReady =
-    groupList && !groupListError && groupList.totalElements > 0
+  // prettier-ignore
+  const groupListIsEmpty = groupList && !groupListError && groupList.totalElements === 0
+  // prettier-ignore
+  const groupListIsReady = groupList && !groupListError && groupList.totalElements > 0
   const orgListIsEmpty = orgList && !orgListError && orgList.totalElements === 0
   const orgListIsReady = orgList && !orgListError && orgList.totalElements > 0
-  const workspaceListIsEmpty =
-    workspaceList && !workspaceListError && workspaceList.totalElements === 0
-  const workspaceListIsReady =
-    workspaceList && !workspaceListError && workspaceList.totalElements > 0
+  // prettier-ignore
+  const workspaceListIsEmpty = workspaceList && !workspaceListError && workspaceList.totalElements === 0
+  // prettier-ignore
+  const workspaceListIsReady = workspaceList && !workspaceListError && workspaceList.totalElements > 0
 
   return (
     <>

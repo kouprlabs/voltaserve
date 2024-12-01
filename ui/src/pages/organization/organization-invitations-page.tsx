@@ -66,8 +66,8 @@ const OrganizationInvitationsPage = () => {
     },
     swrConfig(),
   )
-  const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
-    useState(false)
+  // prettier-ignore
+  const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] = useState(false)
   const orgIsReady = org && !orgError
   const listIsEmpty = list && !listError && list.totalElements === 0
   const listIsReady = list && !listError && list.totalElements > 0
