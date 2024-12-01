@@ -16,11 +16,7 @@ import cx from 'classnames'
 import { Status } from '@/client/api/snapshot'
 import store from '@/store/configure-store'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  selectionAdded,
-  selectionRemoved,
-  selectionUpdated,
-} from '@/store/ui/files'
+import { selectionAdded, selectionRemoved, selectionUpdated } from '@/store/ui/files'
 import { FileCommonProps, FileViewType } from '@/types/file'
 import ItemIcon from './icon'
 import { performMultiSelect, performRangeSelect } from './item-perform-select'
@@ -118,8 +114,7 @@ const ListItem = ({
       navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
     } else if (
       file.type === 'file' &&
-      ((file.snapshot?.preview && file.snapshot?.status === Status.Ready) ||
-        file.snapshot?.mosaic)
+      ((file.snapshot?.preview && file.snapshot?.status === Status.Ready) || file.snapshot?.mosaic)
     ) {
       window.open(`/file/${file.id}`, '_blank')?.focus()
     }
@@ -178,19 +173,9 @@ const ListItem = ({
       onDoubleClick={isSelectionMode ? undefined : handleIconDoubleClick}
       onContextMenu={isSelectionMode ? undefined : handleContextMenu}
     >
-      {isSelectionMode && !isPresentational ? (
-        <MultiSelectCheckbox isChecked={isChecked} viewType={viewType} />
-      ) : null}
-      <div
-        className={cx('flex', 'items-center', 'justify-center')}
-        style={{ width, minHeight }}
-      >
-        <ItemIcon
-          file={file}
-          scale={scale}
-          viewType={viewType}
-          isLoading={isLoading || loading.includes(file.id)}
-        />
+      {isSelectionMode && !isPresentational ? <MultiSelectCheckbox isChecked={isChecked} viewType={viewType} /> : null}
+      <div className={cx('flex', 'items-center', 'justify-center')} style={{ width, minHeight }}>
+        <ItemIcon file={file} scale={scale} viewType={viewType} isLoading={isLoading || loading.includes(file.id)} />
       </div>
       <div
         className={cx(
@@ -216,8 +201,7 @@ const ListItem = ({
             {file.name}
           </ChakraLink>
         ) : null}
-        {file.type === 'file' &&
-        (file.snapshot?.preview || file.snapshot?.mosaic) ? (
+        {file.type === 'file' && (file.snapshot?.preview || file.snapshot?.mosaic) ? (
           <ChakraLink
             className={cx('text-center', 'no-underline', {
               'hover:no-underline': isSelectionMode,
@@ -230,22 +214,13 @@ const ListItem = ({
             {file.name}
           </ChakraLink>
         ) : null}
-        {file.type === 'file' &&
-        !file.snapshot?.preview &&
-        !file.snapshot?.mosaic ? (
-          <Text
-            className={cx('text-center')}
-            noOfLines={noOfLines}
-            onClick={handleIconClick}
-          >
+        {file.type === 'file' && !file.snapshot?.preview && !file.snapshot?.mosaic ? (
+          <Text className={cx('text-center')} noOfLines={noOfLines} onClick={handleIconClick}>
             {file.name}
           </Text>
         ) : null}
       </div>
-      <Text
-        noOfLines={noOfLines}
-        className={cx('text-gray-500', 'text-center')}
-      >
+      <Text noOfLines={noOfLines} className={cx('text-gray-500', 'text-center')}>
         <RelativeDate date={new Date(file.createTime)} />
       </Text>
     </div>

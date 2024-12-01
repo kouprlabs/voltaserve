@@ -9,23 +9,9 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  Input,
-  Link as ChakraLink,
-  Heading,
-} from '@chakra-ui/react'
+import { Button, FormControl, FormErrorMessage, Input, Link as ChakraLink, Heading } from '@chakra-ui/react'
 import { Logo } from '@koupr/ui'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -45,17 +31,12 @@ type FormValues = {
 const SignInPage = () => {
   const navigate = useNavigate()
   const formSchema = Yup.object().shape({
-    email: Yup.string()
-      .email('Email is not valid')
-      .required('Email is required'),
+    email: Yup.string().email('Email is not valid').required('Email is required'),
     password: Yup.string().required('Password is required'),
   })
 
   const handleSignIn = useCallback(
-    async (
-      { email: username, password }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ email: username, password }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       try {
         const token = await TokenAPI.exchange({
           username,
@@ -81,9 +62,7 @@ const SignInPage = () => {
         } else {
           const workspaceList = await WorkspaceAPI.list()
           if (workspaceList.totalElements === 1) {
-            navigate(
-              `/workspace/${workspaceList.data[0].id}/file/${workspaceList.data[0].rootId}`,
-            )
+            navigate(`/workspace/${workspaceList.data[0].id}/file/${workspaceList.data[0].rootId}`)
           } else {
             navigate('/workspace')
           }
@@ -103,21 +82,11 @@ const SignInPage = () => {
         <Helmet>
           <title>Sign In to Voltaserve</title>
         </Helmet>
-        <div
-          className={cx(
-            'flex',
-            'flex-col',
-            'items-center',
-            'gap-2.5',
-            'w-full',
-          )}
-        >
+        <div className={cx('flex', 'flex-col', 'items-center', 'gap-2.5', 'w-full')}>
           <div className={cx('w-[64px]')}>
             <Logo type="voltaserve" size="md" isGlossy={true} />
           </div>
-          <Heading className={cx('text-heading')}>
-            Sign In to Voltaserve
-          </Heading>
+          <Heading className={cx('text-heading')}>Sign In to Voltaserve</Heading>
           <Formik
             initialValues={{
               email: '',
@@ -129,29 +98,18 @@ const SignInPage = () => {
           >
             {({ errors, touched, isSubmitting }) => (
               <Form className={cx('w-full')}>
-                <div
-                  className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}
-                >
+                <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
                   <Field name="email">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.email && touched.email)}
-                      >
-                        <Input
-                          {...field}
-                          id="email"
-                          placeholder="Email"
-                          disabled={isSubmitting}
-                        />
+                      <FormControl isInvalid={Boolean(errors.email && touched.email)}>
+                        <Input {...field} id="email" placeholder="Email" disabled={isSubmitting} />
                         <FormErrorMessage>{errors.email}</FormErrorMessage>
                       </FormControl>
                     )}
                   </Field>
                   <Field name="password">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.password && touched.password)}
-                      >
+                      <FormControl isInvalid={Boolean(errors.password && touched.password)}>
                         <Input
                           {...field}
                           id="password"
@@ -176,9 +134,7 @@ const SignInPage = () => {
               </Form>
             )}
           </Formik>
-          <div
-            className={cx('flex', 'flex-col', 'items-center', 'max-w-[60ch]')}
-          >
+          <div className={cx('flex', 'flex-col', 'items-center', 'max-w-[60ch]')}>
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <span>{"Don't have an account yet?"}</span>
               <ChakraLink as={Link} to="/sign-up">

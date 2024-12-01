@@ -21,9 +21,7 @@ const ViewerAudio = ({ file }: ViewerAudioProps) => {
     if (!download || !download.extension) {
       return ''
     }
-    return `/proxy/api/v3/files/${file.id}/preview${
-      download.extension
-    }?${new URLSearchParams({
+    return `/proxy/api/v3/files/${file.id}/preview${download.extension}?${new URLSearchParams({
       access_token: getAccessTokenOrRedirect(),
     })}`
   }, [file, download])

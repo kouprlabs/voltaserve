@@ -49,11 +49,7 @@ const OrganizationLeave = ({ open, id, onClose }: OrganizationLeaveProps) => {
   }, [id, navigate, onClose])
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Leave Organization</ModalHeader>
@@ -63,13 +59,7 @@ const OrganizationLeave = ({ open, id, onClose }: OrganizationLeaveProps) => {
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              disabled={isLoading}
-              onClick={() => onClose?.()}
-            >
+            <Button type="button" variant="outline" colorScheme="blue" disabled={isLoading} onClick={() => onClose?.()}>
               Cancel
             </Button>
             <Button

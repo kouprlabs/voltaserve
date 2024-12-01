@@ -60,13 +60,7 @@ const ConsoleConfirmationModal = ({
         <ModalBody>{body}</ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              disabled={isLoading}
-              onClick={onClose}
-            >
+            <Button type="button" variant="outline" colorScheme="blue" disabled={isLoading} onClick={onClose}>
               Cancel
             </Button>
             <Button

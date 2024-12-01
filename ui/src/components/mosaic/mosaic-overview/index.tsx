@@ -31,17 +31,9 @@ import MosaicOverviewArtifacts from './mosaic-overview-artifacts'
 import MosaicOverviewSettings from './mosaic-overview-settings'
 
 const MosaicOverview = () => {
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
+  const id = useAppSelector((state) => (state.ui.files.selection.length > 0 ? state.ui.files.selection[0] : undefined))
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const {
-    data: info,
-    error: infoError,
-    isLoading: infoIsLoading,
-  } = MosaicAPI.useGetInfo(id, swrConfig())
+  const { data: info, error: infoError, isLoading: infoIsLoading } = MosaicAPI.useGetInfo(id, swrConfig())
   const infoIsReady = info && !infoError
 
   return (
@@ -56,8 +48,8 @@ const MosaicOverview = () => {
                 <AlertIcon />
                 <Box className={cx('grow')}>
                   <AlertDescription>
-                    This mosaic comes from an older snapshot. You can create a
-                    new one for the active snapshot from the settings.
+                    This mosaic comes from an older snapshot. You can create a new one for the active snapshot from the
+                    settings.
                   </AlertDescription>
                 </Box>
                 <CloseButton

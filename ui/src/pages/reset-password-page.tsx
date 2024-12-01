@@ -9,23 +9,9 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  Input,
-  Link as ChakraLink,
-  Heading,
-} from '@chakra-ui/react'
+import { Button, FormControl, FormErrorMessage, Input, Link as ChakraLink, Heading } from '@chakra-ui/react'
 import { Logo } from '@koupr/ui'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -54,10 +40,7 @@ const ResetPasswordPage = () => {
   const [isCompleted, setIsCompleted] = useState(false)
 
   const handleSubmit = useCallback(
-    async (
-      { newPassword }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ newPassword }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       try {
         await AccountAPI.resetPassword({
           newPassword,
@@ -77,24 +60,14 @@ const ResetPasswordPage = () => {
         <Helmet>
           <title>Reset Password</title>
         </Helmet>
-        <div
-          className={cx(
-            'flex',
-            'flex-col',
-            'items-center',
-            'gap-2.5',
-            'w-full',
-          )}
-        >
+        <div className={cx('flex', 'flex-col', 'items-center', 'gap-2.5', 'w-full')}>
           <div className={cx('w-[64px]')}>
             <Logo type="voltaserve" size="md" isGlossy={true} />
           </div>
           <Heading className={cx('text-heading')}>Reset Password</Heading>
           {isCompleted ? (
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
-              <span className={cx('text-center')}>
-                Password successfully changed.
-              </span>
+              <span className={cx('text-center')}>Password successfully changed.</span>
               <ChakraLink as={Link} to="/sign-in">
                 Sign In
               </ChakraLink>
@@ -112,21 +85,10 @@ const ResetPasswordPage = () => {
               >
                 {({ errors, touched, isSubmitting }) => (
                   <Form className={cx('w-full')}>
-                    <div
-                      className={cx(
-                        'flex',
-                        'flex-col',
-                        'items-center',
-                        'gap-1.5',
-                      )}
-                    >
+                    <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
                       <Field name="newPassword">
                         {({ field }: FieldAttributes<FieldProps>) => (
-                          <FormControl
-                            isInvalid={Boolean(
-                              errors.newPassword && touched.newPassword,
-                            )}
-                          >
+                          <FormControl isInvalid={Boolean(errors.newPassword && touched.newPassword)}>
                             <Input
                               {...field}
                               id="newPassword"
@@ -134,19 +96,14 @@ const ResetPasswordPage = () => {
                               type="password"
                               disabled={isSubmitting}
                             />
-                            <FormErrorMessage>
-                              {errors.newPassword}
-                            </FormErrorMessage>
+                            <FormErrorMessage>{errors.newPassword}</FormErrorMessage>
                           </FormControl>
                         )}
                       </Field>
                       <Field name="newPasswordConfirmation">
                         {({ field }: FieldAttributes<FieldProps>) => (
                           <FormControl
-                            isInvalid={Boolean(
-                              errors.newPasswordConfirmation &&
-                                touched.newPasswordConfirmation,
-                            )}
+                            isInvalid={Boolean(errors.newPasswordConfirmation && touched.newPasswordConfirmation)}
                           >
                             <Input
                               {...field}
@@ -155,9 +112,7 @@ const ResetPasswordPage = () => {
                               type="password"
                               disabled={isSubmitting}
                             />
-                            <FormErrorMessage>
-                              {errors.newPasswordConfirmation}
-                            </FormErrorMessage>
+                            <FormErrorMessage>{errors.newPasswordConfirmation}</FormErrorMessage>
                           </FormControl>
                         )}
                       </Field>
@@ -174,9 +129,7 @@ const ResetPasswordPage = () => {
                   </Form>
                 )}
               </Formik>
-              <div
-                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
-              >
+              <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
                 <span>Password already reset?</span>
                 <ChakraLink as={Link} to="/sign-in">
                   Sign In

@@ -18,19 +18,10 @@ export type DrawerOpenNewTabButtonProps = {
   isCollapsed?: boolean
 }
 
-const DrawerOpenNewTabButton = ({
-  file,
-  isCollapsed,
-}: DrawerOpenNewTabButtonProps) => {
+const DrawerOpenNewTabButton = ({ file, isCollapsed }: DrawerOpenNewTabButtonProps) => {
   const label = 'Open file'
-  const download = useMemo(
-    () => file.snapshot?.preview ?? file.snapshot?.original,
-    [file],
-  )
-  const path = useMemo(
-    () => (file.snapshot?.preview ? 'preview' : 'original'),
-    [file],
-  )
+  const download = useMemo(() => file.snapshot?.preview ?? file.snapshot?.original, [file])
+  const path = useMemo(() => (file.snapshot?.preview ? 'preview' : 'original'), [file])
   const url = useMemo(() => {
     if (!download?.extension) {
       return ''

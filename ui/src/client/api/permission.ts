@@ -16,15 +16,11 @@ export const OWNER_PERMISSION = 'owner'
 export type PermissionType = 'viewer' | 'editor' | 'owner' | 'none'
 
 export function gtViewerPermission(permission: PermissionType): boolean {
-  return (
-    getPermissionWeight(permission) > getPermissionWeight(VIEWER_PERMISSION)
-  )
+  return getPermissionWeight(permission) > getPermissionWeight(VIEWER_PERMISSION)
 }
 
 export function gtEditorPermission(permission: PermissionType) {
-  return (
-    getPermissionWeight(permission) > getPermissionWeight(EDITOR_PERMISSION)
-  )
+  return getPermissionWeight(permission) > getPermissionWeight(EDITOR_PERMISSION)
 }
 
 export function gtOwnerPermission(permission: PermissionType) {
@@ -32,33 +28,23 @@ export function gtOwnerPermission(permission: PermissionType) {
 }
 
 export function geViewerPermission(permission: PermissionType): boolean {
-  return (
-    getPermissionWeight(permission) >= getPermissionWeight(VIEWER_PERMISSION)
-  )
+  return getPermissionWeight(permission) >= getPermissionWeight(VIEWER_PERMISSION)
 }
 
 export function geEditorPermission(permission: PermissionType) {
-  return (
-    getPermissionWeight(permission) >= getPermissionWeight(EDITOR_PERMISSION)
-  )
+  return getPermissionWeight(permission) >= getPermissionWeight(EDITOR_PERMISSION)
 }
 
 export function geOwnerPermission(permission: PermissionType) {
-  return (
-    getPermissionWeight(permission) >= getPermissionWeight(OWNER_PERMISSION)
-  )
+  return getPermissionWeight(permission) >= getPermissionWeight(OWNER_PERMISSION)
 }
 
 export function ltViewerPermission(permission: PermissionType): boolean {
-  return (
-    getPermissionWeight(permission) < getPermissionWeight(VIEWER_PERMISSION)
-  )
+  return getPermissionWeight(permission) < getPermissionWeight(VIEWER_PERMISSION)
 }
 
 export function ltEditorPermission(permission: PermissionType) {
-  return (
-    getPermissionWeight(permission) < getPermissionWeight(EDITOR_PERMISSION)
-  )
+  return getPermissionWeight(permission) < getPermissionWeight(EDITOR_PERMISSION)
 }
 
 export function ltOwnerPermission(permission: PermissionType) {
@@ -66,21 +52,15 @@ export function ltOwnerPermission(permission: PermissionType) {
 }
 
 export function leViewerPermission(permission: PermissionType): boolean {
-  return (
-    getPermissionWeight(permission) <= getPermissionWeight(VIEWER_PERMISSION)
-  )
+  return getPermissionWeight(permission) <= getPermissionWeight(VIEWER_PERMISSION)
 }
 
 export function leEditorPermission(permission: PermissionType) {
-  return (
-    getPermissionWeight(permission) <= getPermissionWeight(EDITOR_PERMISSION)
-  )
+  return getPermissionWeight(permission) <= getPermissionWeight(EDITOR_PERMISSION)
 }
 
 export function leOwnerPermission(permission: PermissionType) {
-  return (
-    getPermissionWeight(permission) <= getPermissionWeight(OWNER_PERMISSION)
-  )
+  return getPermissionWeight(permission) <= getPermissionWeight(OWNER_PERMISSION)
 }
 
 export function getPermissionWeight(permission: PermissionType) {

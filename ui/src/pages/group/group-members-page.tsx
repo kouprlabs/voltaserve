@@ -8,12 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useEffect, useState } from 'react'
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button, Avatar } from '@chakra-ui/react'
 import {
   DataTable,
@@ -49,11 +44,7 @@ const GroupMembersPage = () => {
   const dispatch = useAppDispatch()
   const location = useLocation()
   const { id } = useParams()
-  const {
-    data: group,
-    error: groupError,
-    isLoading: groupIsLoading,
-  } = GroupAPI.useGet(id, swrConfig())
+  const { data: group, error: groupError, isLoading: groupIsLoading } = GroupAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -79,8 +70,7 @@ const GroupMembersPage = () => {
   )
   const [userToRemove, setUserToRemove] = useState<IdPUser>()
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
-  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
-    useState<boolean>(false)
+  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState<boolean>(false)
   const { hasPagination } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
@@ -128,14 +118,7 @@ const GroupMembersPage = () => {
                 {
                   title: 'Full name',
                   renderCell: (u) => (
-                    <div
-                      className={cx(
-                        'flex',
-                        'flex-row',
-                        'gap-1.5',
-                        'items-center',
-                      )}
-                    >
+                    <div className={cx('flex', 'flex-row', 'gap-1.5', 'items-center')}>
                       <Avatar
                         name={u.fullName}
                         src={
@@ -145,11 +128,7 @@ const GroupMembersPage = () => {
                               })
                             : undefined
                         }
-                        className={cx(
-                          'border',
-                          'border-gray-300',
-                          'dark:border-gray-700',
-                        )}
+                        className={cx('border', 'border-gray-300', 'dark:border-gray-700')}
                       />
                       <span>{truncateEnd(u.fullName, 50)}</span>
                     </div>
@@ -195,11 +174,7 @@ const GroupMembersPage = () => {
               onClose={() => setIsRemoveMemberModalOpen(false)}
             />
           ) : null}
-          <GroupAddMember
-            open={isAddMembersModalOpen}
-            group={group}
-            onClose={() => setIsAddMembersModalOpen(false)}
-          />
+          <GroupAddMember open={isAddMembersModalOpen} group={group} onClose={() => setIsAddMembersModalOpen(false)} />
         </>
       ) : null}
     </>

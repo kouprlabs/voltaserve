@@ -21,14 +21,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
@@ -45,11 +38,7 @@ type FormValues = {
   fullName: string
 }
 
-const AccountEditFullName = ({
-  open,
-  user,
-  onClose,
-}: AccountEditFullNameProps) => {
+const AccountEditFullName = ({ open, user, onClose }: AccountEditFullNameProps) => {
   const mutate = useAppSelector((state) => state.ui.account.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
@@ -63,10 +52,7 @@ const AccountEditFullName = ({
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { fullName }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ fullName }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         const result = await UserAPI.updateFullName({
@@ -83,11 +69,7 @@ const AccountEditFullName = ({
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Full Name</ModalHeader>
@@ -104,25 +86,15 @@ const AccountEditFullName = ({
               <ModalBody>
                 <Field name="fullName">
                   {({ field }: FieldAttributes<FieldProps>) => (
-                    <FormControl
-                      isInvalid={Boolean(errors.fullName && touched.fullName)}
-                    >
-                      <Input
-                        ref={inputRef}
-                        {...field}
-                        placeholder="Full name"
-                        disabled={isSubmitting}
-                        autoFocus
-                      />
+                    <FormControl isInvalid={Boolean(errors.fullName && touched.fullName)}>
+                      <Input ref={inputRef} {...field} placeholder="Full name" disabled={isSubmitting} autoFocus />
                       <FormErrorMessage>{errors.fullName}</FormErrorMessage>
                     </FormControl>
                   )}
                 </Field>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -132,12 +104,7 @@ const AccountEditFullName = ({
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="blue"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="blue" isLoading={isSubmitting}>
                     Save
                   </Button>
                 </div>

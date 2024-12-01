@@ -21,14 +21,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
@@ -60,10 +53,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { userId }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ userId }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         await GroupAPI.addMember(group.id, {
@@ -81,11 +71,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Add Member</ModalHeader>
@@ -103,9 +89,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="userId">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.userId && touched.userId)}
-                      >
+                      <FormControl isInvalid={Boolean(errors.userId && touched.userId)}>
                         <UserSelector
                           value={activeUser}
                           organizationId={group.organization.id}
@@ -123,9 +107,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"

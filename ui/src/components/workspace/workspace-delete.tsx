@@ -22,14 +22,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
@@ -45,18 +38,12 @@ type FormValues = {
   name: string
 }
 
-const WorkspaceDelete = ({
-  open,
-  workspace,
-  onClose,
-}: WorkspaceDeleteProps) => {
+const WorkspaceDelete = ({ open, workspace, onClose }: WorkspaceDeleteProps) => {
   const navigate = useNavigate()
   const mutate = useAppSelector((state) => state.ui.workspace.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
-    name: Yup.string()
-      .required('Confirmation is required')
-      .oneOf([workspace.name], 'Invalid workspace name'),
+    name: Yup.string().required('Confirmation is required').oneOf([workspace.name], 'Invalid workspace name'),
   })
 
   useEffect(() => {
@@ -80,11 +67,7 @@ const WorkspaceDelete = ({
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Delete Workspace</ModalHeader>
@@ -105,9 +88,7 @@ const WorkspaceDelete = ({
                   </span>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.name && touched.name)}
-                      >
+                      <FormControl isInvalid={Boolean(errors.name && touched.name)}>
                         <Input {...field} disabled={isSubmitting} />
                         <FormErrorMessage>{errors.name}</FormErrorMessage>
                       </FormControl>
@@ -116,9 +97,7 @@ const WorkspaceDelete = ({
                 </div>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -128,12 +107,7 @@ const WorkspaceDelete = ({
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="red"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="red" isLoading={isSubmitting}>
                     Delete Permanently
                   </Button>
                 </div>

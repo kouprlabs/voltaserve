@@ -22,11 +22,7 @@ import {
 import { IconClose, IconSchedule, IconCheckCircle, IconError } from '@koupr/ui'
 import cx from 'classnames'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
-import {
-  Upload,
-  UploadDecorator,
-  uploadRemoved,
-} from '@/store/entities/uploads'
+import { Upload, UploadDecorator, uploadRemoved } from '@/store/entities/uploads'
 import { useAppDispatch } from '@/store/hook'
 
 export type UploadsItemProps = {
@@ -51,24 +47,15 @@ const UploadItem = ({ upload: uploadProp }: UploadsItemProps) => {
                 size="20px"
               />
             ) : null}
-            {upload.isPending ? (
-              <IconSchedule className={cx('shrink-0', 'text-gray-500')} />
-            ) : null}
-            {upload.isSucceeded ? (
-              <IconCheckCircle
-                className={cx('shrink-0', 'text-green-500')}
-                filled={true}
-              />
-            ) : null}
+            {upload.isPending ? <IconSchedule className={cx('shrink-0', 'text-gray-500')} /> : null}
+            {upload.isSucceeded ? <IconCheckCircle className={cx('shrink-0', 'text-green-500')} filled={true} /> : null}
             {upload.isFailed ? (
               <div className={cx('shrink-0', 'text-red-500')}>
                 <IconError filled={true} />
               </div>
             ) : null}
             <div className={cx('flex', 'flex-col', 'grow')}>
-              <span className={cx('font-semibold')}>
-                {truncateMiddle(upload.blob.name, 40)}
-              </span>
+              <span className={cx('font-semibold')}>{truncateMiddle(upload.blob.name, 40)}</span>
             </div>
             <IconButton
               icon={<IconClose />}
@@ -88,9 +75,7 @@ const UploadItem = ({ upload: uploadProp }: UploadsItemProps) => {
               <AccordionItem className={cx('border-none')}>
                 <AccordionButton className={cx('p-0.5')}>
                   <div className={cx('flex', 'flex-row', 'w-full')}>
-                    <span className={cx('text-left', 'grow')}>
-                      Upload failed, click to show error
-                    </span>
+                    <span className={cx('text-left', 'grow')}>Upload failed, click to show error</span>
                     <AccordionIcon />
                   </div>
                 </AccordionButton>

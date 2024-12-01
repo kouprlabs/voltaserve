@@ -8,13 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useEffect, useState } from 'react'
-import {
-  Pagination,
-  SectionError,
-  SectionPlaceholder,
-  SectionSpinner,
-  usePageMonitor,
-} from '@koupr/ui'
+import { Pagination, SectionError, SectionPlaceholder, SectionSpinner, usePageMonitor } from '@koupr/ui'
 import cx from 'classnames'
 import TaskAPI, { SortOrder } from '@/client/api/task'
 import { errorToString } from '@/client/error'
@@ -51,25 +45,8 @@ const TasksList = () => {
       {listError ? <SectionError text={errorToString(listError)} /> : null}
       {listIsEmpty ? <SectionPlaceholder text="There are no tasks." /> : null}
       {listIsReady ? (
-        <div
-          className={cx(
-            'flex',
-            'flex-col',
-            'gap-1.5',
-            'justify-between',
-            'items-center',
-            'h-full',
-          )}
-        >
-          <div
-            className={cx(
-              'flex',
-              'flex-col',
-              'gap-1.5',
-              'w-full',
-              'overflow-y-auto',
-            )}
-          >
+        <div className={cx('flex', 'flex-col', 'gap-1.5', 'justify-between', 'items-center', 'h-full')}>
+          <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full', 'overflow-y-auto')}>
             {list.data.map((task) => (
               <TaskDrawerItem key={task.id} task={task} />
             ))}

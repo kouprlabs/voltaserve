@@ -91,10 +91,7 @@ export default class InsightsAPI {
     })
   }
 
-  static useGetInfo(
-    id: string | null | undefined,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useGetInfo(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/insights/${id}/info`
     return useSWR<Info>(
       id ? url : null,
@@ -117,18 +114,10 @@ export default class InsightsAPI {
 
   static useGetLanguages(swrOptions?: SWRConfiguration) {
     const url = `/insights/languages`
-    return useSWR<Language[]>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<Language[]>,
-      swrOptions,
-    )
+    return useSWR<Language[]>(url, () => apiFetcher({ url, method: 'GET' }) as Promise<Language[]>, swrOptions)
   }
 
-  static useListEntities(
-    id: string | null | undefined,
-    options?: ListEntitiesOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useListEntities(id: string | null | undefined, options?: ListEntitiesOptions, swrOptions?: SWRConfiguration) {
     const url = `/insights/${id}/entities?${this.paramsFromListOptions(options)}`
     return useSWR<EntityList>(
       id ? url : null,

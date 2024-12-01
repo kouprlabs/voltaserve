@@ -19,9 +19,7 @@ export type ViewerPDFProps = {
 const ViewerPDF = ({ file }: ViewerPDFProps) => {
   const url = useMemo(() => {
     if (file.snapshot?.preview && file.snapshot?.preview.extension) {
-      return `/proxy/api/v3/files/${file.id}/preview${
-        file.snapshot?.preview.extension
-      }?${new URLSearchParams({
+      return `/proxy/api/v3/files/${file.id}/preview${file.snapshot?.preview.extension}?${new URLSearchParams({
         access_token: getAccessTokenOrRedirect(),
       })}`
     }
@@ -31,9 +29,7 @@ const ViewerPDF = ({ file }: ViewerPDFProps) => {
     return null
   }
 
-  return (
-    <iframe className={cx('w-full', 'h-full')} src={url} title={file.name} />
-  )
+  return <iframe className={cx('w-full', 'h-full')} src={url} title={file.name} />
 }
 
 export default ViewerPDF

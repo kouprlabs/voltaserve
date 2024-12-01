@@ -9,11 +9,7 @@
 // AGPL-3.0-only in the root of this repository.
 import { File } from '@/client/api/file'
 import store from '@/store/configure-store'
-import {
-  selectionAdded,
-  selectionRemoved,
-  selectionUpdated,
-} from '@/store/ui/files'
+import { selectionAdded, selectionRemoved, selectionUpdated } from '@/store/ui/files'
 
 export function performRangeSelect(file: File) {
   const ui = store.getState().ui.files

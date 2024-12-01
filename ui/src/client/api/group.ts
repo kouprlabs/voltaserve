@@ -95,20 +95,12 @@ export default class GroupAPI {
 
   static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/groups/${id}`
-    return useSWR<Group>(
-      id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<Group>,
-      swrOptions,
-    )
+    return useSWR<Group>(id ? url : null, () => apiFetcher({ url, method: 'GET' }) as Promise<Group>, swrOptions)
   }
 
   static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/groups?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
-      swrOptions,
-    )
+    return useSWR<List>(url, () => apiFetcher({ url, method: 'GET' }) as Promise<List>, swrOptions)
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {

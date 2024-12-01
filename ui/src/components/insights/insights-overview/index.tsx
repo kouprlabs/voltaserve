@@ -30,11 +30,7 @@ import InsightsOverviewEntities from './insights-overview-entities'
 import InsightsOverviewSettings from './insights-overview-settings'
 
 const InsightsOverview = () => {
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
+  const id = useAppSelector((state) => (state.ui.files.selection.length > 0 ? state.ui.files.selection[0] : undefined))
   const [isWarningVisible, setIsWarningVisible] = useState(true)
   const { data: info } = InsightsAPI.useGetInfo(id)
 
@@ -51,8 +47,8 @@ const InsightsOverview = () => {
               <AlertIcon />
               <Box className={cx('grow')}>
                 <AlertDescription>
-                  These insights come from an older snapshot. You can collect
-                  new ones for the active snapshot from the settings.
+                  These insights come from an older snapshot. You can collect new ones for the active snapshot from the
+                  settings.
                 </AlertDescription>
               </Box>
               <CloseButton

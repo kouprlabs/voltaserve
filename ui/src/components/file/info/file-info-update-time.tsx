@@ -17,11 +17,7 @@ export type FileInfoUpdateTimeProps = {
 }
 
 const FileInfoUpdateTime = ({ file }: FileInfoUpdateTimeProps) => {
-  if (
-    !file.updateTime ||
-    (file.updateTime &&
-      file.createTime.includes(file.updateTime.replaceAll('Z', '')))
-  ) {
+  if (!file.updateTime || (file.updateTime && file.createTime.includes(file.updateTime.replaceAll('Z', '')))) {
     return null
   }
   return (

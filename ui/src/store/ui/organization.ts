@@ -21,10 +21,7 @@ const slice = createSlice({
   name: 'organization',
   initialState,
   reducers: {
-    mutateUpdated: (
-      state,
-      action: PayloadAction<KeyedMutator<Organization>>,
-    ) => {
+    mutateUpdated: (state, action: PayloadAction<KeyedMutator<Organization>>) => {
       state.mutate = action.payload
     },
   },

@@ -21,14 +21,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
@@ -45,10 +38,7 @@ type FormValues = {
   newPassword: string
 }
 
-const AccountChangePassword = ({
-  open,
-  onClose,
-}: AccountChangePasswordProps) => {
+const AccountChangePassword = ({ open, onClose }: AccountChangePasswordProps) => {
   const mutate = useAppSelector((state) => state.ui.account.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const initialValues: FormValues = { currentPassword: '', newPassword: '' }
@@ -62,10 +52,7 @@ const AccountChangePassword = ({
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { currentPassword, newPassword }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ currentPassword, newPassword }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         const result = await UserAPI.updatePassword({
@@ -83,11 +70,7 @@ const AccountChangePassword = ({
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Change Password</ModalHeader>
@@ -104,48 +87,24 @@ const AccountChangePassword = ({
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="currentPassword">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(
-                          errors.currentPassword && touched.currentPassword,
-                        )}
-                      >
-                        <Input
-                          {...field}
-                          type="password"
-                          placeholder="Current password"
-                          disabled={isSubmitting}
-                        />
-                        <FormErrorMessage>
-                          {errors.currentPassword}
-                        </FormErrorMessage>
+                      <FormControl isInvalid={Boolean(errors.currentPassword && touched.currentPassword)}>
+                        <Input {...field} type="password" placeholder="Current password" disabled={isSubmitting} />
+                        <FormErrorMessage>{errors.currentPassword}</FormErrorMessage>
                       </FormControl>
                     )}
                   </Field>
                   <Field name="newPassword">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(
-                          errors.newPassword && touched.newPassword,
-                        )}
-                      >
-                        <Input
-                          {...field}
-                          type="password"
-                          placeholder="New password"
-                          disabled={isSubmitting}
-                        />
-                        <FormErrorMessage>
-                          {errors.newPassword}
-                        </FormErrorMessage>
+                      <FormControl isInvalid={Boolean(errors.newPassword && touched.newPassword)}>
+                        <Input {...field} type="password" placeholder="New password" disabled={isSubmitting} />
+                        <FormErrorMessage>{errors.newPassword}</FormErrorMessage>
                       </FormControl>
                     )}
                   </Field>
                 </div>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -155,12 +114,7 @@ const AccountChangePassword = ({
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="blue"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="blue" isLoading={isSubmitting}>
                     Save
                   </Button>
                 </div>

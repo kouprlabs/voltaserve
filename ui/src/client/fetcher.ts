@@ -55,9 +55,7 @@ export async function fetcher<T>({
     headers['Content-Type'] = 'application/json'
   }
   if (authenticate) {
-    headers['Authorization'] = `Bearer ${
-      redirect ? getAccessTokenOrRedirect() : getAccessToken()
-    }`
+    headers['Authorization'] = `Bearer ${redirect ? getAccessTokenOrRedirect() : getAccessToken()}`
   }
   const response = await baseFetcher(
     url,
@@ -79,12 +77,7 @@ export async function fetcher<T>({
   }
 }
 
-export async function baseFetcher(
-  url: string,
-  init: RequestInit,
-  redirect = true,
-  showError = true,
-) {
+export async function baseFetcher(url: string, init: RequestInit, redirect = true, showError = true) {
   try {
     const response = await fetch(url, init)
     return handleResponse(response, redirect, showError)
@@ -97,11 +90,7 @@ export async function baseFetcher(
   }
 }
 
-async function handleResponse(
-  response: Response,
-  redirect = true,
-  showError = true,
-) {
+async function handleResponse(response: Response, redirect = true, showError = true) {
   if (response.status <= 299) {
     return response
   } else {

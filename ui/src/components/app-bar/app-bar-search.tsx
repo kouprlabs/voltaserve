@@ -9,30 +9,12 @@
 // AGPL-3.0-only in the root of this repository.
 import { ChangeEvent, KeyboardEvent, useEffect, useMemo, useState } from 'react'
 import { useCallback } from 'react'
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom'
-import {
-  Button,
-  Icon,
-  IconButton,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
-} from '@chakra-ui/react'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Button, Icon, IconButton, Input, InputGroup, InputLeftElement, InputRightElement } from '@chakra-ui/react'
 import { IconClose, IconSearch, IconTune, NotificationBadge } from '@koupr/ui'
 import cx from 'classnames'
 import { Query as FileQuery } from '@/client/api/file'
-import {
-  decodeFileQuery,
-  decodeQuery,
-  encodeFileQuery,
-  encodeQuery,
-} from '@/lib/helpers/query'
+import { decodeFileQuery, decodeQuery, encodeFileQuery, encodeQuery } from '@/lib/helpers/query'
 import { useAppDispatch } from '@/store/hook'
 import { modalDidOpen as searchFilterModalDidOpen } from '@/store/ui/search-filter'
 
@@ -42,63 +24,42 @@ const AppBarSearch = () => {
   const location = useLocation()
   const { id: workspaceId, fileId } = useParams()
   const [searchParams] = useSearchParams()
-  const isWorkspaces = useMemo(
-    () => location.pathname === '/workspace',
-    [location],
-  )
+  const isWorkspaces = useMemo(() => location.pathname === '/workspace', [location])
   const isFiles = useMemo(
-    () =>
-      location.pathname.includes('/workspace/') &&
-      location.pathname.includes('/file/'),
+    () => location.pathname.includes('/workspace/') && location.pathname.includes('/file/'),
     [location],
   )
   const isGroups = useMemo(() => location.pathname === '/group', [location])
-  const isOrgs = useMemo(
-    () => location.pathname === '/organization',
-    [location],
-  )
+  const isOrgs = useMemo(() => location.pathname === '/organization', [location])
   const isOrgMembers = useMemo(
-    () =>
-      location.pathname.includes('/organization/') &&
-      location.pathname.includes('/member'),
+    () => location.pathname.includes('/organization/') && location.pathname.includes('/member'),
     [location],
   )
   const isGroupMembers = useMemo(
-    () =>
-      location.pathname.includes('/group/') &&
-      location.pathname.includes('/member'),
+    () => location.pathname.includes('/group/') && location.pathname.includes('/member'),
     [location],
   )
   const isConsoleUsers = useMemo(
-    () =>
-      location.pathname.includes('/console/') &&
-      location.pathname.includes('/users'),
+    () => location.pathname.includes('/console/') && location.pathname.includes('/users'),
     [location],
   )
   const isConsoleGroups = useMemo(
-    () =>
-      location.pathname.includes('/console/') &&
-      location.pathname.includes('/groups'),
+    () => location.pathname.includes('/console/') && location.pathname.includes('/groups'),
     [location],
   )
   const isConsoleWorkspaces = useMemo(
-    () =>
-      location.pathname.includes('/console/') &&
-      location.pathname.includes('/workspaces'),
+    () => location.pathname.includes('/console/') && location.pathname.includes('/workspaces'),
     [location],
   )
   const isConsoleOrganizations = useMemo(
-    () =>
-      location.pathname.includes('/console/') &&
-      location.pathname.includes('/organizations'),
+    () => location.pathname.includes('/console/') && location.pathname.includes('/organizations'),
     [location],
   )
   const query: string | FileQuery | undefined = isFiles
     ? decodeFileQuery(searchParams.get('q') as string)
     : decodeQuery(searchParams.get('q') as string)
   const parsedQuery = useMemo(
-    () =>
-      (isFiles && query ? (query as FileQuery).text : (query as string)) || '',
+    () => (isFiles && query ? (query as FileQuery).text : (query as string)) || '',
     [isFiles, query],
   )
   const isAvailable = useMemo(
@@ -209,9 +170,7 @@ const AppBarSearch = () => {
         }
       } else if (isOrgMembers) {
         if (value) {
-          navigate(
-            `/organization/${workspaceId}/member?q=${encodeQuery(value)}`,
-          )
+          navigate(`/organization/${workspaceId}/member?q=${encodeQuery(value)}`)
         } else {
           navigate(`/organization/${workspaceId}/member`)
         }
@@ -342,11 +301,7 @@ const AppBarSearch = () => {
         </NotificationBadge>
       ) : null}
       {buffer || (isFocused && buffer) ? (
-        <Button
-          leftIcon={<IconSearch />}
-          onClick={() => handleSearch(buffer)}
-          isDisabled={!buffer}
-        >
+        <Button leftIcon={<IconSearch />} onClick={() => handleSearch(buffer)} isDisabled={!buffer}>
           Search
         </Button>
       ) : null}

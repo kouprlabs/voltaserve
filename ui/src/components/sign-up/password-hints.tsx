@@ -40,33 +40,25 @@ function hasMinLength(value: string, minimum: number): boolean {
 
 function hasMinLowerCase(value: string, minimum: number): boolean {
   const lowerCaseCount = Array.from(value).filter(
-    (character) =>
-      character === character.toLowerCase() &&
-      character !== character.toUpperCase(),
+    (character) => character === character.toLowerCase() && character !== character.toUpperCase(),
   ).length
   return lowerCaseCount >= minimum
 }
 
 function hasMinUpperCase(value: string, minimum: number): boolean {
   const upperCaseCount = Array.from(value).filter(
-    (character) =>
-      character === character.toUpperCase() &&
-      character !== character.toLowerCase(),
+    (character) => character === character.toUpperCase() && character !== character.toLowerCase(),
   ).length
   return upperCaseCount >= minimum
 }
 
 function hasMinNumbers(value: string, minimum: number): boolean {
-  const numbersCount = Array.from(value).filter(
-    (character) => !isNaN(Number(character)),
-  ).length
+  const numbersCount = Array.from(value).filter((character) => !isNaN(Number(character))).length
   return numbersCount >= minimum
 }
 
 function hasMinSymbols(value: string, minimum: number): boolean {
-  const symbolsCount = Array.from(value).filter(
-    (character) => !character.match(/[a-zA-Z0-9\s]/),
-  ).length
+  const symbolsCount = Array.from(value).filter((character) => !character.match(/[a-zA-Z0-9\s]/)).length
   return symbolsCount >= minimum
 }
 
@@ -75,10 +67,7 @@ export type PasswordRequirementProps = {
   isFulfilled?: boolean
 }
 
-export const PasswordRequirement = ({
-  text,
-  isFulfilled,
-}: PasswordRequirementProps) => {
+export const PasswordRequirement = ({ text, isFulfilled }: PasswordRequirementProps) => {
   return (
     <div
       className={cx(

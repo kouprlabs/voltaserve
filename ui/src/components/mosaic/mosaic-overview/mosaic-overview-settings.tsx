@@ -13,11 +13,7 @@ import { IconBolt, IconDelete, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
-import {
-  geEditorPermission,
-  geOwnerPermission,
-  NONE_PERMISSION,
-} from '@/client/api/permission'
+import { geEditorPermission, geOwnerPermission, NONE_PERMISSION } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
@@ -26,11 +22,7 @@ import { modalDidClose } from '@/store/ui/mosaic'
 
 const MosaicOverviewSettings = () => {
   const dispatch = useAppDispatch()
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
+  const id = useAppSelector((state) => (state.ui.files.selection.length > 0 ? state.ui.files.selection[0] : undefined))
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
   const {
@@ -39,12 +31,7 @@ const MosaicOverviewSettings = () => {
     isLoading: infoIsLoading,
     mutate: mutateInfo,
   } = MosaicAPI.useGetInfo(id, swrConfig())
-  const {
-    data: file,
-    error: fileError,
-    isLoading: fileIsLoading,
-    mutate: mutateFile,
-  } = FileAPI.useGet(id, swrConfig())
+  const { data: file, error: fileError, isLoading: fileIsLoading, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
   const fileIsReady = file && !fileError
   const infoIsReady = info && !infoError
 
@@ -80,9 +67,7 @@ const MosaicOverviewSettings = () => {
 
   const canDelete = useMemo(() => {
     return (
-      !file?.snapshot?.task?.isPending &&
-      !info?.isOutdated &&
-      geOwnerPermission(file?.permission ?? NONE_PERMISSION)
+      !file?.snapshot?.task?.isPending && !info?.isOutdated && geOwnerPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [info, file])
 
@@ -101,11 +86,7 @@ const MosaicOverviewSettings = () => {
                   <Text>Create a mosaic for the active snapshot.</Text>
                 </CardBody>
                 <CardFooter>
-                  <Button
-                    leftIcon={<IconBolt />}
-                    isDisabled={!canCreate}
-                    onClick={handleUpdate}
-                  >
+                  <Button leftIcon={<IconBolt />} isDisabled={!canCreate} onClick={handleUpdate}>
                     Create Mosaic
                   </Button>
                 </CardFooter>
@@ -115,12 +96,7 @@ const MosaicOverviewSettings = () => {
                   <Text>Delete mosaic from the active snapshot.</Text>
                 </CardBody>
                 <CardFooter>
-                  <Button
-                    colorScheme="red"
-                    leftIcon={<IconDelete />}
-                    isDisabled={!canDelete}
-                    onClick={handleDelete}
-                  >
+                  <Button colorScheme="red" leftIcon={<IconDelete />} isDisabled={!canDelete} onClick={handleDelete}>
                     Delete Mosaic
                   </Button>
                 </CardFooter>

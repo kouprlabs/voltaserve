@@ -22,14 +22,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
@@ -50,9 +43,7 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
   const mutate = useAppSelector((state) => state.ui.groups.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
-    name: Yup.string()
-      .required('Confirmation is required')
-      .oneOf([group.name], 'Invalid group name'),
+    name: Yup.string().required('Confirmation is required').oneOf([group.name], 'Invalid group name'),
   })
 
   useEffect(() => {
@@ -75,11 +66,7 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Delete Group</ModalHeader>
@@ -100,9 +87,7 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
                   </span>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.name && touched.name)}
-                      >
+                      <FormControl isInvalid={Boolean(errors.name && touched.name)}>
                         <Input {...field} disabled={isSubmitting} />
                         <FormErrorMessage>{errors.name}</FormErrorMessage>
                       </FormControl>
@@ -111,9 +96,7 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"

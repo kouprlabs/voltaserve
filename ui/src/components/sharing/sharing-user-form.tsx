@@ -10,13 +10,7 @@
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
-import {
-  IconCheck,
-  IconPersonAdd,
-  SectionError,
-  SectionPlaceholder,
-  Select,
-} from '@koupr/ui'
+import { IconCheck, IconPersonAdd, SectionError, SectionPlaceholder, Select } from '@koupr/ui'
 import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
@@ -61,14 +55,10 @@ const SharingUserForm = () => {
     swrConfig(),
   )
   const isSingleSelection = selection.length === 1
-  const { mutate: mutatePermissions } = FileAPI.useGetGroupPermissions(
-    isSingleSelection ? selection[0] : undefined,
-  )
+  const { mutate: mutatePermissions } = FileAPI.useGetGroupPermissions(isSingleSelection ? selection[0] : undefined)
   const workspaceIsReady = workspace && !workspaceError
-  const userListIsEmpty =
-    userList && !userListError && userList.totalElements === 0
-  const userListIsReady =
-    userList && !userListError && userList.totalElements > 0
+  const userListIsEmpty = userList && !userListError && userList.totalElements === 0
+  const userListIsReady = userList && !userListError && userList.totalElements > 0
 
   const handleGrantPermission = useCallback(async () => {
     if (!user || !permission) {
@@ -93,32 +83,20 @@ const SharingUserForm = () => {
     } catch {
       setIsGranting(false)
     }
-  }, [
-    selection,
-    user,
-    permission,
-    isSingleSelection,
-    dispatch,
-    mutateFiles,
-    mutatePermissions,
-  ])
+  }, [selection, user, permission, isSingleSelection, dispatch, mutateFiles, mutatePermissions])
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {workspaceIsLoading || userListIsLoading ? <SharingFormSkeleton /> : null}
       {workspaceError || userListError ? (
-        <SectionError
-          text={errorToString(workspaceError || userListError)}
-          height="auto"
-        />
+        <SectionError text={errorToString(workspaceError || userListError)} height="auto" />
       ) : null}
       {workspaceIsReady && userListIsEmpty ? (
         <SectionPlaceholder
           text="This organization has no members."
           content={
             <>
-              {workspace &&
-              geEditorPermission(workspace.organization.permission) ? (
+              {workspace && geEditorPermission(workspace.organization.permission) ? (
                 <Button
                   as={Link}
                   to={`/organization/${workspace.organization.id}/member?invite=true`}

@@ -8,12 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { ReactElement, useState } from 'react'
-import {
-  useLocation,
-  useNavigate,
-  useSearchParams,
-  Link,
-} from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { Badge, Heading, Avatar, Link as ChakraLink } from '@chakra-ui/react'
 import {
   DataTable,
@@ -50,12 +45,10 @@ const ConsolePanelUsers = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
-  const [isConfirmationDestructive, setIsConfirmationDestructive] =
-    useState(false)
+  const [isConfirmationDestructive, setIsConfirmationDestructive] = useState(false)
   const [confirmationHeader, setConfirmationHeader] = useState<ReactElement>()
   const [confirmationBody, setConfirmationBody] = useState<ReactElement>()
-  const [confirmationRequest, setConfirmationRequest] =
-    useState<ConsoleConfirmationModalRequest>()
+  const [confirmationRequest, setConfirmationRequest] = useState<ConsoleConfirmationModalRequest>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -92,32 +85,13 @@ const ConsolePanelUsers = () => {
               {
                 title: 'Full name',
                 renderCell: (user) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'gap-1.5',
-                      'items-center',
-                    )}
-                  >
+                  <div className={cx('flex', 'flex-row', 'gap-1.5', 'items-center')}>
                     <Avatar
                       name={user.fullName}
-                      src={
-                        user.picture
-                          ? getPictureUrlById(user.id, user.picture)
-                          : undefined
-                      }
-                      className={cx(
-                        'border',
-                        'border-gray-300',
-                        'dark:border-gray-700',
-                      )}
+                      src={user.picture ? getPictureUrlById(user.id, user.picture) : undefined}
+                      className={cx('border', 'border-gray-300', 'dark:border-gray-700')}
                     />
-                    <ChakraLink
-                      as={Link}
-                      to={`/console/users/${user.id}`}
-                      className={cx('no-underline')}
-                    >
+                    <ChakraLink as={Link} to={`/console/users/${user.id}`} className={cx('no-underline')}>
                       <Text noOfLines={1}>{user.fullName}</Text>
                     </ChakraLink>
                   </div>
@@ -137,19 +111,11 @@ const ConsolePanelUsers = () => {
               },
               {
                 title: 'Created',
-                renderCell: (user) => (
-                  <RelativeDate date={new Date(user.createTime)} />
-                ),
+                renderCell: (user) => <RelativeDate date={new Date(user.createTime)} />,
               },
               {
                 title: 'Updated',
-                renderCell: (user) => (
-                  <>
-                    {user.updateTime ? (
-                      <RelativeDate date={new Date(user.updateTime)} />
-                    ) : null}
-                  </>
-                ),
+                renderCell: (user) => <>{user.updateTime ? <RelativeDate date={new Date(user.updateTime)} /> : null}</>,
               },
               {
                 title: 'Props',
@@ -169,9 +135,7 @@ const ConsolePanelUsers = () => {
                         Inactive
                       </Badge>
                     )}
-                    {getUserId() === user.id ? (
-                      <Badge colorScheme="red">It's you</Badge>
-                    ) : null}
+                    {getUserId() === user.id ? <Badge colorScheme="red">It's you</Badge> : null}
                   </div>
                 ),
               },
@@ -181,17 +145,12 @@ const ConsolePanelUsers = () => {
                 label: 'Suspend',
                 icon: <IconFrontHand />,
                 isDestructive: true,
-                isHiddenFn: (user) =>
-                  getUserId() === user.id || user.isAdmin || !user.isActive,
+                isHiddenFn: (user) => getUserId() === user.id || user.isAdmin || !user.isActive,
                 onClick: async (user) => {
                   setConfirmationHeader(<>Suspend User</>)
                   setConfirmationBody(
                     <>
-                      Are you sure you want to suspend{' '}
-                      <span className={cx('font-bold')}>
-                        {userToString(user)}
-                      </span>
-                      ?
+                      Are you sure you want to suspend <span className={cx('font-bold')}>{userToString(user)}</span>?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
@@ -210,11 +169,7 @@ const ConsolePanelUsers = () => {
                   setConfirmationHeader(<>Unsuspend User</>)
                   setConfirmationBody(
                     <>
-                      Are you sure you want to unsuspend{' '}
-                      <span className={cx('font-bold')}>
-                        {userToString(user)}
-                      </span>
-                      ?
+                      Are you sure you want to unsuspend <span className={cx('font-bold')}>{userToString(user)}</span>?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
@@ -233,11 +188,7 @@ const ConsolePanelUsers = () => {
                   setConfirmationHeader(<>Make Admin</>)
                   setConfirmationBody(
                     <>
-                      Are you sure you want to make{' '}
-                      <span className={cx('font-bold')}>
-                        {userToString(user)}
-                      </span>{' '}
-                      admin?
+                      Are you sure you want to make <span className={cx('font-bold')}>{userToString(user)}</span> admin?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
@@ -257,11 +208,7 @@ const ConsolePanelUsers = () => {
                   setConfirmationHeader(<>Demote Admin</>)
                   setConfirmationBody(
                     <>
-                      Are you sure you want to demote{' '}
-                      <span className={cx('font-bold')}>
-                        {userToString(user)}
-                      </span>
-                      ?
+                      Are you sure you want to demote <span className={cx('font-bold')}>{userToString(user)}</span>?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {

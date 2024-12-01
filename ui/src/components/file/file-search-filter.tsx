@@ -23,14 +23,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { Select } from '@koupr/ui'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
@@ -64,9 +57,7 @@ const FileSearchFilters = () => {
   const { id: workspaceId, fileId } = useParams()
   const [searchParams] = useSearchParams()
   const query = decodeFileQuery(searchParams.get('q') as string)
-  const isModalOpen = useAppSelector(
-    (state) => state.ui.searchFilter.isModalOpen,
-  )
+  const isModalOpen = useAppSelector((state) => state.ui.searchFilter.isModalOpen)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const formSchema = Yup.object().shape({
     type: Yup.string(),
@@ -78,13 +69,7 @@ const FileSearchFilters = () => {
 
   const handleSubmit = useCallback(
     async (
-      {
-        type,
-        createTimeBefore,
-        createTimeAfter,
-        updateTimeBefore,
-        updateTimeAfter,
-      }: FormValues,
+      { type, createTimeBefore, createTimeAfter, updateTimeBefore, updateTimeAfter }: FormValues,
       { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
@@ -92,18 +77,10 @@ const FileSearchFilters = () => {
         const encodedQuery = encodeFileQuery({
           text: query?.text || '',
           type: type || undefined,
-          createTimeBefore: createTimeBefore
-            ? new Date(createTimeBefore).getTime()
-            : undefined,
-          createTimeAfter: createTimeAfter
-            ? new Date(createTimeAfter).getTime()
-            : undefined,
-          updateTimeBefore: updateTimeBefore
-            ? new Date(updateTimeBefore).getTime()
-            : undefined,
-          updateTimeAfter: updateTimeAfter
-            ? new Date(updateTimeAfter).getTime()
-            : undefined,
+          createTimeBefore: createTimeBefore ? new Date(createTimeBefore).getTime() : undefined,
+          createTimeAfter: createTimeAfter ? new Date(createTimeAfter).getTime() : undefined,
+          updateTimeBefore: updateTimeBefore ? new Date(updateTimeBefore).getTime() : undefined,
+          updateTimeAfter: updateTimeAfter ? new Date(updateTimeAfter).getTime() : undefined,
         })
         navigate(`/workspace/${workspaceId}/file/${fileId}?q=${encodedQuery}`)
         await mutateList?.()
@@ -127,12 +104,7 @@ const FileSearchFilters = () => {
   }, [dispatch])
 
   return (
-    <Modal
-      size="xl"
-      isOpen={isModalOpen}
-      onClose={handleClose}
-      closeOnOverlayClick={false}
-    >
+    <Modal size="xl" isOpen={isModalOpen} onClose={handleClose} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Search Filter</ModalHeader>
@@ -168,13 +140,7 @@ const FileSearchFilters = () => {
                     <FormLabel>Type</FormLabel>
                     <Select<FileTypeOption, false>
                       options={typeOptions}
-                      defaultValue={
-                        query?.type
-                          ? typeOptions.find(
-                              (option) => option.value === query.type,
-                            )
-                          : undefined
-                      }
+                      defaultValue={query?.type ? typeOptions.find((option) => option.value === query.type) : undefined}
                       selectedOptionStyle="check"
                       isDisabled={isSubmitting}
                       onChange={async (newValue) => {
@@ -189,20 +155,12 @@ const FileSearchFilters = () => {
                     <div className={cx('flex', 'items-center', 'gap-1.5')}>
                       <Field name="createTimeAfter">
                         {({ field }: FieldAttributes<FieldProps>) => (
-                          <Input
-                            {...field}
-                            type="datetime-local"
-                            disabled={isSubmitting}
-                          />
+                          <Input {...field} type="datetime-local" disabled={isSubmitting} />
                         )}
                       </Field>
                       <Field name="createTimeBefore">
                         {({ field }: FieldAttributes<FieldProps>) => (
-                          <Input
-                            {...field}
-                            type="datetime-local"
-                            disabled={isSubmitting}
-                          />
+                          <Input {...field} type="datetime-local" disabled={isSubmitting} />
                         )}
                       </Field>
                     </div>
@@ -212,20 +170,12 @@ const FileSearchFilters = () => {
                     <div className={cx('flex', 'items-center', 'gap-1.5')}>
                       <Field name="updateTimeAfter">
                         {({ field }: FieldAttributes<FieldProps>) => (
-                          <Input
-                            {...field}
-                            type="datetime-local"
-                            disabled={isSubmitting}
-                          />
+                          <Input {...field} type="datetime-local" disabled={isSubmitting} />
                         )}
                       </Field>
                       <Field name="updateTimeBefore">
                         {({ field }: FieldAttributes<FieldProps>) => (
-                          <Input
-                            {...field}
-                            type="datetime-local"
-                            disabled={isSubmitting}
-                          />
+                          <Input {...field} type="datetime-local" disabled={isSubmitting} />
                         )}
                       </Field>
                     </div>
@@ -233,15 +183,8 @@ const FileSearchFilters = () => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
-                  <Button
-                    type="button"
-                    variant="outline"
-                    colorScheme="blue"
-                    onClick={handleClose}
-                  >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+                  <Button type="button" variant="outline" colorScheme="blue" onClick={handleClose}>
                     Close
                   </Button>
                   <Button

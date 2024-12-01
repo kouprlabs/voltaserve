@@ -20,14 +20,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
@@ -46,11 +39,7 @@ type FormValues = {
   picture: any
 }
 
-const AccountEditPicture = ({
-  open,
-  user,
-  onClose,
-}: AccountEditPictureProps) => {
+const AccountEditPicture = ({ open, user, onClose }: AccountEditPictureProps) => {
   const mutate = useAppSelector((state) => state.ui.account.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deletionInProgress, setDeletionInProgress] = useState(false)
@@ -68,11 +57,7 @@ const AccountEditPicture = ({
         'Unsupported file format',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (value: any) =>
-          value === null ||
-          (value &&
-            ['image/jpg', 'image/jpeg', 'image/gif', 'image/png'].includes(
-              value.type,
-            )),
+          value === null || (value && ['image/jpg', 'image/jpeg', 'image/gif', 'image/png'].includes(value.type)),
       ),
   })
 
@@ -81,10 +66,7 @@ const AccountEditPicture = ({
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { picture }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ picture }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         const result = await UserAPI.updatePicture(picture)
@@ -110,11 +92,7 @@ const AccountEditPicture = ({
   }, [onClose, mutate])
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Picture</ModalHeader>
@@ -131,31 +109,17 @@ const AccountEditPicture = ({
           {({ errors, touched, isSubmitting, setFieldValue, values }) => (
             <Form>
               <ModalBody>
-                <div
-                  className={cx('flex', 'flex-col', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-col', 'items-center', 'gap-1')}>
                   <Field name="picture">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.picture && touched.picture)}
-                      >
+                      <FormControl isInvalid={Boolean(errors.picture && touched.picture)}>
                         <AccountUploadPicture
                           {...field}
-                          initialValue={
-                            user.picture
-                              ? getPictureUrl(user.picture)
-                              : undefined
-                          }
+                          initialValue={user.picture ? getPictureUrl(user.picture) : undefined}
                           disabled={isSubmitting}
                           onChange={async (event) => {
-                            if (
-                              event.target.files &&
-                              event.target.files.length > 0
-                            ) {
-                              await setFieldValue(
-                                'picture',
-                                event.target.files[0],
-                              )
+                            if (event.target.files && event.target.files.length > 0) {
+                              await setFieldValue('picture', event.target.files[0])
                             }
                           }}
                         />
@@ -166,9 +130,7 @@ const AccountEditPicture = ({
                 </div>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"

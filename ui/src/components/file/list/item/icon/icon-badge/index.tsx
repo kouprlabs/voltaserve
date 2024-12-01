@@ -26,12 +26,8 @@ const IconBadge = ({ file, isLoading }: IconBadgeProps) => {
     <>
       {file.type === 'file' ? (
         <>
-          {file.snapshot?.status === Status.Waiting ? (
-            <IconBadgeWaiting />
-          ) : null}
-          {file.snapshot?.status === Status.Processing || isLoading ? (
-            <IconBadgeProcessing />
-          ) : null}
+          {file.snapshot?.status === Status.Waiting ? <IconBadgeWaiting /> : null}
+          {file.snapshot?.status === Status.Processing || isLoading ? <IconBadgeProcessing /> : null}
           {file.snapshot?.status === Status.Error ? <IconBadgeError /> : null}
           {file.isShared ? <IconBadgeShared /> : null}
           {file.snapshot?.entities ? <IconBadgeInsights /> : null}

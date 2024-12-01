@@ -76,20 +76,12 @@ export default class InvitationAPI {
 
   static useGetIncoming(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/invitations/incoming?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
-      swrOptions,
-    )
+    return useSWR<List>(url, () => apiFetcher({ url, method: 'GET' }) as Promise<List>, swrOptions)
   }
 
   static useGetIncomingCount(swrOptions?: SWRConfiguration) {
     const url = '/invitations/incoming/count'
-    return useSWR<number>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<number>,
-      swrOptions,
-    )
+    return useSWR<number>(url, () => apiFetcher({ url, method: 'GET' }) as Promise<number>, swrOptions)
   }
 
   static useGetOutgoing(options?: ListOptions, swrOptions?: SWRConfiguration) {

@@ -18,10 +18,7 @@ export type DrawerDownloadButtonProps = {
   isCollapsed?: boolean
 }
 
-const DrawerDownloadButton = ({
-  file,
-  isCollapsed,
-}: DrawerDownloadButtonProps) => {
+const DrawerDownloadButton = ({ file, isCollapsed }: DrawerDownloadButtonProps) => {
   const label = 'Download'
   return (
     <Tooltip label={label} isDisabled={!isCollapsed}>

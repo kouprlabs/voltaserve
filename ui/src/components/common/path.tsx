@@ -8,12 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useMemo } from 'react'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  Skeleton,
-} from '@chakra-ui/react'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Skeleton } from '@chakra-ui/react'
 import { Text } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
@@ -40,10 +35,7 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
       {path && !error ? (
         <Breadcrumb className={cx('overflow-hidden', 'shrink-0')}>
           <BreadcrumbItem>
-            <BreadcrumbLink
-              className={cx('nowrap')}
-              onClick={() => onClick?.(rootId)}
-            >
+            <BreadcrumbLink className={cx('nowrap')} onClick={() => onClick?.(rootId)}>
               Home
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -54,30 +46,15 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
           ) : null}
           {shortPath.map((file) => (
             <BreadcrumbItem key={file.id}>
-              <BreadcrumbLink
-                isCurrentPage={fileId === file.id}
-                onClick={() => onClick?.(file.id)}
-              >
-                {maxCharacters ? (
-                  <Text maxCharacters={maxCharacters}>{file.name}</Text>
-                ) : (
-                  file.name
-                )}
+              <BreadcrumbLink isCurrentPage={fileId === file.id} onClick={() => onClick?.(file.id)}>
+                {maxCharacters ? <Text maxCharacters={maxCharacters}>{file.name}</Text> : file.name}
               </BreadcrumbLink>
             </BreadcrumbItem>
           ))}
         </Breadcrumb>
       ) : null}
       {isLoading ? (
-        <div
-          className={cx(
-            'flex',
-            'flex-row',
-            'items-center',
-            'gap-0.5',
-            'flex-shrink-0',
-          )}
-        >
+        <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5', 'flex-shrink-0')}>
           <Skeleton className={cx('w-[100px]', 'h-[20px]', 'rounded-[20px]')} />
           <span>/</span>
           <Skeleton className={cx('w-[100px]', 'h-[20px]', 'rounded-[20px]')} />

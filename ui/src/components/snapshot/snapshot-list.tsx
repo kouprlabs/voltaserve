@@ -25,32 +25,18 @@ import {
   Td,
   Tr,
 } from '@chakra-ui/react'
-import {
-  Pagination,
-  RelativeDate,
-  SectionError,
-  SectionPlaceholder,
-  SectionSpinner,
-  usePageMonitor,
-} from '@koupr/ui'
+import { Pagination, RelativeDate, SectionError, SectionPlaceholder, SectionSpinner, usePageMonitor } from '@koupr/ui'
 import cx from 'classnames'
 import SnapshotAPI, { Snapshot, SortBy, SortOrder } from '@/client/api/snapshot'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  detachModalDidOpen,
-  listModalDidClose,
-  mutateUpdated,
-  selectionUpdated,
-} from '@/store/ui/snapshots'
+import { detachModalDidOpen, listModalDidClose, mutateUpdated, selectionUpdated } from '@/store/ui/snapshots'
 
 const SnapshotList = () => {
   const dispatch = useAppDispatch()
-  const isModalOpen = useAppSelector(
-    (state) => state.ui.snapshots.isListModalOpen,
-  )
+  const isModalOpen = useAppSelector((state) => state.ui.snapshots.isListModalOpen)
   const fileId = useAppSelector((state) => state.ui.files.selection[0])
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const [isActivating, setIsActivating] = useState(false)
@@ -129,12 +115,7 @@ const SnapshotList = () => {
   )
 
   return (
-    <Modal
-      size="xl"
-      isOpen={isModalOpen}
-      onClose={handleClose}
-      closeOnOverlayClick={false}
-    >
+    <Modal size="xl" isOpen={isModalOpen} onClose={handleClose} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Snapshots</ModalHeader>
@@ -142,9 +123,7 @@ const SnapshotList = () => {
         <ModalBody>
           {listIsLoading ? <SectionSpinner /> : null}
           {listError ? <SectionError text={errorToString(listError)} /> : null}
-          {listIsEmpty ? (
-            <SectionPlaceholder text="There are no snapshots." />
-          ) : null}
+          {listIsEmpty ? <SectionPlaceholder text="There are no snapshots." /> : null}
           {listIsReady ? (
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <Table variant="simple" size="sm">
@@ -169,38 +148,17 @@ const SnapshotList = () => {
                         <Radio size="md" isChecked={isSelected(s)} />
                       </Td>
                       <Td className={cx('px-0.5')}>
-                        <div
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1.5',
-                          )}
-                        >
-                          <Avatar
-                            name={`V ${s.version}`}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
+                        <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
+                          <Avatar name={`V ${s.version}`} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
                           <div className={cx('flex', 'flex-col', 'gap-0.5')}>
                             <span className={cx('text-base')}>
                               <RelativeDate date={new Date(s.createTime)} />
                             </span>
                             <div className={cx('flex', 'flex-row', 'gap-0.5')}>
-                              {s.original.size ? (
-                                <Badge variant="outline">
-                                  {prettyBytes(s.original.size)}
-                                </Badge>
-                              ) : null}
-                              {s.entities ? (
-                                <Badge variant="outline">Insights</Badge>
-                              ) : null}
-                              {s.mosaic ? (
-                                <Badge variant="outline">Mosaic</Badge>
-                              ) : null}
-                              {s.isActive ? (
-                                <Badge colorScheme="green">Active</Badge>
-                              ) : null}
+                              {s.original.size ? <Badge variant="outline">{prettyBytes(s.original.size)}</Badge> : null}
+                              {s.entities ? <Badge variant="outline">Insights</Badge> : null}
+                              {s.mosaic ? <Badge variant="outline">Mosaic</Badge> : null}
+                              {s.isActive ? <Badge colorScheme="green">Active</Badge> : null}
                             </div>
                           </div>
                         </div>
@@ -224,13 +182,7 @@ const SnapshotList = () => {
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              isDisabled={isActivating}
-              onClick={handleClose}
-            >
+            <Button type="button" variant="outline" colorScheme="blue" isDisabled={isActivating} onClick={handleClose}>
               Close
             </Button>
             <Button

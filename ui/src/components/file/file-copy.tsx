@@ -22,12 +22,7 @@ import {
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  copyModalDidClose,
-  loadingAdded,
-  loadingRemoved,
-  selectionUpdated,
-} from '@/store/ui/files'
+import { copyModalDidClose, loadingAdded, loadingRemoved, selectionUpdated } from '@/store/ui/files'
 import FileBrowse from './file-browse'
 
 const FileCopy = () => {
@@ -60,30 +55,17 @@ const FileCopy = () => {
   }, [targetId, fileId, selection, dispatch, mutateList, mutateTasks])
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => dispatch(copyModalDidClose())}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => dispatch(copyModalDidClose())} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>
-          {selection.length > 1
-            ? `Copy (${selection.length}) Items to…`
-            : 'Copy Item to…'}
-        </ModalHeader>
+        <ModalHeader>{selection.length > 1 ? `Copy (${selection.length}) Items to…` : 'Copy Item to…'}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <FileBrowse onChange={(id) => setTargetId(id)} />
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              onClick={() => dispatch(copyModalDidClose())}
-            >
+            <Button type="button" variant="outline" colorScheme="blue" onClick={() => dispatch(copyModalDidClose())}>
               Cancel
             </Button>
             <Button variant="solid" colorScheme="blue" onClick={handleCopy}>

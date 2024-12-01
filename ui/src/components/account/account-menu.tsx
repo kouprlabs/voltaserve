@@ -18,8 +18,7 @@ import { getPictureUrl } from '@/lib/helpers/picture'
 
 const AccountMenu = () => {
   const { data: user } = UserAPI.useGet(swrConfig())
-  const { data: invitationCount } =
-    InvitationAPI.useGetIncomingCount(swrConfig())
+  const { data: invitationCount } = InvitationAPI.useGetIncomingCount(swrConfig())
 
   return (
     <KouprAccountMenu
@@ -36,9 +35,7 @@ const AccountMenu = () => {
           <MenuItem as={Link} to="/account/invitation">
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
               <span>Invitations</span>
-              {invitationCount && invitationCount > 0 ? (
-                <NumberTag>{invitationCount}</NumberTag>
-              ) : null}
+              {invitationCount && invitationCount > 0 ? <NumberTag>{invitationCount}</NumberTag> : null}
             </div>
           </MenuItem>
           <MenuItem as={Link} to="/sign-out" className={cx('text-red-500')}>

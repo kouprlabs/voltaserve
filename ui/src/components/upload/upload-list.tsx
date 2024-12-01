@@ -20,10 +20,7 @@ const UploadList = () => {
 
   useEffect(() => {
     for (const upload of items) {
-      if (
-        queue.findIndex((e) => e.id === upload.id) !== -1 ||
-        upload.completed
-      ) {
+      if (queue.findIndex((e) => e.id === upload.id) !== -1 || upload.completed) {
         continue
       }
       queue.push(upload)

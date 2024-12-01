@@ -41,11 +41,7 @@ const OrganizationInvitationsPage = () => {
   const location = useLocation()
   const { id } = useParams()
   const toast = useToast()
-  const {
-    data: org,
-    error: orgError,
-    isLoading: orgIsLoading,
-  } = OrganizationAPI.useGet(id, swrConfig())
+  const { data: org, error: orgError, isLoading: orgIsLoading } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -66,8 +62,7 @@ const OrganizationInvitationsPage = () => {
     },
     swrConfig(),
   )
-  const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
-    useState(false)
+  const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] = useState(false)
   const orgIsReady = org && !orgError
   const listIsEmpty = list && !listError && list.totalElements === 0
   const listIsReady = list && !listError && list.totalElements > 0
@@ -137,9 +132,7 @@ const OrganizationInvitationsPage = () => {
                 },
                 {
                   title: 'Date',
-                  renderCell: (i) => (
-                    <RelativeDate date={new Date(i.createTime)} />
-                  ),
+                  renderCell: (i) => <RelativeDate date={new Date(i.createTime)} />,
                 },
               ]}
               actions={[

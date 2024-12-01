@@ -20,11 +20,7 @@ const InsightsOverviewChart = () => {
   const { colorMode } = useColorMode()
   const colors = useToken('colors', ['gray.200'])
   const colorsDark = useToken('colors', ['gray.500'])
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
+  const id = useAppSelector((state) => (state.ui.files.selection.length > 0 ? state.ui.files.selection[0] : undefined))
   const {
     data: list,
     error: listError,
@@ -41,19 +37,9 @@ const InsightsOverviewChart = () => {
     <>
       {listIsLoading ? <SectionSpinner /> : null}
       {listError ? <SectionError text={errorToString(listError)} /> : null}
-      {listIsEmpty ? (
-        <SectionPlaceholder text="Not enough data to render the chart." />
-      ) : null}
+      {listIsEmpty ? <SectionPlaceholder text="Not enough data to render the chart." /> : null}
       {listIsReady ? (
-        <div
-          className={cx(
-            'w-full',
-            'h-[300px]',
-            'flex',
-            'items-center',
-            'justify-center',
-          )}
-        >
+        <div className={cx('w-full', 'h-[300px]', 'flex', 'items-center', 'justify-center')}>
           <ResponsivePie
             data={list.data.map((entity) => ({
               id: `${entity.text} (${entity.frequency})`,
@@ -69,9 +55,7 @@ const InsightsOverviewChart = () => {
             activeOuterRadiusOffset={8}
             arcLabel={() => ''}
             arcLinkLabelsSkipAngle={10}
-            arcLinkLabelsTextColor={
-              colorMode === 'light' ? 'rgb(26, 32, 44)' : 'white'
-            }
+            arcLinkLabelsTextColor={colorMode === 'light' ? 'rgb(26, 32, 44)' : 'white'}
             arcLinkLabelsThickness={2}
             arcLinkLabelsColor={{ from: 'color' }}
             arcLabelsSkipAngle={10}

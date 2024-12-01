@@ -149,12 +149,6 @@ const slice = createSlice({
   },
 })
 
-export const {
-  uploadAdded,
-  uploadUpdated,
-  uploadRemoved,
-  uploadCompleted,
-  completedUploadsCleared,
-} = slice.actions
+export const { uploadAdded, uploadUpdated, uploadRemoved, uploadCompleted, completedUploadsCleared } = slice.actions
 
 export default slice.reducer

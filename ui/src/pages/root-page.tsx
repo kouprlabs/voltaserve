@@ -35,19 +35,14 @@ const RootPage = () => {
   useEffect(() => {
     const element = document.querySelector("link[rel='icon']")
     if (element) {
-      window
-        .matchMedia('(prefers-color-scheme: dark)')
-        .addEventListener('change', (event: MediaQueryListEvent) => {
-          if (event.matches) {
-            element.setAttribute('href', '/favicon-dark.svg')
-          } else {
-            element.setAttribute('href', '/favicon.svg')
-          }
-        })
-      if (
-        window.matchMedia &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches
-      ) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event: MediaQueryListEvent) => {
+        if (event.matches) {
+          element.setAttribute('href', '/favicon-dark.svg')
+        } else {
+          element.setAttribute('href', '/favicon.svg')
+        }
+      })
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         element.setAttribute('href', '/favicon-dark.svg')
       } else {
         element.setAttribute('href', '/favicon.svg')

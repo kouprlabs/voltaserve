@@ -70,11 +70,7 @@ type ListQueryParams = {
 export default class TaskAPI {
   static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/tasks/${id}`
-    return useSWR<Task>(
-      id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<Task>,
-      swrOptions,
-    )
+    return useSWR<Task>(id ? url : null, () => apiFetcher({ url, method: 'GET' }) as Promise<Task>, swrOptions)
   }
 
   static list(options?: ListOptions) {
@@ -86,11 +82,7 @@ export default class TaskAPI {
 
   static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/tasks?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
-      swrOptions,
-    )
+    return useSWR<List>(url, () => apiFetcher({ url, method: 'GET' }) as Promise<List>, swrOptions)
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
@@ -115,11 +107,7 @@ export default class TaskAPI {
 
   static useGetCount(swrOptions?: SWRConfiguration) {
     const url = '/tasks/count'
-    return useSWR<number>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<number>,
-      swrOptions,
-    )
+    return useSWR<number>(url, () => apiFetcher({ url, method: 'GET' }) as Promise<number>, swrOptions)
   }
 
   static getCount() {

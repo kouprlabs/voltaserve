@@ -25,19 +25,9 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import {
-  Pagination,
-  SearchInput,
-  SectionError,
-  SectionPlaceholder,
-  SectionSpinner,
-  usePageMonitor,
-} from '@koupr/ui'
+import { Pagination, SearchInput, SectionError, SectionPlaceholder, SectionSpinner, usePageMonitor } from '@koupr/ui'
 import cx from 'classnames'
-import OrganizationAPI, {
-  Organization,
-  SortOrder,
-} from '@/client/api/organization'
+import OrganizationAPI, { Organization, SortOrder } from '@/client/api/organization'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 
@@ -46,10 +36,7 @@ export type OrganizationSelectorProps = {
   onConfirm?: (organization: Organization) => void
 }
 
-const OrganizationSelector = ({
-  defaultValue,
-  onConfirm,
-}: OrganizationSelectorProps) => {
+const OrganizationSelector = ({ defaultValue, onConfirm }: OrganizationSelectorProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
@@ -61,10 +48,7 @@ const OrganizationSelector = ({
     error: listError,
     isLoading: listIsLoading,
     mutate,
-  } = OrganizationAPI.useList(
-    { query, page, size, sortOrder: SortOrder.Desc },
-    swrConfig(),
-  )
+  } = OrganizationAPI.useList({ query, page, size, sortOrder: SortOrder.Desc }, swrConfig())
   const { hasPageSwitcher } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
@@ -117,39 +101,19 @@ const OrganizationSelector = ({
       >
         {confirmed ? confirmed.name : 'Select Organization'}
       </Button>
-      <Modal
-        size="xl"
-        isOpen={isOpen}
-        onClose={onClose}
-        closeOnOverlayClick={false}
-      >
+      <Modal size="xl" isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Select Organization</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-              <SearchInput
-                placeholder="Search Organizations"
-                query={query}
-                onChange={handleSearchInputChange}
-              />
+              <SearchInput placeholder="Search Organizations" query={query} onChange={handleSearchInputChange} />
               {listIsLoading ? <SectionSpinner /> : null}
-              {listError ? (
-                <SectionError text={errorToString(listError)} />
-              ) : null}
-              {listIsEmpty ? (
-                <SectionPlaceholder text="There are no organizations." />
-              ) : null}
+              {listError ? <SectionError text={errorToString(listError)} /> : null}
+              {listIsEmpty ? <SectionPlaceholder text="There are no organizations." /> : null}
               {listIsReady ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'flex-col',
-                    'justify-between',
-                    'h-[320px]',
-                  )}
-                >
+                <div className={cx('flex', 'flex-col', 'justify-between', 'h-[320px]')}>
                   <Table variant="simple" size="sm">
                     <colgroup>
                       <col className={cx('w-[40px]')} />
@@ -168,25 +132,11 @@ const OrganizationSelector = ({
                           onClick={() => setSelected(o)}
                         >
                           <Td className={cx('px-0.5', 'text-center')}>
-                            <Radio
-                              size="md"
-                              isChecked={selected?.id === o.id}
-                            />
+                            <Radio size="md" isChecked={selected?.id === o.id} />
                           </Td>
                           <Td className={cx('p-0.5')}>
-                            <div
-                              className={cx(
-                                'flex',
-                                'flex-row',
-                                'items-center',
-                                'gap-1.5',
-                              )}
-                            >
-                              <Avatar
-                                name={o.name}
-                                size="sm"
-                                className={cx('w-[40px]', 'h-[40px]')}
-                              />
+                            <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
+                              <Avatar name={o.name} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
                               <span className={cx('text-base')}>{o.name}</span>
                             </div>
                           </Td>
@@ -210,20 +160,10 @@ const OrganizationSelector = ({
           </ModalBody>
           <ModalFooter>
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-              <Button
-                type="button"
-                variant="outline"
-                colorScheme="blue"
-                onClick={onClose}
-              >
+              <Button type="button" variant="outline" colorScheme="blue" onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                variant="solid"
-                colorScheme="blue"
-                isDisabled={!selected}
-                onClick={handleConfirm}
-              >
+              <Button variant="solid" colorScheme="blue" isDisabled={!selected} onClick={handleConfirm}>
                 Confirm
               </Button>
             </div>

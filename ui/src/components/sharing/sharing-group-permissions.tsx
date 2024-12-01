@@ -8,24 +8,8 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
-import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  IconButton,
-  Badge,
-  Avatar,
-} from '@chakra-ui/react'
-import {
-  IconDelete,
-  SectionError,
-  SectionPlaceholder,
-  SectionSpinner,
-  Text,
-} from '@koupr/ui'
+import { Table, Thead, Tbody, Tr, Th, Td, IconButton, Badge, Avatar } from '@chakra-ui/react'
+import { IconDelete, SectionError, SectionPlaceholder, SectionSpinner, Text } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI, { GroupPermission } from '@/client/api/file'
 import { errorToString } from '@/client/error'
@@ -42,10 +26,8 @@ const SharingGroupPermissions = () => {
     isLoading: permissionsIsLoading,
     mutate: mutatePermissions,
   } = FileAPI.useGetGroupPermissions(selection[0], swrConfig())
-  const permissionsIsEmpty =
-    permissions && !permissionsError && permissions.length === 0
-  const permissionsIsReady =
-    permissions && !permissionsError && permissions.length > 0
+  const permissionsIsEmpty = permissions && !permissionsError && permissions.length === 0
+  const permissionsIsReady = permissions && !permissionsError && permissions.length > 0
 
   const handleRevokePermission = useCallback(
     async (permission: GroupPermission) => {
@@ -67,12 +49,8 @@ const SharingGroupPermissions = () => {
   return (
     <>
       {permissionsIsLoading ? <SectionSpinner height="auto" /> : null}
-      {permissionsError ? (
-        <SectionError text={errorToString(permissionsError)} height="auto" />
-      ) : null}
-      {permissionsIsEmpty ? (
-        <SectionPlaceholder text="Not shared with any groups." height="auto" />
-      ) : null}
+      {permissionsError ? <SectionError text={errorToString(permissionsError)} height="auto" /> : null}
+      {permissionsIsEmpty ? <SectionPlaceholder text="Not shared with any groups." height="auto" /> : null}
       {permissionsIsReady ? (
         <Table>
           <Thead>
@@ -86,14 +64,8 @@ const SharingGroupPermissions = () => {
             {permissions.map((permission) => (
               <Tr key={permission.id}>
                 <Td className={cx('p-1')}>
-                  <div
-                    className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                  >
-                    <Avatar
-                      name={permission.group.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
+                  <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+                    <Avatar name={permission.group.name} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
                     <Text noOfLines={1}>{permission.group.name}</Text>
                   </div>
                 </Td>

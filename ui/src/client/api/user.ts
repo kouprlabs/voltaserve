@@ -71,11 +71,7 @@ export default class UserAPI {
 
   static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/users?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
-      swrOptions,
-    )
+    return useSWR<List>(url, () => apiFetcher({ url, method: 'GET' }) as Promise<List>, swrOptions)
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {

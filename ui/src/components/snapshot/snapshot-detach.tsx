@@ -27,14 +27,10 @@ import { detachModalDidClose, selectionUpdated } from '@/store/ui/snapshots'
 const SnapshotDetach = () => {
   const dispatch = useDispatch()
   const id = useAppSelector((state) =>
-    state.ui.snapshots.selection.length > 0
-      ? state.ui.snapshots.selection[0]
-      : undefined,
+    state.ui.snapshots.selection.length > 0 ? state.ui.snapshots.selection[0] : undefined,
   )
   const mutate = useAppSelector((state) => state.ui.snapshots.snapshotMutate)
-  const isModalOpen = useAppSelector(
-    (state) => state.ui.snapshots.isDetachModalOpen,
-  )
+  const isModalOpen = useAppSelector((state) => state.ui.snapshots.isDetachModalOpen)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleDetach = useCallback(async () => {
@@ -54,11 +50,7 @@ const SnapshotDetach = () => {
   }, [id, dispatch, mutate])
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => dispatch(detachModalDidClose())}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => dispatch(detachModalDidClose())} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Detach Snapshot</ModalHeader>
@@ -77,13 +69,7 @@ const SnapshotDetach = () => {
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="solid"
-              colorScheme="red"
-              isLoading={isLoading}
-              onClick={handleDetach}
-            >
+            <Button type="submit" variant="solid" colorScheme="red" isLoading={isLoading} onClick={handleDetach}>
               Detach
             </Button>
           </div>

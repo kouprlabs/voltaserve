@@ -9,29 +9,8 @@
 // AGPL-3.0-only in the root of this repository.
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  Badge,
-  Center,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  Spacer,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react'
-import {
-  IconChevronRight,
-  IconFlag,
-  IconGroup,
-  IconPerson,
-  IconWorkspaces,
-  SectionSpinner,
-} from '@koupr/ui'
+import { Badge, Center, Flex, Grid, GridItem, Heading, Spacer, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react'
+import { IconChevronRight, IconFlag, IconGroup, IconPerson, IconWorkspaces, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import semver from 'semver'
@@ -49,8 +28,7 @@ const internalComponents = [
   { id: 'console' },
   { id: 'conversion' },
 ]
-const compareFn = (a: ComponentVersion, b: ComponentVersion) =>
-  a.name > b.name ? 1 : 0
+const compareFn = (a: ComponentVersion, b: ComponentVersion) => (a.name > b.name ? 1 : 0)
 
 const ConsolePanelOverview = () => {
   const [userCount, setUserCount] = useState<number>()
@@ -76,16 +54,10 @@ const ConsolePanelOverview = () => {
       ConsoleAPI.getComponentsVersions(component).then((value) => {
         if (component.id == 'ui') {
           value.currentVersion = uiCurrentVersion.version
-          value.updateAvailable = semver.gt(
-            value.latestVersion,
-            uiCurrentVersion.version,
-          )
+          value.updateAvailable = semver.gt(value.latestVersion, uiCurrentVersion.version)
         }
         setComponentsData((prevState) => {
-          return [
-            ...prevState.filter((item) => item.name !== value.name),
-            value,
-          ].toSorted(compareFn)
+          return [...prevState.filter((item) => item.name !== value.name), value].toSorted(compareFn)
         })
       })
     })
@@ -191,13 +163,9 @@ const ConsolePanelOverview = () => {
                     <Flex padding={1}>
                       Components
                       <Spacer />
-                      {componentsData.filter(
-                        (component) => component.updateAvailable,
-                      ).length > 1 ? (
+                      {componentsData.filter((component) => component.updateAvailable).length > 1 ? (
                         <Badge colorScheme="yellow">Updates available</Badge>
-                      ) : componentsData.filter(
-                          (component) => component.updateAvailable,
-                        ).length === 1 ? (
+                      ) : componentsData.filter((component) => component.updateAvailable).length === 1 ? (
                         <Badge colorScheme="yellow">Update available</Badge>
                       ) : null}
                     </Flex>
@@ -216,13 +184,9 @@ const ConsolePanelOverview = () => {
                         {component.updateAvailable ? (
                           <Link to={component.location}>
                             <Center>
-                              <Badge colorScheme="red">
-                                {component.currentVersion}
-                              </Badge>
+                              <Badge colorScheme="red">{component.currentVersion}</Badge>
                               <IconChevronRight />
-                              <Badge colorScheme="green">
-                                {component.latestVersion}
-                              </Badge>
+                              <Badge colorScheme="green">{component.latestVersion}</Badge>
                             </Center>
                           </Link>
                         ) : (

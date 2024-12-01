@@ -21,14 +21,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
@@ -45,11 +38,7 @@ type FormValues = {
   name: string
 }
 
-const OrganizationEditName = ({
-  open,
-  organization,
-  onClose,
-}: OrganizationEditNameProps) => {
+const OrganizationEditName = ({ open, organization, onClose }: OrganizationEditNameProps) => {
   const mutate = useAppSelector((state) => state.ui.organization.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
@@ -63,10 +52,7 @@ const OrganizationEditName = ({
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { name }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ name }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         const result = await OrganizationAPI.patchName(organization.id, {
@@ -83,11 +69,7 @@ const OrganizationEditName = ({
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Name</ModalHeader>
@@ -104,25 +86,15 @@ const OrganizationEditName = ({
               <ModalBody>
                 <Field name="name">
                   {({ field }: FieldAttributes<FieldProps>) => (
-                    <FormControl
-                      isInvalid={Boolean(errors.name && touched.name)}
-                    >
-                      <Input
-                        ref={inputRef}
-                        {...field}
-                        placeholder="Name"
-                        disabled={isSubmitting}
-                        autoFocus
-                      />
+                    <FormControl isInvalid={Boolean(errors.name && touched.name)}>
+                      <Input ref={inputRef} {...field} placeholder="Name" disabled={isSubmitting} autoFocus />
                       <FormErrorMessage>{errors.name}</FormErrorMessage>
                     </FormControl>
                   )}
                 </Field>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -132,12 +104,7 @@ const OrganizationEditName = ({
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="blue"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="blue" isLoading={isSubmitting}>
                     Save
                   </Button>
                 </div>

@@ -8,22 +8,8 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useState } from 'react'
-import {
-  IconButton,
-  IconButtonProps,
-  Progress,
-  Switch,
-  Tooltip,
-  useColorMode,
-} from '@chakra-ui/react'
-import {
-  IconEdit,
-  IconDelete,
-  IconWarning,
-  SectionSpinner,
-  Form,
-  SectionError,
-} from '@koupr/ui'
+import { IconButton, IconButtonProps, Progress, Switch, Tooltip, useColorMode } from '@chakra-ui/react'
+import { IconEdit, IconDelete, IconWarning, SectionSpinner, Form, SectionError } from '@koupr/ui'
 import cx from 'classnames'
 import StorageAPI from '@/client/api/storage'
 import { errorToString } from '@/client/error'
@@ -38,20 +24,12 @@ import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
 
 const EditButton = (props: IconButtonProps) => (
-  <IconButton
-    icon={<IconEdit />}
-    className={cx('h-[40px]', 'w-[40px]')}
-    {...props}
-  />
+  <IconButton icon={<IconEdit />} className={cx('h-[40px]', 'w-[40px]')} {...props} />
 )
 
 const AccountSettingsPage = () => {
   const { colorMode, toggleColorMode } = useColorMode()
-  const {
-    data: user,
-    error: userError,
-    isLoading: userIsLoading,
-  } = UserAPI.useGet()
+  const { data: user, error: userError, isLoading: userIsLoading } = UserAPI.useGet()
   const {
     data: storageUsage,
     error: storageUsageError,
@@ -76,17 +54,11 @@ const AccountSettingsPage = () => {
                 title: 'Storage',
                 content: (
                   <>
-                    {storageUsageError ? (
-                      <SectionError
-                        text={errorToString(storageUsageError)}
-                        height="auto"
-                      />
-                    ) : null}
+                    {storageUsageError ? <SectionError text={errorToString(storageUsageError)} height="auto" /> : null}
                     {storageUsageIsReady ? (
                       <>
                         <span>
-                          {prettyBytes(storageUsage.bytes)} of{' '}
-                          {prettyBytes(storageUsage.maxBytes)} used
+                          {prettyBytes(storageUsage.bytes)} of {prettyBytes(storageUsage.maxBytes)} used
                         </span>
                         <Progress value={storageUsage.percentage} hasStripe />
                       </>
@@ -126,39 +98,16 @@ const AccountSettingsPage = () => {
                     content: (
                       <>
                         {user.pendingEmail ? (
-                          <div
-                            className={cx(
-                              'flex',
-                              'flex-row',
-                              'gap-0.5',
-                              'items-center',
-                            )}
-                          >
+                          <div className={cx('flex', 'flex-row', 'gap-0.5', 'items-center')}>
                             <Tooltip label="Please check your inbox to confirm your email.">
-                              <div
-                                className={cx(
-                                  'flex',
-                                  'items-center',
-                                  'justify-center',
-                                  'cursor-default',
-                                )}
-                              >
-                                <IconWarning
-                                  className={cx('text-yellow-400')}
-                                />
+                              <div className={cx('flex', 'items-center', 'justify-center', 'cursor-default')}>
+                                <IconWarning className={cx('text-yellow-400')} />
                               </div>
                             </Tooltip>
                             <span>{truncateMiddle(user.pendingEmail, 50)}</span>
                           </div>
                         ) : null}
-                        {!user.pendingEmail ? (
-                          <span>
-                            {truncateMiddle(
-                              user.pendingEmail || user.email,
-                              50,
-                            )}
-                          </span>
-                        ) : null}
+                        {!user.pendingEmail ? <span>{truncateMiddle(user.pendingEmail || user.email, 50)}</span> : null}
                         <EditButton
                           title="Edit email"
                           aria-label="Edit email"
@@ -184,12 +133,7 @@ const AccountSettingsPage = () => {
                 rows: [
                   {
                     label: 'Dark mode',
-                    content: (
-                      <Switch
-                        isChecked={colorMode === 'dark'}
-                        onChange={() => toggleColorMode()}
-                      />
-                    ),
+                    content: <Switch isChecked={colorMode === 'dark'} onChange={() => toggleColorMode()} />,
                   },
                 ],
               },
@@ -213,25 +157,10 @@ const AccountSettingsPage = () => {
               },
             ]}
           />
-          <AccountEditFullName
-            open={isFullNameModalOpen}
-            user={user}
-            onClose={() => setIsFullNameModalOpen(false)}
-          />
-          <AccountEditEmail
-            open={isEmailModalOpen}
-            user={user}
-            onClose={() => setIsEmailModalOpen(false)}
-          />
-          <AccountChangePassword
-            open={isPasswordModalOpen}
-            user={user}
-            onClose={() => setIsPasswordModalOpen(false)}
-          />
-          <AccountDelete
-            open={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-          />
+          <AccountEditFullName open={isFullNameModalOpen} user={user} onClose={() => setIsFullNameModalOpen(false)} />
+          <AccountEditEmail open={isEmailModalOpen} user={user} onClose={() => setIsEmailModalOpen(false)} />
+          <AccountChangePassword open={isPasswordModalOpen} user={user} onClose={() => setIsPasswordModalOpen(false)} />
+          <AccountDelete open={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} />
         </>
       ) : null}
     </>

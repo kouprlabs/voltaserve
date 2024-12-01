@@ -17,16 +17,8 @@ import { getAccessTokenOrRedirect } from '@/infra/token'
 import { useAppSelector } from '@/store/hook'
 
 const InsightsOverviewArtifacts = () => {
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
-  const {
-    data: file,
-    error: fileError,
-    isLoading: fileIsLoading,
-  } = FileAPI.useGet(id, swrConfig())
+  const id = useAppSelector((state) => (state.ui.files.selection.length > 0 ? state.ui.files.selection[0] : undefined))
+  const { data: file, error: fileError, isLoading: fileIsLoading } = FileAPI.useGet(id, swrConfig())
   const searchParams = new URLSearchParams({
     access_token: getAccessTokenOrRedirect(),
   })
@@ -37,15 +29,7 @@ const InsightsOverviewArtifacts = () => {
       {fileIsLoading ? <SectionSpinner /> : null}
       {fileError ? <SectionError text={errorToString(fileError)} /> : null}
       {fileIsReady ? (
-        <div
-          className={cx(
-            'flex',
-            'flex-col',
-            'items-center',
-            'justify-center',
-            'gap-1',
-          )}
-        >
+        <div className={cx('flex', 'flex-col', 'items-center', 'justify-center', 'gap-1')}>
           {file.snapshot?.text ? (
             <Button
               as="a"

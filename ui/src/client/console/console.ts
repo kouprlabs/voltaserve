@@ -130,10 +130,7 @@ export interface ComponentVersion {
 }
 
 export default class ConsoleAPI {
-  static useListUsersByOrganization(
-    options: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useListUsersByOrganization(options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/organization/users?${this.paramsFromListOptions(options)}`
     return useSWR<ListResponse<ConsoleUserOrganization>>(
       url,
@@ -153,10 +150,7 @@ export default class ConsoleAPI {
     }) as Promise<ListResponse<ConsoleUserOrganization>>
   }
 
-  static useListGroupsByUser(
-    options: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useListGroupsByUser(options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/user/groups?${this.paramsFromListOptions(options)}`
     return useSWR<ListResponse<ConsoleGroupUser>>(
       url,
@@ -176,10 +170,7 @@ export default class ConsoleAPI {
     }) as Promise<ListResponse<ConsoleGroupUser>>
   }
 
-  static useListGroupsByOrganization(
-    options: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useListGroupsByOrganization(options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/organization/groups?${this.paramsFromListOptions(options)}`
     return useSWR<ListResponse<ConsoleGroup>>(
       url,
@@ -199,10 +190,7 @@ export default class ConsoleAPI {
     }) as Promise<ListResponse<ConsoleGroup>>
   }
 
-  static useListOrganizationsByUser(
-    options: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useListOrganizationsByUser(options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/user/organizations?${this.paramsFromListOptions(options)}`
     return useSWR<ListResponse<ConsoleOrganizationUser>>(
       url,
@@ -222,10 +210,7 @@ export default class ConsoleAPI {
     }) as Promise<ListResponse<ConsoleOrganizationUser>>
   }
 
-  static useListWorkspacesByUser(
-    options: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useListWorkspacesByUser(options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/user/workspaces?${this.paramsFromListOptions(options)}`
     return useSWR<ListResponse<ConsoleWorkspaceUser>>(
       url,
@@ -245,10 +230,7 @@ export default class ConsoleAPI {
     }) as Promise<ListResponse<ConsoleWorkspaceUser>>
   }
 
-  static useListWorkspacesByOrganization(
-    options: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useListWorkspacesByOrganization(options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/organization/workspaces?${this.paramsFromListOptions(options)}`
     return useSWR<ListResponse<ConsoleWorkspace>>(
       url,
@@ -268,10 +250,7 @@ export default class ConsoleAPI {
     }) as Promise<ListResponse<ConsoleWorkspace>>
   }
 
-  static useGetOrganizationById(
-    options: BaseIDRequest,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useGetOrganizationById(options: BaseIDRequest, swrOptions?: SWRConfiguration) {
     const url = `/organization?${this.paramsFromListOptions(options)}`
     return useSWR<ConsoleOrganization>(
       options.id ? url : null,
@@ -305,11 +284,7 @@ export default class ConsoleAPI {
     }) as Promise<ComponentVersion>
   }
 
-  static useListObject<T>(
-    object: ConsoleObject,
-    options: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useListObject<T>(object: ConsoleObject, options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/${object}/all?${this.paramsFromListOptions(options)}`
     return useSWR<ListResponse<T>>(
       url,
@@ -325,11 +300,7 @@ export default class ConsoleAPI {
     }) as Promise<ListResponse<T>>
   }
 
-  static useSearchObject<T>(
-    object: ConsoleObject,
-    options: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useSearchObject<T>(object: ConsoleObject, options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/${object}/search?${this.paramsFromListOptions(options)}`
     return useSWR<ListResponse<T>>(
       url,
@@ -345,11 +316,7 @@ export default class ConsoleAPI {
     }) as Promise<ListResponse<T>>
   }
 
-  static useListOrSearchObject<T>(
-    object: ConsoleObject,
-    options: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useListOrSearchObject<T>(object: ConsoleObject, options: ListOptions, swrOptions?: SWRConfiguration) {
     if (options.query) {
       return this.useSearchObject<T>(object, options, swrOptions)
     } else {

@@ -9,13 +9,7 @@
 // AGPL-3.0-only in the root of this repository.
 import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import {
-  PagePagination,
-  SectionError,
-  SectionSpinner,
-  usePageMonitor,
-  usePagePagination,
-} from '@koupr/ui'
+import { PagePagination, SectionError, SectionSpinner, usePageMonitor, usePagePagination } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -51,42 +45,18 @@ const WorkspaceFilesPage = () => {
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
-  const isSnapshotListModalOpen = useAppSelector(
-    (state) => state.ui.snapshots.isListModalOpen,
-  )
-  const isSnapshotDetachModalOpen = useAppSelector(
-    (state) => state.ui.snapshots.isDetachModalOpen,
-  )
-  const isShareModalOpen = useAppSelector(
-    (state) => state.ui.files.isSharingModalOpen,
-  )
-  const isMoveModalOpen = useAppSelector(
-    (state) => state.ui.files.isMoveModalOpen,
-  )
-  const isCopyModalOpen = useAppSelector(
-    (state) => state.ui.files.isCopyModalOpen,
-  )
-  const isCreateModalOpen = useAppSelector(
-    (state) => state.ui.files.isCreateModalOpen,
-  )
-  const isDeleteModalOpen = useAppSelector(
-    (state) => state.ui.files.isDeleteModalOpen,
-  )
-  const isRenameModalOpen = useAppSelector(
-    (state) => state.ui.files.isRenameModalOpen,
-  )
-  const isInfoModalOpen = useAppSelector(
-    (state) => state.ui.files.isInfoModalOpen,
-  )
-  const isInsightsModalOpen = useAppSelector(
-    (state) => state.ui.insights.isModalOpen,
-  )
-  const isMosaicModalOpen = useAppSelector(
-    (state) => state.ui.mosaic.isModalOpen,
-  )
-  const isSearchFilterModalOpen = useAppSelector(
-    (state) => state.ui.searchFilter.isModalOpen,
-  )
+  const isSnapshotListModalOpen = useAppSelector((state) => state.ui.snapshots.isListModalOpen)
+  const isSnapshotDetachModalOpen = useAppSelector((state) => state.ui.snapshots.isDetachModalOpen)
+  const isShareModalOpen = useAppSelector((state) => state.ui.files.isSharingModalOpen)
+  const isMoveModalOpen = useAppSelector((state) => state.ui.files.isMoveModalOpen)
+  const isCopyModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
+  const isCreateModalOpen = useAppSelector((state) => state.ui.files.isCreateModalOpen)
+  const isDeleteModalOpen = useAppSelector((state) => state.ui.files.isDeleteModalOpen)
+  const isRenameModalOpen = useAppSelector((state) => state.ui.files.isRenameModalOpen)
+  const isInfoModalOpen = useAppSelector((state) => state.ui.files.isInfoModalOpen)
+  const isInsightsModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
+  const isMosaicModalOpen = useAppSelector((state) => state.ui.mosaic.isModalOpen)
+  const isSearchFilterModalOpen = useAppSelector((state) => state.ui.searchFilter.isModalOpen)
   const {
     data: workspace,
     error: workspaceError,
@@ -148,16 +118,7 @@ const WorkspaceFilesPage = () => {
       ) : null}
       {workspaceIsReady ? (
         <>
-          <div
-            className={cx(
-              'flex',
-              'flex-col',
-              'w-full',
-              'gap-2.5',
-              'grow',
-              'overflow-hidden',
-            )}
-          >
+          <div className={cx('flex', 'flex-col', 'w-full', 'gap-2.5', 'grow', 'overflow-hidden')}>
             {workspace && fileId ? (
               <Path
                 rootId={workspace.rootId}
@@ -170,16 +131,7 @@ const WorkspaceFilesPage = () => {
               />
             ) : null}
             <FileToolbar list={list} />
-            <div
-              className={cx(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'grow',
-                'overflow-y-auto',
-                'overflow-x-hidden',
-              )}
-            >
+            <div className={cx('flex', 'flex-col', 'gap-1.5', 'grow', 'overflow-y-auto', 'overflow-x-hidden')}>
               <div
                 className={cx(
                   'w-full',
@@ -199,12 +151,8 @@ const WorkspaceFilesPage = () => {
                 onClick={() => dispatch(selectionUpdated([]))}
               >
                 {listIsLoading ? <SectionSpinner /> : null}
-                {listError ? (
-                  <SectionError text={errorToString(listError)} />
-                ) : null}
-                {listIsReady ? (
-                  <FileList list={list} scale={iconScale} />
-                ) : null}
+                {listError ? <SectionError text={errorToString(listError)} /> : null}
+                {listIsReady ? <FileList list={list} scale={iconScale} /> : null}
               </div>
               {list && hasPagination ? (
                 <div className={cx('self-end', 'pb-1.5')}>

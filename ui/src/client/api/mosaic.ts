@@ -58,10 +58,7 @@ export default class MosaicAPI {
     })
   }
 
-  static useGetInfo(
-    id: string | null | undefined,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useGetInfo(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/mosaics/${id}/info`
     return useSWR<Info>(
       id ? url : null,

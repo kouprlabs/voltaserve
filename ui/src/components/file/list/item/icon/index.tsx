@@ -19,23 +19,11 @@ export type ItemIconProps = {
 
 const ItemIcon = ({ file, scale, viewType, isLoading }: ItemIconProps) => (
   <>
-    <div
-      className={cx('z-0', 'text-gray-500', 'dark:text-gray-300', 'relative')}
-    >
+    <div className={cx('z-0', 'text-gray-500', 'dark:text-gray-300', 'relative')}>
       {file.type === 'file' ? (
-        <IconFile
-          file={file}
-          scale={computeScale(scale, viewType)}
-          viewType={viewType}
-          isLoading={isLoading}
-        />
+        <IconFile file={file} scale={computeScale(scale, viewType)} viewType={viewType} isLoading={isLoading} />
       ) : file.type === 'folder' ? (
-        <IconFolder
-          file={file}
-          scale={computeScale(scale, viewType)}
-          viewType={viewType}
-          isLoading={isLoading}
-        />
+        <IconFolder file={file} scale={computeScale(scale, viewType)} viewType={viewType} isLoading={isLoading} />
       ) : null}
     </div>
   </>

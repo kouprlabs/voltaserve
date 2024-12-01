@@ -15,10 +15,7 @@ type MultiSelectCheckboxProps = {
   viewType: FileViewType
 }
 
-const MultiSelectCheckbox = ({
-  isChecked,
-  viewType,
-}: MultiSelectCheckboxProps) => {
+const MultiSelectCheckbox = ({ isChecked, viewType }: MultiSelectCheckboxProps) => {
   return (
     <div
       className={cx('w-[18px]', 'h-[18px]', {
@@ -29,16 +26,7 @@ const MultiSelectCheckbox = ({
       })}
     >
       <div
-        className={cx(
-          'absolute',
-          'top-0',
-          'left-0',
-          'flex',
-          'items-center',
-          'justify-center',
-          'w-[18px]',
-          'h-[18px]',
-        )}
+        className={cx('absolute', 'top-0', 'left-0', 'flex', 'items-center', 'justify-center', 'w-[18px]', 'h-[18px]')}
       >
         <span
           className={cx(

@@ -23,14 +23,7 @@ import {
   ModalOverlay,
   Textarea,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import InvitationAPI from '@/client/api/invitation'
@@ -48,15 +41,9 @@ type FormValues = {
   emails: string
 }
 
-const OrganizationInviteMembers = ({
-  open,
-  id,
-  onClose,
-}: OrganizationInviteMembersProps) => {
+const OrganizationInviteMembers = ({ open, id, onClose }: OrganizationInviteMembersProps) => {
   const navigate = useNavigate()
-  const mutateList = useAppSelector(
-    (state) => state.ui.outgoingInvitations.mutate,
-  )
+  const mutateList = useAppSelector((state) => state.ui.outgoingInvitations.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     emails: Yup.string().required('Email(s) are required'),
@@ -67,10 +54,7 @@ const OrganizationInviteMembers = ({
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { emails }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ emails }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         await InvitationAPI.create({
@@ -89,12 +73,7 @@ const OrganizationInviteMembers = ({
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      size="3xl"
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} size="3xl" closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Invite Members</ModalHeader>
@@ -112,9 +91,7 @@ const OrganizationInviteMembers = ({
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="emails">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.emails && touched.emails)}
-                      >
+                      <FormControl isInvalid={Boolean(errors.emails && touched.emails)}>
                         <FormLabel>Comma separated emails:</FormLabel>
                         <Textarea
                           {...field}
@@ -130,9 +107,7 @@ const OrganizationInviteMembers = ({
                 </div>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -142,12 +117,7 @@ const OrganizationInviteMembers = ({
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="blue"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="blue" isLoading={isSubmitting}>
                     Invite
                   </Button>
                 </div>

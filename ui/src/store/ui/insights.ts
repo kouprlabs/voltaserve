@@ -39,11 +39,6 @@ const slice = createSlice({
   },
 })
 
-export const {
-  modalDidOpen,
-  modalDidClose,
-  allModalsDidClose,
-  mutateInfoUpdated,
-} = slice.actions
+export const { modalDidOpen, modalDidClose, allModalsDidClose, mutateInfoUpdated } = slice.actions
 
 export default slice.reducer

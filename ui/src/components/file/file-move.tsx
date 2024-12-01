@@ -22,12 +22,7 @@ import {
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  loadingAdded,
-  loadingRemoved,
-  moveModalDidClose,
-  selectionUpdated,
-} from '@/store/ui/files'
+import { loadingAdded, loadingRemoved, moveModalDidClose, selectionUpdated } from '@/store/ui/files'
 import FileBrowse from './file-browse'
 
 const FileMove = () => {
@@ -56,38 +51,20 @@ const FileMove = () => {
   }, [targetId, fileId, selection, dispatch, mutateList, mutateTasks])
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => dispatch(moveModalDidClose())}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => dispatch(moveModalDidClose())} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>
-          {selection.length > 1
-            ? `Move (${selection.length}) Items To…`
-            : 'Move Item To…'}
-        </ModalHeader>
+        <ModalHeader>{selection.length > 1 ? `Move (${selection.length}) Items To…` : 'Move Item To…'}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <FileBrowse onChange={(id) => setTargetId(id)} />
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              onClick={() => dispatch(moveModalDidClose())}
-            >
+            <Button type="button" variant="outline" colorScheme="blue" onClick={() => dispatch(moveModalDidClose())}>
               Cancel
             </Button>
-            <Button
-              variant="solid"
-              colorScheme="blue"
-              isDisabled={targetId === fileId}
-              onClick={handleMove}
-            >
+            <Button variant="solid" colorScheme="blue" isDisabled={targetId === fileId} onClick={handleMove}>
               Move Here
             </Button>
           </div>

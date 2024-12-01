@@ -14,20 +14,14 @@ export type IconThumbnailProps = {
   isLoading?: boolean
 }
 
-const IconThumbnail = ({
-  file,
-  scale,
-  isLoading: isLoadingProp,
-}: IconThumbnailProps) => {
+const IconThumbnail = ({ file, scale, isLoading: isLoadingProp }: IconThumbnailProps) => {
   const { original } = file.snapshot || {}
   const width = getThumbnailWidth(file, scale)
   const height = getThumbnailHeight(file, scale)
   const [isLoading, setIsLoading] = useState(true)
   const url = useMemo(() => {
     if (file.snapshot?.thumbnail) {
-      return `/proxy/api/v3/files/${file.id}/thumbnail${
-        file.snapshot.thumbnail.extension
-      }?${new URLSearchParams({
+      return `/proxy/api/v3/files/${file.id}/thumbnail${file.snapshot.thumbnail.extension}?${new URLSearchParams({
         access_token: getAccessTokenOrRedirect(),
       })}`
     }
@@ -56,39 +50,16 @@ const IconThumbnail = ({
         alt={file.name}
         onLoad={() => setIsLoading(false)}
       />
-      {isLoading ? (
-        <Skeleton className={cx('rounded-md')} style={{ width, height }} />
-      ) : null}
+      {isLoading ? <Skeleton className={cx('rounded-md')} style={{ width, height }} /> : null}
       {fe.isVideo(original?.extension) ? (
         <div
-          className={cx(
-            'absolute',
-            'top-0',
-            'left-0',
-            'opacity-50',
-            'flex',
-            'items-center',
-            'justify-center',
-          )}
+          className={cx('absolute', 'top-0', 'left-0', 'opacity-50', 'flex', 'items-center', 'justify-center')}
           style={{ width, height }}
         >
-          <IconPlayArrow
-            className={cx('text-white', 'text-[40px]')}
-            filled={true}
-          />
+          <IconPlayArrow className={cx('text-white', 'text-[40px]')} filled={true} />
         </div>
       ) : null}
-      <div
-        className={cx(
-          'absolute',
-          'flex',
-          'flex-row',
-          'items-center',
-          'gap-[2px]',
-          'bottom-[-5px]',
-          'right-[-5px]',
-        )}
-      >
+      <div className={cx('absolute', 'flex', 'flex-row', 'items-center', 'gap-[2px]', 'bottom-[-5px]', 'right-[-5px]')}>
         <IconBadge file={file} isLoading={isLoadingProp} />
       </div>
     </>

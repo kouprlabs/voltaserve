@@ -10,14 +10,7 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { IconButton } from '@chakra-ui/react'
-import {
-  IconEdit,
-  IconDelete,
-  IconPersonAdd,
-  SectionSpinner,
-  Form,
-  SectionError,
-} from '@koupr/ui'
+import { IconEdit, IconDelete, IconPersonAdd, SectionSpinner, Form, SectionError } from '@koupr/ui'
 import GroupAPI from '@/client/api/group'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
 import { errorToString } from '@/client/error'
@@ -29,22 +22,12 @@ import { truncateEnd } from '@/lib/helpers/truncate-end'
 
 const GroupSettingsPage = () => {
   const { id } = useParams()
-  const {
-    data: group,
-    error: groupError,
-    isLoading: groupIsLoading,
-  } = GroupAPI.useGet(id, swrConfig())
+  const { data: group, error: groupError, isLoading: groupIsLoading } = GroupAPI.useGet(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const hasEditPermission = useMemo(
-    () => group && geEditorPermission(group.permission),
-    [group],
-  )
-  const hasOwnerPermission = useMemo(
-    () => group && geOwnerPermission(group.permission),
-    [group],
-  )
+  const hasEditPermission = useMemo(() => group && geEditorPermission(group.permission), [group])
+  const hasOwnerPermission = useMemo(() => group && geOwnerPermission(group.permission), [group])
   const groupIsReady = group && !groupError
 
   return (
@@ -113,21 +96,9 @@ const GroupSettingsPage = () => {
               },
             ]}
           />
-          <GroupEditName
-            open={isNameModalOpen}
-            group={group}
-            onClose={() => setIsNameModalOpen(false)}
-          />
-          <GroupAddMember
-            open={isAddMembersModalOpen}
-            group={group}
-            onClose={() => setIsAddMembersModalOpen(false)}
-          />
-          <GroupDelete
-            open={deleteModalOpen}
-            group={group}
-            onClose={() => setDeleteModalOpen(false)}
-          />
+          <GroupEditName open={isNameModalOpen} group={group} onClose={() => setIsNameModalOpen(false)} />
+          <GroupAddMember open={isAddMembersModalOpen} group={group} onClose={() => setIsAddMembersModalOpen(false)} />
+          <GroupDelete open={deleteModalOpen} group={group} onClose={() => setDeleteModalOpen(false)} />
         </>
       ) : null}
     </>

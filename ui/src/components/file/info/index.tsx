@@ -35,12 +35,7 @@ const FileInfo = () => {
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              onClick={() => dispatch(infoModalDidClose())}
-            >
+            <Button type="button" variant="outline" colorScheme="blue" onClick={() => dispatch(infoModalDidClose())}>
               Close
             </Button>
           </div>

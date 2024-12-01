@@ -99,12 +99,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
         onClear={handleSearchInputClear}
       />
       {workspace && fileId ? (
-        <Path
-          rootId={workspace.rootId}
-          fileId={fileId}
-          maxCharacters={10}
-          onClick={(fileId) => setFileId(fileId)}
-        />
+        <Path rootId={workspace.rootId} fileId={fileId} maxCharacters={10} onClick={(fileId) => setFileId(fileId)} />
       ) : null}
       {listIsLoading ? <SectionSpinner /> : null}
       {listError ? <SectionError text={errorToString(listError)} /> : null}
@@ -142,10 +137,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
                 )}
                 onClick={() => setFileId(f.id)}
               >
-                <img
-                  src={FolderSvg}
-                  className={cx('shrink-0', 'w-[36px]', 'h-[28.84px]')}
-                />
+                <img src={FolderSvg} className={cx('shrink-0', 'w-[36px]', 'h-[28.84px]')} />
                 <Text noOfLines={1}>{f.name}</Text>
                 <div className={cx('grow')} />
                 <IconChevronRight />

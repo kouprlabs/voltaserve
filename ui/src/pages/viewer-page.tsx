@@ -22,22 +22,13 @@ import ViewerMosaic from '@/components/viewer/viewer-mosaic'
 import ViewerPDF from '@/components/viewer/viewer-pdf'
 import ViewerVideo from '@/components/viewer/viewer-video'
 import downloadFile from '@/lib/helpers/download-file'
-import {
-  isGLB,
-  isAudio,
-  isImage,
-  isPDF,
-  isVideo,
-} from '@/lib/helpers/file-extension'
+import { isGLB, isAudio, isImage, isPDF, isVideo } from '@/lib/helpers/file-extension'
 
 const ViewerPage = () => {
   const { id } = useParams()
   const location = useLocation()
   const { data: file } = FileAPI.useGet(id)
-  const hasMosaicPath = useMemo(
-    () => location.pathname.endsWith('/mosaic'),
-    [location],
-  )
+  const hasMosaicPath = useMemo(() => location.pathname.endsWith('/mosaic'), [location])
   const hasPDF = useMemo(() => {
     return Boolean(
       file?.snapshot &&
@@ -46,37 +37,20 @@ const ViewerPage = () => {
     )
   }, [file, location])
   const hasImage = useMemo(
-    () =>
-      Boolean(
-        file?.snapshot &&
-          file.snapshot?.original &&
-          isImage(file.snapshot?.original.extension),
-      ),
+    () => Boolean(file?.snapshot && file.snapshot?.original && isImage(file.snapshot?.original.extension)),
     [file],
   )
-  const hasMosaicImage = useMemo(
-    () => hasImage && file?.snapshot && file.snapshot?.mosaic,
-    [hasImage],
-  )
+  const hasMosaicImage = useMemo(() => hasImage && file?.snapshot && file.snapshot?.mosaic, [hasImage])
   const hasVideo = useMemo(
-    () =>
-      file?.snapshot &&
-      file.snapshot?.original &&
-      isVideo(file.snapshot?.original.extension),
+    () => file?.snapshot && file.snapshot?.original && isVideo(file.snapshot?.original.extension),
     [file],
   )
   const hasAudio = useMemo(
-    () =>
-      file?.snapshot &&
-      file.snapshot?.original &&
-      isAudio(file.snapshot?.original.extension),
+    () => file?.snapshot && file.snapshot?.original && isAudio(file.snapshot?.original.extension),
     [file],
   )
   const hasGLB = useMemo(
-    () =>
-      file?.snapshot &&
-      file.snapshot?.preview &&
-      isGLB(file.snapshot.preview.extension),
+    () => file?.snapshot && file.snapshot?.preview && isGLB(file.snapshot.preview.extension),
     [file],
   )
 
@@ -102,14 +76,8 @@ const ViewerPage = () => {
         } else {
           return (
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-              <span className={cx('text-[16px]')}>
-                Cannot preview this file.
-              </span>
-              <Button
-                leftIcon={<IconDownload />}
-                colorScheme="blue"
-                onClick={() => downloadFile(file)}
-              >
+              <span className={cx('text-[16px]')}>Cannot preview this file.</span>
+              <Button leftIcon={<IconDownload />} colorScheme="blue" onClick={() => downloadFile(file)}>
                 Download
               </Button>
             </div>
@@ -117,15 +85,7 @@ const ViewerPage = () => {
         }
       }
     },
-    [
-      hasMosaicPath,
-      hasMosaicImage,
-      hasPDF,
-      hasImage,
-      hasVideo,
-      hasAudio,
-      hasGLB,
-    ],
+    [hasMosaicPath, hasMosaicImage, hasPDF, hasImage, hasVideo, hasAudio, hasGLB],
   )
   const isTheaterMode = hasVideo || (hasImage && !hasMosaicImage)
 
@@ -140,16 +100,7 @@ const ViewerPage = () => {
             <Sidenav storage={{ prefix: 'voltaserve', namespace: 'viewer' }}>
               <DrawerContent file={file} />
             </Sidenav>
-            <div
-              className={cx(
-                'relative',
-                'flex',
-                'flex-col',
-                'gap-0',
-                'grow',
-                'h-[100vh]',
-              )}
-            >
+            <div className={cx('relative', 'flex', 'flex-col', 'gap-0', 'grow', 'h-[100vh]')}>
               <div
                 className={cx(
                   'flex',
@@ -168,9 +119,7 @@ const ViewerPage = () => {
           </div>
         </>
       ) : (
-        <div
-          className={cx('flex', 'items-center', 'justify-center', 'h-[100vh]')}
-        >
+        <div className={cx('flex', 'items-center', 'justify-center', 'h-[100vh]')}>
           <Spinner />
         </div>
       )}

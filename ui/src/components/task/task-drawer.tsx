@@ -71,9 +71,7 @@ const TaskDrawer = () => {
       body={
         <>
           {countIsLoading ? <SectionSpinner /> : null}
-          {countError ? (
-            <SectionError text={errorToString(countError)} />
-          ) : null}
+          {countError ? <SectionError text={errorToString(countError)} /> : null}
           {countIsReady ? <TasksList /> : null}
         </>
       }

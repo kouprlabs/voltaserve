@@ -8,19 +8,8 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useEffect } from 'react'
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from 'react-router-dom'
-import {
-  Heading,
-  Link as ChakraLink,
-  Avatar,
-  Badge,
-  Button,
-} from '@chakra-ui/react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Heading, Link as ChakraLink, Avatar, Badge, Button } from '@chakra-ui/react'
 import {
   DataTable,
   IconAdd,
@@ -59,10 +48,7 @@ const GroupListPage = () => {
     error: listError,
     isLoading: listIsLoading,
     mutate,
-  } = GroupAPI.useList(
-    { query, page, size, sortOrder: SortOrder.Desc },
-    swrConfig(),
-  )
+  } = GroupAPI.useList({ query, page, size, sortOrder: SortOrder.Desc }, swrConfig())
   const { hasPagination } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
@@ -94,12 +80,7 @@ const GroupListPage = () => {
           <SectionPlaceholder
             text="There are no groups."
             content={
-              <Button
-                as={Link}
-                to="/new/group"
-                leftIcon={<IconAdd />}
-                variant="solid"
-              >
+              <Button as={Link} to="/new/group" leftIcon={<IconAdd />} variant="solid">
                 New Group
               </Button>
             }
@@ -112,24 +93,9 @@ const GroupListPage = () => {
               {
                 title: 'Name',
                 renderCell: (g) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <Avatar
-                      name={g.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
-                    <ChakraLink
-                      as={Link}
-                      to={`/group/${g.id}/member`}
-                      className={cx('no-underline')}
-                    >
+                  <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
+                    <Avatar name={g.name} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
+                    <ChakraLink as={Link} to={`/group/${g.id}/member`} className={cx('no-underline')}>
                       <Text noOfLines={1}>{g.name}</Text>
                     </ChakraLink>
                   </div>
@@ -138,11 +104,7 @@ const GroupListPage = () => {
               {
                 title: 'Organization',
                 renderCell: (g) => (
-                  <ChakraLink
-                    as={Link}
-                    to={`/organization/${g.organization.id}/member`}
-                    className={cx('no-underline')}
-                  >
+                  <ChakraLink as={Link} to={`/organization/${g.organization.id}/member`} className={cx('no-underline')}>
                     <Text noOfLines={1}>{g.organization.name}</Text>
                   </ChakraLink>
                 ),
@@ -153,9 +115,7 @@ const GroupListPage = () => {
               },
               {
                 title: 'Date',
-                renderCell: (g) => (
-                  <RelativeDate date={new Date(g.createTime)} />
-                ),
+                renderCell: (g) => <RelativeDate date={new Date(g.createTime)} />,
               },
             ]}
             pagination={

@@ -9,24 +9,8 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  IconButton,
-  Badge,
-  Avatar,
-} from '@chakra-ui/react'
-import {
-  IconDelete,
-  SectionError,
-  SectionPlaceholder,
-  SectionSpinner,
-  Text,
-} from '@koupr/ui'
+import { Table, Thead, Tbody, Tr, Th, Td, IconButton, Badge, Avatar } from '@chakra-ui/react'
+import { IconDelete, SectionError, SectionPlaceholder, SectionSpinner, Text } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI, { UserPermission } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -49,10 +33,8 @@ const SharingUserPermissions = () => {
     isLoading: permissionsIsLoading,
     mutate: mutatePermissions,
   } = FileAPI.useGetUserPermissions(selection[0], swrConfig())
-  const permissionsIsEmpty =
-    permissions && !permissionsError && permissions.length === 0
-  const permissionsIsReady =
-    permissions && !permissionsError && permissions.length > 0
+  const permissionsIsEmpty = permissions && !permissionsError && permissions.length === 0
+  const permissionsIsReady = permissions && !permissionsError && permissions.length > 0
 
   const handleRevokePermission = useCallback(
     async (permission: UserPermission) => {
@@ -74,12 +56,8 @@ const SharingUserPermissions = () => {
   return (
     <>
       {permissionsIsLoading ? <SectionSpinner height="auto" /> : null}
-      {permissionsError ? (
-        <SectionError text={errorToString(permissionsError)} height="auto" />
-      ) : null}
-      {permissionsIsEmpty ? (
-        <SectionPlaceholder text="Not shared with any users." height="auto" />
-      ) : null}
+      {permissionsError ? <SectionError text={errorToString(permissionsError)} height="auto" /> : null}
+      {permissionsIsEmpty ? <SectionPlaceholder text="Not shared with any users." height="auto" /> : null}
       {permissionsIsReady ? (
         <Table>
           <Thead>
@@ -93,36 +71,22 @@ const SharingUserPermissions = () => {
             {permissions.map((permission) => (
               <Tr key={permission.id}>
                 <Td className={cx('p-1')}>
-                  <div
-                    className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                  >
+                  <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                     <Avatar
                       name={permission.user.fullName}
                       src={
                         permission.user.picture
-                          ? getPictureUrlById(
-                              permission.user.id,
-                              permission.user.picture,
-                              {
-                                organizationId: workspace?.organization.id,
-                              },
-                            )
+                          ? getPictureUrlById(permission.user.id, permission.user.picture, {
+                              organizationId: workspace?.organization.id,
+                            })
                           : undefined
                       }
                       size="sm"
-                      className={cx(
-                        'w-[40px]',
-                        'h-[40px]',
-                        'border',
-                        'border-gray-300',
-                        'dark:border-gray-700',
-                      )}
+                      className={cx('w-[40px]', 'h-[40px]', 'border', 'border-gray-300', 'dark:border-gray-700')}
                     />
                     <div className={cx('flex', 'flex-col', 'gap-0.5')}>
                       <Text noOfLines={1}>{permission.user.fullName}</Text>
-                      <span className={cx('text-gray-500')}>
-                        {permission.user.email}
-                      </span>
+                      <span className={cx('text-gray-500')}>{permission.user.email}</span>
                     </div>
                   </div>
                 </Td>

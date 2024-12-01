@@ -17,11 +17,7 @@ import { getAdminStatus } from '@/infra/token'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { activeNavChanged, NavType } from '@/store/ui/nav'
 import UploadDrawer from '../upload/upload-drawer'
-import {
-  CreateGroupButton,
-  CreateOrganizationButton,
-  CreateWorkspaceButton,
-} from './app-bar-buttons'
+import { CreateGroupButton, CreateOrganizationButton, CreateWorkspaceButton } from './app-bar-buttons'
 import AppBarSearch from './app-bar-search'
 
 const AppBar = () => {
@@ -54,9 +50,7 @@ const AppBar = () => {
         <>
           {activeNav === NavType.Workspaces ? <CreateWorkspaceButton /> : null}
           {activeNav === NavType.Groups ? <CreateGroupButton /> : null}
-          {activeNav === NavType.Organizations ? (
-            <CreateOrganizationButton />
-          ) : null}
+          {activeNav === NavType.Organizations ? <CreateOrganizationButton /> : null}
           {getAdminStatus() ? <ConsoleButton /> : null}
           <UploadDrawer />
           <TaskDrawer />

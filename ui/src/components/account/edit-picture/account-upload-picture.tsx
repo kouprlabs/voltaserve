@@ -19,12 +19,7 @@ export type AccountUploadPictureProps = {
   onChange: (event: ChangeEvent<HTMLInputElement>) => void
 }
 
-const AccountUploadPicture = ({
-  name,
-  initialValue,
-  onChange,
-  disabled,
-}: AccountUploadPictureProps) => {
+const AccountUploadPicture = ({ name, initialValue, onChange, disabled }: AccountUploadPictureProps) => {
   const [src, setSrc] = useState<string>()
   const hiddenInput = useRef<HTMLInputElement>(null)
 
@@ -39,10 +34,7 @@ const AccountUploadPicture = ({
       }
       const reader = new FileReader()
       reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
-        if (
-          readerEvent.target?.result &&
-          typeof readerEvent.target.result === 'string'
-        ) {
+        if (readerEvent.target?.result && typeof readerEvent.target.result === 'string') {
           setSrc(readerEvent.target.result)
         }
       }
@@ -76,23 +68,13 @@ const AccountUploadPicture = ({
           <div className={cx('relative', 'w-[400px]', 'h-[160px]')}>
             <Image
               src={src || initialValue || ''}
-              className={cx(
-                'rounded',
-                'w-[400px]',
-                'h-[160px]',
-                'object-cover',
-              )}
+              className={cx('rounded', 'w-[400px]', 'h-[160px]', 'object-cover')}
               alt="Account picture"
             />
             <IconButton
               icon={<IconEdit />}
               variant="solid-gray"
-              className={cx(
-                'top-[10px]',
-                'right-[5px]',
-                'absolute',
-                'z-[1000]',
-              )}
+              className={cx('top-[10px]', 'right-[5px]', 'absolute', 'z-[1000]')}
               title="Edit picture"
               aria-label="Edit picture"
               disabled={disabled}
@@ -101,29 +83,14 @@ const AccountUploadPicture = ({
           </div>
         ) : (
           <div
-            className={cx(
-              'flex',
-              'items-center',
-              'justify-center',
-              'cursor-pointer',
-              'w-[400px]',
-              'h-[160px]',
-            )}
+            className={cx('flex', 'items-center', 'justify-center', 'cursor-pointer', 'w-[400px]', 'h-[160px]')}
             onClick={handleEdit}
           >
-            <span className={cx('text-blue-600', 'dark:text-blue-200')}>
-              Browse
-            </span>
+            <span className={cx('text-blue-600', 'dark:text-blue-200')}>Browse</span>
           </div>
         )}
       </div>
-      <input
-        ref={hiddenInput}
-        className={cx('hidden')}
-        type="file"
-        name={name}
-        onChange={handleFileChange}
-      />
+      <input ref={hiddenInput} className={cx('hidden')} type="file" name={name} onChange={handleFileChange} />
     </div>
   )
 }

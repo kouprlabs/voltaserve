@@ -8,13 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useEffect } from 'react'
-import {
-  Modal,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-} from '@chakra-ui/react'
+import { Modal, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay } from '@chakra-ui/react'
 import { SectionError, SectionSpinner } from '@koupr/ui'
 import FileAPI from '@/client/api/file'
 import InsightsAPI from '@/client/api/insights'
@@ -27,11 +21,7 @@ import InsightsOverview from './insights-overview'
 
 const Insights = () => {
   const dispatch = useAppDispatch()
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
+  const id = useAppSelector((state) => (state.ui.files.selection.length > 0 ? state.ui.files.selection[0] : undefined))
   const isModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
   const {
     data: info,
@@ -39,11 +29,7 @@ const Insights = () => {
     isLoading: infoIsLoading,
     mutate: mutateInfo,
   } = InsightsAPI.useGetInfo(id, swrConfig())
-  const {
-    data: file,
-    error: fileError,
-    isLoading: fileIsLoading,
-  } = FileAPI.useGet(id, swrConfig())
+  const { data: file, error: fileError, isLoading: fileIsLoading } = FileAPI.useGet(id, swrConfig())
   const infoIsReady = info && !infoError
   const fileIsReady = file && !fileError
 
@@ -60,12 +46,7 @@ const Insights = () => {
   }, [file])
 
   return (
-    <Modal
-      size="xl"
-      isOpen={isModalOpen}
-      onClose={() => dispatch(modalDidClose())}
-      closeOnOverlayClick={false}
-    >
+    <Modal size="xl" isOpen={isModalOpen} onClose={() => dispatch(modalDidClose())} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Insights</ModalHeader>
@@ -75,14 +56,8 @@ const Insights = () => {
         {fileIsReady ? (
           <>
             {infoIsLoading ? <SectionSpinner /> : null}
-            {infoError ? (
-              <SectionError text={errorToString(infoError)} />
-            ) : null}
-            {infoIsReady ? (
-              <>
-                {info?.isAvailable ? <InsightsOverview /> : <InsightsCreate />}
-              </>
-            ) : null}
+            {infoError ? <SectionError text={errorToString(infoError)} /> : null}
+            {infoIsReady ? <>{info?.isAvailable ? <InsightsOverview /> : <InsightsCreate />}</> : null}
           </>
         ) : null}
       </ModalContent>

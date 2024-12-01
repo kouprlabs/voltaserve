@@ -21,14 +21,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
@@ -49,10 +42,7 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
   const mutate = useAppSelector((state) => state.ui.account.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
-    email: Yup.string()
-      .required('Email is required')
-      .email('Must be a valid email')
-      .max(255),
+    email: Yup.string().required('Email is required').email('Must be a valid email').max(255),
   })
   const inputRef = useRef<HTMLInputElement>(null)
   useFocusAndSelectAll(inputRef, isModalOpen)
@@ -62,10 +52,7 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { email }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ email }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         const result = await UserAPI.updateEmailRequest({
@@ -82,11 +69,7 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Email</ModalHeader>
@@ -103,25 +86,15 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
               <ModalBody>
                 <Field name="email">
                   {({ field }: FieldAttributes<FieldProps>) => (
-                    <FormControl
-                      isInvalid={Boolean(errors.email && touched.email)}
-                    >
-                      <Input
-                        ref={inputRef}
-                        {...field}
-                        placeholder="Email"
-                        disabled={isSubmitting}
-                        autoFocus
-                      />
+                    <FormControl isInvalid={Boolean(errors.email && touched.email)}>
+                      <Input ref={inputRef} {...field} placeholder="Email" disabled={isSubmitting} autoFocus />
                       <FormErrorMessage>{errors.email}</FormErrorMessage>
                     </FormControl>
                   )}
                 </Field>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -131,12 +104,7 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="blue"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="blue" isLoading={isSubmitting}>
                     Save
                   </Button>
                 </div>

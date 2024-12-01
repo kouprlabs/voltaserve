@@ -155,11 +155,7 @@ export function isArchive(ext?: string | null) {
   if (!ext) {
     return false
   }
-  return (
-    ['.zip', '.tar', '.7z', '.bz2', '.gz', '.rar'].findIndex(
-      (e) => e === ext,
-    ) !== -1
-  )
+  return ['.zip', '.tar', '.7z', '.bz2', '.gz', '.rar'].findIndex((e) => e === ext) !== -1
 }
 
 export function isFont(ext?: string | null) {

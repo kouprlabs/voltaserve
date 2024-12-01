@@ -13,11 +13,7 @@ import { IconBolt, IconDelete, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import InsightsAPI from '@/client/api/insights'
-import {
-  geEditorPermission,
-  geOwnerPermission,
-  NONE_PERMISSION,
-} from '@/client/api/permission'
+import { geEditorPermission, geOwnerPermission, NONE_PERMISSION } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
@@ -26,11 +22,7 @@ import { modalDidClose } from '@/store/ui/insights'
 
 const InsightsOverviewSettings = () => {
   const dispatch = useAppDispatch()
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
+  const id = useAppSelector((state) => (state.ui.files.selection.length > 0 ? state.ui.files.selection[0] : undefined))
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
   const {
@@ -39,12 +31,7 @@ const InsightsOverviewSettings = () => {
     isLoading: infoIsLoading,
     mutate: mutateInfo,
   } = InsightsAPI.useGetInfo(id, swrConfig())
-  const {
-    data: file,
-    error: fileError,
-    isLoading: fileIsLoading,
-    mutate: mutateFile,
-  } = FileAPI.useGet(id, swrConfig())
+  const { data: file, error: fileError, isLoading: fileIsLoading, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
   const canCollect = useMemo(() => {
     return !!(
       !file?.snapshot?.task?.isPending &&
@@ -55,9 +42,7 @@ const InsightsOverviewSettings = () => {
 
   const canDelete = useMemo(() => {
     return (
-      !file?.snapshot?.task?.isPending &&
-      !info?.isOutdated &&
-      geOwnerPermission(file?.permission ?? NONE_PERMISSION)
+      !file?.snapshot?.task?.isPending && !info?.isOutdated && geOwnerPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [info, file])
   const fileIsReady = file && !fileError
@@ -100,11 +85,7 @@ const InsightsOverviewSettings = () => {
                   <Text>Collect insights for the active snapshot.</Text>
                 </CardBody>
                 <CardFooter>
-                  <Button
-                    leftIcon={<IconBolt />}
-                    isDisabled={!canCollect}
-                    onClick={handleUpdate}
-                  >
+                  <Button leftIcon={<IconBolt />} isDisabled={!canCollect} onClick={handleUpdate}>
                     Collect Insights
                   </Button>
                 </CardFooter>
@@ -114,12 +95,7 @@ const InsightsOverviewSettings = () => {
                   <Text>Delete insights from the active snapshot.</Text>
                 </CardBody>
                 <CardFooter>
-                  <Button
-                    colorScheme="red"
-                    leftIcon={<IconDelete />}
-                    isDisabled={!canDelete}
-                    onClick={handleDelete}
-                  >
+                  <Button colorScheme="red" leftIcon={<IconDelete />} isDisabled={!canDelete} onClick={handleDelete}>
                     Delete Insights
                   </Button>
                 </CardFooter>

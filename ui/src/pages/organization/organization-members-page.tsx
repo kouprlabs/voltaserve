@@ -8,12 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useEffect, useState } from 'react'
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button, Avatar } from '@chakra-ui/react'
 import {
   DataTable,
@@ -41,10 +36,7 @@ import { decodeQuery } from '@/lib/helpers/query'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  inviteModalDidClose,
-  inviteModalDidOpen,
-} from '@/store/ui/organizations'
+import { inviteModalDidClose, inviteModalDidOpen } from '@/store/ui/organizations'
 
 const OrganizationMembersPage = () => {
   const { id } = useParams()
@@ -52,11 +44,7 @@ const OrganizationMembersPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useAppDispatch()
-  const {
-    data: org,
-    error: orgError,
-    isLoading: orgIsLoading,
-  } = OrganizationAPI.useGet(id, swrConfig())
+  const { data: org, error: orgError, isLoading: orgIsLoading } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -78,12 +66,9 @@ const OrganizationMembersPage = () => {
     },
     swrConfig(),
   )
-  const isInviteMembersModalOpen = useAppSelector(
-    (state) => state.ui.organizations.isInviteModalOpen,
-  )
+  const isInviteMembersModalOpen = useAppSelector((state) => state.ui.organizations.isInviteModalOpen)
   const [userToRemove, setUserToRemove] = useState<User>()
-  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
-    useState<boolean>(false)
+  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState<boolean>(false)
   const { hasPagination } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
@@ -112,10 +97,7 @@ const OrganizationMembersPage = () => {
               text="This organization has no members."
               content={
                 geOwnerPermission(org.permission) ? (
-                  <Button
-                    leftIcon={<IconPersonAdd />}
-                    onClick={() => dispatch(inviteModalDidOpen())}
-                  >
+                  <Button leftIcon={<IconPersonAdd />} onClick={() => dispatch(inviteModalDidOpen())}>
                     Invite Members
                   </Button>
                 ) : undefined
@@ -129,14 +111,7 @@ const OrganizationMembersPage = () => {
                 {
                   title: 'Full name',
                   renderCell: (u) => (
-                    <div
-                      className={cx(
-                        'flex',
-                        'flex-row',
-                        'gap-1.5',
-                        'items-center',
-                      )}
-                    >
+                    <div className={cx('flex', 'flex-row', 'gap-1.5', 'items-center')}>
                       <Avatar
                         name={u.fullName}
                         src={
@@ -146,11 +121,7 @@ const OrganizationMembersPage = () => {
                               })
                             : undefined
                         }
-                        className={cx(
-                          'border',
-                          'border-gray-300',
-                          'dark:border-gray-700',
-                        )}
+                        className={cx('border', 'border-gray-300', 'dark:border-gray-700')}
                       />
                       <span>{truncateEnd(u.fullName, 50)}</span>
                     </div>

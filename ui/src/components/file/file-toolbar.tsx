@@ -40,17 +40,8 @@ import { ltEditorPermission } from '@/client/api/permission'
 import mapFileList from '@/lib/helpers/map-file-list'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  sortByUpdated,
-  viewTypeToggled,
-  selectionModeToggled,
-  sortOrderToggled,
-} from '@/store/ui/files'
-import {
-  createModalDidOpen,
-  iconScaleUpdated,
-  selectionUpdated,
-} from '@/store/ui/files'
+import { sortByUpdated, viewTypeToggled, selectionModeToggled, sortOrderToggled } from '@/store/ui/files'
+import { createModalDidOpen, iconScaleUpdated, selectionUpdated } from '@/store/ui/files'
 import { drawerDidOpen } from '@/store/ui/uploads'
 import { FileViewType } from '@/types/file'
 import FileMenu from './file-menu'
@@ -63,20 +54,14 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const dispatch = useAppDispatch()
   const { id: workspaceId, fileId } = useParams()
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const count = useAppSelector(
-    (state) => state.entities.files.list?.data.length,
-  )
+  const count = useAppSelector((state) => state.entities.files.list?.data.length)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const viewType = useAppSelector((state) => state.ui.files.viewType)
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
-  const isSelectionMode = useAppSelector(
-    (state) => state.ui.files.isSelectionMode,
-  )
+  const isSelectionMode = useAppSelector((state) => state.ui.files.isSelectionMode)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const isContextMenuOpen = useAppSelector(
-    (state) => state.ui.files.isContextMenuOpen,
-  )
+  const isContextMenuOpen = useAppSelector((state) => state.ui.files.isContextMenuOpen)
   const iconScales = [1, 1.25, 1.5, 1.75, 2.5]
   const fileUploadInput = useRef<HTMLInputElement>(null)
   const folderUploadInput = useRef<HTMLInputElement>(null)
@@ -194,23 +179,15 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               variant="solid"
               colorScheme="blue"
               icon={<IconCloudUpload />}
-              isDisabled={
-                !folder || ltEditorPermission(folder.permission) || !list
-              }
+              isDisabled={!folder || ltEditorPermission(folder.permission) || !list}
             />
           </Tooltip>
           <Portal>
             <MenuList>
-              <MenuItem
-                icon={<IconAdd />}
-                onClick={() => fileUploadInput?.current?.click()}
-              >
+              <MenuItem icon={<IconAdd />} onClick={() => fileUploadInput?.current?.click()}>
                 Upload Files
               </MenuItem>
-              <MenuItem
-                icon={<IconUpload />}
-                onClick={() => folderUploadInput?.current?.click()}
-              >
+              <MenuItem icon={<IconUpload />} onClick={() => folderUploadInput?.current?.click()}>
                 Upload Folder
               </MenuItem>
             </MenuList>
@@ -221,9 +198,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             variant="outline"
             colorScheme="blue"
             icon={<IconAdd />}
-            isDisabled={
-              !folder || ltEditorPermission(folder.permission) || !list
-            }
+            isDisabled={!folder || ltEditorPermission(folder.permission) || !list}
             onClick={() => dispatch(createModalDidOpen())}
             title="New folder"
             aria-label="New folder"
@@ -283,22 +258,13 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               />
               <Portal>
                 <MenuList zIndex="dropdown">
-                  <MenuItem
-                    icon={getSortIcon(SortBy.Name)}
-                    onClick={() => handleSortByChange(SortBy.Name)}
-                  >
+                  <MenuItem icon={getSortIcon(SortBy.Name)} onClick={() => handleSortByChange(SortBy.Name)}>
                     Sort By Name
                   </MenuItem>
-                  <MenuItem
-                    icon={getSortIcon(SortBy.Kind)}
-                    onClick={() => handleSortByChange(SortBy.Kind)}
-                  >
+                  <MenuItem icon={getSortIcon(SortBy.Kind)} onClick={() => handleSortByChange(SortBy.Kind)}>
                     Sort By Kind
                   </MenuItem>
-                  <MenuItem
-                    icon={getSortIcon(SortBy.Size)}
-                    onClick={() => handleSortByChange(SortBy.Size)}
-                  >
+                  <MenuItem icon={getSortIcon(SortBy.Size)} onClick={() => handleSortByChange(SortBy.Size)}>
                     Sort By Size
                   </MenuItem>
                   <MenuItem
@@ -315,11 +281,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                   </MenuItem>
                   <MenuDivider />
                   {iconScales.map((scale, index) => (
-                    <MenuItem
-                      key={index}
-                      icon={getScaleIcon(scale)}
-                      onClick={() => handleIconScaleChange(scale)}
-                    >
+                    <MenuItem key={index} icon={getScaleIcon(scale)} onClick={() => handleIconScaleChange(scale)}>
                       {scale}x
                     </MenuItem>
                   ))}
@@ -329,13 +291,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           </div>
         </div>
       </div>
-      <input
-        ref={fileUploadInput}
-        className={cx('hidden')}
-        type="file"
-        multiple
-        onChange={handleUploadChange}
-      />
+      <input ref={fileUploadInput} className={cx('hidden')} type="file" multiple onChange={handleUploadChange} />
       <input
         ref={folderUploadInput}
         className={cx('hidden')}

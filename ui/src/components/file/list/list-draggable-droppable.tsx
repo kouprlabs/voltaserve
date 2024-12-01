@@ -8,14 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useState, MouseEvent } from 'react'
-import {
-  DragCancelEvent,
-  DragEndEvent,
-  DragStartEvent,
-  useDndMonitor,
-  useDraggable,
-  useDroppable,
-} from '@dnd-kit/core'
+import { DragCancelEvent, DragEndEvent, DragStartEvent, useDndMonitor, useDraggable, useDroppable } from '@dnd-kit/core'
 import cx from 'classnames'
 import FileAPI, { FileType } from '@/client/api/file'
 import store from '@/store/configure-store'
@@ -61,15 +54,8 @@ const ListDraggableDroppable = ({
       if (selection.includes(file.id) || event.active.id === file.id) {
         setVisible(true)
       }
-      if (
-        file.type === FileType.Folder &&
-        file.id !== event.active.id &&
-        !selection.includes(file.id) &&
-        isOver
-      ) {
-        const idsToMove = [
-          ...new Set<string>([...selection, event.active.id as string]),
-        ]
+      if (file.type === FileType.Folder && file.id !== event.active.id && !selection.includes(file.id) && isOver) {
+        const idsToMove = [...new Set<string>([...selection, event.active.id as string])]
         const list = store.getState().entities.files.list
         if (list) {
           await mutateList?.({

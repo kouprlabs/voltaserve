@@ -10,15 +10,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { IconButton } from '@chakra-ui/react'
-import {
-  IconEdit,
-  IconLogout,
-  IconDelete,
-  IconPersonAdd,
-  SectionSpinner,
-  Form,
-  SectionError,
-} from '@koupr/ui'
+import { IconEdit, IconLogout, IconDelete, IconPersonAdd, SectionSpinner, Form, SectionError } from '@koupr/ui'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
 import { errorToString } from '@/client/error'
@@ -31,14 +23,9 @@ import { truncateEnd } from '@/lib/helpers/truncate-end'
 
 const OrganizationSettingsPage = () => {
   const { id } = useParams()
-  const {
-    data: org,
-    error: orgError,
-    isLoading: orgIsLoading,
-  } = OrganizationAPI.useGet(id, swrConfig())
+  const { data: org, error: orgError, isLoading: orgIsLoading } = OrganizationAPI.useGet(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
-  const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
-    useState(false)
+  const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] = useState(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const orgIsReady = org && !orgError
@@ -122,26 +109,14 @@ const OrganizationSettingsPage = () => {
               },
             ]}
           />
-          <OrganizationEditName
-            open={isNameModalOpen}
-            organization={org}
-            onClose={() => setIsNameModalOpen(false)}
-          />
+          <OrganizationEditName open={isNameModalOpen} organization={org} onClose={() => setIsNameModalOpen(false)} />
           <OrganizationInviteMembers
             open={isInviteMembersModalOpen}
             id={org.id}
             onClose={() => setIsInviteMembersModalOpen(false)}
           />
-          <OrganizationLeave
-            open={isLeaveModalOpen}
-            id={org.id}
-            onClose={() => setIsLeaveModalOpen(false)}
-          />
-          <OrganizationDelete
-            open={isDeleteModalOpen}
-            organization={org}
-            onClose={() => setIsDeleteModalOpen(false)}
-          />
+          <OrganizationLeave open={isLeaveModalOpen} id={org.id} onClose={() => setIsLeaveModalOpen(false)} />
+          <OrganizationDelete open={isDeleteModalOpen} organization={org} onClose={() => setIsDeleteModalOpen(false)} />
         </>
       ) : null}
     </>

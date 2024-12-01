@@ -86,11 +86,7 @@ export default class OrganizationAPI {
 
   static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/organizations?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
-      swrOptions,
-    )
+    return useSWR<List>(url, () => apiFetcher({ url, method: 'GET' }) as Promise<List>, swrOptions)
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {

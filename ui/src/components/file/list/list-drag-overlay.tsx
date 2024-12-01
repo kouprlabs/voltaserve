@@ -16,20 +16,12 @@ import ListItem from './item'
 type ListDragOverlayProps = FileCommonProps
 
 const ListDragOverlay = ({ file, scale, viewType }: ListDragOverlayProps) => {
-  const selectionCount = useAppSelector(
-    (state) => state.ui.files.selection.length,
-  )
+  const selectionCount = useAppSelector((state) => state.ui.files.selection.length)
 
   return (
     <DragOverlay>
       <div className={cx('relative')}>
-        <ListItem
-          file={file}
-          scale={scale}
-          isPresentational={true}
-          isDragging={true}
-          viewType={viewType}
-        />
+        <ListItem file={file} scale={scale} isPresentational={true} isDragging={true} viewType={viewType} />
         {selectionCount > 1 ? (
           <div
             className={cx(

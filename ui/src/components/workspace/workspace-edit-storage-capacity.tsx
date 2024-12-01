@@ -22,14 +22,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { SectionError, SectionSpinner } from '@koupr/ui'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import StorageAPI from '@/client/api/storage'
@@ -49,11 +42,7 @@ type FormValues = {
   storageCapacity: number
 }
 
-const WorkspaceEditStorageCapacity = ({
-  open,
-  workspace,
-  onClose,
-}: WorkspaceEditStorageCapacityProps) => {
+const WorkspaceEditStorageCapacity = ({ open, workspace, onClose }: WorkspaceEditStorageCapacityProps) => {
   const mutate = useAppSelector((state) => state.ui.workspace.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const {
@@ -80,10 +69,7 @@ const WorkspaceEditStorageCapacity = ({
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { storageCapacity }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ storageCapacity }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         const result = await WorkspaceAPI.patchStorageCapacity(workspace.id, {
@@ -100,11 +86,7 @@ const WorkspaceEditStorageCapacity = ({
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Storage Capacity</ModalHeader>
@@ -122,32 +104,21 @@ const WorkspaceEditStorageCapacity = ({
             <Form>
               <ModalBody>
                 {storageUsageIsLoading ? <SectionSpinner /> : null}
-                {storageUsageError ? (
-                  <SectionError text={errorToString(storageUsageError)} />
-                ) : null}
+                {storageUsageError ? <SectionError text={errorToString(storageUsageError)} /> : null}
                 {storageUsageIsReady ? (
                   <Field name="storageCapacity">
                     {(props: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        maxW="500px"
-                        isInvalid={Boolean(
-                          errors.storageCapacity && touched.storageCapacity,
-                        )}
-                      >
+                      <FormControl maxW="500px" isInvalid={Boolean(errors.storageCapacity && touched.storageCapacity)}>
                         <FormLabel>Storage capacity</FormLabel>
                         <StorageInput {...props} />
-                        <FormErrorMessage>
-                          {errors.storageCapacity}
-                        </FormErrorMessage>
+                        <FormErrorMessage>{errors.storageCapacity}</FormErrorMessage>
                       </FormControl>
                     )}
                   </Field>
                 ) : null}
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -157,12 +128,7 @@ const WorkspaceEditStorageCapacity = ({
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="blue"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="blue" isLoading={isSubmitting}>
                     Save
                   </Button>
                 </div>

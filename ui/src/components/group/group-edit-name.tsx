@@ -21,14 +21,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
@@ -59,10 +52,7 @@ const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { name }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ name }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         const result = await GroupAPI.patchName(group.id, {
@@ -79,11 +69,7 @@ const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Name</ModalHeader>
@@ -100,25 +86,15 @@ const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
               <ModalBody>
                 <Field name="name">
                   {({ field }: FieldAttributes<FieldProps>) => (
-                    <FormControl
-                      isInvalid={Boolean(errors.name && touched.name)}
-                    >
-                      <Input
-                        ref={inputRef}
-                        {...field}
-                        placeholder="Name"
-                        disabled={isSubmitting}
-                        autoFocus
-                      />
+                    <FormControl isInvalid={Boolean(errors.name && touched.name)}>
+                      <Input ref={inputRef} {...field} placeholder="Name" disabled={isSubmitting} autoFocus />
                       <FormErrorMessage>{errors.name}</FormErrorMessage>
                     </FormControl>
                   )}
                 </Field>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"

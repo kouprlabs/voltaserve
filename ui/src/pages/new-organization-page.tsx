@@ -11,14 +11,7 @@ import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Heading } from '@chakra-ui/react'
 import { Button, FormControl, FormErrorMessage, Input } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -38,10 +31,7 @@ const NewOrganizationPage = () => {
   })
 
   const handleSubmit = useCallback(
-    async (
-      { name }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ name }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       setIsLoading(true)
       try {
@@ -80,24 +70,14 @@ const NewOrganizationPage = () => {
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        maxW="400px"
-                        isInvalid={Boolean(errors.name && touched.name)}
-                      >
-                        <Input
-                          {...field}
-                          placeholder="Name"
-                          disabled={isSubmitting}
-                          autoFocus
-                        />
+                      <FormControl maxW="400px" isInvalid={Boolean(errors.name && touched.name)}>
+                        <Input {...field} placeholder="Name" disabled={isSubmitting} autoFocus />
                         <FormErrorMessage>{errors.name}</FormErrorMessage>
                       </FormControl>
                     )}
                   </Field>
                 </div>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="submit"
                     variant="solid"

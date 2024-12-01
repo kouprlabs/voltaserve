@@ -9,23 +9,9 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  Input,
-  Link as ChakraLink,
-  Heading,
-} from '@chakra-ui/react'
+import { Button, FormControl, FormErrorMessage, Input, Link as ChakraLink, Heading } from '@chakra-ui/react'
 import { Logo } from '@koupr/ui'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -44,9 +30,7 @@ const SignUpPage = () => {
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false)
   const formSchema = Yup.object().shape({
     fullName: Yup.string().required('Name is required'),
-    email: Yup.string()
-      .email('Email is not valid')
-      .required('Email is required'),
+    email: Yup.string().email('Email is not valid').required('Email is required'),
     password: Yup.string().required('Password is required'),
     passwordConfirmation: Yup.string()
       .oneOf([Yup.ref('password'), undefined], 'Passwords must match')
@@ -55,10 +39,7 @@ const SignUpPage = () => {
   const { data: passwordRequirements } = AccountAPI.useGetPasswordRequirements()
 
   const handleSubmit = useCallback(
-    async (
-      { fullName, email, password }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ fullName, email, password }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       try {
         await AccountAPI.create({
           fullName,
@@ -80,45 +61,24 @@ const SignUpPage = () => {
           <title>Sign Up to Voltaserve</title>
         </Helmet>
         {isConfirmationVisible ? (
-          <div
-            className={cx(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-2.5',
-              'w-full',
-            )}
-          >
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-2.5', 'w-full')}>
             <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
               <div className={cx('w-[64px]')}>
                 <Logo type="voltaserve" size="md" isGlossy={true} />
               </div>
-              <Heading className={cx('text-heading')}>
-                Thanks! We just sent you a confirmation email
-              </Heading>
+              <Heading className={cx('text-heading')}>Thanks! We just sent you a confirmation email</Heading>
               <span className={cx('text-center')}>
-                Just open your inbox, find the email, and click on the
-                confirmation link.
+                Just open your inbox, find the email, and click on the confirmation link.
               </span>
             </div>
           </div>
         ) : null}
         {!isConfirmationVisible ? (
-          <div
-            className={cx(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-2.5',
-              'w-full',
-            )}
-          >
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-2.5', 'w-full')}>
             <div className={cx('w-[64px]')}>
               <Logo type="voltaserve" size="md" isGlossy={true} />
             </div>
-            <Heading className={cx('text-heading')}>
-              Sign Up to Voltaserve
-            </Heading>
+            <Heading className={cx('text-heading')}>Sign Up to Voltaserve</Heading>
             <Formik
               initialValues={{
                 fullName: '',
@@ -132,53 +92,26 @@ const SignUpPage = () => {
             >
               {({ errors, touched, isSubmitting, values }) => (
                 <Form className={cx('w-full')}>
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-col',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
+                  <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
                     <Field name="fullName">
                       {({ field }: FieldAttributes<FieldProps>) => (
-                        <FormControl
-                          isInvalid={Boolean(
-                            errors.fullName && touched.fullName,
-                          )}
-                        >
-                          <Input
-                            {...field}
-                            id="fullName"
-                            placeholder="Full name"
-                            disabled={isSubmitting}
-                          />
+                        <FormControl isInvalid={Boolean(errors.fullName && touched.fullName)}>
+                          <Input {...field} id="fullName" placeholder="Full name" disabled={isSubmitting} />
                           <FormErrorMessage>{errors.fullName}</FormErrorMessage>
                         </FormControl>
                       )}
                     </Field>
                     <Field name="email">
                       {({ field }: FieldAttributes<FieldProps>) => (
-                        <FormControl
-                          isInvalid={Boolean(errors.email && touched.email)}
-                        >
-                          <Input
-                            {...field}
-                            id="email"
-                            placeholder="Email"
-                            disabled={isSubmitting}
-                          />
+                        <FormControl isInvalid={Boolean(errors.email && touched.email)}>
+                          <Input {...field} id="email" placeholder="Email" disabled={isSubmitting} />
                           <FormErrorMessage>{errors.email}</FormErrorMessage>
                         </FormControl>
                       )}
                     </Field>
                     <Field name="password">
                       {({ field }: FieldAttributes<FieldProps>) => (
-                        <FormControl
-                          isInvalid={Boolean(
-                            errors.password && touched.password,
-                          )}
-                        >
+                        <FormControl isInvalid={Boolean(errors.password && touched.password)}>
                           <Input
                             {...field}
                             id="password"
@@ -189,10 +122,7 @@ const SignUpPage = () => {
                           <FormErrorMessage>{errors.password}</FormErrorMessage>
                           {passwordRequirements ? (
                             <div className="pt-1">
-                              <PasswordHints
-                                value={values.password}
-                                requirements={passwordRequirements}
-                              />
+                              <PasswordHints value={values.password} requirements={passwordRequirements} />
                             </div>
                           ) : null}
                         </FormControl>
@@ -200,12 +130,7 @@ const SignUpPage = () => {
                     </Field>
                     <Field name="passwordConfirmation">
                       {({ field }: FieldAttributes<FieldProps>) => (
-                        <FormControl
-                          isInvalid={Boolean(
-                            errors.passwordConfirmation &&
-                              touched.passwordConfirmation,
-                          )}
-                        >
+                        <FormControl isInvalid={Boolean(errors.passwordConfirmation && touched.passwordConfirmation)}>
                           <Input
                             {...field}
                             id="passwordConfirmation"
@@ -213,9 +138,7 @@ const SignUpPage = () => {
                             type="password"
                             disabled={isSubmitting}
                           />
-                          <FormErrorMessage>
-                            {errors.passwordConfirmation}
-                          </FormErrorMessage>
+                          <FormErrorMessage>{errors.passwordConfirmation}</FormErrorMessage>
                         </FormControl>
                       )}
                     </Field>

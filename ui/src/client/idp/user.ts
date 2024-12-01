@@ -82,11 +82,7 @@ type ListQueryParams = {
 export default class UserAPI {
   static useGet(swrOptions?: SWRConfiguration) {
     const url = `/users/me`
-    return useSWR<User>(
-      url,
-      () => idpFetcher({ url, method: 'GET' }) as Promise<User>,
-      swrOptions,
-    )
+    return useSWR<User>(url, () => idpFetcher({ url, method: 'GET' }) as Promise<User>, swrOptions)
   }
 
   static useGetById(id?: string, swrOptions?: SWRConfiguration) {
@@ -111,11 +107,7 @@ export default class UserAPI {
 
   static useList(options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/users?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
-      url,
-      () => idpFetcher({ url, method: 'GET' }) as Promise<List>,
-      swrOptions,
-    )
+    return useSWR<List>(url, () => idpFetcher({ url, method: 'GET' }) as Promise<List>, swrOptions)
   }
 
   static list(options: ListOptions) {

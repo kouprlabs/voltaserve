@@ -34,27 +34,9 @@ const LayoutFull = ({ children }: LayoutFullProps) => {
   }, [error, toast, dispatch])
 
   return (
-    <div
-      className={cx(
-        'relative',
-        'flex',
-        'flex-col',
-        'items-center',
-        'w-full',
-        'h-[100vh]',
-      )}
-    >
+    <div className={cx('relative', 'flex', 'flex-col', 'items-center', 'w-full', 'h-[100vh]')}>
       <div
-        className={cx(
-          'flex',
-          'items-center',
-          'justify-center',
-          'w-full',
-          'md:w-[400px]',
-          'h-full',
-          'p-2',
-          'md:p-0',
-        )}
+        className={cx('flex', 'items-center', 'justify-center', 'w-full', 'md:w-[400px]', 'h-full', 'p-2', 'md:p-0')}
       >
         {children}
       </div>

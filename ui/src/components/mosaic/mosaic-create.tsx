@@ -17,11 +17,7 @@ import { modalDidClose } from '@/store/ui/mosaic'
 
 const MosaicCreate = () => {
   const dispatch = useAppDispatch()
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
+  const id = useAppSelector((state) => (state.ui.files.selection.length > 0 ? state.ui.files.selection[0] : undefined))
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
   const mutateInfo = useAppSelector((state) => state.ui.mosaic.mutateInfo)
@@ -43,38 +39,19 @@ const MosaicCreate = () => {
   return (
     <>
       <ModalBody>
-        <div
-          className={cx(
-            'flex',
-            'flex-col',
-            'items-center',
-            'justify-center',
-            'gap-1.5',
-          )}
-        >
+        <div className={cx('flex', 'flex-col', 'items-center', 'justify-center', 'gap-1.5')}>
           <p>
-            Create a mosaic to enhance view performance of a large image by
-            splitting it into smaller, manageable tiles. This makes browsing a
-            high-resolution image faster and more efficient.
+            Create a mosaic to enhance view performance of a large image by splitting it into smaller, manageable tiles.
+            This makes browsing a high-resolution image faster and more efficient.
           </p>
         </div>
       </ModalBody>
       <ModalFooter>
         <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-          <Button
-            type="button"
-            variant="outline"
-            colorScheme="blue"
-            onClick={() => dispatch(modalDidClose())}
-          >
+          <Button type="button" variant="outline" colorScheme="blue" onClick={() => dispatch(modalDidClose())}>
             Cancel
           </Button>
-          <Button
-            type="button"
-            variant="solid"
-            colorScheme="blue"
-            onClick={handleCreate}
-          >
+          <Button type="button" variant="solid" colorScheme="blue" onClick={handleCreate}>
             Create Mosaic
           </Button>
         </div>

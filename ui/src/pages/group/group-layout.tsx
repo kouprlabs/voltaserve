@@ -24,12 +24,7 @@ const GroupLayout = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { id } = useParams()
-  const {
-    data: group,
-    error: groupError,
-    isLoading: groupIsLoading,
-    mutate,
-  } = GroupAPI.useGet(id, swrConfig())
+  const { data: group, error: groupError, isLoading: groupIsLoading, mutate } = GroupAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
   const groupIsReady = group && !groupError
 
@@ -64,12 +59,8 @@ const GroupLayout = () => {
             </Heading>
             <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
               <TabList>
-                <Tab onClick={() => navigate(`/group/${id}/member`)}>
-                  Members
-                </Tab>
-                <Tab onClick={() => navigate(`/group/${id}/settings`)}>
-                  Settings
-                </Tab>
+                <Tab onClick={() => navigate(`/group/${id}/member`)}>Members</Tab>
+                <Tab onClick={() => navigate(`/group/${id}/settings`)}>Settings</Tab>
               </TabList>
             </Tabs>
             <Outlet />

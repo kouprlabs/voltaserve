@@ -52,9 +52,7 @@ const WorkspaceLayout = () => {
   return (
     <>
       {workspaceIsLoading ? <SectionSpinner /> : null}
-      {workspaceError ? (
-        <SectionError text={errorToString(workspaceError)} />
-      ) : null}
+      {workspaceError ? <SectionError text={errorToString(workspaceError)} /> : null}
       {workspaceIsReady ? (
         <>
           <Helmet>
@@ -66,16 +64,8 @@ const WorkspaceLayout = () => {
             </Heading>
             <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
               <TabList>
-                <Tab
-                  onClick={() =>
-                    navigate(`/workspace/${id}/file/${workspace.rootId}`)
-                  }
-                >
-                  Files
-                </Tab>
-                <Tab onClick={() => navigate(`/workspace/${id}/settings`)}>
-                  Settings
-                </Tab>
+                <Tab onClick={() => navigate(`/workspace/${id}/file/${workspace.rootId}`)}>Files</Tab>
+                <Tab onClick={() => navigate(`/workspace/${id}/settings`)}>Settings</Tab>
               </TabList>
             </Tabs>
             <Outlet />

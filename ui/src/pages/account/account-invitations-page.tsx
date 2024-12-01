@@ -38,11 +38,7 @@ const AccountInvitationsPage = () => {
   const location = useLocation()
   const dispatch = useAppDispatch()
   const toast = useToast()
-  const {
-    data: user,
-    error: userError,
-    isLoading: userIsLoading,
-  } = UserAPI.useGet()
+  const { data: user, error: userError, isLoading: userIsLoading } = UserAPI.useGet()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -53,10 +49,7 @@ const AccountInvitationsPage = () => {
     error: listError,
     isLoading: listIsLoading,
     mutate,
-  } = InvitationAPI.useGetIncoming(
-    { page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc },
-    swrConfig(),
-  )
+  } = InvitationAPI.useGetIncoming({ page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc }, swrConfig())
   const userIsReady = user && !userError
   const listIsEmpty = list && !listError && list.totalElements === 0
   const listIsReady = list && !listError && list.totalElements > 0
@@ -101,9 +94,7 @@ const AccountInvitationsPage = () => {
         <>
           {listIsLoading ? <SectionSpinner /> : null}
           {listError ? <SectionError text={errorToString(listError)} /> : null}
-          {listIsEmpty ? (
-            <SectionPlaceholder text="There are no invitations." />
-          ) : null}
+          {listIsEmpty ? <SectionPlaceholder text="There are no invitations." /> : null}
           {listIsReady ? (
             <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
               <DataTable
@@ -112,34 +103,19 @@ const AccountInvitationsPage = () => {
                   {
                     title: 'From',
                     renderCell: (i) => (
-                      <div
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'gap-1.5',
-                          'items-center',
-                        )}
-                      >
+                      <div className={cx('flex', 'flex-row', 'gap-1.5', 'items-center')}>
                         {i.owner && i.organization ? (
                           <>
                             <Avatar
                               name={i.owner.fullName}
                               src={
                                 i.owner.picture
-                                  ? getPictureUrlById(
-                                      i.owner.id,
-                                      i.owner.picture,
-                                      {
-                                        invitationId: i.id,
-                                      },
-                                    )
+                                  ? getPictureUrlById(i.owner.id, i.owner.picture, {
+                                      invitationId: i.id,
+                                    })
                                   : undefined
                               }
-                              className={cx(
-                                'border',
-                                'border-gray-300',
-                                'dark:border-gray-700',
-                              )}
+                              className={cx('border', 'border-gray-300', 'dark:border-gray-700')}
                             />
                             {i.owner ? userToString(i.owner) : ''}
                           </>
@@ -149,17 +125,11 @@ const AccountInvitationsPage = () => {
                   },
                   {
                     title: 'Organization',
-                    renderCell: (i) => (
-                      <Text noOfLines={1}>
-                        {i.organization ? i.organization.name : ''}
-                      </Text>
-                    ),
+                    renderCell: (i) => <Text noOfLines={1}>{i.organization ? i.organization.name : ''}</Text>,
                   },
                   {
                     title: 'Date',
-                    renderCell: (i) => (
-                      <RelativeDate date={new Date(i.createTime)} />
-                    ),
+                    renderCell: (i) => <RelativeDate date={new Date(i.createTime)} />,
                   },
                 ]}
                 actions={[

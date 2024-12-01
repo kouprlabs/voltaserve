@@ -24,9 +24,7 @@ const FileInfoStorage = ({ file }: FileInfoStorageProps) => {
       <StatLabel>Storage</StatLabel>
       <StatNumber className={cx('text-base')}>
         <div className={cx('flex', 'flex-col', 'gap-0.5')}>
-          {error ? (
-            <span className={cx('text-red-500')}>Failed to load.</span>
-          ) : null}
+          {error ? <span className={cx('text-red-500')}>Failed to load.</span> : null}
           {usage && !error ? (
             <>
               <span>

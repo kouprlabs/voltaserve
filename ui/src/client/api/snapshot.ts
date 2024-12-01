@@ -133,11 +133,7 @@ export default class SnapshotAPI {
 
   static useList(options: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/snapshots?${this.paramsFromListOptions(options)}`
-    return useSWR<List | undefined>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }),
-      swrOptions,
-    )
+    return useSWR<List | undefined>(url, () => apiFetcher({ url, method: 'GET' }), swrOptions)
   }
 
   static paramsFromListOptions(options: ListOptions): URLSearchParams {

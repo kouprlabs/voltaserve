@@ -52,9 +52,7 @@ const ConfirmEmailPage = () => {
         </div>
         {!isCompleted && !isFailed ? (
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <Heading className={cx('text-heading')}>
-              Confirming your Email…
-            </Heading>
+            <Heading className={cx('text-heading')}>Confirming your Email…</Heading>
             <Spinner />
           </div>
         ) : null}
@@ -70,9 +68,7 @@ const ConfirmEmailPage = () => {
           </div>
         ) : null}
         {isFailed ? (
-          <Heading className={cx('text-heading')}>
-            An error occurred while processing your request.
-          </Heading>
+          <Heading className={cx('text-heading')}>An error occurred while processing your request.</Heading>
         ) : null}
       </div>
     </LayoutFull>

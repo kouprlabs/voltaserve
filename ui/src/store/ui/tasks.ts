@@ -34,20 +34,12 @@ const slice = createSlice({
     mutateListUpdated: (state, action: PayloadAction<KeyedMutator<List>>) => {
       state.mutateList = action.payload
     },
-    mutateCountUpdated: (
-      state,
-      action: PayloadAction<KeyedMutator<number>>,
-    ) => {
+    mutateCountUpdated: (state, action: PayloadAction<KeyedMutator<number>>) => {
       state.mutateCount = action.payload
     },
   },
 })
 
-export const {
-  drawerDidOpen,
-  drawerDidClose,
-  mutateListUpdated,
-  mutateCountUpdated,
-} = slice.actions
+export const { drawerDidOpen, drawerDidClose, mutateListUpdated, mutateCountUpdated } = slice.actions
 
 export default slice.reducer

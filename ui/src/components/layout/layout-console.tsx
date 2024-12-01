@@ -10,14 +10,7 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '@chakra-ui/react'
-import {
-  IconWorkspaces,
-  IconHome,
-  IconGroup,
-  IconFlag,
-  IconPerson,
-  Shell,
-} from '@koupr/ui'
+import { IconWorkspaces, IconHome, IconGroup, IconFlag, IconPerson, Shell } from '@koupr/ui'
 import { Logo } from '@koupr/ui'
 import { cx } from '@emotion/css'
 import AppBar from '@/components/app-bar'
@@ -57,9 +50,7 @@ const LayoutConsole = () => {
           <Logo type="voltaserve" size="sm" />
         </div>
       }
-      homeHref={
-        location.pathname.startsWith('/console') ? '/console/dashboard' : '/'
-      }
+      homeHref={location.pathname.startsWith('/console') ? '/console/dashboard' : '/'}
       topBar={<AppBar />}
       items={[
         {

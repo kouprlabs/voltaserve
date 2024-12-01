@@ -31,10 +31,7 @@ const slice = createSlice({
     selectionUpdated: (state, action: PayloadAction<string[]>) => {
       state.selection = action.payload
     },
-    mutateUpdated: (
-      state,
-      action: PayloadAction<KeyedMutator<List | undefined>>,
-    ) => {
+    mutateUpdated: (state, action: PayloadAction<KeyedMutator<List | undefined>>) => {
       state.snapshotMutate = action.payload
     },
     listModalDidOpen: (state) => {

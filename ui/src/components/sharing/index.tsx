@@ -32,9 +32,7 @@ import SharingUserForm from './sharing-user-form'
 const Sharing = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isSharingModalOpen,
-  )
+  const isModalOpen = useAppSelector((state) => state.ui.files.isSharingModalOpen)
   const isSingleSelection = selection.length === 1
   const { data: userPermissions } = FileAPI.useGetUserPermissions(
     isSingleSelection ? selection[0] : undefined,
@@ -66,26 +64,18 @@ const Sharing = () => {
           <Tabs colorScheme="gray">
             <TabList className={cx('h-[40px]')}>
               <Tab>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
                   <span>Users</span>
                   {userPermissions && userPermissions.length > 0 ? (
-                    <Tag className={cx('rounded-full')}>
-                      {userPermissions.length}
-                    </Tag>
+                    <Tag className={cx('rounded-full')}>{userPermissions.length}</Tag>
                   ) : null}
                 </div>
               </Tab>
               <Tab>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
                   <span>Groups</span>
                   {groupPermissions && groupPermissions.length > 0 ? (
-                    <Tag className={cx('rounded-full')}>
-                      {groupPermissions.length}
-                    </Tag>
+                    <Tag className={cx('rounded-full')}>{groupPermissions.length}</Tag>
                   ) : null}
                 </div>
               </Tab>

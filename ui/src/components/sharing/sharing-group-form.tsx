@@ -10,13 +10,7 @@
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
-import {
-  IconAdd,
-  IconCheck,
-  SectionError,
-  SectionPlaceholder,
-  Select,
-} from '@koupr/ui'
+import { IconAdd, IconCheck, SectionError, SectionPlaceholder, Select } from '@koupr/ui'
 import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
@@ -60,14 +54,10 @@ const SharingGroupForm = () => {
     swrConfig(),
   )
   const isSingleSelection = selection.length === 1
-  const { mutate: mutatePermissions } = FileAPI.useGetGroupPermissions(
-    isSingleSelection ? selection[0] : undefined,
-  )
+  const { mutate: mutatePermissions } = FileAPI.useGetGroupPermissions(isSingleSelection ? selection[0] : undefined)
   const workspaceIsReady = workspace && !workspaceError
-  const groupListIsEmpty =
-    groupList && !groupListError && groupList.totalElements === 0
-  const groupListIsReady =
-    groupList && !groupListError && groupList.totalElements > 0
+  const groupListIsEmpty = groupList && !groupListError && groupList.totalElements === 0
+  const groupListIsReady = groupList && !groupListError && groupList.totalElements > 0
 
   const handleGrantPermission = useCallback(async () => {
     if (!group || !permission) {
@@ -92,39 +82,21 @@ const SharingGroupForm = () => {
     } catch {
       setIsGranting(false)
     }
-  }, [
-    selection,
-    group,
-    permission,
-    isSingleSelection,
-    dispatch,
-    mutateFiles,
-    mutatePermissions,
-  ])
+  }, [selection, group, permission, isSingleSelection, dispatch, mutateFiles, mutatePermissions])
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-      {workspaceIsLoading || groupListIsLoading ? (
-        <SharingFormSkeleton />
-      ) : null}
+      {workspaceIsLoading || groupListIsLoading ? <SharingFormSkeleton /> : null}
       {workspaceError || groupListError ? (
-        <SectionError
-          text={errorToString(workspaceError || groupListError)}
-          height="auto"
-        />
+        <SectionError text={errorToString(workspaceError || groupListError)} height="auto" />
       ) : null}
       {workspaceIsReady && groupListIsEmpty ? (
         <SectionPlaceholder
           text="This organization has no groups."
           content={
             <>
-              {workspace &&
-              geEditorPermission(workspace.organization.permission) ? (
-                <Button
-                  as={Link}
-                  to={`/new/group?org=${workspace.organization.id}`}
-                  leftIcon={<IconAdd />}
-                >
+              {workspace && geEditorPermission(workspace.organization.permission) ? (
+                <Button as={Link} to={`/new/group?org=${workspace.organization.id}`} leftIcon={<IconAdd />}>
                   New Group
                 </Button>
               ) : null}

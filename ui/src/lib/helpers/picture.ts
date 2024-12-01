@@ -11,9 +11,9 @@ import { Picture } from '@/client/types'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
 export function getPictureUrl(picture: Picture) {
-  return `/proxy/idp/v3/users/me/picture${picture.extension}?${new URLSearchParams(
-    { access_token: getAccessTokenOrRedirect() },
-  )}`
+  return `/proxy/idp/v3/users/me/picture${picture.extension}?${new URLSearchParams({
+    access_token: getAccessTokenOrRedirect(),
+  })}`
 }
 
 type PictureUrlByIdOptions = {
@@ -22,17 +22,11 @@ type PictureUrlByIdOptions = {
   invitationId?: string
 }
 
-export function getPictureUrlById(
-  id: string,
-  picture: Picture,
-  options?: PictureUrlByIdOptions,
-) {
-  return `/proxy/api/v3/users/${id}/picture${picture.extension}?${new URLSearchParams(
-    {
-      access_token: getAccessTokenOrRedirect(),
-      organization_id: options?.organizationId ?? '',
-      group_id: options?.groupId ?? '',
-      invitation_id: options?.invitationId ?? '',
-    },
-  )}`
+export function getPictureUrlById(id: string, picture: Picture, options?: PictureUrlByIdOptions) {
+  return `/proxy/api/v3/users/${id}/picture${picture.extension}?${new URLSearchParams({
+    access_token: getAccessTokenOrRedirect(),
+    organization_id: options?.organizationId ?? '',
+    group_id: options?.groupId ?? '',
+    invitation_id: options?.invitationId ?? '',
+  })}`
 }

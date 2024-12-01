@@ -22,14 +22,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
@@ -45,18 +38,12 @@ type FormValues = {
   name: string
 }
 
-const OrganizationDelete = ({
-  open,
-  organization,
-  onClose,
-}: OrganizationDeleteProps) => {
+const OrganizationDelete = ({ open, organization, onClose }: OrganizationDeleteProps) => {
   const navigate = useNavigate()
   const mutate = useAppSelector((state) => state.ui.organizations.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
-    name: Yup.string()
-      .required('Confirmation is required')
-      .oneOf([organization.name], 'Invalid organization name'),
+    name: Yup.string().required('Confirmation is required').oneOf([organization.name], 'Invalid organization name'),
   })
 
   useEffect(() => {
@@ -79,11 +66,7 @@ const OrganizationDelete = ({
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Delete Organization</ModalHeader>
@@ -98,17 +81,13 @@ const OrganizationDelete = ({
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                  <span>
-                    Are you sure you want to delete this organization?
-                  </span>
+                  <span>Are you sure you want to delete this organization?</span>
                   <span>
                     Please type <b>{organization.name}</b> to confirm.
                   </span>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.name && touched.name)}
-                      >
+                      <FormControl isInvalid={Boolean(errors.name && touched.name)}>
                         <Input {...field} disabled={isSubmitting} />
                         <FormErrorMessage>{errors.name}</FormErrorMessage>
                       </FormControl>
@@ -117,9 +96,7 @@ const OrganizationDelete = ({
                 </div>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -129,12 +106,7 @@ const OrganizationDelete = ({
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="red"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="red" isLoading={isSubmitting}>
                     Delete Permanently
                   </Button>
                 </div>

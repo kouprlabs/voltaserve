@@ -18,12 +18,7 @@ const ConsoleButton = () => {
     <>
       {location.pathname.startsWith('/console') ? (
         <Link to="/">
-          <IconButton
-            ref={buttonRef}
-            icon={<IconClose />}
-            title="Close console"
-            aria-label="Close console"
-          />
+          <IconButton ref={buttonRef} icon={<IconClose />} title="Close console" aria-label="Close console" />
         </Link>
       ) : (
         <Link to="/console/dashboard">

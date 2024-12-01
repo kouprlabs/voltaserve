@@ -9,10 +9,7 @@
 // AGPL-3.0-only in the root of this repository.
 import { RefObject, useEffect } from 'react'
 
-export default function useFocusAndSelectAll(
-  inputRef: RefObject<HTMLInputElement>,
-  enable?: boolean,
-) {
+export default function useFocusAndSelectAll(inputRef: RefObject<HTMLInputElement>, enable?: boolean) {
   useEffect(() => {
     setTimeout(() => {
       if (enable) {

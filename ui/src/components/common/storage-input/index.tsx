@@ -17,9 +17,7 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
   const [value, setValue] = useState<number | null>(
     field.value ? convertFromByte(field.value, getUnit(field.value)) : null,
   )
-  const [unit, setUnit] = useState<Unit>(
-    field.value ? getUnit(field.value) : 'b',
-  )
+  const [unit, setUnit] = useState<Unit>(field.value ? getUnit(field.value) : 'b')
 
   const handleInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.value) {
@@ -46,18 +44,9 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
     <>
       <input id={id} type="hidden" {...field} />
       <div className={cx('flex', 'flex-row', 'gap-0.5')}>
-        <Input
-          type="number"
-          disabled={form.isSubmitting}
-          value={value || ''}
-          onChange={handleInputChange}
-        />
+        <Input type="number" disabled={form.isSubmitting} value={value || ''} onChange={handleInputChange} />
         <div className={cx('min-w-[80px]')}>
-          <Select
-            defaultValue={unit}
-            disabled={form.isSubmitting}
-            onChange={handleSelectChange}
-          >
+          <Select defaultValue={unit} disabled={form.isSubmitting} onChange={handleSelectChange}>
             <option value="b">B</option>
             <option value="mb">MB</option>
             <option value="gb">GB</option>

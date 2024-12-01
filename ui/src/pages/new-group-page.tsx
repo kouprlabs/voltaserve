@@ -9,22 +9,8 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  Input,
-} from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Button, FormControl, FormErrorMessage, FormLabel, Heading, Input } from '@chakra-ui/react'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -48,16 +34,10 @@ const NewGroupPage = () => {
     name: Yup.string().required('Name is required').max(255),
     organizationId: Yup.string().required('Organization is required'),
   })
-  const { data: organization } = OrganizationAPI.useGet(
-    searchParams.get('org'),
-    swrConfig(),
-  )
+  const { data: organization } = OrganizationAPI.useGet(searchParams.get('org'), swrConfig())
 
   const handleSubmit = useCallback(
-    async (
-      { name, organizationId }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ name, organizationId }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       setIsLoading(true)
       try {
@@ -97,10 +77,7 @@ const NewGroupPage = () => {
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        maxW="400px"
-                        isInvalid={Boolean(errors.name && touched.name)}
-                      >
+                      <FormControl maxW="400px" isInvalid={Boolean(errors.name && touched.name)}>
                         <FormLabel>Name</FormLabel>
                         <Input {...field} disabled={isSubmitting} autoFocus />
                         <FormErrorMessage>{errors.name}</FormErrorMessage>
@@ -109,29 +86,18 @@ const NewGroupPage = () => {
                   </Field>
                   <Field name="organizationId">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        maxW="400px"
-                        isInvalid={Boolean(
-                          errors.organizationId && touched.organizationId,
-                        )}
-                      >
+                      <FormControl maxW="400px" isInvalid={Boolean(errors.organizationId && touched.organizationId)}>
                         <FormLabel>Organization</FormLabel>
                         <OrganizationSelector
                           defaultValue={organization}
-                          onConfirm={(value) =>
-                            setFieldValue(field.name, value.id)
-                          }
+                          onConfirm={(value) => setFieldValue(field.name, value.id)}
                         />
-                        <FormErrorMessage>
-                          {errors.organizationId}
-                        </FormErrorMessage>
+                        <FormErrorMessage>{errors.organizationId}</FormErrorMessage>
                       </FormControl>
                     )}
                   </Field>
                 </div>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="submit"
                     variant="solid"

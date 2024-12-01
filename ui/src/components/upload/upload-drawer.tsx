@@ -20,14 +20,10 @@ import { drawerDidClose } from '@/store/ui/uploads'
 const UploadDrawer = () => {
   const dispatch = useAppDispatch()
   const hasPendingUploads = useAppSelector(
-    (state) =>
-      state.entities.uploads.items.filter((e) => !e.completed).length > 0,
+    (state) => state.entities.uploads.items.filter((e) => !e.completed).length > 0,
   )
   const isDrawerOpen = useAppSelector((state) => state.ui.uploads.isDrawerOpen)
-  const hasCompleted = useAppSelector(
-    (state) =>
-      state.entities.uploads.items.filter((e) => e.completed).length > 0,
-  )
+  const hasCompleted = useAppSelector((state) => state.entities.uploads.items.filter((e) => e.completed).length > 0)
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   useEffect(() => {
@@ -57,12 +53,7 @@ const UploadDrawer = () => {
       footer={
         <>
           {hasCompleted ? (
-            <Button
-              className={cx('w-full')}
-              size="sm"
-              leftIcon={<IconClearAll />}
-              onClick={handleClearCompleted}
-            >
+            <Button className={cx('w-full')} size="sm" leftIcon={<IconClearAll />} onClick={handleClearCompleted}>
               Clear Completed Items
             </Button>
           ) : null}

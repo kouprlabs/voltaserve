@@ -25,14 +25,7 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import {
-  Pagination,
-  SearchInput,
-  SectionError,
-  SectionPlaceholder,
-  SectionSpinner,
-  usePageMonitor,
-} from '@koupr/ui'
+import { Pagination, SearchInput, SectionError, SectionPlaceholder, SectionSpinner, usePageMonitor } from '@koupr/ui'
 import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { errorToString } from '@/client/error'
@@ -48,13 +41,7 @@ export type UserSelectorProps = {
   onConfirm?: (user: User) => void
 }
 
-const UserSelector = ({
-  value,
-  organizationId,
-  groupId,
-  excludeGroupMembers,
-  onConfirm,
-}: UserSelectorProps) => {
+const UserSelector = ({ value, organizationId, groupId, excludeGroupMembers, onConfirm }: UserSelectorProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
@@ -124,40 +111,19 @@ const UserSelector = ({
       >
         {value ? userToString(value) : 'Select User'}
       </Button>
-      <Modal
-        size="xl"
-        isOpen={isOpen}
-        onClose={onClose}
-        closeOnOverlayClick={false}
-      >
+      <Modal size="xl" isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Select User</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-              <SearchInput
-                placeholder="Search Users"
-                query={query}
-                onChange={handleSearchInputChange}
-              />
-              {listError ? (
-                <SectionError text={errorToString(listError)} />
-              ) : null}
+              <SearchInput placeholder="Search Users" query={query} onChange={handleSearchInputChange} />
+              {listError ? <SectionError text={errorToString(listError)} /> : null}
               {listIsLoading ? <SectionSpinner /> : null}
-              {listIsEmpty ? (
-                <SectionPlaceholder text="There are no users." />
-              ) : null}
+              {listIsEmpty ? <SectionPlaceholder text="There are no users." /> : null}
               {listIsReady ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'flex-col',
-                    'justify-between',
-                    'gap-1.5',
-                    'h-[320px]',
-                  )}
-                >
+                <div className={cx('flex', 'flex-col', 'justify-between', 'gap-1.5', 'h-[320px]')}>
                   <Table variant="simple" size="sm">
                     <colgroup>
                       <col className={cx('w-[40px]')} />
@@ -177,20 +143,10 @@ const UserSelector = ({
                           onClick={() => setSelected(u)}
                         >
                           <Td className={cx('px-0.5', 'text-center')}>
-                            <Radio
-                              size="md"
-                              isChecked={selected?.id === u.id}
-                            />
+                            <Radio size="md" isChecked={selected?.id === u.id} />
                           </Td>
                           <Td className={cx('p-0.5')}>
-                            <div
-                              className={cx(
-                                'flex',
-                                'flex-row',
-                                'items-center',
-                                'gap-1.5',
-                              )}
-                            >
+                            <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
                               <Avatar
                                 name={u.fullName}
                                 src={
@@ -210,9 +166,7 @@ const UserSelector = ({
                                   'dark:border-gray-700',
                                 )}
                               />
-                              <span className={cx('text-base')}>
-                                {userToString(u)}
-                              </span>
+                              <span className={cx('text-base')}>{userToString(u)}</span>
                             </div>
                           </Td>
                         </Tr>
@@ -236,20 +190,10 @@ const UserSelector = ({
           </ModalBody>
           <ModalFooter>
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-              <Button
-                type="button"
-                variant="outline"
-                colorScheme="blue"
-                onClick={onClose}
-              >
+              <Button type="button" variant="outline" colorScheme="blue" onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                variant="solid"
-                colorScheme="blue"
-                isDisabled={!selected}
-                onClick={handleConfirm}
-              >
+              <Button variant="solid" colorScheme="blue" isDisabled={!selected} onClick={handleConfirm}>
                 Confirm
               </Button>
             </div>

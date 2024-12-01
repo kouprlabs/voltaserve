@@ -28,11 +28,7 @@ const Brand = ({ isGlossy = false }: LogoProps) => {
       return colorMode === 'dark' ? <BrandDarkSvg /> : <BrandSvg />
     }
   }, [colorMode, isGlossy])
-  return (
-    <div className={cx('flex', 'items-center', 'justify-center')}>
-      {renderSvg()}
-    </div>
-  )
+  return <div className={cx('flex', 'items-center', 'justify-center')}>{renderSvg()}</div>
 }
 
 export default Brand

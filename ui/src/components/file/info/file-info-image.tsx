@@ -23,8 +23,7 @@ const FileInfoImage = ({ file }: FileInfoImageProps) => {
     <Stat>
       <StatLabel>Image dimensions</StatLabel>
       <StatNumber className={cx('text-base')}>
-        {file.snapshot?.original.image.width}x
-        {file.snapshot?.original.image.height}
+        {file.snapshot?.original.image.width}x{file.snapshot?.original.image.height}
       </StatNumber>
     </Stat>
   )

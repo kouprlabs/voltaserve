@@ -16,16 +16,8 @@ import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
 
 const MosaicOverviewArtifacts = () => {
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
-  const {
-    data: file,
-    error: fileError,
-    isLoading: fileIsLoading,
-  } = FileAPI.useGet(id, swrConfig())
+  const id = useAppSelector((state) => (state.ui.files.selection.length > 0 ? state.ui.files.selection[0] : undefined))
+  const { data: file, error: fileError, isLoading: fileIsLoading } = FileAPI.useGet(id, swrConfig())
   const fileIsReady = file && !fileError
 
   return (
@@ -33,22 +25,8 @@ const MosaicOverviewArtifacts = () => {
       {fileIsLoading ? <SectionSpinner /> : null}
       {fileError ? <SectionError text={errorToString(fileError)} /> : null}
       {fileIsReady ? (
-        <div
-          className={cx(
-            'flex',
-            'flex-col',
-            'items-center',
-            'justify-center',
-            'gap-1',
-          )}
-        >
-          <Button
-            as="a"
-            type="button"
-            leftIcon={<IconOpenInNew />}
-            target="_blank"
-            href={`/file/${file.id}/mosaic`}
-          >
+        <div className={cx('flex', 'flex-col', 'items-center', 'justify-center', 'gap-1')}>
+          <Button as="a" type="button" leftIcon={<IconOpenInNew />} target="_blank" href={`/file/${file.id}/mosaic`}>
             View Mosaic
           </Button>
         </div>

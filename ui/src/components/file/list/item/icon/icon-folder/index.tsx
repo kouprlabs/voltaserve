@@ -33,17 +33,7 @@ const IconFolder = ({ file, scale, isLoading }: IconFolderProps) => {
         className="pointer-events-none select-none"
         style={{ width: `${width}px`, height: `${height}px` }}
       />
-      <div
-        className={cx(
-          'absolute',
-          'flex',
-          'flex-row',
-          'items-center',
-          'gap-[2px]',
-          'bottom-[-5px]',
-          'right-[-5px]',
-        )}
-      >
+      <div className={cx('absolute', 'flex', 'flex-row', 'items-center', 'gap-[2px]', 'bottom-[-5px]', 'right-[-5px]')}>
         <IconBadge file={file} isLoading={isLoading} />
       </div>
     </>

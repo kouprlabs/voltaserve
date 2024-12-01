@@ -22,14 +22,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import FileAPI, { FileType } from '@/client/api/file'
@@ -43,9 +36,7 @@ type FormValues = {
 const FileCreate = () => {
   const { id: workspaceId, fileId } = useParams()
   const dispatch = useAppDispatch()
-  const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isCreateModalOpen,
-  )
+  const isModalOpen = useAppSelector((state) => state.ui.files.isCreateModalOpen)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [inputRef, setInputRef] = useState<HTMLInputElement | null>()
   const formSchema = Yup.object().shape({
@@ -59,10 +50,7 @@ const FileCreate = () => {
   }, [inputRef])
 
   const handleSubmit = useCallback(
-    async (
-      { name }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ name }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         await FileAPI.create({
@@ -83,11 +71,7 @@ const FileCreate = () => {
 
   return (
     <>
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => dispatch(createModalDidClose())}
-        closeOnOverlayClick={false}
-      >
+      <Modal isOpen={isModalOpen} onClose={() => dispatch(createModalDidClose())} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>New Folder</ModalHeader>
@@ -104,9 +88,7 @@ const FileCreate = () => {
                 <ModalBody>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.name && touched.name)}
-                      >
+                      <FormControl isInvalid={Boolean(errors.name && touched.name)}>
                         <Input
                           ref={(r) => setInputRef(r)}
                           {...field}
@@ -120,9 +102,7 @@ const FileCreate = () => {
                   </Field>
                 </ModalBody>
                 <ModalFooter>
-                  <div
-                    className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                  >
+                  <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                     <Button
                       type="button"
                       variant="outline"
@@ -132,12 +112,7 @@ const FileCreate = () => {
                     >
                       Cancel
                     </Button>
-                    <Button
-                      type="submit"
-                      variant="solid"
-                      colorScheme="blue"
-                      isLoading={isSubmitting}
-                    >
+                    <Button type="submit" variant="solid" colorScheme="blue" isLoading={isSubmitting}>
                       Create
                     </Button>
                   </div>

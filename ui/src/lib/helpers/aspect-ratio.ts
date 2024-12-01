@@ -8,12 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-export function getSizeWithAspectRatio(
-  srcWidth: number,
-  srcHeight: number,
-  maxWidth: number,
-  maxHeight: number,
-) {
+export function getSizeWithAspectRatio(srcWidth: number, srcHeight: number, maxWidth: number, maxHeight: number) {
   const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight)
   return { width: srcWidth * ratio, height: srcHeight * ratio }
 }

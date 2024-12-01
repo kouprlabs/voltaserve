@@ -24,13 +24,7 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
-import {
-  PagePagination,
-  RelativeDate,
-  SectionError,
-  SectionPlaceholder,
-  SectionSpinner,
-} from '@koupr/ui'
+import { PagePagination, RelativeDate, SectionError, SectionPlaceholder, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleAPI from '@/client/console/console'
@@ -86,18 +80,12 @@ const ConsolePanelOrganization = () => {
     swrConfig(),
   )
   const orgIsReady = org && !orgError
-  const userListIsEmpty =
-    userList && !userListError && userList.totalElements === 0
-  const userListIsReady =
-    userList && !userListError && userList.totalElements > 0
-  const workspaceListIsEmpty =
-    workspaceList && !workspaceListError && workspaceList.totalElements === 0
-  const workspaceListIsReady =
-    workspaceList && !workspaceListError && workspaceList.totalElements > 0
-  const groupListIsEmpty =
-    groupList && !groupListError && groupList.totalElements === 0
-  const groupListIsReady =
-    groupList && !groupListError && groupList.totalElements > 0
+  const userListIsEmpty = userList && !userListError && userList.totalElements === 0
+  const userListIsReady = userList && !userListError && userList.totalElements > 0
+  const workspaceListIsEmpty = workspaceList && !workspaceListError && workspaceList.totalElements === 0
+  const workspaceListIsReady = workspaceList && !workspaceListError && workspaceList.totalElements > 0
+  const groupListIsEmpty = groupList && !groupListError && groupList.totalElements === 0
+  const groupListIsReady = groupList && !groupListError && groupList.totalElements > 0
 
   return (
     <>
@@ -118,13 +106,7 @@ const ConsolePanelOrganization = () => {
                   <Avatar
                     name={org.name}
                     size="2xl"
-                    className={cx(
-                      'w-[165px]',
-                      'h-[165px]',
-                      'border',
-                      'border-gray-300',
-                      'dark:border-gray-700',
-                    )}
+                    className={cx('w-[165px]', 'h-[165px]', 'border', 'border-gray-300', 'dark:border-gray-700')}
                   />
                 </div>
               </GridItem>
@@ -151,22 +133,13 @@ const ConsolePanelOrganization = () => {
                       <Thead>
                         <Tr>
                           <Th className={cx('p-0')}>
-                            <div
-                              className={cx(
-                                'flex',
-                                'items-center',
-                                'justify-between',
-                                'h-[50px]',
-                              )}
-                            >
+                            <div className={cx('flex', 'items-center', 'justify-between', 'h-[50px]')}>
                               <span className={cx('font-bold')}>Users</span>
                               <Spacer />
                               {userList.totalElements > 5 ? (
                                 <PagePagination
                                   totalElements={userList.totalElements}
-                                  totalPages={Math.ceil(
-                                    userList.totalElements / 5,
-                                  )}
+                                  totalPages={Math.ceil(userList.totalElements / 5)}
                                   page={userPage}
                                   size={5}
                                   steps={[]}
@@ -187,11 +160,7 @@ const ConsolePanelOrganization = () => {
                     <Divider mb={4} />
                     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                       {userList.data.map((user) => (
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          key={user.id}
-                        >
+                        <Stack direction="row" alignItems="center" key={user.id}>
                           <Avatar
                             name={user.username}
                             src={user.picture}
@@ -199,9 +168,7 @@ const ConsolePanelOrganization = () => {
                             className={cx('w-[40px]', 'h-[40px]')}
                           />
                           <div className={cx('flex', 'flex-col', 'gap-0')}>
-                            <div
-                              className={cx('flex', 'items-center', 'gap-0.5')}
-                            >
+                            <div className={cx('flex', 'items-center', 'gap-0.5')}>
                               <Text fontWeight="bold" noOfLines={1}>
                                 {user.username}
                               </Text>
@@ -239,24 +206,13 @@ const ConsolePanelOrganization = () => {
                       <Thead>
                         <Tr>
                           <Th className={cx('p-0')}>
-                            <div
-                              className={cx(
-                                'flex',
-                                'items-center',
-                                'justify-between',
-                                'h-[50px]',
-                              )}
-                            >
-                              <span className={cx('font-bold')}>
-                                Workspaces
-                              </span>
+                            <div className={cx('flex', 'items-center', 'justify-between', 'h-[50px]')}>
+                              <span className={cx('font-bold')}>Workspaces</span>
                               <Spacer />
                               {workspaceList.totalElements > 5 ? (
                                 <PagePagination
                                   totalElements={workspaceList.totalElements}
-                                  totalPages={Math.ceil(
-                                    workspaceList.totalElements / 5,
-                                  )}
+                                  totalPages={Math.ceil(workspaceList.totalElements / 5)}
                                   page={workspacePage}
                                   size={5}
                                   steps={[]}
@@ -277,28 +233,14 @@ const ConsolePanelOrganization = () => {
                     <Divider mb={4} />
                     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                       {workspaceList.data.map((workspace) => (
-                        <div
-                          key={workspace.id}
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1',
-                          )}
-                        >
-                          <Avatar
-                            name={workspace.name}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
+                        <div key={workspace.id} className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+                          <Avatar name={workspace.name} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
                           <div className={cx('flex', 'flex-col', 'gap-0')}>
                             <Text fontWeight="bold" noOfLines={1}>
                               {workspace.name}
                             </Text>
                             <span className={cx('text-gray-500')}>
-                              <RelativeDate
-                                date={new Date(workspace.createTime)}
-                              />
+                              <RelativeDate date={new Date(workspace.createTime)} />
                             </span>
                           </div>
                         </div>
@@ -329,22 +271,13 @@ const ConsolePanelOrganization = () => {
                       <Thead>
                         <Tr>
                           <Th className={cx('p-0')}>
-                            <div
-                              className={cx(
-                                'flex',
-                                'items-center',
-                                'justify-between',
-                                'h-[50px]',
-                              )}
-                            >
+                            <div className={cx('flex', 'items-center', 'justify-between', 'h-[50px]')}>
                               <span className={cx('font-bold')}>Groups</span>
                               <Spacer />
                               {groupList.totalElements > 5 ? (
                                 <PagePagination
                                   totalElements={groupList.totalElements}
-                                  totalPages={Math.ceil(
-                                    groupList.totalElements / 5,
-                                  )}
+                                  totalPages={Math.ceil(groupList.totalElements / 5)}
                                   page={groupPage}
                                   size={5}
                                   steps={[]}
@@ -365,20 +298,8 @@ const ConsolePanelOrganization = () => {
                     <Divider mb={4} />
                     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                       {groupList.data.map((group) => (
-                        <div
-                          key={group.id}
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1',
-                          )}
-                        >
-                          <Avatar
-                            name={group.name}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
+                        <div key={group.id} className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+                          <Avatar name={group.name} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
                           <div className={cx('flex', 'flex-col', 'gap-0')}>
                             <Text fontWeight="bold" noOfLines={1}>
                               {group.name}
@@ -412,14 +333,7 @@ const ListSkeleton = ({ header, children }: ListSkeletonProps) => (
       <Thead>
         <Tr>
           <Th className={cx('p-0')}>
-            <div
-              className={cx(
-                'flex',
-                'items-center',
-                'justify-between',
-                'h-[50px]',
-              )}
-            >
+            <div className={cx('flex', 'items-center', 'justify-between', 'h-[50px]')}>
               <span className={cx('font-bold')}>{header}</span>
               <Spacer />
             </div>

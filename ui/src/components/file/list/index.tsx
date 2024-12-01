@@ -10,13 +10,7 @@
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { SectionPlaceholder } from '@koupr/ui'
-import {
-  DndContext,
-  useSensors,
-  PointerSensor,
-  useSensor,
-  DragStartEvent,
-} from '@dnd-kit/core'
+import { DndContext, useSensors, PointerSensor, useSensor, DragStartEvent } from '@dnd-kit/core'
 import cx from 'classnames'
 import { FileWithPath, useDropzone } from 'react-dropzone'
 import Hotkeys from 'react-hot-keys'
@@ -53,9 +47,7 @@ const FileList = ({ list, scale }: FileListProps) => {
   const { id: workspaceId, fileId } = useParams()
   const hidden = useAppSelector((state) => state.ui.files.hidden)
   const viewType = useAppSelector((state) => state.ui.files.viewType)
-  const isSelectionMode = useAppSelector(
-    (state) => state.ui.files.isSelectionMode,
-  )
+  const isSelectionMode = useAppSelector((state) => state.ui.files.isSelectionMode)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector(
     (state) =>
@@ -72,10 +64,7 @@ const FileList = ({ list, scale }: FileListProps) => {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<FileMenuPosition>()
-  const activeFile = useMemo(
-    () => list.data.find((e) => e.id === activeId),
-    [list, activeId],
-  )
+  const activeFile = useMemo(() => list.data.find((e) => e.id === activeId), [list, activeId])
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -155,43 +144,25 @@ const FileList = ({ list, scale }: FileListProps) => {
         return
       }
       event.preventDefault()
-      if (
-        (keyName === 'command+a' && isMacOS()) ||
-        (keyName === 'ctrl+a' && !isMacOS())
-      ) {
+      if ((keyName === 'command+a' && isMacOS()) || (keyName === 'ctrl+a' && !isMacOS())) {
         dispatch(selectionUpdated(list?.data.map((f) => f.id)))
-      } else if (
-        (keyName === 'command+c' && isMacOS()) ||
-        (keyName === 'ctrl+c' && !isMacOS())
-      ) {
+      } else if ((keyName === 'command+c' && isMacOS()) || (keyName === 'ctrl+c' && !isMacOS())) {
         if (selection.length > 0) {
           dispatch(copyModalDidOpen())
         }
-      } else if (
-        (keyName === 'command+x' && isMacOS()) ||
-        (keyName === 'ctrl+x' && !isMacOS())
-      ) {
+      } else if ((keyName === 'command+x' && isMacOS()) || (keyName === 'ctrl+x' && !isMacOS())) {
         if (selection.length > 0) {
           dispatch(moveModalDidOpen())
         }
-      } else if (
-        (keyName === 'command+i' && isMacOS()) ||
-        (keyName === 'ctrl+i' && !isMacOS())
-      ) {
+      } else if ((keyName === 'command+i' && isMacOS()) || (keyName === 'ctrl+i' && !isMacOS())) {
         if (selection.length > 0) {
           dispatch(infoModalDidOpen())
         }
-      } else if (
-        (keyName === 'command+e' && isMacOS()) ||
-        (keyName === 'f2' && !isMacOS())
-      ) {
+      } else if ((keyName === 'command+e' && isMacOS()) || (keyName === 'f2' && !isMacOS())) {
         if (selection.length === 1) {
           dispatch(renameModalDidOpen())
         }
-      } else if (
-        (keyName === 'command+backspace' && isMacOS()) ||
-        keyName === 'del'
-      ) {
+      } else if ((keyName === 'command+backspace' && isMacOS()) || keyName === 'del') {
         if (selection.length > 0) {
           dispatch(deleteModalDidOpen())
         }
@@ -226,24 +197,10 @@ const FileList = ({ list, scale }: FileListProps) => {
         {...getRootProps()}
       >
         <input {...getInputProps()} />
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          {list.totalElements === 0 ? (
-            <SectionPlaceholder text="There are no items." />
-          ) : null}
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          {list.totalElements === 0 ? <SectionPlaceholder text="There are no items." /> : null}
           {viewType === FileViewType.Grid && list.totalElements > 0 ? (
-            <div
-              className={cx(
-                'flex',
-                'flex-wrap',
-                'gap-1.5',
-                'overflow-hidden',
-                'pb-2.5',
-              )}
-            >
+            <div className={cx('flex', 'flex-wrap', 'gap-1.5', 'overflow-hidden', 'pb-2.5')}>
               {list.data
                 .filter((e) => !hidden.includes(e.id))
                 .map((f) => (
@@ -262,15 +219,7 @@ const FileList = ({ list, scale }: FileListProps) => {
             </div>
           ) : null}
           {viewType === FileViewType.List && list.totalElements > 0 ? (
-            <div
-              className={cx(
-                'flex',
-                'flex-col',
-                'gap-0.5',
-                'overflow-hidden',
-                'pb-2.5',
-              )}
-            >
+            <div className={cx('flex', 'flex-col', 'gap-0.5', 'overflow-hidden', 'pb-2.5')}>
               {list.data
                 .filter((e) => !hidden.includes(e.id))
                 .map((f) => (
@@ -288,18 +237,10 @@ const FileList = ({ list, scale }: FileListProps) => {
                 ))}
             </div>
           ) : null}
-          <ListDragOverlay
-            file={activeFile!}
-            scale={scale}
-            viewType={viewType}
-          />
+          <ListDragOverlay file={activeFile!} scale={scale} viewType={viewType} />
         </DndContext>
       </div>
-      <FileMenu
-        isOpen={isMenuOpen}
-        position={menuPosition}
-        onClose={() => setIsMenuOpen(false)}
-      />
+      <FileMenu isOpen={isMenuOpen} position={menuPosition} onClose={() => setIsMenuOpen(false)} />
     </Hotkeys>
   )
 }

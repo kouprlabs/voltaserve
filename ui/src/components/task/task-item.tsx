@@ -60,23 +60,14 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
               />
             ) : null}
             {task.status === Status.Success ? (
-              <IconCheckCircle
-                className={cx('shrink-0', 'text-green-500')}
-                filled={true}
-              />
+              <IconCheckCircle className={cx('shrink-0', 'text-green-500')} filled={true} />
             ) : null}
-            {task.status === Status.Error ? (
-              <IconError filled={true} className={cx('text-red-500')} />
-            ) : null}
+            {task.status === Status.Error ? <IconError filled={true} className={cx('text-red-500')} /> : null}
             <div className={cx('flex', 'flex-col', 'grow')}>
               {task.payload?.object ? (
-                <span className={cx('font-semibold')}>
-                  {truncateMiddle(task.payload.object, 40)}
-                </span>
+                <span className={cx('font-semibold')}>{truncateMiddle(task.payload.object, 40)}</span>
               ) : null}
-              {task.status !== Status.Error ? (
-                <Text noOfLines={3}>{task.name}</Text>
-              ) : null}
+              {task.status !== Status.Error ? <Text noOfLines={3}>{task.name}</Text> : null}
             </div>
             {task.error ? (
               <IconButton
@@ -96,9 +87,7 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
               <AccordionItem className={cx('border-none')}>
                 <AccordionButton className={cx('p-0.5')}>
                   <div className={cx('flex', 'flex-row', 'w-full')}>
-                    <span className={cx('text-left', 'grow')}>
-                      Task failed, click to show error.
-                    </span>
+                    <span className={cx('text-left', 'grow')}>Task failed, click to show error.</span>
                     <AccordionIcon />
                   </div>
                 </AccordionButton>

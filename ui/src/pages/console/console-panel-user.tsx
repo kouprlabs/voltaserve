@@ -9,27 +9,8 @@
 // AGPL-3.0-only in the root of this repository.
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Avatar,
-  Badge,
-  Divider,
-  Grid,
-  GridItem,
-  Heading,
-  Spacer,
-  Table,
-  Text,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react'
-import {
-  PagePagination,
-  RelativeDate,
-  SectionError,
-  SectionPlaceholder,
-  SectionSpinner,
-} from '@koupr/ui'
+import { Avatar, Badge, Divider, Grid, GridItem, Heading, Spacer, Table, Text, Th, Thead, Tr } from '@chakra-ui/react'
+import { PagePagination, RelativeDate, SectionError, SectionPlaceholder, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleAPI from '@/client/console/console'
@@ -43,11 +24,7 @@ const ConsolePanelUser = () => {
   const [workspacePage, setWorkspacePage] = useState(1)
   const [groupPage, setGroupPage] = useState(1)
   const [orgsPage, setOrgPage] = useState(1)
-  const {
-    data: user,
-    error: userError,
-    isLoading: userIsLoading,
-  } = UserAPI.useGetById(id)
+  const { data: user, error: userError, isLoading: userIsLoading } = UserAPI.useGetById(id)
   const {
     data: groupList,
     error: groupListError,
@@ -85,16 +62,12 @@ const ConsolePanelUser = () => {
     swrConfig(),
   )
   const userIsReady = user && !userError
-  const groupListIsEmpty =
-    groupList && !groupListError && groupList.totalElements === 0
-  const groupListIsReady =
-    groupList && !groupListError && groupList.totalElements > 0
+  const groupListIsEmpty = groupList && !groupListError && groupList.totalElements === 0
+  const groupListIsReady = groupList && !groupListError && groupList.totalElements > 0
   const orgListIsEmpty = orgList && !orgListError && orgList.totalElements === 0
   const orgListIsReady = orgList && !orgListError && orgList.totalElements > 0
-  const workspaceListIsEmpty =
-    workspaceList && !workspaceListError && workspaceList.totalElements === 0
-  const workspaceListIsReady =
-    workspaceList && !workspaceListError && workspaceList.totalElements > 0
+  const workspaceListIsEmpty = workspaceList && !workspaceListError && workspaceList.totalElements === 0
+  const workspaceListIsReady = workspaceList && !workspaceListError && workspaceList.totalElements > 0
 
   return (
     <>
@@ -115,19 +88,9 @@ const ConsolePanelUser = () => {
               <div className={cx('relative', 'shrink-0')}>
                 <Avatar
                   name={user.fullName}
-                  src={
-                    user.picture
-                      ? getPictureUrlById(user.id, user.picture)
-                      : undefined
-                  }
+                  src={user.picture ? getPictureUrlById(user.id, user.picture) : undefined}
                   size="2xl"
-                  className={cx(
-                    'w-[165px]',
-                    'h-[165px]',
-                    'border',
-                    'border-gray-300',
-                    'dark:border-gray-700',
-                  )}
+                  className={cx('w-[165px]', 'h-[165px]', 'border', 'border-gray-300', 'dark:border-gray-700')}
                 />
               </div>
             </GridItem>
@@ -154,24 +117,13 @@ const ConsolePanelUser = () => {
                     <Thead>
                       <Tr>
                         <Th className={cx('p-0')}>
-                          <div
-                            className={cx(
-                              'flex',
-                              'items-center',
-                              'justify-between',
-                              'h-[50px]',
-                            )}
-                          >
-                            <span className={cx('font-bold')}>
-                              Organizations
-                            </span>
+                          <div className={cx('flex', 'items-center', 'justify-between', 'h-[50px]')}>
+                            <span className={cx('font-bold')}>Organizations</span>
                             <Spacer />
                             {orgList.totalElements > 5 ? (
                               <PagePagination
                                 totalElements={orgList.totalElements}
-                                totalPages={Math.ceil(
-                                  orgList.totalElements / 5,
-                                )}
+                                totalPages={Math.ceil(orgList.totalElements / 5)}
                                 page={orgsPage}
                                 size={5}
                                 steps={[]}
@@ -194,33 +146,18 @@ const ConsolePanelUser = () => {
                     {orgList.data.map((organization) => (
                       <div
                         key={organization.organizationId}
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'items-center',
-                          'gap-1',
-                        )}
+                        className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                       >
-                        <Avatar
-                          name={organization.organizationName}
-                          size="sm"
-                          className={cx('w-[40px]', 'h-[40px]')}
-                        />
+                        <Avatar name={organization.organizationName} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
                         <div className={cx('flex', 'flex-col', 'gap-0')}>
-                          <div
-                            className={cx('flex', 'items-center', 'gap-0.5')}
-                          >
+                          <div className={cx('flex', 'items-center', 'gap-0.5')}>
                             <Text fontWeight="bold" noOfLines={1}>
                               {organization.organizationName}
                             </Text>
-                            <Badge variant="outline">
-                              {organization.permission}
-                            </Badge>
+                            <Badge variant="outline">{organization.permission}</Badge>
                           </div>
                           <span className={cx('text-gray-500')}>
-                            <RelativeDate
-                              date={new Date(organization.createTime)}
-                            />
+                            <RelativeDate date={new Date(organization.createTime)} />
                           </span>
                         </div>
                       </div>
@@ -251,22 +188,13 @@ const ConsolePanelUser = () => {
                     <Thead>
                       <Tr>
                         <Th className={cx('p-0')}>
-                          <div
-                            className={cx(
-                              'flex',
-                              'items-center',
-                              'justify-between',
-                              'h-[50px]',
-                            )}
-                          >
+                          <div className={cx('flex', 'items-center', 'justify-between', 'h-[50px]')}>
                             <span className={cx('font-bold')}>Workspaces</span>
                             <Spacer />
                             {workspaceList.totalElements > 5 ? (
                               <PagePagination
                                 totalElements={workspaceList.totalElements}
-                                totalPages={Math.ceil(
-                                  workspaceList.totalElements / 5,
-                                )}
+                                totalPages={Math.ceil(workspaceList.totalElements / 5)}
                                 page={workspacePage}
                                 size={5}
                                 steps={[]}
@@ -287,35 +215,17 @@ const ConsolePanelUser = () => {
                   <Divider mb={4} />
                   <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                     {workspaceList.data.map((workspace) => (
-                      <div
-                        key={workspace.workspaceId}
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'items-center',
-                          'gap-1',
-                        )}
-                      >
-                        <Avatar
-                          name={workspace.workspaceName}
-                          size="sm"
-                          className={cx('w-[40px]', 'h-[40px]')}
-                        />
+                      <div key={workspace.workspaceId} className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+                        <Avatar name={workspace.workspaceName} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
                         <div className={cx('flex', 'flex-col', 'gap-0')}>
-                          <div
-                            className={cx('flex', 'items-center', 'gap-0.5')}
-                          >
+                          <div className={cx('flex', 'items-center', 'gap-0.5')}>
                             <Text fontWeight="bold" noOfLines={1}>
                               {workspace.workspaceName}
                             </Text>
-                            <Badge variant="outline">
-                              {workspace.permission}
-                            </Badge>
+                            <Badge variant="outline">{workspace.permission}</Badge>
                           </div>
                           <span className={cx('text-gray-500')}>
-                            <RelativeDate
-                              date={new Date(workspace.createTime)}
-                            />
+                            <RelativeDate date={new Date(workspace.createTime)} />
                           </span>
                         </div>
                       </div>
@@ -346,22 +256,13 @@ const ConsolePanelUser = () => {
                     <Thead>
                       <Tr>
                         <Th className={cx('p-0')}>
-                          <div
-                            className={cx(
-                              'flex',
-                              'items-center',
-                              'justify-between',
-                              'h-[50px]',
-                            )}
-                          >
+                          <div className={cx('flex', 'items-center', 'justify-between', 'h-[50px]')}>
                             <span className={cx('font-bold')}>Groups</span>
                             <Spacer />
                             {groupList.totalElements > 5 ? (
                               <PagePagination
                                 totalElements={groupList.totalElements}
-                                totalPages={Math.ceil(
-                                  groupList.totalElements / 5,
-                                )}
+                                totalPages={Math.ceil(groupList.totalElements / 5)}
                                 page={groupPage}
                                 size={5}
                                 steps={[]}
@@ -382,29 +283,10 @@ const ConsolePanelUser = () => {
                   <Divider mb={4} />
                   <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                     {groupList.data.map((group) => (
-                      <div
-                        key={group.groupId}
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'items-center',
-                          'gap-1',
-                        )}
-                      >
-                        <Avatar
-                          name={group.groupName}
-                          size="sm"
-                          className={cx('w-[40px]', 'h-[40px]')}
-                        />
+                      <div key={group.groupId} className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+                        <Avatar name={group.groupName} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
                         <div className={cx('flex', 'flex-col', 'gap-0')}>
-                          <div
-                            className={cx(
-                              'flex',
-                              'flex-row',
-                              'items-center',
-                              'gap-0.5',
-                            )}
-                          >
+                          <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
                             <Text fontWeight="bold" noOfLines={1}>
                               {group.groupName}
                             </Text>
@@ -438,14 +320,7 @@ const ListSekeleton = ({ header, children }: ListSekeletonProps) => (
       <Thead>
         <Tr>
           <Th className={cx('p-0')}>
-            <div
-              className={cx(
-                'flex',
-                'items-center',
-                'justify-between',
-                'h-[50px]',
-              )}
-            >
+            <div className={cx('flex', 'items-center', 'justify-between', 'h-[50px]')}>
               <span className={cx('font-bold')}>{header}</span>
               <Spacer />
             </div>

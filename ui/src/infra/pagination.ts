@@ -12,12 +12,7 @@ import { StorageOptions } from '@koupr/ui'
 export const FILES_PAGINATION_STEP = 21
 
 export function filePaginationSteps() {
-  return [
-    FILES_PAGINATION_STEP,
-    FILES_PAGINATION_STEP * 2,
-    FILES_PAGINATION_STEP * 4,
-    FILES_PAGINATION_STEP * 5,
-  ]
+  return [FILES_PAGINATION_STEP, FILES_PAGINATION_STEP * 2, FILES_PAGINATION_STEP * 4, FILES_PAGINATION_STEP * 5]
 }
 
 export function filesPaginationStorage(): StorageOptions {

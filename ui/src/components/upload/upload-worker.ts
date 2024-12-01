@@ -11,11 +11,7 @@ import { FileWithPath } from 'react-dropzone'
 import FileAPI, { FileType } from '@/client/api/file'
 import { errorToString } from '@/client/error'
 import store from '@/store/configure-store'
-import {
-  Upload,
-  uploadCompleted,
-  uploadUpdated,
-} from '@/store/entities/uploads'
+import { Upload, uploadCompleted, uploadUpdated } from '@/store/entities/uploads'
 
 export const queue: Upload[] = []
 let working = false
@@ -43,10 +39,7 @@ setInterval(async () => {
         type: FileType.File,
         workspaceId: upload.workspaceId,
         parentId: upload.parentId,
-        name:
-          (upload.blob as FileWithPath).path ||
-          upload.blob.webkitRelativePath ||
-          upload.blob.name,
+        name: (upload.blob as FileWithPath).path || upload.blob.webkitRelativePath || upload.blob.name,
         request,
         blob: upload.blob,
         onProgress: (progress) => {

@@ -37,19 +37,10 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
-import {
-  geEditorPermission,
-  geOwnerPermission,
-  geViewerPermission,
-} from '@/client/api/permission'
+import { geEditorPermission, geOwnerPermission, geViewerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import downloadFile from '@/lib/helpers/download-file'
-import {
-  isImage,
-  isMicrosoftOffice,
-  isOpenOffice,
-  isPDF,
-} from '@/lib/helpers/file-extension'
+import { isImage, isMicrosoftOffice, isOpenOffice, isPDF } from '@/lib/helpers/file-extension'
 import mapFileList from '@/lib/helpers/map-file-list'
 import { isMacOS as helperIsMacOS } from '@/lib/helpers/os'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
@@ -80,34 +71,22 @@ export type FileMenuPosition = {
   y: number
 }
 
-const FileMenu = ({
-  position,
-  isOpen,
-  isToolbarMode,
-  onClose,
-}: FileMenuProps) => {
+const FileMenu = ({ position, isOpen, isToolbarMode, onClose }: FileMenuProps) => {
   const dispatch = useAppDispatch()
   const list = useAppSelector((state) => state.entities.files.list)
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const { data: file } = FileAPI.useGet(
-    selection.length === 1 ? selection[0] : undefined,
-    swrConfig(),
-  )
+  const { data: file } = FileAPI.useGet(selection.length === 1 ? selection[0] : undefined, swrConfig())
   const isOwnerInSelection = useMemo(
     () =>
       Boolean(
-        list?.data
-          .filter((item) => selection.includes(item.id))
-          .every((item) => geOwnerPermission(item.permission)),
+        list?.data.filter((item) => selection.includes(item.id)).every((item) => geOwnerPermission(item.permission)),
       ),
     [list, selection],
   )
   const isEditorInSelection = useMemo(
     () =>
       Boolean(
-        list?.data
-          .filter((item) => selection.includes(item.id))
-          .every((item) => geEditorPermission(item.permission)),
+        list?.data.filter((item) => selection.includes(item.id)).every((item) => geEditorPermission(item.permission)),
       ),
     [list, selection],
   )
@@ -119,70 +98,29 @@ const FileMenu = ({
         isMicrosoftOffice(file.snapshot?.original.extension) ||
         isOpenOffice(file.snapshot?.original.extension) ||
         isImage(file.snapshot?.original.extension)) &&
-      ((geViewerPermission(file.permission) && file.snapshot?.entities) ||
-        geEditorPermission(file.permission)),
+      ((geViewerPermission(file.permission) && file.snapshot?.entities) || geEditorPermission(file.permission)),
     [file],
   )
   const isMosaicAuthorized = useMemo(
-    () =>
-      file?.type === 'file' &&
-      !file.snapshot?.task?.isPending &&
-      isImage(file.snapshot?.original.extension),
+    () => file?.type === 'file' && !file.snapshot?.task?.isPending && isImage(file.snapshot?.original.extension),
     [file],
   )
-  const isSharingAuthorized = useMemo(
-    () => selection.length > 0 && isOwnerInSelection,
-    [selection, isOwnerInSelection],
-  )
-  const isDeleteAuthorized = useMemo(
-    () => selection.length > 0 && isOwnerInSelection,
-    [selection, isOwnerInSelection],
-  )
-  const isMoveAuthorized = useMemo(
-    () => selection.length > 0 && isEditorInSelection,
-    [selection, isEditorInSelection],
-  )
-  const isCopyAuthorized = useMemo(
-    () => selection.length > 0 && isEditorInSelection,
-    [selection, isEditorInSelection],
-  )
-  const isSnapshotsAuthorized = useMemo(
-    () => file?.type === 'file' && geOwnerPermission(file.permission),
-    [file],
-  )
-  const isUploadAuthorized = useMemo(
-    () => file?.type === 'file' && geEditorPermission(file.permission),
-    [file],
-  )
-  const isDownloadAuthorized = useMemo(
-    () => file?.type === 'file' && geViewerPermission(file.permission),
-    [file],
-  )
-  const isRenameAuthorized = useMemo(
-    () => file !== undefined && geEditorPermission(file.permission),
-    [file],
-  )
-  const isInfoAuthorized = useMemo(
-    () => file !== undefined && geViewerPermission(file.permission),
-    [file],
-  )
+  const isSharingAuthorized = useMemo(() => selection.length > 0 && isOwnerInSelection, [selection, isOwnerInSelection])
+  const isDeleteAuthorized = useMemo(() => selection.length > 0 && isOwnerInSelection, [selection, isOwnerInSelection])
+  const isMoveAuthorized = useMemo(() => selection.length > 0 && isEditorInSelection, [selection, isEditorInSelection])
+  const isCopyAuthorized = useMemo(() => selection.length > 0 && isEditorInSelection, [selection, isEditorInSelection])
+  const isSnapshotsAuthorized = useMemo(() => file?.type === 'file' && geOwnerPermission(file.permission), [file])
+  const isUploadAuthorized = useMemo(() => file?.type === 'file' && geEditorPermission(file.permission), [file])
+  const isDownloadAuthorized = useMemo(() => file?.type === 'file' && geViewerPermission(file.permission), [file])
+  const isRenameAuthorized = useMemo(() => file !== undefined && geEditorPermission(file.permission), [file])
+  const isInfoAuthorized = useMemo(() => file !== undefined && geViewerPermission(file.permission), [file])
   const isToolsAuthorized = useMemo(
     () => isInsightsAuthorized || isMosaicAuthorized,
     [isInsightsAuthorized, isMosaicAuthorized],
   )
   const isManagementAuthorized = useMemo(() => {
-    return (
-      isSharingAuthorized ||
-      isSnapshotsAuthorized ||
-      isUploadAuthorized ||
-      isDownloadAuthorized
-    )
-  }, [
-    isSharingAuthorized,
-    isSnapshotsAuthorized,
-    isUploadAuthorized,
-    isDownloadAuthorized,
-  ])
+    return isSharingAuthorized || isSnapshotsAuthorized || isUploadAuthorized || isDownloadAuthorized
+  }, [isSharingAuthorized, isSnapshotsAuthorized, isUploadAuthorized, isDownloadAuthorized])
   const isMacOS = useMemo(() => helperIsMacOS(), [])
   const uploadInputRef = useRef<HTMLInputElement>(null)
 
@@ -410,10 +348,7 @@ const FileMenu = ({
             {isToolbarMode ? (
               <MenuOptionGroup>
                 <MenuDivider />
-                <MenuItem
-                  icon={<IconSelectCheckBox />}
-                  onClick={handleSelectAllClick}
-                >
+                <MenuItem icon={<IconSelectCheckBox />} onClick={handleSelectAllClick}>
                   <div className={cx('flex', 'flex-row', 'justify-between')}>
                     <span>Select All</span>
                     {isMacOS ? (
@@ -427,10 +362,7 @@ const FileMenu = ({
                     )}
                   </div>
                 </MenuItem>
-                <MenuItem
-                  icon={<IconCheckBoxOutlineBlank />}
-                  onClick={() => dispatch(selectionUpdated([]))}
-                >
+                <MenuItem icon={<IconCheckBoxOutlineBlank />} onClick={() => dispatch(selectionUpdated([]))}>
                   Unselect All
                 </MenuItem>
               </MenuOptionGroup>
@@ -462,13 +394,7 @@ const FileMenu = ({
           </MenuList>
         </Portal>
       </Menu>
-      <input
-        ref={uploadInputRef}
-        className={cx('hidden')}
-        type="file"
-        multiple
-        onChange={handleUploadInputChange}
-      />
+      <input ref={uploadInputRef} className={cx('hidden')} type="file" multiple onChange={handleUploadInputChange} />
     </>
   )
 }

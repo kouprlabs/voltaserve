@@ -23,20 +23,13 @@ import {
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { useAppSelector } from '@/store/hook'
-import {
-  deleteModalDidClose,
-  loadingAdded,
-  loadingRemoved,
-  selectionUpdated,
-} from '@/store/ui/files'
+import { deleteModalDidClose, loadingAdded, loadingRemoved, selectionUpdated } from '@/store/ui/files'
 
 const FileDelete = () => {
   const { fileId } = useParams()
   const dispatch = useDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isDeleteModalOpen,
-  )
+  const isModalOpen = useAppSelector((state) => state.ui.files.isDeleteModalOpen)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
 
@@ -54,11 +47,7 @@ const FileDelete = () => {
   }, [selection, fileId, dispatch, mutateList, mutateTasks])
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => dispatch(deleteModalDidClose())}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => dispatch(deleteModalDidClose())} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         {selection.length > 1 ? (
@@ -76,20 +65,10 @@ const FileDelete = () => {
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              onClick={() => dispatch(deleteModalDidClose())}
-            >
+            <Button type="button" variant="outline" colorScheme="blue" onClick={() => dispatch(deleteModalDidClose())}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="solid"
-              colorScheme="red"
-              onClick={handleDelete}
-            >
+            <Button type="submit" variant="solid" colorScheme="red" onClick={handleDelete}>
               Delete
             </Button>
           </div>

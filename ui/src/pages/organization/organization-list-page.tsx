@@ -8,19 +8,8 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useEffect } from 'react'
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from 'react-router-dom'
-import {
-  Heading,
-  Link as ChakraLink,
-  Avatar,
-  Badge,
-  Button,
-} from '@chakra-ui/react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Heading, Link as ChakraLink, Avatar, Badge, Button } from '@chakra-ui/react'
 import {
   DataTable,
   IconAdd,
@@ -59,10 +48,7 @@ const OrganizationListPage = () => {
     error: listError,
     isLoading: listIsLoading,
     mutate,
-  } = OrganizationAPI.useList(
-    { query, page, size, sortOrder: SortOrder.Desc },
-    swrConfig(),
-  )
+  } = OrganizationAPI.useList({ query, page, size, sortOrder: SortOrder.Desc }, swrConfig())
   const { hasPagination } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
@@ -94,12 +80,7 @@ const OrganizationListPage = () => {
           <SectionPlaceholder
             text="There are no organizations."
             content={
-              <Button
-                as={Link}
-                to="/new/organization"
-                leftIcon={<IconAdd />}
-                variant="solid"
-              >
+              <Button as={Link} to="/new/organization" leftIcon={<IconAdd />} variant="solid">
                 New Organization
               </Button>
             }
@@ -112,24 +93,9 @@ const OrganizationListPage = () => {
               {
                 title: 'Name',
                 renderCell: (o) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'gap-1.5',
-                      'items-center',
-                    )}
-                  >
-                    <Avatar
-                      name={o.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
-                    <ChakraLink
-                      as={Link}
-                      to={`/organization/${o.id}/member`}
-                      className={cx('no-underline')}
-                    >
+                  <div className={cx('flex', 'flex-row', 'gap-1.5', 'items-center')}>
+                    <Avatar name={o.name} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
+                    <ChakraLink as={Link} to={`/organization/${o.id}/member`} className={cx('no-underline')}>
                       <Text noOfLines={1}>{o.name}</Text>
                     </ChakraLink>
                   </div>
@@ -141,9 +107,7 @@ const OrganizationListPage = () => {
               },
               {
                 title: 'Date',
-                renderCell: (o) => (
-                  <RelativeDate date={new Date(o.createTime)} />
-                ),
+                renderCell: (o) => <RelativeDate date={new Date(o.createTime)} />,
               },
             ]}
             pagination={

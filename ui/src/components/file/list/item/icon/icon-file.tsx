@@ -23,15 +23,7 @@ const IconFile = ({ file, scale, isLoading }: IconFileProps) => (
       <>
         <IconDiverse file={file} scale={scale} />
         <div
-          className={cx(
-            'absolute',
-            'flex',
-            'flex-row',
-            'items-center',
-            'gap-[2px]',
-            'bottom-[-5px]',
-            'right-[-5px]',
-          )}
+          className={cx('absolute', 'flex', 'flex-row', 'items-center', 'gap-[2px]', 'bottom-[-5px]', 'right-[-5px]')}
         >
           <IconBadge file={file} isLoading={isLoading} />
         </div>

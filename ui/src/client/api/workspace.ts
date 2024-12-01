@@ -85,11 +85,7 @@ export default class WorkspaceAPI {
 
   static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/workspaces?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
-      url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
-      swrOptions,
-    )
+    return useSWR<List>(url, () => apiFetcher({ url, method: 'GET' }) as Promise<List>, swrOptions)
   }
 
   static list(options?: ListOptions) {
@@ -135,10 +131,7 @@ export default class WorkspaceAPI {
     }) as Promise<Workspace>
   }
 
-  static patchStorageCapacity(
-    id: string,
-    options: PatchStorageCapacityOptions,
-  ) {
+  static patchStorageCapacity(id: string, options: PatchStorageCapacityOptions) {
     return apiFetcher({
       url: `/workspaces/${id}/storage_capacity`,
       method: 'PATCH',

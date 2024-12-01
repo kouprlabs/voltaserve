@@ -13,16 +13,7 @@ import cx from 'classnames'
 
 const IconBadgeInsights = () => (
   <Tooltip label="This item has insights">
-    <Circle
-      className={cx(
-        'text-orange-600',
-        'bg-white',
-        'w-[23px]',
-        'h-[23px]',
-        'border',
-        'border-gray-200',
-      )}
-    >
+    <Circle className={cx('text-orange-600', 'bg-white', 'w-[23px]', 'h-[23px]', 'border', 'border-gray-200')}>
       <IconVisibility className={cx('text-[12px]')} />
     </Circle>
   </Tooltip>

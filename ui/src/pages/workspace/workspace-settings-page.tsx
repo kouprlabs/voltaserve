@@ -10,13 +10,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { IconButton, IconButtonProps, Progress } from '@chakra-ui/react'
-import {
-  Form,
-  IconDelete,
-  IconEdit,
-  SectionError,
-  SectionSpinner,
-} from '@koupr/ui'
+import { Form, IconDelete, IconEdit, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
 import StorageAPI from '@/client/api/storage'
@@ -29,9 +23,7 @@ import WorkspaceEditStorageCapacity from '@/components/workspace/workspace-edit-
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 
-const EditButton = (props: IconButtonProps) => (
-  <IconButton icon={<IconEdit />} {...props} />
-)
+const EditButton = (props: IconButtonProps) => <IconButton icon={<IconEdit />} {...props} />
 
 const WorkspaceSettingsPage = () => {
   const { id } = useParams()
@@ -47,17 +39,10 @@ const WorkspaceSettingsPage = () => {
     isLoading: storageUsageIsLoading,
     mutate: mutateStorageUsage,
   } = StorageAPI.useGetWorkspaceUsage(id, swrConfig())
-  const hasEditPermission = useMemo(
-    () => workspace && geEditorPermission(workspace.permission),
-    [workspace],
-  )
-  const hasOwnerPermission = useMemo(
-    () => workspace && geOwnerPermission(workspace.permission),
-    [workspace],
-  )
+  const hasEditPermission = useMemo(() => workspace && geEditorPermission(workspace.permission), [workspace])
+  const hasOwnerPermission = useMemo(() => workspace && geOwnerPermission(workspace.permission), [workspace])
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
-  const [isStorageCapacityModalOpen, setIsStorageCapacityModalOpen] =
-    useState(false)
+  const [isStorageCapacityModalOpen, setIsStorageCapacityModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const workspaceIsReady = workspace && !workspaceError
   const storageUsageIsReady = storageUsage && !storageUsageError
@@ -92,17 +77,11 @@ const WorkspaceSettingsPage = () => {
                 title: 'Storage',
                 content: (
                   <>
-                    {storageUsageError ? (
-                      <SectionError
-                        text={errorToString(storageUsageError)}
-                        height="auto"
-                      />
-                    ) : null}
+                    {storageUsageError ? <SectionError text={errorToString(storageUsageError)} height="auto" /> : null}
                     {storageUsageIsReady ? (
                       <>
                         <span>
-                          {prettyBytes(storageUsage.bytes)} of{' '}
-                          {prettyBytes(storageUsage.maxBytes)} used
+                          {prettyBytes(storageUsage.bytes)} of {prettyBytes(storageUsage.maxBytes)} used
                         </span>
                         <Progress value={storageUsage.percentage} hasStripe />
                       </>
@@ -172,21 +151,13 @@ const WorkspaceSettingsPage = () => {
               },
             ]}
           />
-          <WorkspaceEditName
-            open={isNameModalOpen}
-            workspace={workspace}
-            onClose={handleEditNameClose}
-          />
+          <WorkspaceEditName open={isNameModalOpen} workspace={workspace} onClose={handleEditNameClose} />
           <WorkspaceEditStorageCapacity
             open={isStorageCapacityModalOpen}
             workspace={workspace}
             onClose={handleEditStorageCapacityClose}
           />
-          <WorkspaceDelete
-            open={isDeleteModalOpen}
-            workspace={workspace}
-            onClose={() => setIsDeleteModalOpen(false)}
-          />
+          <WorkspaceDelete open={isDeleteModalOpen} workspace={workspace} onClose={() => setIsDeleteModalOpen(false)} />
         </>
       ) : null}
     </>

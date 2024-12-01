@@ -161,24 +161,17 @@ const slice = createSlice({
       saveFileSortBy(state.sortBy)
     },
     sortOrderToggled: (state) => {
-      state.sortOrder =
-        state.sortOrder === SortOrder.Asc ? SortOrder.Desc : SortOrder.Asc
+      state.sortOrder = state.sortOrder === SortOrder.Asc ? SortOrder.Desc : SortOrder.Asc
       saveFileSortOrder(state.sortOrder)
     },
     viewTypeToggled: (state) => {
-      state.viewType =
-        state.viewType === FileViewType.Grid
-          ? FileViewType.List
-          : FileViewType.Grid
+      state.viewType = state.viewType === FileViewType.Grid ? FileViewType.List : FileViewType.Grid
       saveFileViewType(state.viewType)
     },
     selectionModeToggled: (state) => {
       state.isSelectionMode = !state.isSelectionMode
     },
-    mutateUpdated: (
-      state,
-      action: PayloadAction<KeyedMutator<List | undefined>>,
-    ) => {
+    mutateUpdated: (state, action: PayloadAction<KeyedMutator<List | undefined>>) => {
       state.mutate = action.payload
     },
   },

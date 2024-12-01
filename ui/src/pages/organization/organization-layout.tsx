@@ -25,12 +25,7 @@ const OrganizationLayout = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { id } = useParams()
-  const {
-    data: org,
-    error: orgError,
-    isLoading: orgIsLoading,
-    mutate,
-  } = OrganizationAPI.useGet(id, swrConfig())
+  const { data: org, error: orgError, isLoading: orgIsLoading, mutate } = OrganizationAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
   const orgIsReady = org && !orgError
 
@@ -67,18 +62,14 @@ const OrganizationLayout = () => {
             </Heading>
             <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
               <TabList>
-                <Tab onClick={() => navigate(`/organization/${id}/member`)}>
-                  Members
-                </Tab>
+                <Tab onClick={() => navigate(`/organization/${id}/member`)}>Members</Tab>
                 <Tab
                   onClick={() => navigate(`/organization/${id}/invitation`)}
                   display={geOwnerPermission(org.permission) ? 'auto' : 'none'}
                 >
                   Invitations
                 </Tab>
-                <Tab onClick={() => navigate(`/organization/${id}/settings`)}>
-                  Settings
-                </Tab>
+                <Tab onClick={() => navigate(`/organization/${id}/settings`)}>Settings</Tab>
               </TabList>
             </Tabs>
             <Outlet />

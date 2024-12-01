@@ -22,14 +22,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI from '@/client/idp/user'
@@ -55,10 +48,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { password }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ password }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
         await UserAPI.delete({ password })
@@ -72,11 +62,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => onClose?.()}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Delete Account</ModalHeader>
@@ -91,23 +77,12 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'items-start', 'gap-1')}>
-                  <span>
-                    Are you sure you want to delete your account permanently?
-                  </span>
-                  <span className={cx('font-semibold')}>
-                    Type your password to confirm:
-                  </span>
+                  <span>Are you sure you want to delete your account permanently?</span>
+                  <span className={cx('font-semibold')}>Type your password to confirm:</span>
                   <Field name="password">
                     {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.password && touched.password)}
-                      >
-                        <Input
-                          {...field}
-                          type="password"
-                          placeholder="Password"
-                          disabled={isSubmitting}
-                        />
+                      <FormControl isInvalid={Boolean(errors.password && touched.password)}>
+                        <Input {...field} type="password" placeholder="Password" disabled={isSubmitting} />
                         <FormErrorMessage>{errors.password}</FormErrorMessage>
                       </FormControl>
                     )}
@@ -115,9 +90,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -127,12 +100,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="red"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="red" isLoading={isSubmitting}>
                     Delete Permanently
                   </Button>
                 </div>

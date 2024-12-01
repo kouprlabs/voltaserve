@@ -9,23 +9,9 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  Input,
-  Link as ChakraLink,
-  Heading,
-} from '@chakra-ui/react'
+import { Button, FormControl, FormErrorMessage, Input, Link as ChakraLink, Heading } from '@chakra-ui/react'
 import { Logo } from '@koupr/ui'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -38,28 +24,20 @@ type FormValues = {
 
 const ForgotPasswordPage = () => {
   const formSchema = Yup.object().shape({
-    email: Yup.string()
-      .email('Email is not valid')
-      .required('Email is required'),
+    email: Yup.string().email('Email is not valid').required('Email is required'),
   })
   const [isCompleted, setIsCompleted] = useState(false)
 
-  const handleSubmit = useCallback(
-    async (
-      { email }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
-      try {
-        await AccountAPI.sendResetPasswordEmail({
-          email,
-        })
-        setIsCompleted(true)
-      } finally {
-        setSubmitting(false)
-      }
-    },
-    [],
-  )
+  const handleSubmit = useCallback(async ({ email }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
+    try {
+      await AccountAPI.sendResetPasswordEmail({
+        email,
+      })
+      setIsCompleted(true)
+    } finally {
+      setSubmitting(false)
+    }
+  }, [])
 
   return (
     <LayoutFull>
@@ -67,29 +45,19 @@ const ForgotPasswordPage = () => {
         <Helmet>
           <title>Forgot Password</title>
         </Helmet>
-        <div
-          className={cx(
-            'flex',
-            'flex-col',
-            'items-center',
-            'gap-2.5',
-            'w-full',
-          )}
-        >
+        <div className={cx('flex', 'flex-col', 'items-center', 'gap-2.5', 'w-full')}>
           <div className={cx('w-[64px]')}>
             <Logo type="voltaserve" size="md" isGlossy={true} />
           </div>
           <Heading className={cx('text-heading')}>Forgot Password</Heading>
           {isCompleted ? (
             <span className={cx('text-center')}>
-              If your email belongs to an account, you will receive the recovery
-              instructions in your inbox shortly.
+              If your email belongs to an account, you will receive the recovery instructions in your inbox shortly.
             </span>
           ) : (
             <>
               <span className={cx('text-center')}>
-                Please provide your account Email where we can send you the
-                password recovery instructions.
+                Please provide your account Email where we can send you the password recovery instructions.
               </span>
               <Formik
                 initialValues={{
@@ -101,25 +69,11 @@ const ForgotPasswordPage = () => {
               >
                 {({ errors, touched, isSubmitting }) => (
                   <Form className={cx('w-full')}>
-                    <div
-                      className={cx(
-                        'flex',
-                        'flex-col',
-                        'items-center',
-                        'gap-1.5',
-                      )}
-                    >
+                    <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
                       <Field name="email">
                         {({ field }: FieldAttributes<FieldProps>) => (
-                          <FormControl
-                            isInvalid={Boolean(errors.email && touched.email)}
-                          >
-                            <Input
-                              {...field}
-                              id="email"
-                              placeholder="Email"
-                              disabled={isSubmitting}
-                            />
+                          <FormControl isInvalid={Boolean(errors.email && touched.email)}>
+                            <Input {...field} id="email" placeholder="Email" disabled={isSubmitting} />
                             <FormErrorMessage>{errors.email}</FormErrorMessage>
                           </FormControl>
                         )}
@@ -137,9 +91,7 @@ const ForgotPasswordPage = () => {
                   </Form>
                 )}
               </Formik>
-              <div
-                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
-              >
+              <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
                 <span>Password recovered?</span>
                 <ChakraLink as={Link} to="/sign-in">
                   Sign In

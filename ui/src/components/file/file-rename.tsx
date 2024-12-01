@@ -22,14 +22,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
+import { Field, FieldAttributes, FieldProps, Form, Formik, FormikHelpers } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
@@ -44,9 +37,7 @@ type FormValues = {
 const FileRename = () => {
   const dispatch = useAppDispatch()
   const { fileId } = useParams()
-  const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isRenameModalOpen,
-  )
+  const isModalOpen = useAppSelector((state) => state.ui.files.isRenameModalOpen)
   const id = useAppSelector((state) => state.ui.files.selection[0])
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const { data: file, mutate: mutateFile } = FileAPI.useGet(id)
@@ -57,10 +48,7 @@ const FileRename = () => {
   useFocusAndSelectAll(inputRef, isModalOpen)
 
   const handleSubmit = useCallback(
-    async (
-      { name }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async ({ name }: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       if (!file) {
         return
       }
@@ -78,11 +66,7 @@ const FileRename = () => {
   )
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onClose={() => dispatch(renameModalDidClose())}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isModalOpen} onClose={() => dispatch(renameModalDidClose())} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Rename Item</ModalHeader>
@@ -99,24 +83,15 @@ const FileRename = () => {
               <ModalBody>
                 <Field name="name">
                   {({ field }: FieldAttributes<FieldProps>) => (
-                    <FormControl
-                      isInvalid={Boolean(errors.name && touched.name)}
-                    >
-                      <Input
-                        ref={inputRef}
-                        {...field}
-                        placeholder="Name"
-                        disabled={isSubmitting}
-                      />
+                    <FormControl isInvalid={Boolean(errors.name && touched.name)}>
+                      <Input ref={inputRef} {...field} placeholder="Name" disabled={isSubmitting} />
                       <FormErrorMessage>{errors.name}</FormErrorMessage>
                     </FormControl>
                   )}
                 </Field>
               </ModalBody>
               <ModalFooter>
-                <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
-                >
+                <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                   <Button
                     type="button"
                     variant="outline"
@@ -126,12 +101,7 @@ const FileRename = () => {
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="blue"
-                    isLoading={isSubmitting}
-                  >
+                  <Button type="submit" variant="solid" colorScheme="blue" isLoading={isSubmitting}>
                     Save
                   </Button>
                 </div>

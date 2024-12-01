@@ -8,12 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { ReactElement, useState } from 'react'
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Avatar, Link as ChakraLink } from '@chakra-ui/react'
 import { Heading } from '@chakra-ui/react'
 import {
@@ -52,22 +47,16 @@ const ConsolePanelGroups = () => {
     storage: consoleGroupsPaginationStorage(),
   })
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
-  const [isConfirmationDestructive, setIsConfirmationDestructive] =
-    useState(false)
+  const [isConfirmationDestructive, setIsConfirmationDestructive] = useState(false)
   const [confirmationHeader, setConfirmationHeader] = useState<ReactElement>()
   const [confirmationBody, setConfirmationBody] = useState<ReactElement>()
-  const [confirmationRequest, setConfirmationRequest] =
-    useState<ConsoleConfirmationModalRequest>()
+  const [confirmationRequest, setConfirmationRequest] = useState<ConsoleConfirmationModalRequest>()
   const {
     data: list,
     error: listError,
     isLoading: listIsLoading,
     mutate,
-  } = ConsoleAPI.useListOrSearchObject<ConsoleGroup>(
-    'group',
-    { page, size, query },
-    swrConfig(),
-  )
+  } = ConsoleAPI.useListOrSearchObject<ConsoleGroup>('group', { page, size, query }, swrConfig())
   const { hasPagination } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
@@ -85,9 +74,7 @@ const ConsolePanelGroups = () => {
         <Heading className={cx('text-heading')}>Groups</Heading>
         {listIsLoading ? <SectionSpinner /> : null}
         {listError ? <SectionError text={errorToString(listError)} /> : null}
-        {listIsEmpty ? (
-          <SectionPlaceholder text="There are no groups." />
-        ) : null}
+        {listIsEmpty ? <SectionPlaceholder text="There are no groups." /> : null}
         {listIsReady ? (
           <DataTable
             items={list.data}
@@ -95,19 +82,8 @@ const ConsolePanelGroups = () => {
               {
                 title: 'Name',
                 renderCell: (group) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <Avatar
-                      name={group.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
+                  <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
+                    <Avatar name={group.name} size="sm" className={cx('w-[40px]', 'h-[40px]')} />
                     <Text noOfLines={1}>{group.name}</Text>
                   </div>
                 ),
@@ -126,15 +102,11 @@ const ConsolePanelGroups = () => {
               },
               {
                 title: 'Created',
-                renderCell: (group) => (
-                  <RelativeDate date={new Date(group.createTime)} />
-                ),
+                renderCell: (group) => <RelativeDate date={new Date(group.createTime)} />,
               },
               {
                 title: 'Updated',
-                renderCell: (group) => (
-                  <RelativeDate date={new Date(group.updateTime)} />
-                ),
+                renderCell: (group) => <RelativeDate date={new Date(group.updateTime)} />,
               },
             ]}
             actions={[
@@ -145,8 +117,7 @@ const ConsolePanelGroups = () => {
                   setConfirmationHeader(<>Grant Owner Permission</>)
                   setConfirmationBody(
                     <>
-                      Are you sure you want to grant yourself owner permission
-                      on{' '}
+                      Are you sure you want to grant yourself owner permission on{' '}
                       <span className={cx('font-bold')}>{workspace.name}</span>?
                     </>,
                   )
