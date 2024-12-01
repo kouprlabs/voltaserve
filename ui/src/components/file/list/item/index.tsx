@@ -11,10 +11,9 @@ import { MouseEvent, useEffect, useMemo } from 'react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link as ChakraLink } from '@chakra-ui/react'
-import { Text } from '@koupr/ui'
+import { RelativeDate, Text } from '@koupr/ui'
 import cx from 'classnames'
 import { Status } from '@/client/api/snapshot'
-import relativeDate from '@/lib/helpers/relative-date'
 import store from '@/store/configure-store'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -57,7 +56,6 @@ const ListItem = ({
       return 1
     }
   }, [viewType])
-  const date = relativeDate(new Date(file.createTime))
   const computedScale = computeScale(scale, viewType)
   const width = `${WIDTH * computedScale}px`
   const minHeight = `${MIN_HEIGHT * computedScale}px`
@@ -248,7 +246,7 @@ const ListItem = ({
         noOfLines={noOfLines}
         className={cx('text-gray-500', 'text-center')}
       >
-        {date}
+        <RelativeDate date={new Date(file.createTime)} />
       </Text>
     </div>
   )
