@@ -31,7 +31,12 @@ export default [
   {
     rules: {
       'react/react-in-jsx-scope': 'off',
-      'prettier/prettier': 'error',
+      'prettier/prettier': [
+        'error',
+        {
+          'printWidth': 120,
+        },
+      ],
     },
   },
   {
