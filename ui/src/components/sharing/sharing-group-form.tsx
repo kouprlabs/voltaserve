@@ -47,12 +47,12 @@ const SharingGroupForm = () => {
   const {
     data: workspace,
     error: workspaceError,
-    isLoading: isWorkspaceLoading,
+    isLoading: workspaceIsLoading,
   } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const {
-    data: groups,
-    error: groupsError,
-    isLoading: isGroupsLoading,
+    data: groupList,
+    error: groupListError,
+    isLoading: groupListIsLoading,
   } = GroupAPI.useList(
     {
       organizationId: workspace?.organization.id,
@@ -63,11 +63,11 @@ const SharingGroupForm = () => {
   const { mutate: mutatePermissions } = FileAPI.useGetGroupPermissions(
     isSingleSelection ? selection[0] : undefined,
   )
-  const isWorkspaceError = !workspace && workspaceError
-  const isWorkspaceReady = workspace && !workspaceError
-  const isGroupsError = !groups && groupsError
-  const isGroupsEmpty = groups && !groupsError && groups.totalElements === 0
-  const isGroupsReady = groups && !groupsError && groups.totalElements > 0
+  const workspaceIsReady = workspace && !workspaceError
+  const groupListIsEmpty =
+    groupList && !groupListError && groupList.totalElements === 0
+  const groupListIsReady =
+    groupList && !groupListError && groupList.totalElements > 0
 
   const handleGrantPermission = useCallback(async () => {
     if (!group || !permission) {
@@ -104,14 +104,16 @@ const SharingGroupForm = () => {
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-      {isWorkspaceLoading || isGroupsLoading ? <SharingFormSkeleton /> : null}
-      {isWorkspaceError || isGroupsError ? (
+      {workspaceIsLoading || groupListIsLoading ? (
+        <SharingFormSkeleton />
+      ) : null}
+      {workspaceError || groupListError ? (
         <SectionError
-          text={errorToString(workspaceError || groupsError)}
+          text={errorToString(workspaceError || groupListError)}
           height="auto"
         />
       ) : null}
-      {isWorkspaceReady && isGroupsEmpty ? (
+      {workspaceIsReady && groupListIsEmpty ? (
         <SectionPlaceholder
           text="This organization has no groups."
           content={
@@ -131,7 +133,7 @@ const SharingGroupForm = () => {
           height="auto"
         />
       ) : null}
-      {isWorkspaceReady && isGroupsReady ? (
+      {workspaceIsReady && groupListIsReady ? (
         <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <GroupSelector
             value={group}

@@ -17,6 +17,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import TaskAPI, { SortOrder } from '@/client/api/task'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch } from '@/store/hook'
 import { mutateListUpdated } from '@/store/ui/tasks'
@@ -29,7 +30,7 @@ const TasksList = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate: mutateList,
   } = TaskAPI.useList({ page, size, sortOrder: SortOrder.Asc }, swrConfig())
   const { hasPageSwitcher } = usePageMonitor({
@@ -37,9 +38,8 @@ const TasksList = () => {
     totalElements: list?.totalElements ?? 0,
     steps: [size],
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     dispatch(mutateListUpdated(mutateList))
@@ -47,10 +47,10 @@ const TasksList = () => {
 
   return (
     <>
-      {isListLoading ? <SectionSpinner /> : null}
-      {isListError ? <SectionError text="Failed to load tasks." /> : null}
-      {isListEmpty ? <SectionPlaceholder text="There are no tasks." /> : null}
-      {isListReady ? (
+      {listIsLoading ? <SectionSpinner /> : null}
+      {listError ? <SectionError text={errorToString(listError)} /> : null}
+      {listIsEmpty ? <SectionPlaceholder text="There are no tasks." /> : null}
+      {listIsReady ? (
         <div
           className={cx(
             'flex',

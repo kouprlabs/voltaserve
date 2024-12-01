@@ -15,6 +15,7 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geOwnerPermission } from '@/client/api/permission'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/organization'
@@ -27,12 +28,11 @@ const OrganizationLayout = () => {
   const {
     data: org,
     error: orgError,
-    isLoading: isOrgLoading,
+    isLoading: orgIsLoading,
     mutate,
   } = OrganizationAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
-  const isOrgError = !org && orgError
-  const isOrgReady = org && !orgError
+  const orgIsReady = org && !orgError
 
   useEffect(() => {
     const segments = location.pathname.split('/')
@@ -54,9 +54,9 @@ const OrganizationLayout = () => {
 
   return (
     <>
-      {isOrgLoading ? <SectionSpinner /> : null}
-      {isOrgError ? <SectionError text="Failed to load organization." /> : null}
-      {isOrgReady ? (
+      {orgIsLoading ? <SectionSpinner /> : null}
+      {orgError ? <SectionError text={errorToString(orgError)} /> : null}
+      {orgIsReady ? (
         <>
           <Helmet>
             <title>{org.name}</title>

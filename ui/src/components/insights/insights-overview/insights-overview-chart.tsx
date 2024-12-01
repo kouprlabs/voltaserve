@@ -12,6 +12,7 @@ import { SectionError, SectionPlaceholder, SectionSpinner } from '@koupr/ui'
 import { ResponsivePie } from '@nivo/pie'
 import cx from 'classnames'
 import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
 
@@ -27,24 +28,23 @@ const InsightsOverviewChart = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
   } = InsightsAPI.useListEntities(
     id,
     { page: 1, size: 5, sortBy: SortBy.Frequency, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements < 5
-  const isListReady = list && !listError && list.totalElements >= 5
+  const listIsEmpty = list && !listError && list.totalElements < 5
+  const listIsReady = list && !listError && list.totalElements >= 5
 
   return (
     <>
-      {isListLoading ? <SectionSpinner /> : null}
-      {isListError ? <SectionError text="Failed to load chart." /> : null}
-      {isListEmpty ? (
+      {listIsLoading ? <SectionSpinner /> : null}
+      {listError ? <SectionError text={errorToString(listError)} /> : null}
+      {listIsEmpty ? (
         <SectionPlaceholder text="Not enough data to render the chart." />
       ) : null}
-      {isListReady ? (
+      {listIsReady ? (
         <div
           className={cx(
             'w-full',

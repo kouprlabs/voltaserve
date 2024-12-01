@@ -19,6 +19,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
 
@@ -35,7 +36,7 @@ const InsightsOverviewEntities = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = InsightsAPI.useListEntities(
     metadata ? id : undefined,
@@ -53,9 +54,8 @@ const InsightsOverviewEntities = () => {
     totalElements: list?.totalElements ?? 0,
     steps: [size],
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -79,12 +79,12 @@ const InsightsOverviewEntities = () => {
         onValue={handleSearchInputValue}
         onClear={handleSearchInputClear}
       />
-      {isListLoading ? <SectionSpinner /> : null}
-      {isListError ? <SectionError text="Failed to load entities." /> : null}
-      {isListEmpty ? (
+      {listIsLoading ? <SectionSpinner /> : null}
+      {listError ? <SectionError text={errorToString(listError)} /> : null}
+      {listIsEmpty ? (
         <SectionPlaceholder text="There are no entities." />
       ) : null}
-      {isListReady ? (
+      {listIsReady ? (
         <div
           className={cx(
             'flex',

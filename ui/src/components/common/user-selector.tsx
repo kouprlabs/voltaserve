@@ -35,6 +35,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import userToString from '@/lib/helpers/user-to-string'
@@ -62,7 +63,7 @@ const UserSelector = ({
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = UserAPI.useList(
     {
@@ -81,9 +82,8 @@ const UserSelector = ({
     totalElements: list?.totalElements ?? 0,
     steps: [size],
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -141,14 +141,14 @@ const UserSelector = ({
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {isListError ? (
-                <SectionError text="Failed to load users." />
+              {listError ? (
+                <SectionError text={errorToString(listError)} />
               ) : null}
-              {isListLoading ? <SectionSpinner /> : null}
-              {isListEmpty ? (
+              {listIsLoading ? <SectionSpinner /> : null}
+              {listIsEmpty ? (
                 <SectionPlaceholder text="There are no users." />
               ) : null}
-              {isListReady ? (
+              {listIsReady ? (
                 <div
                   className={cx(
                     'flex',

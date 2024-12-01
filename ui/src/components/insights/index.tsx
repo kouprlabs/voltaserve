@@ -18,6 +18,7 @@ import {
 import { SectionError, SectionSpinner } from '@koupr/ui'
 import FileAPI from '@/client/api/file'
 import InsightsAPI from '@/client/api/insights'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose, mutateInfoUpdated } from '@/store/ui/insights'
@@ -35,18 +36,16 @@ const Insights = () => {
   const {
     data: info,
     error: infoError,
-    isLoading: isInfoLoading,
+    isLoading: infoIsLoading,
     mutate: mutateInfo,
   } = InsightsAPI.useGetInfo(id, swrConfig())
   const {
     data: file,
     error: fileError,
-    isLoading: isFileLoading,
+    isLoading: fileIsLoading,
   } = FileAPI.useGet(id, swrConfig())
-  const isInfoError = !info && infoError
-  const isInfoReady = info && !infoError
-  const isFileError = !file && fileError
-  const isFileReady = file && !fileError
+  const infoIsReady = info && !infoError
+  const fileIsReady = file && !fileError
 
   useEffect(() => {
     if (mutateInfo) {
@@ -71,13 +70,15 @@ const Insights = () => {
       <ModalContent>
         <ModalHeader>Insights</ModalHeader>
         <ModalCloseButton />
-        {isFileLoading ? <SectionSpinner /> : null}
-        {isFileError ? <SectionError text="Failed to load file." /> : null}
-        {isFileReady ? (
+        {fileIsLoading ? <SectionSpinner /> : null}
+        {fileError ? <SectionError text={errorToString(fileError)} /> : null}
+        {fileIsReady ? (
           <>
-            {isInfoLoading ? <SectionSpinner /> : null}
-            {isInfoError ? <SectionError text="Failed to load info." /> : null}
-            {isInfoReady ? (
+            {infoIsLoading ? <SectionSpinner /> : null}
+            {infoError ? (
+              <SectionError text={errorToString(infoError)} />
+            ) : null}
+            {infoIsReady ? (
               <>
                 {info?.isAvailable ? <InsightsOverview /> : <InsightsCreate />}
               </>

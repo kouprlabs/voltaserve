@@ -34,6 +34,7 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleAPI from '@/client/console/console'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 
 const ConsolePanelOrganization = () => {
@@ -44,14 +45,14 @@ const ConsolePanelOrganization = () => {
   const {
     data: org,
     error: orgError,
-    isLoading: isOrgLoading,
+    isLoading: orgIsLoading,
   } = ConsoleAPI.useGetOrganizationById({
     id,
   })
   const {
     data: userList,
-    error: userError,
-    isLoading: isUserListLoading,
+    error: userListError,
+    isLoading: userListIsLoading,
   } = ConsoleAPI.useListUsersByOrganization(
     {
       id,
@@ -62,8 +63,8 @@ const ConsolePanelOrganization = () => {
   )
   const {
     data: workspaceList,
-    isLoading: isWorkspaceListLoading,
-    error: workspaceError,
+    isLoading: workspaceListIsLoading,
+    error: workspaceListError,
   } = ConsoleAPI.useListWorkspacesByOrganization(
     {
       id,
@@ -74,8 +75,8 @@ const ConsolePanelOrganization = () => {
   )
   const {
     data: groupList,
-    error: groupError,
-    isLoading: isGroupListLoading,
+    error: groupListError,
+    isLoading: groupListIsLoading,
   } = ConsoleAPI.useListGroupsByOrganization(
     {
       id,
@@ -84,27 +85,25 @@ const ConsolePanelOrganization = () => {
     },
     swrConfig(),
   )
-  const isOrgError = !org && orgError
-  const isOrgReady = org && !orgError
-  const isUserListError = !userList && userError
-  const isUserListEmpty = userList && !userError && userList.totalElements === 0
-  const isUserListReady = userList && !userError && userList.totalElements > 0
-  const isWorkspaceListError = !workspaceList && workspaceError
-  const isWorkspaceListEmpty =
-    workspaceList && !workspaceError && workspaceList.totalElements === 0
-  const isWorkspaceListReady =
-    workspaceList && !workspaceError && workspaceList.totalElements > 0
-  const isGroupListError = !groupList && groupError
-  const isGroupListEmpty =
-    groupList && !groupError && groupList.totalElements === 0
-  const isGroupListReady =
-    groupList && !groupError && groupList.totalElements > 0
+  const orgIsReady = org && !orgError
+  const userListIsEmpty =
+    userList && !userListError && userList.totalElements === 0
+  const userListIsReady =
+    userList && !userListError && userList.totalElements > 0
+  const workspaceListIsEmpty =
+    workspaceList && !workspaceListError && workspaceList.totalElements === 0
+  const workspaceListIsReady =
+    workspaceList && !workspaceListError && workspaceList.totalElements > 0
+  const groupListIsEmpty =
+    groupList && !groupListError && groupList.totalElements === 0
+  const groupListIsReady =
+    groupList && !groupListError && groupList.totalElements > 0
 
   return (
     <>
-      {isOrgLoading ? <SectionSpinner /> : null}
-      {isOrgError ? <SectionError text="Failed to load organization" /> : null}
-      {isOrgReady ? (
+      {orgIsLoading ? <SectionSpinner /> : null}
+      {orgError ? <SectionError text={errorToString(orgError)} /> : null}
+      {orgIsReady ? (
         <>
           <Helmet>
             <title>{org.name}</title>
@@ -131,22 +130,22 @@ const ConsolePanelOrganization = () => {
               </GridItem>
               <GridItem colSpan={8}></GridItem>
               <GridItem colSpan={3}>
-                {isUserListLoading ? (
+                {userListIsLoading ? (
                   <ListSkeleton header="Users">
                     <SectionSpinner />
                   </ListSkeleton>
                 ) : null}
-                {isUserListError ? (
+                {userListError ? (
                   <ListSkeleton header="Users">
-                    <SectionError text="Failed to load users." />
+                    <SectionError text={errorToString(userListError)} />
                   </ListSkeleton>
                 ) : null}
-                {isUserListEmpty ? (
+                {userListIsEmpty ? (
                   <ListSkeleton header="Users">
                     <SectionPlaceholder text="There are no users." />
                   </ListSkeleton>
                 ) : null}
-                {isUserListReady ? (
+                {userListIsReady ? (
                   <>
                     <Table>
                       <Thead>
@@ -219,22 +218,22 @@ const ConsolePanelOrganization = () => {
                 ) : null}
               </GridItem>
               <GridItem colSpan={3}>
-                {isWorkspaceListLoading ? (
+                {workspaceListIsLoading ? (
                   <ListSkeleton header="Workspaces">
                     <SectionSpinner />
                   </ListSkeleton>
                 ) : null}
-                {isWorkspaceListError ? (
+                {workspaceListError ? (
                   <ListSkeleton header="Workspaces">
-                    <SectionError text="Failed to load workspaces." />
+                    <SectionError text={errorToString(workspaceListError)} />
                   </ListSkeleton>
                 ) : null}
-                {isWorkspaceListEmpty ? (
+                {workspaceListIsEmpty ? (
                   <ListSkeleton header="Workspaces">
                     <SectionPlaceholder text="There are no workspaces." />
                   </ListSkeleton>
                 ) : null}
-                {isWorkspaceListReady ? (
+                {workspaceListIsReady ? (
                   <>
                     <Table>
                       <Thead>
@@ -309,22 +308,22 @@ const ConsolePanelOrganization = () => {
                 ) : null}
               </GridItem>
               <GridItem colSpan={3}>
-                {isGroupListLoading ? (
+                {groupListIsLoading ? (
                   <ListSkeleton header="Groups">
                     <SectionSpinner />
                   </ListSkeleton>
                 ) : null}
-                {isGroupListError ? (
+                {groupListError ? (
                   <ListSkeleton header="Groups">
-                    <SectionError text="Failed to load groups." />
+                    <SectionError text={errorToString(groupListError)} />
                   </ListSkeleton>
                 ) : null}
-                {isGroupListEmpty ? (
+                {groupListIsEmpty ? (
                   <ListSkeleton header="Groups">
                     <SectionPlaceholder text="There are no groups." />
                   </ListSkeleton>
                 ) : null}
-                {isGroupListReady ? (
+                {groupListIsReady ? (
                   <>
                     <Table>
                       <Thead>

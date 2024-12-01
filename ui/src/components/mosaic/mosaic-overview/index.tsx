@@ -24,6 +24,7 @@ import {
 import { SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import MosaicAPI from '@/client/api/mosaic'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
 import MosaicOverviewArtifacts from './mosaic-overview-artifacts'
@@ -39,17 +40,16 @@ const MosaicOverview = () => {
   const {
     data: info,
     error: infoError,
-    isLoading: isInfoLoading,
+    isLoading: infoIsLoading,
   } = MosaicAPI.useGetInfo(id, swrConfig())
-  const isInfoError = !info && infoError
-  const isInfoReady = info && !infoError
+  const infoIsReady = info && !infoError
 
   return (
     <>
       <ModalBody>
-        {isInfoLoading ? <SectionSpinner /> : null}
-        {isInfoError ? <SectionError text="Failed to load info." /> : null}
-        {isInfoReady ? (
+        {infoIsLoading ? <SectionSpinner /> : null}
+        {infoError ? <SectionError text={errorToString(infoError)} /> : null}
+        {infoIsReady ? (
           <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full')}>
             {info.isOutdated && isWarningVisible ? (
               <Alert status="warning" className={cx('flex')}>

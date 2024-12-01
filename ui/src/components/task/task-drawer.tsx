@@ -13,6 +13,7 @@ import { AuxiliaryDrawer, SectionError, SectionSpinner } from '@koupr/ui'
 import { IconClearAll, IconStacks } from '@koupr/ui'
 import cx from 'classnames'
 import TaskAPI from '@/client/api/task'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { drawerDidClose, mutateCountUpdated } from '@/store/ui/tasks'
@@ -27,11 +28,10 @@ const TaskDrawer = () => {
   const {
     data: count,
     error: countError,
-    isLoading: isCountLoading,
+    isLoading: countIsLoading,
     mutate: mutateCount,
   } = TaskAPI.useGetCount(swrConfig())
-  const isCountError = !count && countError
-  const isCountReady = count && !countError
+  const countIsReady = count && !countError
 
   useEffect(() => {
     if (isDrawerOpen) {
@@ -70,14 +70,16 @@ const TaskDrawer = () => {
       header="Tasks"
       body={
         <>
-          {isCountLoading ? <SectionSpinner /> : null}
-          {isCountError ? <SectionError text="Failed to load count." /> : null}
-          {isCountReady ? <TasksList /> : null}
+          {countIsLoading ? <SectionSpinner /> : null}
+          {countError ? (
+            <SectionError text={errorToString(countError)} />
+          ) : null}
+          {countIsReady ? <TasksList /> : null}
         </>
       }
       footer={
         <>
-          {isCountReady ? (
+          {countIsReady ? (
             <>
               {count && count > 0 ? (
                 <Button

@@ -21,6 +21,7 @@ import {
 } from '@koupr/ui'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import OrganizationDelete from '@/components/organization/organization-delete'
 import OrganizationEditName from '@/components/organization/organization-edit-name'
@@ -33,21 +34,20 @@ const OrganizationSettingsPage = () => {
   const {
     data: org,
     error: orgError,
-    isLoading: isOrgLoading,
+    isLoading: orgIsLoading,
   } = OrganizationAPI.useGet(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const isOrgError = !org && orgError
-  const isOrgReady = org && !orgError
+  const orgIsReady = org && !orgError
 
   return (
     <>
-      {isOrgLoading ? <SectionSpinner /> : null}
-      {isOrgError ? <SectionError text="Failed to load organization." /> : null}
-      {isOrgReady ? (
+      {orgIsLoading ? <SectionSpinner /> : null}
+      {orgError ? <SectionError text={errorToString(orgError)} /> : null}
+      {orgIsReady ? (
         <>
           <Form
             sections={[

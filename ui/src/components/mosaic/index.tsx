@@ -18,6 +18,7 @@ import {
 import { SectionError, SectionSpinner } from '@koupr/ui'
 import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { mutateInfoUpdated } from '@/store/ui/mosaic'
@@ -36,18 +37,16 @@ const Mosaic = () => {
   const {
     data: info,
     error: infoError,
-    isLoading: isInfoLoading,
+    isLoading: infoIsLoading,
     mutate: mutateInfo,
   } = MosaicAPI.useGetInfo(id, swrConfig())
   const {
     data: file,
     error: fileError,
-    isLoading: isFileLoading,
+    isLoading: fileIsLoading,
   } = FileAPI.useGet(id, swrConfig())
-  const isFileError = !file && fileError
-  const isFileReady = file && !fileError
-  const isInfoError = !info && infoError
-  const isInfoReady = info && !infoError
+  const fileIsReady = file && !fileError
+  const infoIsReady = info && !infoError
 
   useEffect(() => {
     if (file?.snapshot?.task?.isPending) {
@@ -72,13 +71,15 @@ const Mosaic = () => {
       <ModalContent>
         <ModalHeader>Mosaic</ModalHeader>
         <ModalCloseButton />
-        {isFileLoading ? <SectionSpinner /> : null}
-        {isFileError ? <SectionError text="Failed to load file." /> : null}
-        {isFileReady ? (
+        {fileIsLoading ? <SectionSpinner /> : null}
+        {fileError ? <SectionError text={errorToString(fileError)} /> : null}
+        {fileIsReady ? (
           <>
-            {isInfoLoading ? <SectionSpinner /> : null}
-            {isInfoError ? <SectionError text="Failed to load info." /> : null}
-            {isInfoReady ? (
+            {infoIsLoading ? <SectionSpinner /> : null}
+            {infoError ? (
+              <SectionError text={errorToString(infoError)} />
+            ) : null}
+            {infoIsReady ? (
               <>{info.isAvailable ? <MosaicOverview /> : <MosaicCreate />}</>
             ) : null}
           </>

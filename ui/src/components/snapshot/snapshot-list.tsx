@@ -35,6 +35,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import SnapshotAPI, { Snapshot, SortBy, SortOrder } from '@/client/api/snapshot'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -59,7 +60,7 @@ const SnapshotList = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate: snapshotMutate,
   } = SnapshotAPI.useList(
     {
@@ -76,9 +77,8 @@ const SnapshotList = () => {
     totalElements: list?.totalElements ?? 0,
     steps: [size],
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (snapshotMutate) {
@@ -140,14 +140,12 @@ const SnapshotList = () => {
         <ModalHeader>Snapshots</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {isListLoading ? <SectionSpinner /> : null}
-          {isListError ? (
-            <SectionError text="Failed to load snapshots." />
-          ) : null}
-          {isListEmpty ? (
+          {listIsLoading ? <SectionSpinner /> : null}
+          {listError ? <SectionError text={errorToString(listError)} /> : null}
+          {listIsEmpty ? (
             <SectionPlaceholder text="There are no snapshots." />
           ) : null}
-          {isListReady ? (
+          {listIsReady ? (
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <Table variant="simple" size="sm">
                 <colgroup>

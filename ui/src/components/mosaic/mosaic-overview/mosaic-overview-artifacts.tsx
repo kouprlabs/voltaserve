@@ -11,6 +11,7 @@ import { Button } from '@chakra-ui/react'
 import { IconOpenInNew, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
 
@@ -23,16 +24,15 @@ const MosaicOverviewArtifacts = () => {
   const {
     data: file,
     error: fileError,
-    isLoading: isFileLoading,
+    isLoading: fileIsLoading,
   } = FileAPI.useGet(id, swrConfig())
-  const isFileError = !file && fileError
-  const isFileReady = file && !fileError
+  const fileIsReady = file && !fileError
 
   return (
     <>
-      {isFileLoading ? <SectionSpinner /> : null}
-      {isFileError ? <SectionError text="Failed to load file." /> : null}
-      {isFileReady ? (
+      {fileIsLoading ? <SectionSpinner /> : null}
+      {fileError ? <SectionError text={errorToString(fileError)} /> : null}
+      {fileIsReady ? (
         <div
           className={cx(
             'flex',

@@ -32,6 +32,7 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleAPI, { ConsoleGroup } from '@/client/console/console'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import ConsoleConfirmationModal, {
   ConsoleConfirmationModalRequest,
@@ -60,7 +61,7 @@ const ConsolePanelGroups = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = ConsoleAPI.useListOrSearchObject<ConsoleGroup>(
     'group',
@@ -72,9 +73,8 @@ const ConsolePanelGroups = () => {
     totalElements: list?.totalElements ?? 0,
     steps,
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   return (
     <>
@@ -83,12 +83,12 @@ const ConsolePanelGroups = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Groups</Heading>
-        {isListLoading ? <SectionSpinner /> : null}
-        {isListError ? <SectionError text="Failed to load groups." /> : null}
-        {isListEmpty ? (
+        {listIsLoading ? <SectionSpinner /> : null}
+        {listError ? <SectionError text={errorToString(listError)} /> : null}
+        {listIsEmpty ? (
           <SectionPlaceholder text="There are no groups." />
         ) : null}
-        {isListReady ? (
+        {listIsReady ? (
           <DataTable
             items={list.data}
             columns={[

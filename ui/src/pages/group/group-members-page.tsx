@@ -31,6 +31,7 @@ import cx from 'classnames'
 import GroupAPI from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
 import UserAPI, { SortBy, SortOrder } from '@/client/api/user'
+import { errorToString } from '@/client/error'
 import { User as IdPUser } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import GroupAddMember from '@/components/group/group-add-member'
@@ -51,7 +52,7 @@ const GroupMembersPage = () => {
   const {
     data: group,
     error: groupError,
-    isLoading: isGroupLoading,
+    isLoading: groupIsLoading,
   } = GroupAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
@@ -63,7 +64,7 @@ const GroupMembersPage = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = UserAPI.useList(
     {
@@ -85,11 +86,9 @@ const GroupMembersPage = () => {
     totalElements: list?.totalElements ?? 0,
     steps,
   })
-  const isGroupError = !group && groupError
-  const isGroupReady = group && !groupError
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const groupIsReady = group && !groupError
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (mutate) {
@@ -99,13 +98,13 @@ const GroupMembersPage = () => {
 
   return (
     <>
-      {isGroupLoading ? <SectionSpinner /> : null}
-      {isGroupError ? <SectionError text="Failed to load group." /> : null}
-      {isGroupReady ? (
+      {groupIsLoading ? <SectionSpinner /> : null}
+      {groupError ? <SectionError text={errorToString(groupError)} /> : null}
+      {groupIsReady ? (
         <>
-          {isListLoading ? <SectionSpinner /> : null}
-          {isListError ? <SectionError text="Failed to load members." /> : null}
-          {isListEmpty ? (
+          {listIsLoading ? <SectionSpinner /> : null}
+          {listError ? <SectionError text={errorToString(listError)} /> : null}
+          {listIsEmpty ? (
             <SectionPlaceholder
               text="This group has no members."
               content={
@@ -122,7 +121,7 @@ const GroupMembersPage = () => {
               }
             />
           ) : null}
-          {isListReady ? (
+          {listIsReady ? (
             <DataTable
               items={list.data}
               columns={[

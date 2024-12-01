@@ -15,6 +15,7 @@ import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import InsightsAPI, { Language } from '@/client/api/insights'
 import TaskAPI from '@/client/api/task'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
@@ -38,12 +39,12 @@ const InsightsCreate = () => {
   const {
     data: languages,
     error: languagesError,
-    isLoading: isLanguagesLoading,
+    isLoading: languagesIsLoading,
   } = InsightsAPI.useGetLanguages(swrConfig())
   const {
     data: file,
     error: fileError,
-    isLoading: isFileLoading,
+    isLoading: fileIsLoading,
   } = FileAPI.useGet(id, swrConfig())
   const existingLanguage = useMemo<LanguageOption | undefined>(() => {
     if (file && languages && file.snapshot?.language) {
@@ -56,10 +57,8 @@ const InsightsCreate = () => {
       }
     }
   }, [file, languages])
-  const isFileError = !file && fileError
-  const isFileReady = file && !fileError
-  const isLanguagesError = !languages && languagesError
-  const isLanguagesReady = languages && !languagesError
+  const fileIsReady = file && !fileError
+  const languagesIsReady = languages && !languagesError
 
   const handleCreate = useCallback(async () => {
     if (id && language) {
@@ -83,15 +82,15 @@ const InsightsCreate = () => {
   return (
     <>
       <ModalBody>
-        {isFileLoading ? <SectionSpinner /> : null}
-        {isFileError ? <SectionError text="Failed to load file." /> : null}
-        {isFileReady ? (
+        {fileIsLoading ? <SectionSpinner /> : null}
+        {fileError ? <SectionError text={errorToString(fileError)} /> : null}
+        {fileIsReady ? (
           <>
-            {isLanguagesLoading ? <SectionSpinner /> : null}
-            {isLanguagesError ? (
-              <SectionError text="Failed to load languages." />
+            {languagesIsLoading ? <SectionSpinner /> : null}
+            {languagesError ? (
+              <SectionError text={errorToString(languagesError)} />
             ) : null}
-            {isLanguagesReady ? (
+            {languagesIsReady ? (
               <div
                 className={cx(
                   'flex',

@@ -21,6 +21,7 @@ import cx from 'classnames'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
 import StorageAPI from '@/client/api/storage'
 import WorkspaceAPI from '@/client/api/workspace'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import WorkspaceDelete from '@/components/workspace/workspace-delete'
 import WorkspaceEditName from '@/components/workspace/workspace-edit-name'
@@ -37,13 +38,13 @@ const WorkspaceSettingsPage = () => {
   const {
     data: workspace,
     error: workspaceError,
-    isLoading: isWorkspaceLoading,
+    isLoading: workspaceIsLoading,
     mutate,
   } = WorkspaceAPI.useGet(id, swrConfig())
   const {
     data: storageUsage,
     error: storageUsageError,
-    isLoading: isStorageUsageLoading,
+    isLoading: storageUsageIsLoading,
     mutate: mutateStorageUsage,
   } = StorageAPI.useGetWorkspaceUsage(id, swrConfig())
   const hasEditPermission = useMemo(
@@ -58,10 +59,8 @@ const WorkspaceSettingsPage = () => {
   const [isStorageCapacityModalOpen, setIsStorageCapacityModalOpen] =
     useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const isWorkspaceError = !workspace && workspaceError
-  const isWorkspaceReady = workspace && !workspaceError
-  const isStorageUsageError = !storageUsage && storageUsageError
-  const isStorageUsageReady = storageUsage && !storageUsageError
+  const workspaceIsReady = workspace && !workspaceError
+  const storageUsageIsReady = storageUsage && !storageUsageError
 
   const handleEditNameClose = useCallback(async () => {
     setIsNameModalOpen(false)
@@ -75,17 +74,17 @@ const WorkspaceSettingsPage = () => {
 
   return (
     <>
-      {isWorkspaceLoading ? (
+      {workspaceIsLoading ? (
         <div className={cx('block')}>
           <SectionSpinner />
         </div>
       ) : null}
-      {isWorkspaceError ? (
+      {workspaceError ? (
         <div className={cx('block')}>
-          <SectionError text="Failed to load workspace." />
+          <SectionError text={errorToString(workspaceError)} />
         </div>
       ) : null}
-      {isWorkspaceReady ? (
+      {workspaceIsReady ? (
         <>
           <Form
             sections={[
@@ -93,13 +92,13 @@ const WorkspaceSettingsPage = () => {
                 title: 'Storage',
                 content: (
                   <>
-                    {isStorageUsageError ? (
+                    {storageUsageError ? (
                       <SectionError
-                        text="Failed to load storage usage."
+                        text={errorToString(storageUsageError)}
                         height="auto"
                       />
                     ) : null}
-                    {isStorageUsageReady ? (
+                    {storageUsageIsReady ? (
                       <>
                         <span>
                           {prettyBytes(storageUsage.bytes)} of{' '}
@@ -108,7 +107,7 @@ const WorkspaceSettingsPage = () => {
                         <Progress value={storageUsage.percentage} hasStripe />
                       </>
                     ) : null}
-                    {isStorageUsageLoading ? (
+                    {storageUsageIsLoading ? (
                       <>
                         <span>Calculating…</span>
                         <Progress value={0} hasStripe />

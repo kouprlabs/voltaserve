@@ -14,6 +14,7 @@ import { SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/group'
@@ -26,12 +27,11 @@ const GroupLayout = () => {
   const {
     data: group,
     error: groupError,
-    isLoading: isGroupLoading,
+    isLoading: groupIsLoading,
     mutate,
   } = GroupAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
-  const isGroupError = !group && groupError
-  const isGroupReady = group && !groupError
+  const groupIsReady = group && !groupError
 
   useEffect(() => {
     const segments = location.pathname.split('/')
@@ -51,9 +51,9 @@ const GroupLayout = () => {
 
   return (
     <>
-      {isGroupLoading ? <SectionSpinner /> : null}
-      {isGroupError ? <SectionError text="Failed to load group." /> : null}
-      {isGroupReady ? (
+      {groupIsLoading ? <SectionSpinner /> : null}
+      {groupError ? <SectionError text={errorToString(groupError)} /> : null}
+      {groupIsReady ? (
         <>
           <Helmet>
             <title>{group.name}</title>

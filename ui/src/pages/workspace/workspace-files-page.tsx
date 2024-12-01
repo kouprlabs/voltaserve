@@ -19,6 +19,7 @@ import {
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import Path from '@/components/common/path'
 import FileCopy from '@/components/file/file-copy'
@@ -89,7 +90,7 @@ const WorkspaceFilesPage = () => {
   const {
     data: workspace,
     error: workspaceError,
-    isLoading: isWorkspaceLoading,
+    isLoading: workspaceIsLoading,
   } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
@@ -100,7 +101,7 @@ const WorkspaceFilesPage = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = FileAPI.useList(
     fileId!,
@@ -118,10 +119,8 @@ const WorkspaceFilesPage = () => {
     totalPages: list?.totalPages ?? 1,
     steps,
   })
-  const isWorkspaceError = !workspace && workspaceError
-  const isWorkspaceReady = workspace && !workspaceError
-  const isListError = !list && listError
-  const isListReady = list && !listError
+  const workspaceIsReady = workspace && !workspaceError
+  const listIsReady = list && !listError
 
   useEffect(() => {
     if (list) {
@@ -137,17 +136,17 @@ const WorkspaceFilesPage = () => {
 
   return (
     <>
-      {isWorkspaceLoading ? (
+      {workspaceIsLoading ? (
         <div className={cx('block')}>
           <SectionSpinner />
         </div>
       ) : null}
-      {isWorkspaceError ? (
+      {workspaceError ? (
         <div className={cx('block')}>
-          <SectionError text="Failed to load workspace." />
+          <SectionError text={errorToString(workspaceError)} />
         </div>
       ) : null}
-      {isWorkspaceReady ? (
+      {workspaceIsReady ? (
         <>
           <div
             className={cx(
@@ -199,11 +198,11 @@ const WorkspaceFilesPage = () => {
                 )}
                 onClick={() => dispatch(selectionUpdated([]))}
               >
-                {isListLoading ? <SectionSpinner /> : null}
-                {isListError ? (
-                  <SectionError text="Failed to load items." />
+                {listIsLoading ? <SectionSpinner /> : null}
+                {listError ? (
+                  <SectionError text={errorToString(listError)} />
                 ) : null}
-                {isListReady ? (
+                {listIsReady ? (
                   <FileList list={list} scale={iconScale} />
                 ) : null}
               </div>

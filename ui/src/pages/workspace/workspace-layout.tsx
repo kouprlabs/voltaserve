@@ -14,6 +14,7 @@ import { SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI from '@/client/api/workspace'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/workspace'
@@ -26,12 +27,11 @@ const WorkspaceLayout = () => {
   const {
     data: workspace,
     error: workspaceError,
-    isLoading: isWorkspaceLoading,
+    isLoading: workspaceIsLoading,
     mutate,
   } = WorkspaceAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
-  const isWorkspaceError = !workspace && workspaceError
-  const isWorkspaceReady = workspace && !workspaceError
+  const workspaceIsReady = workspace && !workspaceError
 
   useEffect(() => {
     const segments = location.pathname.split('/')
@@ -51,11 +51,11 @@ const WorkspaceLayout = () => {
 
   return (
     <>
-      {isWorkspaceLoading ? <SectionSpinner /> : null}
-      {isWorkspaceError ? (
-        <SectionError text="Failed to load workspace." />
+      {workspaceIsLoading ? <SectionSpinner /> : null}
+      {workspaceError ? (
+        <SectionError text={errorToString(workspaceError)} />
       ) : null}
-      {isWorkspaceReady ? (
+      {workspaceIsReady ? (
         <>
           <Helmet>
             <title>{workspace.name}</title>

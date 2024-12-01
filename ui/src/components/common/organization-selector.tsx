@@ -38,6 +38,7 @@ import OrganizationAPI, {
   Organization,
   SortOrder,
 } from '@/client/api/organization'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 
 export type OrganizationSelectorProps = {
@@ -58,7 +59,7 @@ const OrganizationSelector = ({
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = OrganizationAPI.useList(
     { query, page, size, sortOrder: SortOrder.Desc },
@@ -69,9 +70,8 @@ const OrganizationSelector = ({
     totalElements: list?.totalElements ?? 0,
     steps: [size],
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     setConfirmed(defaultValue)
@@ -134,14 +134,14 @@ const OrganizationSelector = ({
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {isListLoading ? <SectionSpinner /> : null}
-              {isListError ? (
-                <SectionError text="Failed to load organizations." />
+              {listIsLoading ? <SectionSpinner /> : null}
+              {listError ? (
+                <SectionError text={errorToString(listError)} />
               ) : null}
-              {isListEmpty ? (
+              {listIsEmpty ? (
                 <SectionPlaceholder text="There are no organizations." />
               ) : null}
-              {isListReady ? (
+              {listIsReady ? (
                 <div
                   className={cx(
                     'flex',
