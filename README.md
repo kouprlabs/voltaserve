@@ -74,7 +74,7 @@ We recommend the following third-party applications:
 - [Mountainduck](https://mountainduck.io)
 - [Owlfiles](https://www.skyjos.com/owlfiles).
 
-### Connect with WevDAV
+### Connect with WebDAV
 
 We recommend the following third-party applications:
 
