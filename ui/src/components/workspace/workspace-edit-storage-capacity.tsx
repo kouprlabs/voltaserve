@@ -34,6 +34,7 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import StorageAPI from '@/client/api/storage'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import StorageInput from '@/components/common/storage-input'
 import { useAppSelector } from '@/store/hook'
@@ -58,7 +59,7 @@ const WorkspaceEditStorageCapacity = ({
   const {
     data: storageUsage,
     error: storageUsageError,
-    isLoading: isStorageUsageLoading,
+    isLoading: storageUsageIsLoading,
   } = StorageAPI.useGetWorkspaceUsage(workspace.id, swrConfig())
   const formSchema = useMemo(() => {
     if (storageUsage) {
@@ -72,8 +73,7 @@ const WorkspaceEditStorageCapacity = ({
       return null
     }
   }, [storageUsage])
-  const isStorageUsageError = !storageUsage && storageUsageError
-  const isStorageUsageReady = storageUsage && !storageUsageError
+  const storageUsageIsReady = storageUsage && !storageUsageError
 
   useEffect(() => {
     setIsModalOpen(open)
@@ -121,11 +121,11 @@ const WorkspaceEditStorageCapacity = ({
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                {isStorageUsageLoading ? <SectionSpinner /> : null}
-                {isStorageUsageError ? (
-                  <SectionError text="Failed to load storage usage." />
+                {storageUsageIsLoading ? <SectionSpinner /> : null}
+                {storageUsageError ? (
+                  <SectionError text={errorToString(storageUsageError)} />
                 ) : null}
-                {isStorageUsageReady ? (
+                {storageUsageIsReady ? (
                   <Field name="storageCapacity">
                     {(props: FieldAttributes<FieldProps>) => (
                       <FormControl

@@ -22,6 +22,7 @@ import { IconEdit, NumberTag, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI from '@/client/api/invitation'
+import { errorToString } from '@/client/error'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
@@ -37,15 +38,14 @@ const AccountLayout = () => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const {
     data: user,
-    isLoading: isUserLoading,
+    isLoading: userIsLoading,
     error: userError,
     mutate,
   } = UserAPI.useGet(swrConfig())
   const { data: invitationCount } =
     InvitationAPI.useGetIncomingCount(swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
-  const isUserError = !user && userError
-  const isUserReady = user && !userError
+  const userIsReady = user && !userError
 
   useEffect(() => {
     const segments = location.pathname.split('/')
@@ -65,9 +65,9 @@ const AccountLayout = () => {
 
   return (
     <>
-      {isUserLoading ? <SectionSpinner /> : null}
-      {isUserError ? <SectionError text="Failed to load user." /> : null}
-      {isUserReady ? (
+      {userIsLoading ? <SectionSpinner /> : null}
+      {userError ? <SectionError text={errorToString(userError)} /> : null}
+      {userIsReady ? (
         <>
           <Helmet>
             <title>{user.fullName}</title>

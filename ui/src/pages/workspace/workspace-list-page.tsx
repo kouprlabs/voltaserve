@@ -36,6 +36,7 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { workspacePaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
@@ -56,7 +57,7 @@ const WorkspaceListPage = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = WorkspaceAPI.useList(
     { query, page, size, sortOrder: SortOrder.Desc },
@@ -67,9 +68,8 @@ const WorkspaceListPage = () => {
     totalElements: list?.totalElements ?? 0,
     steps,
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -88,11 +88,9 @@ const WorkspaceListPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Workspaces</Heading>
-        {isListLoading ? <SectionSpinner /> : null}
-        {isListError ? (
-          <SectionError text="Failed to load workspaces." />
-        ) : null}
-        {isListEmpty ? (
+        {listIsLoading ? <SectionSpinner /> : null}
+        {listError ? <SectionError text={errorToString(listError)} /> : null}
+        {listIsEmpty ? (
           <SectionPlaceholder
             text="There are no workspaces."
             content={
@@ -107,7 +105,7 @@ const WorkspaceListPage = () => {
             }
           />
         ) : null}
-        {isListReady ? (
+        {listIsReady ? (
           <DataTable
             items={list.data}
             columns={[

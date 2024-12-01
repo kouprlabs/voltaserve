@@ -47,12 +47,12 @@ const SharingUserForm = () => {
   const {
     data: workspace,
     error: workspaceError,
-    isLoading: isWorkspaceLoading,
+    isLoading: workspaceIsLoading,
   } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const {
-    data: users,
-    error: usersError,
-    isLoading: isUsersLoading,
+    data: userList,
+    error: userListError,
+    isLoading: userListIsLoading,
   } = UserAPI.useList(
     {
       organizationId: workspace?.organization.id,
@@ -64,11 +64,11 @@ const SharingUserForm = () => {
   const { mutate: mutatePermissions } = FileAPI.useGetGroupPermissions(
     isSingleSelection ? selection[0] : undefined,
   )
-  const isWorkspaceError = !workspace && workspaceError
-  const isWorkspaceReady = workspace && !workspaceError
-  const isUsersError = !users && usersError
-  const isUsersEmpty = users && !usersError && users.totalElements === 0
-  const isUsersReady = users && !usersError && users.totalElements > 0
+  const workspaceIsReady = workspace && !workspaceError
+  const userListIsEmpty =
+    userList && !userListError && userList.totalElements === 0
+  const userListIsReady =
+    userList && !userListError && userList.totalElements > 0
 
   const handleGrantPermission = useCallback(async () => {
     if (!user || !permission) {
@@ -105,14 +105,14 @@ const SharingUserForm = () => {
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-      {isWorkspaceLoading || isUsersLoading ? <SharingFormSkeleton /> : null}
-      {isWorkspaceError || isUsersError ? (
+      {workspaceIsLoading || userListIsLoading ? <SharingFormSkeleton /> : null}
+      {workspaceError || userListError ? (
         <SectionError
-          text={errorToString(workspaceError || isUsersError)}
+          text={errorToString(workspaceError || userListError)}
           height="auto"
         />
       ) : null}
-      {isWorkspaceReady && isUsersEmpty ? (
+      {workspaceIsReady && userListIsEmpty ? (
         <SectionPlaceholder
           text="This organization has no members."
           content={
@@ -132,7 +132,7 @@ const SharingUserForm = () => {
           height="auto"
         />
       ) : null}
-      {isWorkspaceReady && isUsersReady ? (
+      {workspaceIsReady && userListIsReady ? (
         <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <UserSelector
             value={user}

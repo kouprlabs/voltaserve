@@ -35,6 +35,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import GroupAPI, { Group, SortOrder } from '@/client/api/group'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 
 export type GroupSelectorProps = {
@@ -56,7 +57,7 @@ const GroupSelector = ({
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = GroupAPI.useList(
     { query, organizationId, page, size, sortOrder: SortOrder.Desc },
@@ -67,9 +68,8 @@ const GroupSelector = ({
     totalElements: list?.totalElements ?? 0,
     steps: [size],
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -127,14 +127,14 @@ const GroupSelector = ({
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {isListLoading ? <SectionSpinner /> : null}
-              {isListError ? (
-                <SectionError text="Failed to load groups." />
+              {listIsLoading ? <SectionSpinner /> : null}
+              {listError ? (
+                <SectionError text={errorToString(listError)} />
               ) : null}
-              {isListEmpty ? (
+              {listIsEmpty ? (
                 <SectionPlaceholder text="There are no groups." />
               ) : null}
-              {isListReady ? (
+              {listIsReady ? (
                 <div
                   className={cx(
                     'flex',

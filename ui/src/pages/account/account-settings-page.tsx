@@ -26,6 +26,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import StorageAPI from '@/client/api/storage'
+import { errorToString } from '@/client/error'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountChangePassword from '@/components/account/account-change-password'
@@ -49,27 +50,25 @@ const AccountSettingsPage = () => {
   const {
     data: user,
     error: userError,
-    isLoading: isUserLoading,
+    isLoading: userIsLoading,
   } = UserAPI.useGet()
   const {
     data: storageUsage,
     error: storageUsageError,
-    isLoading: isStorageUsageLoading,
+    isLoading: storageUsageIsLoading,
   } = StorageAPI.useGetAccountUsage(swrConfig())
   const [isFullNameModalOpen, setIsFullNameModalOpen] = useState(false)
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const isUserError = !user && userError
-  const isUserReady = user && !userError
-  const isStorageUsageError = !storageUsage && storageUsageError
-  const isStorageUsageReady = storageUsage && !storageUsageError
+  const userIsReady = user && !userError
+  const storageUsageIsReady = storageUsage && !storageUsageError
 
   return (
     <>
-      {isUserLoading ? <SectionSpinner /> : null}
-      {isUserError ? <SectionError text="Failed to load user." /> : null}
-      {isUserReady ? (
+      {userIsLoading ? <SectionSpinner /> : null}
+      {userError ? <SectionError text={errorToString(userError)} /> : null}
+      {userIsReady ? (
         <>
           <Form
             sections={[
@@ -77,13 +76,13 @@ const AccountSettingsPage = () => {
                 title: 'Storage',
                 content: (
                   <>
-                    {isStorageUsageError ? (
+                    {storageUsageError ? (
                       <SectionError
-                        text="Failed to load storage usage."
+                        text={errorToString(storageUsageError)}
                         height="auto"
                       />
                     ) : null}
-                    {isStorageUsageReady ? (
+                    {storageUsageIsReady ? (
                       <>
                         <span>
                           {prettyBytes(storageUsage.bytes)} of{' '}
@@ -92,7 +91,7 @@ const AccountSettingsPage = () => {
                         <Progress value={storageUsage.percentage} hasStripe />
                       </>
                     ) : null}
-                    {isStorageUsageLoading ? (
+                    {storageUsageIsLoading ? (
                       <>
                         <span>Calculating…</span>
                         <Progress value={0} hasStripe />

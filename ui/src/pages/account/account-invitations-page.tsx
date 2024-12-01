@@ -24,6 +24,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
+import { errorToString } from '@/client/error'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { incomingInvitationPaginationStorage } from '@/infra/pagination'
@@ -40,7 +41,7 @@ const AccountInvitationsPage = () => {
   const {
     data: user,
     error: userError,
-    isLoading: isUserLoading,
+    isLoading: userIsLoading,
   } = UserAPI.useGet()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
@@ -50,17 +51,15 @@ const AccountInvitationsPage = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = InvitationAPI.useGetIncoming(
     { page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const isUserError = !user && userError
-  const isUserReady = user && !userError
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const userIsReady = user && !userError
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (mutate) {
@@ -96,18 +95,16 @@ const AccountInvitationsPage = () => {
 
   return (
     <>
-      {isUserLoading ? <SectionSpinner /> : null}
-      {isUserError ? <SectionError text="Failed to load user." /> : null}
-      {isUserReady ? (
+      {userIsLoading ? <SectionSpinner /> : null}
+      {userError ? <SectionError text={errorToString(userError)} /> : null}
+      {userIsReady ? (
         <>
-          {isListLoading ? <SectionSpinner /> : null}
-          {isListError ? (
-            <SectionError text="Failed to load invitations." />
-          ) : null}
-          {isListEmpty ? (
+          {listIsLoading ? <SectionSpinner /> : null}
+          {listError ? <SectionError text={errorToString(listError)} /> : null}
+          {listIsEmpty ? (
             <SectionPlaceholder text="There are no invitations." />
           ) : null}
-          {isListReady ? (
+          {listIsReady ? (
             <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
               <DataTable
                 items={list.data}

@@ -20,6 +20,7 @@ import {
 } from '@koupr/ui'
 import GroupAPI from '@/client/api/group'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import GroupAddMember from '@/components/group/group-add-member'
 import GroupDelete from '@/components/group/group-delete'
@@ -31,7 +32,7 @@ const GroupSettingsPage = () => {
   const {
     data: group,
     error: groupError,
-    isLoading: isGroupLoading,
+    isLoading: groupIsLoading,
   } = GroupAPI.useGet(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
@@ -44,14 +45,13 @@ const GroupSettingsPage = () => {
     () => group && geOwnerPermission(group.permission),
     [group],
   )
-  const isGroupError = !group && groupError
-  const isGroupReady = group && !groupError
+  const groupIsReady = group && !groupError
 
   return (
     <>
-      {isGroupLoading ? <SectionSpinner /> : null}
-      {isGroupError ? <SectionError text="Failed to load group." /> : null}
-      {isGroupReady ? (
+      {groupIsLoading ? <SectionSpinner /> : null}
+      {groupError ? <SectionError text={errorToString(groupError)} /> : null}
+      {groupIsReady ? (
         <>
           <Form
             sections={[

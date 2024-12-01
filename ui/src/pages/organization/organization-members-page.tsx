@@ -31,6 +31,7 @@ import cx from 'classnames'
 import OrganizationAPI from '@/client/api/organization'
 import { geOwnerPermission } from '@/client/api/permission'
 import UserAPI, { SortBy, SortOrder, User } from '@/client/api/user'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationRemoveMember from '@/components/organization/organization-remove-member'
@@ -54,7 +55,7 @@ const OrganizationMembersPage = () => {
   const {
     data: org,
     error: orgError,
-    isLoading: isOrgLoading,
+    isLoading: orgIsLoading,
   } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
@@ -64,7 +65,7 @@ const OrganizationMembersPage = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = UserAPI.useList(
     {
@@ -88,11 +89,9 @@ const OrganizationMembersPage = () => {
     totalElements: list?.totalElements ?? 0,
     steps,
   })
-  const isOrgError = !org && orgError
-  const isOrgReady = org && !orgError
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const orgIsReady = org && !orgError
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (searchParams.get('invite') === 'true') {
@@ -102,13 +101,13 @@ const OrganizationMembersPage = () => {
 
   return (
     <>
-      {isOrgLoading ? <SectionSpinner /> : null}
-      {isOrgError ? <SectionError text="Failed to load organization." /> : null}
-      {isOrgReady ? (
+      {orgIsLoading ? <SectionSpinner /> : null}
+      {orgError ? <SectionError text={errorToString(orgError)} /> : null}
+      {orgIsReady ? (
         <>
-          {isListLoading ? <SectionSpinner /> : null}
-          {isListError ? <SectionError text="Failed to load members." /> : null}
-          {isListEmpty ? (
+          {listIsLoading ? <SectionSpinner /> : null}
+          {listError ? <SectionError text={errorToString(listError)} /> : null}
+          {listIsEmpty ? (
             <SectionPlaceholder
               text="This organization has no members."
               content={
@@ -123,7 +122,7 @@ const OrganizationMembersPage = () => {
               }
             />
           ) : null}
-          {isListReady ? (
+          {listIsReady ? (
             <DataTable
               items={list.data}
               columns={[

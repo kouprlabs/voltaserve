@@ -32,6 +32,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
+import { errorToString } from '@/client/error'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import ConsoleConfirmationModal, {
@@ -63,7 +64,7 @@ const ConsolePanelUsers = () => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = UserAPI.useList({ query, page, size }, swrConfig())
   const { hasPagination } = usePageMonitor({
@@ -71,9 +72,8 @@ const ConsolePanelUsers = () => {
     totalElements: list?.totalElements ?? 0,
     steps,
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   return (
     <>
@@ -82,10 +82,10 @@ const ConsolePanelUsers = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Users</Heading>
-        {isListLoading ? <SectionSpinner /> : null}
-        {isListError ? <SectionError text="Failed to load users." /> : null}
-        {isListEmpty ? <SectionPlaceholder text="There are no users." /> : null}
-        {isListReady ? (
+        {listIsLoading ? <SectionSpinner /> : null}
+        {listError ? <SectionError text={errorToString(listError)} /> : null}
+        {listIsEmpty ? <SectionPlaceholder text="There are no users." /> : null}
+        {listIsReady ? (
           <DataTable
             items={list.data}
             columns={[

@@ -19,6 +19,7 @@ import {
   NONE_PERMISSION,
 } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
@@ -35,13 +36,13 @@ const InsightsOverviewSettings = () => {
   const {
     data: info,
     error: infoError,
-    isLoading: isInfoLoading,
+    isLoading: infoIsLoading,
     mutate: mutateInfo,
   } = InsightsAPI.useGetInfo(id, swrConfig())
   const {
     data: file,
     error: fileError,
-    isLoading: isFileLoading,
+    isLoading: fileIsLoading,
     mutate: mutateFile,
   } = FileAPI.useGet(id, swrConfig())
   const canCollect = useMemo(() => {
@@ -59,10 +60,8 @@ const InsightsOverviewSettings = () => {
       geOwnerPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [info, file])
-  const isFileError = !file && fileError
-  const isFileReady = file && !fileError
-  const isInfoError = !info && infoError
-  const isInfoReady = info && !infoError
+  const fileIsReady = file && !fileError
+  const infoIsReady = info && !infoError
 
   const handleUpdate = useCallback(async () => {
     if (id) {
@@ -88,13 +87,13 @@ const InsightsOverviewSettings = () => {
 
   return (
     <>
-      {isFileLoading ? <SectionSpinner /> : null}
-      {isFileError ? <SectionError text="Failed to load file." /> : null}
-      {isFileReady ? (
+      {fileIsLoading ? <SectionSpinner /> : null}
+      {fileError ? <SectionError text={errorToString(fileError)} /> : null}
+      {fileIsReady ? (
         <>
-          {isInfoLoading ? <SectionSpinner /> : null}
-          {isInfoError ? <SectionError text="Failed to load info." /> : null}
-          {isInfoReady ? (
+          {infoIsLoading ? <SectionSpinner /> : null}
+          {infoError ? <SectionError text={errorToString(infoError)} /> : null}
+          {infoIsReady ? (
             <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
               <Card size="md" variant="outline" className={cx('w-[50%]')}>
                 <CardBody>

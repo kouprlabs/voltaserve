@@ -46,13 +46,12 @@ const SharingUserPermissions = () => {
   const {
     data: permissions,
     error: permissionsError,
-    isLoading: isPermissionsLoading,
+    isLoading: permissionsIsLoading,
     mutate: mutatePermissions,
   } = FileAPI.useGetUserPermissions(selection[0], swrConfig())
-  const isPermissionsError = !permissions && permissionsError
-  const isPermissionsEmpty =
+  const permissionsIsEmpty =
     permissions && !permissionsError && permissions.length === 0
-  const isPermissionsReady =
+  const permissionsIsReady =
     permissions && !permissionsError && permissions.length > 0
 
   const handleRevokePermission = useCallback(
@@ -74,14 +73,14 @@ const SharingUserPermissions = () => {
 
   return (
     <>
-      {isPermissionsLoading ? <SectionSpinner height="auto" /> : null}
-      {isPermissionsError ? (
+      {permissionsIsLoading ? <SectionSpinner height="auto" /> : null}
+      {permissionsError ? (
         <SectionError text={errorToString(permissionsError)} height="auto" />
       ) : null}
-      {isPermissionsEmpty ? (
+      {permissionsIsEmpty ? (
         <SectionPlaceholder text="Not shared with any users." height="auto" />
       ) : null}
-      {isPermissionsReady ? (
+      {permissionsIsReady ? (
         <Table>
           <Thead>
             <Tr>

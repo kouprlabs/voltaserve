@@ -22,6 +22,7 @@ import {
 import cx from 'classnames'
 import FileAPI, { FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
+import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import Path from '@/components/common/path'
 import FolderSvg from '@/components/file/list/item/icon/icon-folder/assets/icon-folder.svg'
@@ -40,7 +41,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
   const {
     data: list,
     error: listError,
-    isLoading: isListLoading,
+    isLoading: listIsLoading,
     mutate,
   } = FileAPI.useList(
     fileId,
@@ -59,9 +60,8 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
     totalElements: list?.totalElements ?? 0,
     steps: [size],
   })
-  const isListError = !list && listError
-  const isListEmpty = list && !listError && list.totalElements === 0
-  const isListReady = list && !listError && list.totalElements > 0
+  const listIsEmpty = list && !listError && list.totalElements === 0
+  const listIsReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (workspace) {
@@ -106,10 +106,10 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
           onClick={(fileId) => setFileId(fileId)}
         />
       ) : null}
-      {isListLoading ? <SectionSpinner /> : null}
-      {isListError ? <SectionError text="Failed to load items." /> : null}
-      {isListEmpty ? <SectionPlaceholder text="There are no items." /> : null}
-      {isListReady ? (
+      {listIsLoading ? <SectionSpinner /> : null}
+      {listError ? <SectionError text={errorToString(listError)} /> : null}
+      {listIsEmpty ? <SectionPlaceholder text="There are no items." /> : null}
+      {listIsReady ? (
         <>
           <div
             className={cx(
