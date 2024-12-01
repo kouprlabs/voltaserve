@@ -30,13 +30,20 @@ const slice = createSlice({
     inviteModalDidClose: (state) => {
       state.isInviteModalOpen = false
     },
+    allModalsDidClose: (state) => {
+      state.isInviteModalOpen = false
+    },
     mutateUpdated: (state, action: PayloadAction<KeyedMutator<List>>) => {
       state.mutate = action.payload
     },
   },
 })
 
-export const { inviteModalDidOpen, inviteModalDidClose, mutateUpdated } =
-  slice.actions
+export const {
+  inviteModalDidOpen,
+  inviteModalDidClose,
+  allModalsDidClose,
+  mutateUpdated,
+} = slice.actions
 
 export default slice.reducer

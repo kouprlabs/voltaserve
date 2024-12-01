@@ -32,7 +32,9 @@ import SharingUserForm from './sharing-user-form'
 const Sharing = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
+  const isModalOpen = useAppSelector(
+    (state) => state.ui.files.isSharingModalOpen,
+  )
   const isSingleSelection = selection.length === 1
   const { data: userPermissions } = FileAPI.useGetUserPermissions(
     isSingleSelection ? selection[0] : undefined,

@@ -7,17 +7,26 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useColorMode } from '@chakra-ui/react'
 import { Helmet } from 'react-helmet-async'
+import { useAppDispatch } from '@/store/hook'
+import { allModalsDidClose as allModalsDidCloseForFiles } from '@/store/ui/files'
+import { allModalsDidClose as allModalsDidCloseForInsights } from '@/store/ui/insights'
+import { allModalsDidClose as allModalsDidCloseForMosaic } from '@/store/ui/mosaic'
+import { allModalsDidClose as allModalsDidCloseForOrganizations } from '@/store/ui/organizations'
+import { allModalsDidClose as allModalsDidCloseForSearchFilter } from '@/store/ui/search-filter'
+import { allModalsDidClose as allModalsDidCloseForSnapshots } from '@/store/ui/snapshots'
 
 const RootPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const { colorMode } = useColorMode()
 
   useEffect(() => {
+    closeAllModals()
     if (location.pathname === '/') {
       navigate('/workspace')
     }
@@ -56,6 +65,15 @@ const RootPage = () => {
       body.classList.remove('koupr-dark')
     }
   }, [colorMode])
+
+  const closeAllModals = useCallback(() => {
+    dispatch(allModalsDidCloseForFiles())
+    dispatch(allModalsDidCloseForInsights())
+    dispatch(allModalsDidCloseForMosaic())
+    dispatch(allModalsDidCloseForSnapshots())
+    dispatch(allModalsDidCloseForOrganizations())
+    dispatch(allModalsDidCloseForSearchFilter())
+  }, [dispatch])
 
   return (
     <>

@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
 import {
   IconCheck,
@@ -28,7 +28,6 @@ import { swrConfig } from '@/client/options'
 import UserSelector from '@/components/common/user-selector'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
-import { inviteModalDidOpen } from '@/store/ui/organizations'
 import SharingFormSkeleton from './sharing-form-skeleton'
 import SharingUserPermissions from './sharing-user-permissions'
 
@@ -39,7 +38,6 @@ interface PermissionTypeOption extends OptionBase {
 
 const SharingUserForm = () => {
   const { id: workspaceId } = useParams()
-  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
@@ -105,14 +103,6 @@ const SharingUserForm = () => {
     mutatePermissions,
   ])
 
-  const handleInviteMembersClick = useCallback(async () => {
-    if (workspace) {
-      dispatch(inviteModalDidOpen())
-      dispatch(sharingModalDidClose())
-      navigate(`/organization/${workspace.organization.id}/member`)
-    }
-  }, [workspace, navigate, dispatch])
-
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {isWorkspaceLoading || isUsersLoading ? <SharingFormSkeleton /> : null}
@@ -130,8 +120,9 @@ const SharingUserForm = () => {
               {workspace &&
               geEditorPermission(workspace.organization.permission) ? (
                 <Button
+                  as={Link}
+                  to={`/organization/${workspace.organization.id}/member?invite=true`}
                   leftIcon={<IconPersonAdd />}
-                  onClick={handleInviteMembersClick}
                 >
                   Invite Members
                 </Button>

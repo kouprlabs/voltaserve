@@ -63,7 +63,7 @@ const FileList = ({ list, scale }: FileListProps) => {
       state.ui.files.isMoveModalOpen ||
       state.ui.files.isDeleteModalOpen ||
       state.ui.files.isCreateModalOpen ||
-      state.ui.files.isShareModalOpen ||
+      state.ui.files.isSharingModalOpen ||
       state.ui.files.isRenameModalOpen ||
       state.ui.files.isInfoModalOpen ||
       state.ui.mosaic.isModalOpen ||

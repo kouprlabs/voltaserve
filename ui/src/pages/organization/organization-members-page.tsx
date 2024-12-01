@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   useLocation,
   useNavigate,
@@ -46,10 +46,11 @@ import {
 } from '@/store/ui/organizations'
 
 const OrganizationMembersPage = () => {
+  const { id } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useAppDispatch()
-  const { id } = useParams()
   const {
     data: org,
     error: orgError,
@@ -60,8 +61,6 @@ const OrganizationMembersPage = () => {
     searchFn: () => location.search,
     storage: organizationMemberPaginationStorage(),
   })
-  const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
   const {
     data: list,
     error: listError,
@@ -69,7 +68,7 @@ const OrganizationMembersPage = () => {
     mutate,
   } = UserAPI.useList(
     {
-      query,
+      query: decodeQuery(searchParams.get('q') as string),
       organizationId: id,
       page,
       size,
@@ -94,6 +93,12 @@ const OrganizationMembersPage = () => {
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
+
+  useEffect(() => {
+    if (searchParams.get('invite') === 'true') {
+      dispatch(inviteModalDidOpen())
+    }
+  }, [searchParams])
 
   return (
     <>

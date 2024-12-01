@@ -49,6 +49,10 @@ const slice = createSlice({
     detachModalDidClose: (state) => {
       state.isDetachModalOpen = false
     },
+    allModalsDidClose: (state) => {
+      state.isListModalOpen = false
+      state.isDetachModalOpen = false
+    },
   },
 })
 
@@ -59,6 +63,7 @@ export const {
   detachModalDidOpen,
   listModalDidClose,
   detachModalDidClose,
+  allModalsDidClose,
 } = slice.actions
 
 export default slice.reducer
