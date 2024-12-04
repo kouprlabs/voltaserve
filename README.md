@@ -61,7 +61,7 @@ Create an account and sign in:
 
 ### Voltasverve iOS App
 
-Voltaserve's iOS app defines a gold standard: it's native, optimized for iPhone and iPad, has a slick UI/UX with real-time updates, and it's written in SwiftUI.
+Voltaserve's iOS app defines a gold standard: it's native, optimized for iPhone and iPad, runs great on the Mac, has a slick UI/UX with real-time updates, and it's written in SwiftUI.
 
 - Get started on [GitHub](https://github.com/kouprlabs/voltaserve-ios).
 
