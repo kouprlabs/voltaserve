@@ -20,7 +20,7 @@ Pull images: (_recommended for most users_)
 docker compose pull
 ```
 
-You can pull a specific version by passing the environment variable as follows:
+Optionally, you can pull a specific version by passing the environment variable as follows:
 
 ```shell
 VOLTASERVE_VERSION=2.1.0 docker compose pull
