@@ -11,8 +11,8 @@ ita:
   package: "it_core_news_sm"
   url: "https://huggingface.co/spacy/it_core_news_sm/resolve/main/it_core_news_sm-any-py3-none-any.whl"
 jpn:
-  package: "ja_core_news_sm"
-  url: "https://huggingface.co/spacy/ja_core_news_sm/resolve/main/ja_core_news_sm-any-py3-none-any.whl"
+  package: "xx_ent_wiki_sm"
+  url: "https://huggingface.co/spacy/xx_ent_wiki_sm/resolve/main/xx_ent_wiki_sm-any-py3-none-any.whl"
 nld:
   package: "nl_core_news_sm"
   url: "https://huggingface.co/spacy/nl_core_news_sm/resolve/main/nl_core_news_sm-any-py3-none-any.whl"
@@ -41,8 +41,8 @@ chi_tra:
   package: "zh_core_web_sm"
   url: "https://huggingface.co/spacy/zh_core_web_sm/resolve/main/zh_core_web_sm-any-py3-none-any.whl"
 rus:
-  package: "ru_core_news_sm"
-  url: "https://huggingface.co/spacy/ru_core_news_sm/resolve/main/ru_core_news_sm-any-py3-none-any.whl"
+  package: "xx_ent_wiki_sm"
+  url: "https://huggingface.co/spacy/xx_ent_wiki_sm/resolve/main/xx_ent_wiki_sm-any-py3-none-any.whl"
 hin:
   package: "xx_ent_wiki_sm"
   url: "https://huggingface.co/spacy/xx_ent_wiki_sm/resolve/main/xx_ent_wiki_sm-any-py3-none-any.whl"

@@ -9,25 +9,24 @@
 # AGPL-3.0-only in the root of this repository.
 
 volumes:
-  cockroach:
+  postgres:
   minio:
   meilisearch:
   redis:
 
 services:
-  cockroach:
-    image: cockroachdb/cockroach:latest-v24.2
+  postgres:
+    image: postgres:17.2
     ports:
-      - ${VOLTASERVE_POSTGRES_PORT}:26257
-      - ${VOLTASERVE_COCKROACH_CONSOLE_PORT}:8080
+      - ${VOLTASERVE_POSTGRES_PORT}:5432
     environment:
-      COCKROACH_DATABASE: voltaserve
-      COCKROACH_USER: voltaserve
+      POSTGRES_USER: voltaserve
+      POSTGRES_DB: voltaserve
+      POSTGRES_PASSWORD: voltaserve
     volumes:
-      - cockroach:/cockroach/cockroach-data
-    command: start-single-node --insecure
+      - postgres:/var/lib/postgresql/data
     healthcheck:
-      test: cockroach sql --insecure --execute='SELECT 1;' || exit 1
+      test: pg_isready -U postgres || exit 1
   minio:
     image: minio/minio:RELEASE.2024-09-09T16-59-28Z
     ports:
@@ -40,6 +39,8 @@ services:
     volumes:
       - minio:/data
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: curl --fail http://127.0.0.1:9000/minio/health/live || exit 1
   meilisearch:
     image: getmeili/meilisearch:v1.11.3
     ports:
@@ -64,7 +65,7 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:1080 || exit 1
   api:
-    image: voltaserve/api
+    image: voltaserve/api:${VOLTASERVE_VERSION}
     build:
       context: ./api
     ports:
@@ -74,7 +75,7 @@ services:
       - CONVERSION_URL=http://conversion:8083
       - LANGUAGE_URL=http://language:8084
       - MOSAIC_URL=http://mosaic:8085
-      - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
+      - POSTGRES_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
       - S3_URL=minio:9000
       - SEARCH_URL=http://meilisearch:7700
       - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
@@ -89,20 +90,20 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8080/v3/health || exit 1
     depends_on:
-      - cockroach
+      - postgres
       - redis
       - minio
       - meilisearch
     restart: on-failure
   idp:
-    image: voltaserve/idp
+    image: voltaserve/idp:${VOLTASERVE_VERSION}
     build:
       context: ./idp
     ports:
       - ${VOLTASERVE_IDP_PORT}:8081
     environment:
       - PORT=8081
-      - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
+      - POSTGRES_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
       - SEARCH_URL=http://meilisearch:7700
       - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
@@ -115,12 +116,12 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8081/v3/health || exit 1
     depends_on:
-      - cockroach
+      - postgres
       - meilisearch
       - minio
     restart: on-failure
   ui:
-    image: voltaserve/ui
+    image: voltaserve/ui:${VOLTASERVE_VERSION}
     build:
       context: ./ui
     ports:
@@ -135,7 +136,7 @@ services:
       - api
     restart: on-failure
   webdav:
-    image: voltaserve/webdav
+    image: voltaserve/webdav:${VOLTASERVE_VERSION}
     build:
       context: ./webdav
     ports:
@@ -153,7 +154,7 @@ services:
       - api
     restart: on-failure
   conversion:
-    image: voltaserve/conversion
+    image: voltaserve/conversion:${VOLTASERVE_VERSION}
     build:
       context: ./conversion
     ports:
@@ -172,7 +173,7 @@ services:
       - minio
     restart: on-failure
   language:
-    image: voltaserve/language
+    image: voltaserve/language:${VOLTASERVE_VERSION}
     build:
       context: ./language
     ports:
@@ -181,7 +182,7 @@ services:
       test: wget --quiet --spider http://127.0.0.1:8084/v3/health || exit 1
     restart: on-failure
   mosaic:
-    image: voltaserve/mosaic
+    image: voltaserve/mosaic:${VOLTASERVE_VERSION}
     build:
       context: ./mosaic
     ports:
@@ -192,7 +193,7 @@ services:
       test: wget --quiet --spider http://127.0.0.1:8085/v3/health || exit 1
     restart: on-failure
   console:
-    image: voltaserve/console
+    image: voltaserve/console:${VOLTASERVE_VERSION}
     build:
       context: ./console
       dockerfile: Dockerfile
@@ -201,10 +202,11 @@ services:
     environment:
       - PORT=8086
       - HOST=0.0.0.0
-      - POSTGRES_URL=cockroach
-      - POSTGRES_PORT=26257
+      - POSTGRES_URL=postgres
+      - POSTGRES_PORT=5432
       - POSTGRES_NAME=voltaserve
       - POSTGRES_USER=voltaserve
+      - POSTGRES_PASSWORD=voltaserve
       - WORKERS=4
       - SECURITY_JWT_SIGNING_KEY=586cozl1x9m6zmu4fg8iwi6ajazguehcm9qdfgd5ndo2pc3pcn
       - SECURITY_CORS_ORIGINS=http://localhost:3000
@@ -225,14 +227,14 @@ services:
       - conversion
       - language
       - mosaic
-      - cockroach
+      - postgres
     restart: on-failure
   migrations:
-    image: voltaserve/migrations
+    image: voltaserve/migrations:${VOLTASERVE_VERSION}
     build:
       context: ./migrations
     environment:
-      - DATABASE_URL=postgresql://voltaserve@cockroach:26257/voltaserve
+      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
     depends_on:
-      - cockroach
+      - postgres
     restart: on-failure
