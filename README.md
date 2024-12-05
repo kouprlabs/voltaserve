@@ -20,6 +20,12 @@ Pull images: (_recommended for most users_)
 docker compose pull
 ```
 
+Optionally, you can pull a specific version by passing the environment variable as follows:
+
+```shell
+VOLTASERVE_VERSION=2.1.0 docker compose pull
+```
+
 Optionally build the images from the source: (_can be skipped if you pulled the images_)
 
 ```shell
