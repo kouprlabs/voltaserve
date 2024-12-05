@@ -18,7 +18,7 @@ Install [Python](https://www.python.org) 3.12 with [pyenv](https://github.com/py
 
 ```shell
 docker compose up -d \
-    cockroach \
+    postgres \
     minio \
     meilisearch \
     redis \
@@ -29,22 +29,16 @@ Run the [migrations/migrate]() tool in the newly created database.
 
 ### From Binaries
 
-#### CockroachDB
+#### PostgreSQL
 
-Download the [binary archive](https://www.cockroachlabs.com/docs/releases) and extract the archive.
-
-Start CockroachDB:
-
-```shell
-./cockroach start-single-node --insecure --http-addr=0.0.0.0:18080
-```
+Download and run [PostgreSQL](https://www.postgresql.org).
 
 Using DBeaver or any PostgreSQL GUI, connect with `root` and no password, then create a user and database:
 
 ```sql
 CREATE DATABASE voltaserve;
-CREATE USER voltaserve;
-GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
+CREATE USER voltaserve WITH PASSWORD 'voltaserve';
+ALTER DATABASE voltaserve OWNER TO voltaserve;
 ```
 
 Run the [migrations/migrate]() tool in the newly created database.

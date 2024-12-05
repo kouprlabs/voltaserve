@@ -20,12 +20,6 @@ Add `--reload` flag for development:
 poetry run python -m api.uvi --reload
 ```
 
-To use CockroachDB, add the `POSTGRES_PORT` environment variable:
-
-```shell
-POSTGRES_PORT=26257 poetry run python -m api.uvi --reload
-```
-
 Lint code:
 
 ```shell
