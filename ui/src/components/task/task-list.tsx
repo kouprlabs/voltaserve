@@ -16,7 +16,7 @@ import {
   usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
-import TaskAPI, { SortOrder } from '@/client/api/task'
+import TaskAPI, { SortBy, SortOrder } from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch } from '@/store/hook'
@@ -32,7 +32,10 @@ const TasksList = () => {
     error: listError,
     isLoading: listIsLoading,
     mutate: mutateList,
-  } = TaskAPI.useList({ page, size, sortOrder: SortOrder.Asc }, swrConfig())
+  } = TaskAPI.useList(
+    { page, size, sortOrder: SortOrder.Desc, sortBy: SortBy.DateCreated },
+    swrConfig(),
+  )
   const { hasPageSwitcher } = usePageMonitor({
     totalPages: list?.totalPages ?? 1,
     totalElements: list?.totalElements ?? 0,
