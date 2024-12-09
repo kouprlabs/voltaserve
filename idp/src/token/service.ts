@@ -58,7 +58,6 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     if (!user.isActive) {
       throw newUserSuspendedError()
     }
-    console.log(JSON.stringify(user, null, 2))
     if (isStillLocked(user)) {
       throw newUserTemporarilyLockedError()
     } else {
