@@ -194,8 +194,9 @@ class UserRepoImpl {
           email_update_token = $12,
           email_update_value = $13,
           picture = $14,
-          update_time = $15
-        WHERE id = $16
+          failed_attempts = $15,
+          update_time = $16
+        WHERE id = $17
         RETURNING *`,
       [
         entity.fullName,
@@ -212,6 +213,7 @@ class UserRepoImpl {
         entity.emailUpdateToken,
         entity.emailUpdateValue,
         entity.picture,
+        entity.failedAttempts,
         new Date().toISOString(),
         entity.id,
       ],
@@ -265,6 +267,7 @@ class UserRepoImpl {
       emailUpdateToken: row.email_update_token,
       emailUpdateValue: row.email_update_value,
       picture: row.picture,
+      failedAttempts: row.failed_attempts,
       createTime: row.create_time,
       updateTime: row.update_time,
     }

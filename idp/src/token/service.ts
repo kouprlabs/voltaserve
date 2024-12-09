@@ -58,8 +58,10 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
       throw newUserSuspendedError()
     }
     if (verifyPassword(options.password, user.passwordHash)) {
+      await resetFailedAttempts(user.id)
       return newToken(user.id, user.isAdmin)
     } else {
+      await increaseFailedAttempts(user.id)
       throw newInvalidUsernameOrPasswordError()
     }
   } else if (options.grant_type === 'refresh_token') {
@@ -144,4 +146,20 @@ function newAccessTokenExpiry(): number {
   const now = new Date()
   now.setSeconds(now.getSeconds() + getConfig().token.accessTokenLifetime)
   return Math.floor(now.getTime() / 1000)
+}
+
+async function increaseFailedAttempts(userId: string): Promise<void> {
+  const user = await userRepo.findById(userId)
+  await userRepo.update({
+    id: user.id,
+    failedAttempts: user.failedAttempts + 1,
+  })
+}
+
+async function resetFailedAttempts(userId: string): Promise<void> {
+  const user = await userRepo.findById(userId)
+  await userRepo.update({
+    id: user.id,
+    failedAttempts: 0,
+  })
 }
