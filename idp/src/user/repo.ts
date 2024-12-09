@@ -194,8 +194,10 @@ class UserRepoImpl {
           email_update_token = $12,
           email_update_value = $13,
           picture = $14,
-          update_time = $15
-        WHERE id = $16
+          failed_attempts = $15,
+          locked_until = $16,
+          update_time = $17
+        WHERE id = $18
         RETURNING *`,
       [
         entity.fullName,
@@ -212,6 +214,8 @@ class UserRepoImpl {
         entity.emailUpdateToken,
         entity.emailUpdateValue,
         entity.picture,
+        entity.failedAttempts,
+        entity.lockedUntil,
         new Date().toISOString(),
         entity.id,
       ],
@@ -265,6 +269,8 @@ class UserRepoImpl {
       emailUpdateToken: row.email_update_token,
       emailUpdateValue: row.email_update_value,
       picture: row.picture,
+      failedAttempts: row.failed_attempts,
+      lockedUntil: row.locked_until,
       createTime: row.create_time,
       updateTime: row.update_time,
     }
@@ -272,21 +278,7 @@ class UserRepoImpl {
 
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   private mapList(list: any): User[] {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    return list.map((user: any) => {
-      return {
-        id: user.id,
-        fullName: user.full_name,
-        username: user.username,
-        email: user.email,
-        isEmailConfirmed: user.is_email_confirmed,
-        isAdmin: user.is_admin,
-        isActive: user.is_active,
-        picture: user.picture,
-        createTime: user.create_time,
-        updateTime: user.update_time,
-      }
-    })
+    return list.map(this.mapRow)
   }
 }
 

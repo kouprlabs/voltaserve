@@ -29,6 +29,8 @@ mod m20240905_000001_add_user_active_admin_fields;
 mod m20240907_000001_add_user_force_change_password_field;
 mod m20240913_000001_drop_segmentation_column;
 mod m20241114_000001_drop_user_force_change_password_column;
+mod m20241209_000001_add_user_failed_attempts_column;
+mod m20241209_000001_add_user_locked_until_column;
 
 #[async_trait::async_trait]
 impl MigratorTrait for Migrator {
@@ -50,6 +52,8 @@ impl MigratorTrait for Migrator {
             Box::new(m20240907_000001_add_user_force_change_password_field::Migration),
             Box::new(m20240913_000001_drop_segmentation_column::Migration),
             Box::new(m20241114_000001_drop_user_force_change_password_column::Migration),
+            Box::new(m20241209_000001_add_user_failed_attempts_column::Migration),
+            Box::new(m20241209_000001_add_user_locked_until_column::Migration),
         ]
     }
 }
