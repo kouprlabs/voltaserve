@@ -22,6 +22,7 @@ export function getConfig(): Config {
     readCORS(config)
     readSearch(config)
     readSMTP(config)
+    readSecurity(config)
   }
   return config
 }
@@ -78,4 +79,17 @@ export function readSMTP(config: Config) {
   config.smtp.password = process.env.SMTP_PASSWORD
   config.smtp.senderAddress = process.env.SMTP_SENDER_ADDRESS
   config.smtp.senderName = process.env.SMTP_SENDER_NAME
+}
+
+export function readSecurity(config: Config) {
+  if (process.env.SECURITY_MAX_FAILED_ATTEMPTS) {
+    config.security.maxFailedAttempts = parseInt(
+      process.env.SECURITY_MAX_FAILED_ATTEMPTS,
+    )
+  }
+  if (process.env.SECURITY_LOCKOUT_PERIOD) {
+    config.security.lockoutPeriod = parseInt(
+      process.env.SECURITY_LOCKOUT_PERIOD,
+    )
+  }
 }

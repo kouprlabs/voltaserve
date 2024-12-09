@@ -65,6 +65,14 @@ export function newUserSuspendedError() {
   })
 }
 
+export function newUserTemporarilyLockedError() {
+  return newError({
+    code: ErrorCode.UserTemporarilyLocked,
+    message: 'User temporarily locked. Try again later.',
+    userMessage: 'User temporarily locked. Try again later.',
+  })
+}
+
 export function newRefreshTokenExpiredError() {
   return newError({
     code: ErrorCode.RefreshTokenExpired,

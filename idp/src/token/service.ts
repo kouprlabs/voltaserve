@@ -17,6 +17,7 @@ import {
   newRefreshTokenExpiredError,
   newUserIsNotAdminError,
   newUserSuspendedError,
+  newUserTemporarilyLockedError,
 } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
 import { verifyPassword } from '@/infra/password'
@@ -57,12 +58,17 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     if (!user.isActive) {
       throw newUserSuspendedError()
     }
-    if (verifyPassword(options.password, user.passwordHash)) {
-      await resetFailedAttempts(user.id)
-      return newToken(user.id, user.isAdmin)
+    console.log(JSON.stringify(user, null, 2))
+    if (isStillLocked(user)) {
+      throw newUserTemporarilyLockedError()
     } else {
-      await increaseFailedAttempts(user.id)
-      throw newInvalidUsernameOrPasswordError()
+      if (verifyPassword(options.password, user.passwordHash)) {
+        await resetFailedAttemptsAndUnlock(user.id)
+        return newToken(user.id, user.isAdmin)
+      } else {
+        await increaseFailedAttemptsOrLock(user.id)
+        throw newInvalidUsernameOrPasswordError()
+      }
     }
   } else if (options.grant_type === 'refresh_token') {
     // https://datatracker.ietf.org/doc/html/rfc6749#section-6
@@ -148,18 +154,37 @@ function newAccessTokenExpiry(): number {
   return Math.floor(now.getTime() / 1000)
 }
 
-async function increaseFailedAttempts(userId: string): Promise<void> {
+async function increaseFailedAttemptsOrLock(userId: string): Promise<void> {
   const user = await userRepo.findById(userId)
-  await userRepo.update({
-    id: user.id,
-    failedAttempts: user.failedAttempts + 1,
-  })
+  const failedAttempts = user.failedAttempts + 1
+  if (failedAttempts <= getConfig().security.maxFailedAttempts) {
+    await userRepo.update({
+      id: user.id,
+      failedAttempts,
+    })
+  } else {
+    await userRepo.update({
+      id: user.id,
+      lockedUntil: newLockoutUntil(),
+    })
+  }
 }
 
-async function resetFailedAttempts(userId: string): Promise<void> {
+async function resetFailedAttemptsAndUnlock(userId: string): Promise<void> {
   const user = await userRepo.findById(userId)
   await userRepo.update({
     id: user.id,
     failedAttempts: 0,
+    lockedUntil: null,
   })
+}
+
+function newLockoutUntil(): string {
+  const now = new Date()
+  now.setSeconds(now.getSeconds() + getConfig().security.lockoutPeriod)
+  return now.toISOString()
+}
+
+function isStillLocked(user: User): boolean {
+  return user.lockedUntil && new Date() < new Date(user.lockedUntil)
 }

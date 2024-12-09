@@ -25,6 +25,7 @@ export type User = {
   emailUpdateValue?: string
   picture?: string
   failedAttempts: number
+  lockedUntil?: string
   createTime: string
   updateTime?: string
 }
@@ -62,6 +63,7 @@ export type UpdateOptions = {
   emailUpdateValue?: string
   picture?: string
   failedAttempts?: number
+  lockedUntil?: string
   createTime?: string
   updateTime?: string
 }

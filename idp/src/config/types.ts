@@ -14,6 +14,7 @@ export class Config {
   databaseURL: string
   token: TokenConfig
   password: PasswordConfig
+  security: SecurityConfig
   corsOrigins: string[]
   search: SearchConfig
   smtp: SMTPConfig
@@ -23,6 +24,7 @@ export class Config {
     this.password = new PasswordConfig()
     this.search = new SearchConfig()
     this.smtp = new SMTPConfig()
+    this.security = new SecurityConfig()
   }
 }
 
@@ -40,6 +42,11 @@ export class PasswordConfig {
   minUppercase: number
   minNumbers: number
   minSymbols: number
+}
+
+export class SecurityConfig {
+  maxFailedAttempts: number
+  lockoutPeriod: number
 }
 
 export class SearchConfig {

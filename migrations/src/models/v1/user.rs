@@ -29,6 +29,7 @@ pub enum User {
     ForceChangePassword,
     Picture,
     FailedAttempts,
+    LockedUntil,
     CreateTime,
     UpdateTime,
 }
