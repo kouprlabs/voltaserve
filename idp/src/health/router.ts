@@ -8,25 +8,21 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { Request, Response, Router } from 'express'
-import { Client as PgClient } from 'https://deno.land/x/postgres@v0.19.3/mod.ts'
-import { getConfig } from '@/config/config.ts'
+import { client as postgres } from '@/infra/postgres.ts'
+import { client as meilisearch } from '@/infra/meilisearch.ts'
 
 const router = Router()
 
 router.get('', async (_: Request, res: Response) => {
-  let pg: PgClient | undefined
-  try {
-    pg = new PgClient(getConfig().databaseURL)
-    await pg.connect()
-    await pg.queryObject('SELECT 1')
-    res.send('OK')
-  } catch {
+  if (!postgres.connected) {
     res.sendStatus(503)
-  } finally {
-    if (pg) {
-      await pg.end()
-    }
+    return
   }
+  if (!(await meilisearch.isHealthy())) {
+    res.sendStatus(503)
+    return
+  }
+  res.send('OK')
 })
 
 export default router

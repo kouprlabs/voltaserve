@@ -16,7 +16,10 @@ import {
 import { newHashId, newHyphenlessUuid } from '@/infra/id.ts'
 import { sendTemplateMail } from '@/infra/mail.ts'
 import { hashPassword } from '@/infra/password.ts'
-import search, { USER_SEARCH_INDEX } from '@/infra/search.ts'
+import {
+  client as meilisearch,
+  USER_SEARCH_INDEX,
+} from '../infra/meilisearch.ts'
 import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { getUserCount, mapEntity, UserDTO } from '@/user/service.ts'
@@ -73,7 +76,7 @@ export async function createUser(
       createTime: newDateTime(),
       isAdmin: options.isAdmin,
     })
-    await search.index(USER_SEARCH_INDEX).addDocuments([
+    await meilisearch.index(USER_SEARCH_INDEX).addDocuments([
       {
         id: user.id,
         username: user.username,
@@ -91,7 +94,7 @@ export async function createUser(
     return mapEntity(user)
   } catch (error) {
     await userRepo.delete(id)
-    await search.index(USER_SEARCH_INDEX).deleteDocuments([id])
+    await meilisearch.index(USER_SEARCH_INDEX).deleteDocuments([id])
     throw newInternalServerError(error)
   }
 }
@@ -111,7 +114,7 @@ export async function confirmEmail(options: AccountConfirmEmailOptions) {
     isEmailConfirmed: true,
     emailConfirmationToken: null,
   })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
+  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
       username: user.username,

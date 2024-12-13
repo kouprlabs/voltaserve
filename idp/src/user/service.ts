@@ -28,7 +28,10 @@ import { ErrorCode, newError } from '@/infra/error/core.ts'
 import { newHyphenlessUuid } from '@/infra/id.ts'
 import { sendTemplateMail } from '@/infra/mail.ts'
 import { hashPassword, verifyPassword } from '@/infra/password.ts'
-import search, { USER_SEARCH_INDEX } from '@/infra/search.ts'
+import {
+  client as meilisearch,
+  USER_SEARCH_INDEX,
+} from '../infra/meilisearch.ts'
 import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { Buffer } from 'node:buffer'
@@ -149,7 +152,7 @@ export async function list({
   page,
 }: UserListOptions): Promise<UserAdminList> {
   if (query && query.length >= 3) {
-    const users = await search
+    const users = await meilisearch
       .index(USER_SEARCH_INDEX)
       .search(query, { page: page, hitsPerPage: size })
       .then((value) => {
@@ -194,7 +197,7 @@ export async function updateFullName(
 ): Promise<UserDTO> {
   let user = await userRepo.findById(id)
   user = await userRepo.update({ id: user.id, fullName: options.fullName })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
+  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
       username: user.username,
@@ -266,7 +269,7 @@ export async function updateEmailConfirmation(
     emailUpdateToken: null,
     emailUpdateValue: null,
   })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
+  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
       username: user.username,
@@ -308,7 +311,7 @@ export async function updatePicture(
     id: userId,
     picture: `data:${contentType};base64,${picture}`,
   })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
+  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
       username: user.username,
@@ -326,7 +329,7 @@ export async function updatePicture(
 export async function deletePicture(id: string): Promise<UserDTO> {
   let user = await userRepo.findById(id)
   user = await userRepo.update({ id: user.id, picture: null })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
+  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
       username: user.username,
@@ -345,7 +348,7 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
   const user = await userRepo.findById(id)
   if (verifyPassword(options.password, user.passwordHash)) {
     await userRepo.delete(user.id)
-    await search.index(USER_SEARCH_INDEX).deleteDocuments([user.id])
+    await meilisearch.index(USER_SEARCH_INDEX).deleteDocuments([user.id])
   } else {
     throw newInvalidPasswordError()
   }
@@ -362,7 +365,7 @@ export async function suspendUser(id: string, options: UserSuspendOptions) {
   }
   if (user) {
     await userRepo.suspend(user.id, options.suspend)
-    await search.index(USER_SEARCH_INDEX).updateDocuments([
+    await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
       {
         id: user.id,
         username: user.username,
@@ -390,7 +393,7 @@ export async function makeAdminUser(id: string, options: UserMakeAdminOptions) {
   }
   if (user) {
     await userRepo.makeAdmin(user.id, options.makeAdmin)
-    await search.index(USER_SEARCH_INDEX).updateDocuments([
+    await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
       {
         id: user.id,
         username: user.username,
