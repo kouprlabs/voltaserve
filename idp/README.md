@@ -17,7 +17,7 @@ deno task start
 Lint code:
 
 ```shell
-deno task lint
+deno lint .
 ```
 
 Format code:
