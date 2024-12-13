@@ -1,45 +1,33 @@
 {
   "folders": [
     {
-      "path": "api"
+      "path": "api",
     },
     {
-      "path": "idp"
+      "path": "idp",
     },
     {
-      "path": "webdav"
+      "path": "webdav",
     },
     {
-      "path": "conversion"
+      "path": "conversion",
     },
     {
-      "path": "language"
+      "path": "language",
     },
     {
-      "path": "mosaic"
+      "path": "mosaic",
     },
     {
-      "path": "ui"
+      "path": "ui",
     },
     {
-      "path": "postgres"
-    }
+      "path": "postgres",
+    },
   ],
   "settings": {
-    "[typescript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[dockercompose]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[typescriptreact]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[jsonc]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
     "[dockerfile]": {
-      "editor.defaultFormatter": "ms-azuretools.vscode-docker"
-    }
-  }
+      "editor.defaultFormatter": "ms-azuretools.vscode-docker",
+    },
+  },
 }
