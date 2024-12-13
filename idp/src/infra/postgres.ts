@@ -7,7 +7,8 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { Client } from 'pg'
-import { getConfig } from '@/config/config'
+import { Client } from 'https://deno.land/x/postgres@v0.19.3/mod.ts'
+import { getConfig } from '@/config/config.ts'
 
-export const client = new Client({ connectionString: getConfig().databaseURL })
+export const client = new Client(getConfig().databaseURL)
+await client.connect()

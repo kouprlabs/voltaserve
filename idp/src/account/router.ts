@@ -9,8 +9,8 @@
 // AGPL-3.0-only in the root of this repository.
 import { Router, Request, Response } from 'express'
 import { body, validationResult } from 'express-validator'
-import { getConfig } from '@/config/config'
-import { parseValidationError } from '@/infra/error'
+import { getConfig } from '@/config/config.ts'
+import { parseValidationError } from '@/infra/error/index.ts'
 import {
   confirmEmail,
   createUser,
@@ -21,7 +21,7 @@ import {
   AccountResetPasswordOptions,
   AccountSendResetPasswordEmailOptions,
   getPasswordRequirements,
-} from './service'
+} from './service.ts'
 
 const router = Router()
 
@@ -48,7 +48,7 @@ router.post(
   },
 )
 
-router.get('/password_requirements', async (_: Request, res: Response) => {
+router.get('/password_requirements', (_: Request, res: Response) => {
   res.json(getPasswordRequirements())
 })
 

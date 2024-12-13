@@ -7,19 +7,19 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { getConfig } from '@/config/config'
-import { newDateTime } from '@/infra/date-time'
+import { getConfig } from '@/config/config.ts'
+import { newDateTime } from '@/infra/date-time.ts'
 import {
   newInternalServerError,
   newUsernameUnavailableError,
-} from '@/infra/error'
-import { newHashId, newHyphenlessUuid } from '@/infra/id'
-import { sendTemplateMail } from '@/infra/mail'
-import { hashPassword } from '@/infra/password'
-import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import { User } from '@/user/model'
-import userRepo from '@/user/repo'
-import { UserDTO, mapEntity, getUserCount } from '@/user/service'
+} from '@/infra/error/index.ts'
+import { newHashId, newHyphenlessUuid } from '@/infra/id.ts'
+import { sendTemplateMail } from '@/infra/mail.ts'
+import { hashPassword } from '@/infra/password.ts'
+import search, { USER_SEARCH_INDEX } from '@/infra/search.ts'
+import { User } from '@/user/model.ts'
+import userRepo from '@/user/repo.ts'
+import { UserDTO, mapEntity, getUserCount } from '@/user/service.ts'
 
 export type AccountCreateOptions = {
   email: string

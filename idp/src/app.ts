@@ -7,26 +7,26 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import '@/infra/env'
+import '@/infra/env.ts'
 import cors from 'cors'
 import express from 'express'
 import logger from 'morgan'
 import passport from 'passport'
 import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt'
-import accountRouter from '@/account/router'
-import { getConfig } from '@/config/config'
-import healthRouter from '@/health/router'
+import accountRouter from '@/account/router.ts'
+import { getConfig } from '@/config/config.ts'
+import healthRouter from '@/health/router.ts'
 import {
   ErrorCode,
   errorHandler,
   newError,
   newResponse,
-} from '@/infra/error/core'
-import tokenRouter from '@/token/router'
-import userRepo from '@/user/repo'
-import userRouter from '@/user/router'
-import versionRouter from '@/version/router'
-import { client as postgres } from './infra/postgres'
+} from '@/infra/error/core.ts'
+import tokenRouter from '@/token/router.ts'
+import userRepo from '@/user/repo.ts'
+import userRouter from '@/user/router.ts'
+import versionRouter from '@/version/router.ts'
+import { client as postgres } from './infra/postgres.ts'
 
 const app = express()
 
@@ -44,7 +44,7 @@ passport.use(
       issuer,
       audience,
     },
-    async (payload, done) => {
+    async (payload: any, done: any) => {
       try {
         const user = await userRepo.findById(payload.sub)
         return done(null, user)

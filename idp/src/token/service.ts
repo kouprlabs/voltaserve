@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { decodeJwt, SignJWT } from 'jose'
-import { getConfig } from '@/config/config'
+import { getConfig } from '@/config/config.ts'
 import {
   newEmailNotConfirmedError,
   newInvalidGrantType,
@@ -18,11 +18,11 @@ import {
   newUserIsNotAdminError,
   newUserSuspendedError,
   newUserTemporarilyLockedError,
-} from '@/infra/error'
-import { newHyphenlessUuid } from '@/infra/id'
-import { verifyPassword } from '@/infra/password'
-import { User } from '@/user/model'
-import userRepo from '@/user/repo'
+} from '@/infra/error/index.ts'
+import { newHyphenlessUuid } from '@/infra/id.ts'
+import { verifyPassword } from '@/infra/password.ts'
+import { User } from '@/user/model.ts'
+import userRepo from '@/user/repo.ts'
 
 export type TokenGrantType = 'password' | 'refresh_token'
 
@@ -48,7 +48,7 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
     let user: User
     try {
-      user = await userRepo.findByUsername(options.username.toLocaleLowerCase())
+      user = await userRepo.findByUsername(options.username!.toLocaleLowerCase())
     } catch {
       throw newInvalidUsernameOrPasswordError()
     }
@@ -61,7 +61,7 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     if (isStillLocked(user)) {
       throw newUserTemporarilyLockedError()
     } else {
-      if (verifyPassword(options.password, user.passwordHash)) {
+      if (verifyPassword(options.password!, user.passwordHash!)) {
         await resetFailedAttemptsAndUnlock(user.id)
         return newToken(user.id, user.isAdmin)
       } else {
@@ -73,17 +73,20 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     // https://datatracker.ietf.org/doc/html/rfc6749#section-6
     let user: User
     try {
-      user = await userRepo.findByRefreshTokenValue(options.refresh_token)
+      user = await userRepo.findByRefreshTokenValue(options.refresh_token!)
     } catch {
       throw newInvalidUsernameOrPasswordError()
     }
     if (!user.isEmailConfirmed) {
       throw newEmailNotConfirmedError()
     }
-    if (new Date() >= new Date(user.refreshTokenExpiry)) {
+    if (new Date() >= new Date(user.refreshTokenExpiry!)) {
       throw newRefreshTokenExpiredError()
     }
     return newToken(user.id, user.isAdmin)
+  } else {
+    // Should never end up here, but the Dino linter doesn't know that.
+    throw newInvalidGrantType(options.grant_type)
   }
 }
 
@@ -185,5 +188,5 @@ function newLockoutUntil(): string {
 }
 
 function isStillLocked(user: User): boolean {
-  return user.lockedUntil && new Date() < new Date(user.lockedUntil)
+  return !!(user.lockedUntil && new Date() < new Date(user.lockedUntil))
 }

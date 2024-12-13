@@ -7,61 +7,61 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { newInternalServerError, newUserNotFoundError } from '@/infra/error'
-import { client } from '@/infra/postgres'
-import { InsertOptions, UpdateOptions, User } from './model'
+import { newInternalServerError, newUserNotFoundError } from '@/infra/error/index.ts'
+import { client } from '@/infra/postgres.ts'
+import { InsertOptions, UpdateOptions, User } from './model.ts'
 
 class UserRepoImpl {
   async findById(id: string): Promise<User> {
-    const { rowCount, rows } = await client.query(
+    const { rowCount, rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE id = $1`,
       [id],
     )
-    if (rowCount < 1) {
+    if (rowCount && rowCount < 1) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByUsername(username: string): Promise<User> {
-    const { rowCount, rows } = await client.query(
+    const { rowCount, rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE username = $1`,
       [username],
     )
-    if (rowCount < 1) {
+    if (rowCount && rowCount < 1) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByEmail(email: string): Promise<User> {
-    const { rowCount, rows } = await client.query(
+    const { rowCount, rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE email = $1`,
       [email],
     )
-    if (rowCount < 1) {
+    if (rowCount && rowCount < 1) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByRefreshTokenValue(refreshTokenValue: string): Promise<User> {
-    const { rowCount, rows } = await client.query(
+    const { rowCount, rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE refresh_token_value = $1`,
       [refreshTokenValue],
     )
-    if (rowCount < 1) {
+    if (rowCount && rowCount < 1) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByResetPasswordToken(resetPasswordToken: string): Promise<User> {
-    const { rowCount, rows } = await client.query(
+    const { rowCount, rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE reset_password_token = $1`,
       [resetPasswordToken],
     )
-    if (rowCount < 1) {
+    if (rowCount && rowCount < 1) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
@@ -70,29 +70,29 @@ class UserRepoImpl {
   async findByEmailConfirmationToken(
     emailConfirmationToken: string,
   ): Promise<User> {
-    const { rowCount, rows } = await client.query(
+    const { rowCount, rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE email_confirmation_token = $1`,
       [emailConfirmationToken],
     )
-    if (rowCount < 1) {
+    if (rowCount && rowCount < 1) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByEmailUpdateToken(emailUpdateToken: string): Promise<User> {
-    const { rowCount, rows } = await client.query(
+    const { rowCount, rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE email_update_token = $1`,
       [emailUpdateToken],
     )
-    if (rowCount < 1) {
+    if (rowCount && rowCount < 1) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async list(page: number, size: number): Promise<User[]> {
-    const { rows } = await client.query(
+    const { rows } = await client.queryArray(
       `SELECT *
        FROM "user"
        ORDER BY create_time
@@ -104,7 +104,7 @@ class UserRepoImpl {
   }
 
   async findMany(ids: string[]): Promise<User[]> {
-    const { rows } = await client.query(
+    const { rows } = await client.queryArray(
       `SELECT *
        FROM "user"
        WHERE id = ANY ($1)
@@ -115,14 +115,14 @@ class UserRepoImpl {
   }
 
   async getCount(): Promise<number> {
-    const { rowCount } = await client.query(
+    const { rowCount } = await client.queryObject(
       `SELECT COUNT(id) as count FROM "user"`,
     )
-    return rowCount
+    return rowCount ?? 0
   }
 
   async isUsernameAvailable(username: string): Promise<boolean> {
-    const { rowCount } = await client.query(
+    const { rowCount } = await client.queryObject(
       `SELECT * FROM "user" WHERE username = $1`,
       [username],
     )
@@ -130,7 +130,7 @@ class UserRepoImpl {
   }
 
   async insert(data: InsertOptions): Promise<User> {
-    const { rowCount, rows } = await client.query(
+    const { rowCount, rows } = await client.queryObject(
       `INSERT INTO "user" (
         id,
         full_name,
@@ -164,7 +164,7 @@ class UserRepoImpl {
         new Date().toISOString(),
       ],
     )
-    if (rowCount < 1) {
+    if (rowCount && rowCount < 1) {
       throw newInternalServerError()
     }
     return this.mapRow(rows[0])
@@ -177,7 +177,7 @@ class UserRepoImpl {
     }
     Object.assign(entity, data)
     entity.updateTime = new Date().toISOString()
-    const { rowCount, rows } = await client.query(
+    const { rowCount, rows } = await client.queryObject(
       `UPDATE "user" 
         SET
           full_name = $1,
@@ -220,35 +220,36 @@ class UserRepoImpl {
         entity.id,
       ],
     )
-    if (rowCount < 1) {
+    if (rowCount && rowCount < 1) {
       throw newInternalServerError()
     }
     return this.mapRow(rows[0])
   }
 
   async delete(id: string): Promise<void> {
-    await client.query('DELETE FROM "user" WHERE id = $1', [id])
+    await client.queryObject('DELETE FROM "user" WHERE id = $1', [id])
   }
 
   async suspend(id: string, suspend: boolean): Promise<void> {
-    await client.query(
+    await client.queryObject(
       'UPDATE "user" SET is_active = $1, refresh_token_value = null, refresh_token_expiry = null, update_time = $2 WHERE id = $3',
       [!suspend, new Date().toISOString(), id],
     )
   }
 
   async makeAdmin(id: string, makeAdmin: boolean): Promise<void> {
-    await client.query(
+    await client.queryObject(
       'UPDATE "user" SET is_admin = $1, update_time = $2 WHERE id = $3',
       [makeAdmin, new Date().toISOString(), id],
     )
   }
 
   async enoughActiveAdmins() {
-    const { rows } = await client.query(
+    const { rows } = await client.queryObject(
       'SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',
     )
-    return rows[0].count > 1
+    const result = rows as { count: number }[]
+    return result[0].count > 1
   }
 
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

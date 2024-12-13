@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { Request } from 'express'
-import { User } from '@/user/model'
+import { User } from '@/user/model.ts'
 
 export interface PassportRequest extends Request {
   user: User

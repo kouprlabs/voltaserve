@@ -1,4 +1,4 @@
-import { ErrorCode, newError } from './core'
+import { ErrorCode, newError } from './core.ts'
 
 export function newInternalServerError(error?: unknown) {
   return newError({

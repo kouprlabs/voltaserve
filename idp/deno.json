@@ -1,0 +1,50 @@
+{
+  "tasks": {
+    "start": "deno run --allow-read --allow-write --allow-env --allow-sys --allow-net src/app.ts",
+    "dev": "deno run --reload src/app.ts",
+    "format": "prettier --write .",
+    "swagger-autogen": "deno run ./swagger.js",
+    "lint": "eslint"
+  },
+  "imports": {
+    "@/": "./src/",
+    "camelize": "npm:camelize@1.0.1",
+    "cors": "npm:cors@2.8.5",
+    "dotenv": "npm:dotenv@16.4.5",
+    "express": "npm:express@5.0.0",
+    "express-validator": "npm:express-validator@7.2.0",
+    "handlebars": "npm:handlebars@4.7.8",
+    "hashids": "npm:hashids@2.3.0",
+    "jose": "npm:jose@5.9.6",
+    "js-yaml": "npm:js-yaml@4.1.0",
+    "meilisearch": "npm:meilisearch@0.45.0",
+    "mime-types": "npm:mime-types@2.1.35",
+    "morgan": "npm:morgan@1.10.0",
+    "multer": "npm:multer@1.4.5-lts.1",
+    "nodemailer": "npm:nodemailer@6.9.15",
+    "passport": "npm:passport@0.7.0",
+    "passport-jwt": "npm:passport-jwt@4.0.1",
+    "uuid": "npm:uuid@10.0.0",
+    "@trivago/prettier-plugin-sort-imports": "npm:@trivago/prettier-plugin-sort-imports@4.3.0",
+    "@types/body-parser": "npm:@types/body-parser@1.19.5",
+    "@types/cors": "npm:@types/cors@2.8.17",
+    "@types/express": "npm:@types/express@5.0.0",
+    "@types/js-yaml": "npm:@types/js-yaml@4.0.9",
+    "@types/mime-types": "npm:@types/mime-types@2.1.4",
+    "@types/morgan": "npm:@types/morgan@1.9.9",
+    "@types/multer": "npm:@types/multer@1.4.12",
+    "@types/node": "npm:@types/node@22.7.7",
+    "@types/nodemailer": "npm:@types/nodemailer@6.4.16",
+    "@types/passport": "npm:@types/passport@1.0.16",
+    "@types/passport-jwt": "npm:@types/passport-jwt@4.0.1",
+    "@types/pg": "npm:@types/pg@8.11.10",
+    "@types/uuid": "npm:@types/uuid@10.0.0",
+    "globals": "npm:globals@15.11.0",
+    "swagger-autogen": "npm:swagger-autogen@2.23.7"
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-explicit-any"]
+    }
+  }
+}

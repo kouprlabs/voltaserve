@@ -1,3 +1,3 @@
-export * from './core'
-export * from './creators'
-export * from './validation'
+export * from './core.ts'
+export * from './creators.ts'
+export * from './validation.ts'

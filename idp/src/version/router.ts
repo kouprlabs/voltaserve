@@ -11,7 +11,7 @@ import { Router, Request, Response } from 'express'
 
 const router = Router()
 
-router.get('/', async (_: Request, res: Response) => {
+router.get('/', (_: Request, res: Response) => {
   res.json({ version: '3.0.0' })
 })
 

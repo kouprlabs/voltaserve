@@ -8,17 +8,17 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { Router, Request, Response } from 'express'
-import { Client as PgClient } from 'pg'
-import { getConfig } from '@/config/config'
+import { Client as PgClient } from 'https://deno.land/x/postgres@v0.19.3/mod.ts'
+import { getConfig } from '@/config/config.ts'
 
 const router = Router()
 
 router.get('', async (_: Request, res: Response) => {
-  let pg: PgClient
+  let pg: PgClient|undefined
   try {
-    pg = new PgClient({ connectionString: getConfig().databaseURL })
+    pg = new PgClient(getConfig().databaseURL)
     await pg.connect()
-    await pg.query('SELECT 1')
+    await pg.queryObject('SELECT 1')
     res.send('OK')
   } catch {
     res.sendStatus(503)

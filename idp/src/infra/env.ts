@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import dotenv from 'dotenv'
-import fs from 'fs'
+import fs from 'node:fs'
 
 if (fs.existsSync('.env.local')) {
   dotenv.config({ path: '.env.local' })

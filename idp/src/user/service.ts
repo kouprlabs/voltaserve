@@ -7,9 +7,9 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import fs from 'fs/promises'
-import { getConfig } from '@/config/config'
-import { base64ToBuffer, base64ToExtension, base64ToMIME } from '@/infra/base64'
+import fs from 'node:fs/promises'
+import { getConfig } from '@/config/config.ts'
+import { base64ToBuffer, base64ToExtension, base64ToMIME } from '@/infra/base64.ts'
 import {
   newCannotDemoteSoleAdminError,
   newCannotSuspendSoleAdminError,
@@ -19,14 +19,15 @@ import {
   newUsernameUnavailableError,
   newUserNotFoundError,
   newPictureNotFoundError,
-} from '@/infra/error'
-import { ErrorCode, newError } from '@/infra/error/core'
-import { newHyphenlessUuid } from '@/infra/id'
-import { sendTemplateMail } from '@/infra/mail'
-import { hashPassword, verifyPassword } from '@/infra/password'
-import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import { User } from '@/user/model'
-import userRepo from '@/user/repo'
+} from '@/infra/error/index.ts'
+import { ErrorCode, newError } from '@/infra/error/core.ts'
+import { newHyphenlessUuid } from '@/infra/id.ts'
+import { sendTemplateMail } from '@/infra/mail.ts'
+import { hashPassword, verifyPassword } from '@/infra/password.ts'
+import search, { USER_SEARCH_INDEX } from '@/infra/search.ts'
+import { User } from '@/user/model.ts'
+import userRepo from '@/user/repo.ts'
+import { Buffer } from "node:buffer"
 
 export type UserDTO = {
   id: string
@@ -415,9 +416,6 @@ export function mapEntity(entity: User): UserDTO {
       extension: base64ToExtension(entity.picture),
     }
   }
-  Object.keys(user).forEach(
-    (index) => !user[index] && user[index] !== undefined && delete user[index],
-  )
   return user
 }
 
@@ -438,8 +436,5 @@ export function adminMapEntity(entity: User): UserAdminDTO {
       extension: base64ToExtension(entity.picture),
     }
   }
-  Object.keys(user).forEach(
-    (index) => !user[index] && user[index] !== undefined && delete user[index],
-  )
   return user
 }

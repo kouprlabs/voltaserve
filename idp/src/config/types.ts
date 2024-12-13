@@ -9,13 +9,13 @@
 // AGPL-3.0-only in the root of this repository.
 
 export class Config {
-  port: number
-  publicUIURL: string
-  databaseURL: string
+  port: number = 0
+  publicUIURL: string = ''
+  databaseURL: string = ''
   token: TokenConfig
   password: PasswordConfig
   security: SecurityConfig
-  corsOrigins: string[]
+  corsOrigins: string[] = []
   search: SearchConfig
   smtp: SMTPConfig
 
@@ -29,36 +29,36 @@ export class Config {
 }
 
 export class TokenConfig {
-  jwtSigningKey: string
-  audience: string
-  issuer: string
-  accessTokenLifetime: number
-  refreshTokenLifetime: number
+  jwtSigningKey: string = ''
+  audience: string = ''
+  issuer: string = ''
+  accessTokenLifetime: number = 0
+  refreshTokenLifetime: number = 0
 }
 
 export class PasswordConfig {
-  minLength: number
-  minLowercase: number
-  minUppercase: number
-  minNumbers: number
-  minSymbols: number
+  minLength: number = 0
+  minLowercase: number = 0
+  minUppercase: number = 0
+  minNumbers: number = 0
+  minSymbols: number = 0
 }
 
 export class SecurityConfig {
-  maxFailedAttempts: number
-  lockoutPeriod: number
+  maxFailedAttempts: number = 0
+  lockoutPeriod: number = 0
 }
 
 export class SearchConfig {
-  url: string
+  url: string = ''
 }
 
 export class SMTPConfig {
-  host: string
-  port: number
-  secure: boolean
+  host: string = ''
+  port: number = 0
+  secure: boolean = false
   username?: string
   password?: string
-  senderAddress: string
-  senderName: string
+  senderAddress: string = ''
+  senderName: string = ''
 }

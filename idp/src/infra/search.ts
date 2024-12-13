@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { MeiliSearch } from 'meilisearch'
-import { getConfig } from '@/config/config'
+import { getConfig } from '@/config/config.ts'
 
 export const USER_SEARCH_INDEX = 'user'
 

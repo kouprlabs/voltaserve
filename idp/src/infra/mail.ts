@@ -7,12 +7,12 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import fs from 'fs'
+import fs from 'node:fs'
 import Handlebars from 'handlebars'
 import yaml from 'js-yaml'
 import nodemailer from 'nodemailer'
-import path from 'path'
-import { getConfig } from '@/config/config'
+import path from 'node:path'
+import { getConfig } from '@/config/config.ts'
 
 type MessageParams = {
   subject: string
@@ -57,7 +57,7 @@ export function sendTemplateMail(
         text,
         html,
       },
-      (err) => {
+      (err: any) => {
         if (err) {
           reject(err)
         } else {
