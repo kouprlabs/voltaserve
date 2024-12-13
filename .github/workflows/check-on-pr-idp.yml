@@ -26,21 +26,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set Up Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Set Up Deno
+        uses: denoland/setup-deno@v2
         with:
           bun-version: latest
 
-      - name: Install Packages
-        run: bun i
+      - name: Run Check
+        run: deno task check
         working-directory: idp
 
-      - name: Run TypeScript Compiler
-        run: bun run tsc
-        working-directory: idp
-
-      - name: Run ESLint
-        run: bun run lint
+      - name: Run Lint
+        run: deno lint .
         working-directory: idp
     permissions:
       contents: read

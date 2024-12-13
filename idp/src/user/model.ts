@@ -13,7 +13,7 @@ export type User = {
   fullName: string
   username: string
   email: string
-  passwordHash?: string
+  passwordHash: string
   refreshTokenValue?: string
   refreshTokenExpiry?: string
   resetPasswordToken?: string
@@ -53,19 +53,19 @@ export type UpdateOptions = {
   fullName?: string
   username?: string
   email?: string
-  passwordHash?: string
-  refreshTokenValue?: string
-  refreshTokenExpiry?: string
-  resetPasswordToken?: string
-  emailConfirmationToken?: string
+  passwordHash?: string | null
+  refreshTokenValue?: string | null
+  refreshTokenExpiry?: string | null
+  resetPasswordToken?: string | null
+  emailConfirmationToken?: string | null
   isEmailConfirmed?: boolean
-  emailUpdateToken?: string
-  emailUpdateValue?: string
-  picture?: string
+  emailUpdateToken?: string | null
+  emailUpdateValue?: string | null
+  picture?: string | null
   failedAttempts?: number
-  lockedUntil?: string
+  lockedUntil?: string | null
   createTime?: string
-  updateTime?: string
+  updateTime?: string | null
 }
 
 export interface UserRepo {

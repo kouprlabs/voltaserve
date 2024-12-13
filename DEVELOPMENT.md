@@ -2,15 +2,19 @@
 
 ## Prerequisites
 
+Install [Deno](https://deno.com).
+
 Install [Bun](https://bun.sh).
 
-Install [Go](https://go.dev) for your platform.
+Install [Node.js](https://nodejs.org).
 
-Install [Rust](https://www.rust-lang.org) for your platform.
+Install [Go](https://go.dev).
+
+Install [Rust](https://www.rust-lang.org).
 
 Install [Poetry](https://python-poetry.org/docs/#installation).
 
-Install [Python](https://www.python.org) 3.12 with [pyenv](https://github.com/pyenv/pyenv).
+Install [Python](https://www.python.org) 3.11 with [pyenv](https://github.com/pyenv/pyenv).
 
 ## Run Infrastructure Services
 
@@ -99,26 +103,14 @@ MailHog
 
 ## Install Command Line Tools
 
-### macOS 14.5 Sonoma and later
+### macOS 15 Sequoia and Later
 
 ```shell
 npm i -g gltf-pipeline
 ```
 
 ```shell
-npm i -g @koupr/screenshot-glb
-```
-
-Install browser dependencies:
-
-```shell
-npx playwright install-deps
-```
-
-Install browsers:
-
-```shell
-npx playwright install
+brew install --cask blender
 ```
 
 ```shell
@@ -135,7 +127,7 @@ brew install \
     ffmpeg
 ```
 
-### Debian 12 bookworm and later
+### Debian 12 Bookworm and Later
 
 Run [Voltaserve Conversion](conversion/README.md) with the environment variable `ENABLE_INSTALLER` set to `true`.
 This will install the dependencies in the background. Incoming requests will be queued and be waiting until the installation is complete.

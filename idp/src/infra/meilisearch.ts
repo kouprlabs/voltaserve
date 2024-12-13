@@ -7,17 +7,10 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
+import { MeiliSearch } from 'meilisearch'
+import { getConfig } from '@/config/config.ts'
 
-const swaggerAutogen = require('swagger-autogen')()
+export const USER_SEARCH_INDEX = 'user'
 
-// https://swagger-autogen.github.io/docs/
-const doc = {
-  info: {
-    version: '2.0.0',
-    title: 'Voltaserve Identity Provider',
-  },
-}
-const outputFile = './swagger.json'
-const endpointsFiles = ['./src/app.ts']
-
-swaggerAutogen(outputFile, endpointsFiles, doc).then()
+export const client = new MeiliSearch({ host: getConfig().search.url })
+client.createIndex(USER_SEARCH_INDEX, { primaryKey: 'id' }).then()

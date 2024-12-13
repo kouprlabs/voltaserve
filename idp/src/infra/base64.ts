@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer'
+
 export function base64ToBuffer(value: string): Buffer | null {
   let withoutPrefix: string
   if (value.includes(',')) {
@@ -24,7 +26,7 @@ export function base64ToMIME(value: string): string | null {
   return value.substring(colonIndex + 1, semicolonIndex)
 }
 
-export function base64ToExtension(value: string): string | null {
+export function base64ToExtension(value: string): string {
   const mime = base64ToMIME(value)
   switch (mime) {
     case 'image/jpeg':

@@ -7,26 +7,34 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import fs from 'fs/promises'
-import { getConfig } from '@/config/config'
-import { base64ToBuffer, base64ToExtension, base64ToMIME } from '@/infra/base64'
+import fs from 'node:fs/promises'
+import { getConfig } from '@/config/config.ts'
+import {
+  base64ToBuffer,
+  base64ToExtension,
+  base64ToMIME,
+} from '@/infra/base64.ts'
 import {
   newCannotDemoteSoleAdminError,
   newCannotSuspendSoleAdminError,
   newInternalServerError,
   newInvalidPasswordError,
   newPasswordValidationFailedError,
+  newPictureNotFoundError,
   newUsernameUnavailableError,
   newUserNotFoundError,
-  newPictureNotFoundError,
-} from '@/infra/error'
-import { ErrorCode, newError } from '@/infra/error/core'
-import { newHyphenlessUuid } from '@/infra/id'
-import { sendTemplateMail } from '@/infra/mail'
-import { hashPassword, verifyPassword } from '@/infra/password'
-import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import { User } from '@/user/model'
-import userRepo from '@/user/repo'
+} from '@/infra/error/creators.ts'
+import { ErrorCode, newError } from '@/infra/error/core.ts'
+import { newHyphenlessUuid } from '@/infra/id.ts'
+import { sendTemplateMail } from '@/infra/mail.ts'
+import { hashPassword, verifyPassword } from '@/infra/password.ts'
+import {
+  client as meilisearch,
+  USER_SEARCH_INDEX,
+} from '../infra/meilisearch.ts'
+import { User } from '@/user/model.ts'
+import userRepo from '@/user/repo.ts'
+import { Buffer } from 'node:buffer'
 
 export type UserDTO = {
   id: string
@@ -144,7 +152,7 @@ export async function list({
   page,
 }: UserListOptions): Promise<UserAdminList> {
   if (query && query.length >= 3) {
-    const users = await search
+    const users = await meilisearch
       .index(USER_SEARCH_INDEX)
       .search(query, { page: page, hitsPerPage: size })
       .then((value) => {
@@ -169,7 +177,7 @@ export async function list({
   } else {
     return {
       data: (await userRepo.list(page, size)).map((value) =>
-        adminMapEntity(value),
+        adminMapEntity(value)
       ),
       totalElements: await userRepo.getCount(),
       totalPages: Math.floor(((await userRepo.getCount()) + size - 1) / size),
@@ -189,7 +197,7 @@ export async function updateFullName(
 ): Promise<UserDTO> {
   let user = await userRepo.findById(id)
   user = await userRepo.update({ id: user.id, fullName: options.fullName })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
+  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
       username: user.username,
@@ -261,7 +269,7 @@ export async function updateEmailConfirmation(
     emailUpdateToken: null,
     emailUpdateValue: null,
   })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
+  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
       username: user.username,
@@ -303,7 +311,7 @@ export async function updatePicture(
     id: userId,
     picture: `data:${contentType};base64,${picture}`,
   })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
+  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
       username: user.username,
@@ -321,7 +329,7 @@ export async function updatePicture(
 export async function deletePicture(id: string): Promise<UserDTO> {
   let user = await userRepo.findById(id)
   user = await userRepo.update({ id: user.id, picture: null })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
+  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
       username: user.username,
@@ -340,7 +348,7 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
   const user = await userRepo.findById(id)
   if (verifyPassword(options.password, user.passwordHash)) {
     await userRepo.delete(user.id)
-    await search.index(USER_SEARCH_INDEX).deleteDocuments([user.id])
+    await meilisearch.index(USER_SEARCH_INDEX).deleteDocuments([user.id])
   } else {
     throw newInvalidPasswordError()
   }
@@ -357,7 +365,7 @@ export async function suspendUser(id: string, options: UserSuspendOptions) {
   }
   if (user) {
     await userRepo.suspend(user.id, options.suspend)
-    await search.index(USER_SEARCH_INDEX).updateDocuments([
+    await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
       {
         id: user.id,
         username: user.username,
@@ -385,7 +393,7 @@ export async function makeAdminUser(id: string, options: UserMakeAdminOptions) {
   }
   if (user) {
     await userRepo.makeAdmin(user.id, options.makeAdmin)
-    await search.index(USER_SEARCH_INDEX).updateDocuments([
+    await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
       {
         id: user.id,
         username: user.username,
@@ -415,9 +423,6 @@ export function mapEntity(entity: User): UserDTO {
       extension: base64ToExtension(entity.picture),
     }
   }
-  Object.keys(user).forEach(
-    (index) => !user[index] && user[index] !== undefined && delete user[index],
-  )
   return user
 }
 
@@ -438,8 +443,5 @@ export function adminMapEntity(entity: User): UserAdminDTO {
       extension: base64ToExtension(entity.picture),
     }
   }
-  Object.keys(user).forEach(
-    (index) => !user[index] && user[index] !== undefined && delete user[index],
-  )
   return user
 }

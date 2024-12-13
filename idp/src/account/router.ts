@@ -7,21 +7,21 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { Router, Request, Response } from 'express'
+import { Request, Response, Router } from 'express'
 import { body, validationResult } from 'express-validator'
-import { getConfig } from '@/config/config'
-import { parseValidationError } from '@/infra/error'
+import { getConfig } from '@/config/config.ts'
+import { parseValidationError } from '@/infra/error/validation.ts'
 import {
-  confirmEmail,
-  createUser,
-  resetPassword,
-  sendResetPasswordEmail,
   AccountConfirmEmailOptions,
   AccountCreateOptions,
   AccountResetPasswordOptions,
   AccountSendResetPasswordEmailOptions,
+  confirmEmail,
+  createUser,
   getPasswordRequirements,
-} from './service'
+  resetPassword,
+  sendResetPasswordEmail,
+} from '@/account/service.ts'
 
 const router = Router()
 
@@ -48,7 +48,7 @@ router.post(
   },
 )
 
-router.get('/password_requirements', async (_: Request, res: Response) => {
+router.get('/password_requirements', (_: Request, res: Response) => {
   res.json(getPasswordRequirements())
 })
 

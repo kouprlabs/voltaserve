@@ -7,26 +7,22 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { Router, Request, Response } from 'express'
-import { Client as PgClient } from 'pg'
-import { getConfig } from '@/config/config'
+import { Request, Response, Router } from 'express'
+import { client as postgres } from '@/infra/postgres.ts'
+import { client as meilisearch } from '@/infra/meilisearch.ts'
 
 const router = Router()
 
 router.get('', async (_: Request, res: Response) => {
-  let pg: PgClient
-  try {
-    pg = new PgClient({ connectionString: getConfig().databaseURL })
-    await pg.connect()
-    await pg.query('SELECT 1')
-    res.send('OK')
-  } catch {
+  if (!postgres.connected) {
     res.sendStatus(503)
-  } finally {
-    if (pg) {
-      await pg.end()
-    }
+    return
   }
+  if (!(await meilisearch.isHealthy())) {
+    res.sendStatus(503)
+    return
+  }
+  res.send('OK')
 })
 
 export default router

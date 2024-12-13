@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { scryptSync, randomBytes } from 'crypto'
+import { randomBytes, scryptSync } from 'node:crypto'
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(16).toString('hex')

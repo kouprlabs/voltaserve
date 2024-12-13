@@ -8,11 +8,14 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import * as process from 'node:process'
-import { Config } from './types'
+import { Config } from '@/config/types.ts'
 
 let config: Config
 
 export function getConfig(): Config {
+  if (!process.env.PORT) {
+    throw newEnvironmentVariableNotSetError('PORT')
+  }
   if (!config) {
     config = new Config()
     config.port = parseInt(process.env.PORT)
@@ -28,11 +31,26 @@ export function getConfig(): Config {
 }
 
 export function readURLs(config: Config) {
+  if (!process.env.PUBLIC_UI_URL) {
+    throw newEnvironmentVariableNotSetError('PUBLIC_UI_URL')
+  }
+  if (!process.env.POSTGRES_URL) {
+    throw newEnvironmentVariableNotSetError('POSTGRES_URL')
+  }
   config.publicUIURL = process.env.PUBLIC_UI_URL
   config.databaseURL = process.env.POSTGRES_URL
 }
 
 export function readToken(config: Config) {
+  if (!process.env.TOKEN_JWT_SIGNING_KEY) {
+    throw newEnvironmentVariableNotSetError('TOKEN_JWT_SIGNING_KEY')
+  }
+  if (!process.env.TOKEN_AUDIENCE) {
+    throw newEnvironmentVariableNotSetError('TOKEN_AUDIENCE')
+  }
+  if (!process.env.TOKEN_ISSUER) {
+    throw newEnvironmentVariableNotSetError('TOKEN_ISSUER')
+  }
   config.token.jwtSigningKey = process.env.TOKEN_JWT_SIGNING_KEY
   config.token.audience = process.env.TOKEN_AUDIENCE
   config.token.issuer = process.env.TOKEN_ISSUER
@@ -49,6 +67,21 @@ export function readToken(config: Config) {
 }
 
 export function readPassword(config: Config) {
+  if (!process.env.PASSWORD_MIN_LENGTH) {
+    throw newEnvironmentVariableNotSetError('PASSWORD_MIN_LENGTH')
+  }
+  if (!process.env.PASSWORD_MIN_LOWERCASE) {
+    throw newEnvironmentVariableNotSetError('PASSWORD_MIN_LOWERCASE')
+  }
+  if (!process.env.PASSWORD_MIN_UPPERCASE) {
+    throw newEnvironmentVariableNotSetError('PASSWORD_MIN_UPPERCASE')
+  }
+  if (!process.env.PASSWORD_MIN_NUMBERS) {
+    throw newEnvironmentVariableNotSetError('PASSWORD_MIN_NUMBERS')
+  }
+  if (!process.env.PASSWORD_MIN_SYMBOLS) {
+    throw newEnvironmentVariableNotSetError('PASSWORD_MIN_SYMBOLS')
+  }
   config.password.minLength = parseInt(process.env.PASSWORD_MIN_LENGTH)
   config.password.minLowercase = parseInt(process.env.PASSWORD_MIN_LOWERCASE)
   config.password.minUppercase = parseInt(process.env.PASSWORD_MIN_UPPERCASE)
@@ -64,10 +97,22 @@ export function readCORS(config: Config) {
 }
 
 export function readSearch(config: Config) {
+  if (!process.env.SEARCH_URL) {
+    throw newEnvironmentVariableNotSetError('SEARCH_URL')
+  }
   config.search.url = process.env.SEARCH_URL
 }
 
 export function readSMTP(config: Config) {
+  if (!process.env.SMTP_HOST) {
+    throw newEnvironmentVariableNotSetError('SMTP_HOST')
+  }
+  if (!process.env.SMTP_SENDER_ADDRESS) {
+    throw newEnvironmentVariableNotSetError('SMTP_SENDER_ADDRESS')
+  }
+  if (!process.env.SMTP_SENDER_NAME) {
+    throw newEnvironmentVariableNotSetError('SMTP_SENDER_NAME')
+  }
   config.smtp.host = process.env.SMTP_HOST
   if (process.env.SMTP_PORT) {
     config.smtp.port = parseInt(process.env.SMTP_PORT)
@@ -92,4 +137,8 @@ export function readSecurity(config: Config) {
       process.env.SECURITY_LOCKOUT_PERIOD,
     )
   }
+}
+
+function newEnvironmentVariableNotSetError(variable: string) {
+  return new Error(`${variable} environment variable is not set.`)
 }

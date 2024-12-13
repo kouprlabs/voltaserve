@@ -8,19 +8,26 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM oven/bun:1-alpine
+FROM denoland/deno:debian-2.1.4 AS builder
 
-WORKDIR /app
+WORKDIR /build
 
 COPY src ./src
 COPY templates ./templates
 COPY .env .
-COPY package.json .
-COPY bun.lockb .
-COPY tsconfig.json .
+COPY deno.json .
+COPY deno.lock .
 
-RUN bun install --frozen-lockfile --production
+RUN deno task compile
 
-ENTRYPOINT ["bun", "run", "start"]
+FROM debian:bookworm-slim AS runner
+
+WORKDIR /app
+
+COPY --from=builder /build/voltaserve-idp ./voltaserve-idp
+COPY --from=builder /build/.env ./.env
+COPY --from=builder /build/templates ./templates
+
+ENTRYPOINT ["./voltaserve-idp"]
 
 EXPOSE 8081

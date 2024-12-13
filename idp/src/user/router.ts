@@ -7,44 +7,44 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { Router, Response } from 'express'
+import { Response, Router } from 'express'
 import { body, query, validationResult } from 'express-validator'
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
 import { jwtVerify } from 'jose'
 import multer from 'multer'
-import os from 'os'
+import os from 'node:os'
 import passport from 'passport'
-import { getConfig } from '@/config/config'
+import { getConfig } from '@/config/config.ts'
 import {
   newInvalidJwtError,
   newMissingQueryParamError,
   newPictureNotFoundError,
-  parseValidationError,
-} from '@/infra/error'
-import { PassportRequest } from '@/infra/passport-request'
-import { checkAdmin } from '@/token/service'
+} from '@/infra/error/creators.ts'
+import { parseValidationError } from '@/infra/error/validation.ts'
+import { PassportRequest } from '@/infra/passport-request.ts'
+import { checkAdmin } from '@/token/service.ts'
 import {
+  deletePicture,
   deleteUser,
   getUser,
-  updateFullName,
-  updatePicture,
-  updatePassword,
-  UserDeleteOptions,
-  UserUpdateFullNameOptions,
-  UserUpdatePasswordOptions,
-  deletePicture,
-  UserUpdateEmailRequestOptions,
-  UserUpdateEmailConfirmationOptions,
-  updateEmailRequest,
-  updateEmailConfirmation,
-  suspendUser,
-  makeAdminUser,
   getUserByAdmin,
-  list,
   getUserPicture,
+  list,
+  makeAdminUser,
+  suspendUser,
+  updateEmailConfirmation,
+  updateEmailRequest,
+  updateFullName,
+  updatePassword,
+  updatePicture,
+  UserDeleteOptions,
   UserMakeAdminOptions,
   UserSuspendOptions,
-} from './service'
+  UserUpdateEmailConfirmationOptions,
+  UserUpdateEmailRequestOptions,
+  UserUpdateFullNameOptions,
+  UserUpdatePasswordOptions,
+} from '@/user/service.ts'
 
 const router = Router()
 
@@ -251,7 +251,11 @@ async function getUserIdFromAccessToken(accessToken: string): Promise<string> {
       accessToken,
       new TextEncoder().encode(getConfig().token.jwtSigningKey),
     )
-    return payload.sub
+    if (payload.sub) {
+      return payload.sub
+    } else {
+      throw newInvalidJwtError()
+    }
   } catch {
     throw newInvalidJwtError()
   }

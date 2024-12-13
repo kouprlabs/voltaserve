@@ -2,34 +2,28 @@
 
 ## Getting Started
 
-Install dependencies:
-
-```shell
-bun i
-```
-
 Run for development:
 
 ```shell
-bun run dev
+deno task dev
 ```
 
 Run for production:
 
 ```shell
-bun run start
+deno task start
 ```
 
 Lint code:
 
 ```shell
-bun run lint
+deno lint .
 ```
 
 Format code:
 
 ```shell
-bun run format
+deno fmt .
 ```
 
 Build Docker image:
@@ -38,22 +32,14 @@ Build Docker image:
 docker build -t voltaserve/idp .
 ```
 
-## Generate Documentation
-
-Generate `swagger.json`:
-
-```shell
-bun run swagger-autogen && mv ./swagger.json ./docs
-```
-
 Preview (will be served at [http://localhost:7777](http://localhost:7777)):
 
 ```shell
-bunx @redocly/cli preview-docs --port 7777 ./docs/swagger.json
+deno -A npm:@redocly/cli preview-docs --port 7777 ./docs/swagger.json
 ```
 
 Generate the final static HTML documentation:
 
 ```shell
-bunx @redocly/cli build-docs ./docs/swagger.json --output ./docs/index.html
+deno -A npm:@redocly/cli build-docs ./docs/swagger.json --output ./docs/index.html
 ```
