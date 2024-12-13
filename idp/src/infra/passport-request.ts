@@ -10,6 +10,4 @@
 import { Request } from 'express'
 import { User } from '@/user/model.ts'
 
-export interface PassportRequest extends Request {
-  user: User
-}
+export type PassportRequest = Request & { user: User }
