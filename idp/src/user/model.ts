@@ -53,19 +53,19 @@ export type UpdateOptions = {
   fullName?: string
   username?: string
   email?: string
-  passwordHash?: string|null
-  refreshTokenValue?: string|null
-  refreshTokenExpiry?: string|null
-  resetPasswordToken?: string|null
-  emailConfirmationToken?: string|null
+  passwordHash?: string | null
+  refreshTokenValue?: string | null
+  refreshTokenExpiry?: string | null
+  resetPasswordToken?: string | null
+  emailConfirmationToken?: string | null
   isEmailConfirmed?: boolean
-  emailUpdateToken?: string|null
-  emailUpdateValue?: string|null
-  picture?: string|null
+  emailUpdateToken?: string | null
+  emailUpdateValue?: string | null
+  picture?: string | null
   failedAttempts?: number
-  lockedUntil?: string|null
+  lockedUntil?: string | null
   createTime?: string
-  updateTime?: string|null
+  updateTime?: string | null
 }
 
 export interface UserRepo {

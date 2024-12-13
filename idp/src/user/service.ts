@@ -9,16 +9,20 @@
 // AGPL-3.0-only in the root of this repository.
 import fs from 'node:fs/promises'
 import { getConfig } from '@/config/config.ts'
-import { base64ToBuffer, base64ToExtension, base64ToMIME } from '@/infra/base64.ts'
+import {
+  base64ToBuffer,
+  base64ToExtension,
+  base64ToMIME,
+} from '@/infra/base64.ts'
 import {
   newCannotDemoteSoleAdminError,
   newCannotSuspendSoleAdminError,
   newInternalServerError,
   newInvalidPasswordError,
   newPasswordValidationFailedError,
+  newPictureNotFoundError,
   newUsernameUnavailableError,
   newUserNotFoundError,
-  newPictureNotFoundError,
 } from '@/infra/error/index.ts'
 import { ErrorCode, newError } from '@/infra/error/core.ts'
 import { newHyphenlessUuid } from '@/infra/id.ts'
@@ -27,7 +31,7 @@ import { hashPassword, verifyPassword } from '@/infra/password.ts'
 import search, { USER_SEARCH_INDEX } from '@/infra/search.ts'
 import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
-import { Buffer } from "node:buffer"
+import { Buffer } from 'node:buffer'
 
 export type UserDTO = {
   id: string
@@ -170,7 +174,7 @@ export async function list({
   } else {
     return {
       data: (await userRepo.list(page, size)).map((value) =>
-        adminMapEntity(value),
+        adminMapEntity(value)
       ),
       totalElements: await userRepo.getCount(),
       totalPages: Math.floor(((await userRepo.getCount()) + size - 1) / size),

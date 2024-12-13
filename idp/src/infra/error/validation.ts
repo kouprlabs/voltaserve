@@ -2,8 +2,8 @@ import { ErrorCode, ErrorData, newError } from './core.ts'
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export function parseValidationError(result: any): ErrorData {
-  let message: string|undefined
-  let userMessage: string|undefined
+  let message: string | undefined
+  let userMessage: string | undefined
   if (result.errors) {
     message = result.errors
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

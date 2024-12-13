@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { Router, Request, Response } from 'express'
+import { Request, Response, Router } from 'express'
 
 const router = Router()
 

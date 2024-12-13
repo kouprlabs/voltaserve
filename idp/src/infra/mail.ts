@@ -24,13 +24,12 @@ const transporter = nodemailer.createTransport({
   host: config.host,
   port: config.port,
   secure: config.secure,
-  auth:
-    config.username || config.password
-      ? {
-          user: config.username,
-          pass: config.password,
-        }
-      : null,
+  auth: config.username || config.password
+    ? {
+      user: config.username,
+      pass: config.password,
+    }
+    : null,
 })
 
 export function sendTemplateMail(

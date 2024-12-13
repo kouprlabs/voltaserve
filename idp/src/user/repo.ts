@@ -7,7 +7,10 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { newInternalServerError, newUserNotFoundError } from '@/infra/error/index.ts'
+import {
+  newInternalServerError,
+  newUserNotFoundError,
+} from '@/infra/error/index.ts'
 import { client } from '@/infra/postgres.ts'
 import { InsertOptions, UpdateOptions, User } from './model.ts'
 

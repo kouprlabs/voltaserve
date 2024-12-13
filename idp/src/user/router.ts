@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { Router, Response, Request } from 'express'
+import { Request, Response, Router } from 'express'
 import { body, query, validationResult } from 'express-validator'
 import fs from 'node:fs/promises'
 import { jwtVerify } from 'jose'
@@ -24,26 +24,26 @@ import {
 import { PassportRequest } from '@/infra/passport-request.ts'
 import { checkAdmin } from '@/token/service.ts'
 import {
+  deletePicture,
   deleteUser,
   getUser,
-  updateFullName,
-  updatePicture,
-  updatePassword,
-  UserDeleteOptions,
-  UserUpdateFullNameOptions,
-  UserUpdatePasswordOptions,
-  deletePicture,
-  UserUpdateEmailRequestOptions,
-  UserUpdateEmailConfirmationOptions,
-  updateEmailRequest,
-  updateEmailConfirmation,
-  suspendUser,
-  makeAdminUser,
   getUserByAdmin,
-  list,
   getUserPicture,
+  list,
+  makeAdminUser,
+  suspendUser,
+  updateEmailConfirmation,
+  updateEmailRequest,
+  updateFullName,
+  updatePassword,
+  updatePicture,
+  UserDeleteOptions,
   UserMakeAdminOptions,
   UserSuspendOptions,
+  UserUpdateEmailConfirmationOptions,
+  UserUpdateEmailRequestOptions,
+  UserUpdateFullNameOptions,
+  UserUpdatePasswordOptions,
 } from './service.ts'
 
 const router = Router()
@@ -58,7 +58,7 @@ router.get(
 
 router.get(
   '/me/picture:extension',
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     if (!req.query.access_token) {
       throw newMissingQueryParamError('access_token')
     }
@@ -82,7 +82,7 @@ router.post(
   '/me/update_full_name',
   passport.authenticate('jwt', { session: false }),
   body('fullName').isString().notEmpty().trim().escape().isLength({ max: 255 }),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     const result = validationResult(req)
     if (!result.isEmpty()) {
       throw parseValidationError(result)
@@ -97,7 +97,7 @@ router.post(
   '/me/update_email_request',
   passport.authenticate('jwt', { session: false }),
   body('email').isEmail().isLength({ max: 255 }),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     const result = validationResult(req)
     if (!result.isEmpty()) {
       throw parseValidationError(result)
@@ -115,7 +115,7 @@ router.post(
   '/me/update_email_confirmation',
   passport.authenticate('jwt', { session: false }),
   body('token').isString().notEmpty().trim(),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     const result = validationResult(req)
     if (!result.isEmpty()) {
       throw parseValidationError(result)
@@ -133,7 +133,7 @@ router.post(
   passport.authenticate('jwt', { session: false }),
   body('currentPassword').notEmpty(),
   body('newPassword').isStrongPassword(),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     const result = validationResult(req)
     if (!result.isEmpty()) {
       throw parseValidationError(result)
@@ -151,7 +151,7 @@ router.post(
     dest: os.tmpdir(),
     limits: { fileSize: 3000000, fields: 0, files: 1 },
   }).single('file'),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     const user = await updatePicture(
       req.user.id,
       req.file.path,
@@ -174,7 +174,7 @@ router.delete(
   '/me',
   passport.authenticate('jwt', { session: false }),
   body('password').isString().notEmpty(),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     const result = validationResult(req)
     if (!result.isEmpty()) {
       throw parseValidationError(result)
@@ -190,7 +190,7 @@ router.get(
   query('query').isString().optional(),
   query('page').isInt(),
   query('size').isInt(),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     checkAdmin(req.header('Authorization'))
     const result = validationResult(req)
     if (!result.isEmpty()) {
@@ -210,7 +210,7 @@ router.post(
   '/:id/suspend',
   passport.authenticate('jwt', { session: false }),
   body('suspend').isBoolean(),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     checkAdmin(req.header('Authorization'))
     const result = validationResult(req)
     if (!result.isEmpty()) {
@@ -225,7 +225,7 @@ router.post(
   '/:id/make_admin',
   passport.authenticate('jwt', { session: false }),
   body('makeAdmin').isBoolean(),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     checkAdmin(req.header('Authorization'))
     const result = validationResult(req)
     if (!result.isEmpty()) {
@@ -239,7 +239,7 @@ router.post(
 router.get(
   '/:id',
   passport.authenticate('jwt', { session: false }),
-  async (req: PassportRequest&Request, res: Response) => {
+  async (req: PassportRequest & Request, res: Response) => {
     checkAdmin(req.header('Authorization'))
     res.json(await getUserByAdmin(req.params.id))
   },

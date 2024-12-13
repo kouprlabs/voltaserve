@@ -48,7 +48,9 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
     let user: User
     try {
-      user = await userRepo.findByUsername(options.username!.toLocaleLowerCase())
+      user = await userRepo.findByUsername(
+        options.username!.toLocaleLowerCase(),
+      )
     } catch {
       throw newInvalidUsernameOrPasswordError()
     }

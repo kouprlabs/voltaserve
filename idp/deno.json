@@ -2,7 +2,7 @@
   "tasks": {
     "start": "deno run --allow-read --allow-write --allow-env --allow-sys --allow-net src/app.ts",
     "dev": "deno run --reload src/app.ts",
-    "format": "prettier --write .",
+    "format": "deno fmt .",
     "swagger-autogen": "deno run ./swagger.js",
     "lint": "eslint"
   },
@@ -46,5 +46,10 @@
     "rules": {
       "exclude": ["no-explicit-any"]
     }
+  },
+  "fmt": {
+    "semiColons": false,
+    "singleQuote": true,
+    "exclude": ["./docs"]
   }
 }

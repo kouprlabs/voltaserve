@@ -19,7 +19,7 @@ import { hashPassword } from '@/infra/password.ts'
 import search, { USER_SEARCH_INDEX } from '@/infra/search.ts'
 import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
-import { UserDTO, mapEntity, getUserCount } from '@/user/service.ts'
+import { getUserCount, mapEntity, UserDTO } from '@/user/service.ts'
 
 export type AccountCreateOptions = {
   email: string
