@@ -19,10 +19,13 @@
       "path": "mosaic",
     },
     {
-      "path": "ui",
+      "path": "console",
     },
     {
-      "path": "postgres",
+      "path": "migrations",
+    },
+    {
+      "path": "ui",
     },
   ],
   "settings": {
