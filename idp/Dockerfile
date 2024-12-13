@@ -8,19 +8,16 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM oven/bun:1-alpine
+FROM denoland/deno:alpine-2.1.4
 
 WORKDIR /app
 
 COPY src ./src
 COPY templates ./templates
 COPY .env .
-COPY package.json .
-COPY bun.lockb .
-COPY tsconfig.json .
+COPY deno.json .
+COPY deno.lock .
 
-RUN bun install --frozen-lockfile --production
-
-ENTRYPOINT ["bun", "run", "start"]
+ENTRYPOINT ["deno", "task", "start"]
 
 EXPOSE 8081
