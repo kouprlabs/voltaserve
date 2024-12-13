@@ -50,6 +50,9 @@
   "fmt": {
     "semiColons": false,
     "singleQuote": true,
-    "exclude": ["./docs"]
+    "exclude": [
+      "./docs",
+      "./deno.lock."
+    ]
   }
 }
