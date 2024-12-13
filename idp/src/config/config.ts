@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import * as process from 'node:process'
-import { Config } from './types.ts'
+import { Config } from '@/config/types.ts'
 
 let config: Config
 

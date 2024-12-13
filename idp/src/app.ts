@@ -26,7 +26,7 @@ import tokenRouter from '@/token/router.ts'
 import userRepo from '@/user/repo.ts'
 import userRouter from '@/user/router.ts'
 import versionRouter from '@/version/router.ts'
-import { client as postgres } from './infra/postgres.ts'
+import { client as postgres } from '@/infra/postgres.ts'
 import process from 'node:process'
 
 const app = express()

@@ -10,7 +10,7 @@
 import { Request, Response, Router } from 'express'
 import { body, validationResult } from 'express-validator'
 import { getConfig } from '@/config/config.ts'
-import { parseValidationError } from '@/infra/error/index.ts'
+import { parseValidationError } from '@/infra/error/validation.ts'
 import {
   AccountConfirmEmailOptions,
   AccountCreateOptions,
@@ -21,7 +21,7 @@ import {
   getPasswordRequirements,
   resetPassword,
   sendResetPasswordEmail,
-} from './service.ts'
+} from '@/account/service.ts'
 
 const router = Router()
 

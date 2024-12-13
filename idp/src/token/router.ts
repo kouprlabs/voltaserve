@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { Request, Response, Router } from 'express'
-import { exchange, TokenExchangeOptions } from './service.ts'
+import { exchange, TokenExchangeOptions } from '@/token/service.ts'
 
 const router = Router()
 

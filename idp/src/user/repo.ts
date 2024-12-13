@@ -10,9 +10,9 @@
 import {
   newInternalServerError,
   newUserNotFoundError,
-} from '@/infra/error/index.ts'
+} from '@/infra/error/creators.ts'
 import { client } from '@/infra/postgres.ts'
-import { InsertOptions, UpdateOptions, User } from './model.ts'
+import { InsertOptions, UpdateOptions, User } from '@/user/model.ts'
 
 class UserRepoImpl {
   async findById(id: string): Promise<User> {

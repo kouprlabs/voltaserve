@@ -19,8 +19,8 @@ import {
   newInvalidJwtError,
   newMissingQueryParamError,
   newPictureNotFoundError,
-  parseValidationError,
-} from '@/infra/error/index.ts'
+} from '@/infra/error/creators.ts'
+import { parseValidationError } from '@/infra/error/validation.ts'
 import { PassportRequest } from '@/infra/passport-request.ts'
 import { checkAdmin } from '@/token/service.ts'
 import {
@@ -44,7 +44,7 @@ import {
   UserUpdateEmailRequestOptions,
   UserUpdateFullNameOptions,
   UserUpdatePasswordOptions,
-} from './service.ts'
+} from '@/user/service.ts'
 
 const router = Router()
 

@@ -18,7 +18,7 @@ import {
   newUserIsNotAdminError,
   newUserSuspendedError,
   newUserTemporarilyLockedError,
-} from '@/infra/error/index.ts'
+} from '@/infra/error/creators.ts'
 import { newHyphenlessUuid } from '@/infra/id.ts'
 import { verifyPassword } from '@/infra/password.ts'
 import { User } from '@/user/model.ts'
