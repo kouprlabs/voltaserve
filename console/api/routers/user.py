@@ -9,9 +9,7 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Annotated
-
 from fastapi import APIRouter, Depends, status
-
 from ..database import (
     fetch_user_organizations,
     fetch_user_workspaces,
@@ -40,8 +38,6 @@ from ..models import (
 users_api_router = APIRouter(
     prefix="/user", tags=["user"], dependencies=[Depends(JWTBearer())]
 )
-
-
 logger = base_logger.getChild("user")
 
 
@@ -56,7 +52,6 @@ async def get_user_organizations(
         organizations, count = fetch_user_organizations(
             user_id=data.id, page=data.page, size=data.size
         )
-
         return UserOrganizationListResponse(
             data=organizations,
             totalElements=count,
@@ -84,7 +79,6 @@ async def get_user_workspaces(data: Annotated[UserWorkspaceListRequest, Depends(
         workspaces, count = fetch_user_workspaces(
             user_id=data.id, page=data.page, size=data.size
         )
-
         return UserWorkspaceListResponse(
             data=workspaces,
             totalElements=count,
@@ -111,7 +105,6 @@ async def get_user_groups(data: Annotated[UserGroupListRequest, Depends()]):
         groups, count = fetch_user_groups(
             user_id=data.id, page=data.page, size=data.size
         )
-
         return UserGroupListResponse(
             data=groups,
             totalElements=count,

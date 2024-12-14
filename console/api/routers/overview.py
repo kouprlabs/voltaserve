@@ -9,10 +9,8 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Annotated
-
 from aiohttp import ClientSession
 from fastapi import APIRouter, status, Depends
-
 from ..dependencies import settings, JWTBearer
 from ..log import base_logger
 from ..errors import UnknownApiError, NotFoundError
@@ -21,7 +19,6 @@ from ..models import VersionRequest, VersionResponse
 overview_api_router = APIRouter(
     prefix="/overview", tags=["overview"], dependencies=[Depends(JWTBearer())]
 )
-
 logger = base_logger.getChild("overview")
 
 
@@ -54,7 +51,6 @@ async def get_dockerhub_version(
         logger.exception(e)
         response["latestVersion"] = "UNKNOWN"
         response["location"] = f"https://hub.docker.com/layers/voltaserve/{id}"
-
     return response
 
 
@@ -68,7 +64,6 @@ async def get_local_version(sess: ClientSession, url: str, response: dict) -> di
     except Exception as e:
         logger.exception(e)
         response["currentVersion"] = "UNKNOWN"
-
     return response
 
 
@@ -87,7 +82,6 @@ async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
         "console",
     ):
         return NotFoundError(message=f"Microservice {data.id} not found")
-
     try:
         urls = settings.model_dump()
         response = {"name": data.id}
@@ -102,14 +96,12 @@ async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
                 response = await get_local_version(
                     sess, urls[f"{data.id.upper()}_URL"], response
                 )
-
             response["updateAvailable"] = (
                 response["latestVersion"] > response["currentVersion"]
                 if response["currentVersion"] != ""
                 and response["latestVersion"] != "UNKNOWN"
                 else None
             )
-
         return VersionResponse(**response)
     except Exception as e:
         logger.exception(e)

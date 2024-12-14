@@ -9,15 +9,13 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Annotated
-
-from fastapi import APIRouter, Depends, status, Response
-
+from fastapi import APIRouter, Depends, status
 from ..database import (
     fetch_workspace,
     fetch_workspaces,
     fetch_workspace_count,
 )
-from ..dependencies import JWTBearer, meilisearch_client, redis_conn
+from ..dependencies import JWTBearer, meilisearch_client
 from ..log import base_logger
 from ..errors import (
     NotFoundError,
@@ -48,8 +46,6 @@ workspace_api_router = APIRouter(
     },
     dependencies=[Depends(JWTBearer())],
 )
-
-
 logger = base_logger.getChild("workspace")
 
 
@@ -59,7 +55,6 @@ logger = base_logger.getChild("workspace")
 async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
     try:
         workspace = fetch_workspace(_id=data.id)
-
         return WorkspaceResponse(**workspace)
     except NotFoundException as e:
         logger.error(e)
@@ -86,7 +81,6 @@ async def get_workspace_count():
 async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
     try:
         workspaces, count = fetch_workspaces(page=data.page, size=data.size)
-
         return WorkspaceListResponse(
             data=workspaces,
             totalElements=count,
@@ -110,7 +104,6 @@ async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends(
         workspaces = meilisearch_client.index("workspace").search(
             data.query, {"page": data.page, "hitsPerPage": data.size}
         )
-
         hits = []
         for workspace in workspaces["hits"]:
             try:
@@ -119,7 +112,6 @@ async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends(
             except NotFoundException:
                 pass
         count = len(workspaces["hits"])
-
         return WorkspaceListResponse(
             data=hits,
             totalElements=count,

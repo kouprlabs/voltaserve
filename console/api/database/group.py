@@ -9,10 +9,8 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Tuple, Iterable, Dict
-
 from psycopg import DatabaseError
-
-from ..dependencies import conn, parse_sql_update_query
+from ..dependencies import conn
 from ..errors import EmptyDataException, NotFoundException
 from .generic import exists
 
@@ -22,7 +20,6 @@ def fetch_group(_id: str) -> Dict:
         with conn.cursor() as curs:
             if not exists(curs=curs, tablename="group", _id=_id):
                 raise NotFoundException(message=f"Group with id={_id} does not exist!")
-
             data = curs.execute(
                 f"""
                 SELECT g.id as "group_id", g."name" as "group_name", g.create_time, g.update_time, o.id as "org_id", 
@@ -32,7 +29,6 @@ def fetch_group(_id: str) -> Dict:
                 WHERE g.id='{_id}'
                 """
             ).fetchone()
-
             return (
                 {
                     "createTime": data.get("create_time"),
@@ -48,7 +44,6 @@ def fetch_group(_id: str) -> Dict:
                 if data is not None
                 else None
             )
-
     except DatabaseError as error:
         raise error
 
@@ -57,7 +52,6 @@ def fetch_group_count() -> Dict:
     try:
         with conn.cursor() as curs:
             return curs.execute('SELECT count(id) FROM "group"').fetchone()
-
     except DatabaseError as error:
         raise error
 
@@ -77,12 +71,9 @@ def fetch_groups(page=1, size=10) -> Tuple[Iterable[Dict], int]:
                 LIMIT {size}
                 """
             ).fetchall()
-
             if data is None or data == {}:
                 raise EmptyDataException
-
             count = curs.execute('SELECT count(1) FROM "group"').fetchone()
-
             return (
                 {
                     "id": d.get("group_id"),
@@ -98,6 +89,5 @@ def fetch_groups(page=1, size=10) -> Tuple[Iterable[Dict], int]:
                 }
                 for d in data
             ), count["count"]
-
     except DatabaseError as error:
         raise error
