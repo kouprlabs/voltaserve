@@ -8,13 +8,29 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { Hono } from 'hono'
+import { z } from 'zod'
+import { zValidator } from '@hono/zod-validator'
 import { exchange, TokenExchangeOptions } from '@/token/service.ts'
+import { handleValidationError } from '@/infra/error/validation.ts'
 
 const router = new Hono()
 
-router.post('/', async (c) => {
-  const options = (await c.req.json()) as TokenExchangeOptions
-  return c.json(await exchange(options))
-})
+router.post(
+  '/',
+  zValidator(
+    'form',
+    z.object({
+      grant_type: z.union([z.literal('password'), z.literal('refresh_token')]),
+      username: z.string().optional(),
+      password: z.string().optional(),
+      refresh_token: z.string().optional(),
+    }),
+    handleValidationError,
+  ),
+  async (c) => {
+    const options = (await c.req.valid('form')) as TokenExchangeOptions
+    return c.json(await exchange(options))
+  },
+)
 
 export default router

@@ -193,8 +193,12 @@ router.get(
     'query',
     z.object({
       query: z.string().optional(),
-      page: z.number().int(),
-      size: z.number().int(),
+      page: z.string().regex(/^\d+$/, 'Must be a numeric value.').transform(
+        Number,
+      ),
+      size: z.string().regex(/^\d+$/, 'Must be a numeric value.').transform(
+        Number,
+      ),
     }),
     handleValidationError,
   ),

@@ -30,17 +30,26 @@ import { User } from '@/user/model.ts'
 const app = new Hono()
 
 app.onError((error, c) => {
-  if (error.name === 'UnauthorizedError') {
+  if (error.message === 'Unauthorized') {
     return c.json(
       newResponse(newError({ code: ErrorCode.InvalidCredentials })),
       401,
     )
   } else {
-    const genericError = error as any
-    if (
-      genericError.code && Object.values(ErrorCode).includes(genericError.code)
-    ) {
-      const data = genericError as ErrorData
+    console.error(error)
+    return c.json(
+      newResponse(newError({ code: ErrorCode.InternalServerError })),
+      500,
+    )
+  }
+})
+
+app.use('*', async (c, next) => {
+  try {
+    return await next()
+  } catch (error: any) {
+    if (error.code && Object.values(ErrorCode).includes(error.code)) {
+      const data = error as ErrorData
       if (data.error) {
         console.error(data.error)
       }
@@ -55,16 +64,17 @@ app.onError((error, c) => {
   }
 })
 
-app.route('/version', versionRouter)
-app.route('/v3/accounts', accountRouter)
-
-app.use('/v3/*', (c, next) => {
+app.use('/v3/*', async (c, next) => {
   const jwtMiddleware = jwt({ secret: getConfig().token.jwtSigningKey })
   switch (c.req.path) {
+    case '/v3/token':
     case '/v3/users/me/picture:extension':
-      return next()
+    case '/v3/health':
+    case '/v3/accounts':
+    case '/version':
+      return await next()
     default:
-      return jwtMiddleware(c, next)
+      return await jwtMiddleware(c, next)
   }
 })
 
@@ -91,7 +101,9 @@ app.use('/v3/*', async (c, next) => {
 
 app.route('/v3/health', healthRouter)
 app.route('/v3/users', userRouter)
+app.route('/v3/accounts', accountRouter)
 app.route('/v3/token', tokenRouter)
+app.route('/version', versionRouter)
 
 postgres
   .connect()
