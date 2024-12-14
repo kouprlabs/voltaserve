@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { z, ZodError } from 'zod'
-import { ErrorCode, ErrorData, newError } from '../error/core.ts'
+import { ErrorCode, ErrorData, newError } from '@/error/core.ts'
 import { getConfig } from '@/config/config.ts'
 import { Buffer } from 'node:buffer'
 

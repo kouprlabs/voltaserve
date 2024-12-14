@@ -13,7 +13,7 @@ import { zValidator } from '@hono/zod-validator'
 import {
   handleValidationError,
   ZodFactory,
-} from '../lib/validation.ts'
+} from '@/lib/validation.ts'
 import {
   AccountConfirmEmailOptions,
   AccountCreateOptions,

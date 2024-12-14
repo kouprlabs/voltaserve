@@ -19,11 +19,11 @@ import {
   newMissingQueryParamError,
   newPictureNotFoundError,
   newUserIsNotAdminError,
-} from '../error/creators.ts'
+} from '@/error/creators.ts'
 import {
   handleValidationError,
   ZodFactory,
-} from '../lib/validation.ts'
+} from '@/lib/validation.ts'
 import {
   deletePicture,
   drop,
