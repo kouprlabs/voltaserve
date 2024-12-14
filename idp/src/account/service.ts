@@ -12,14 +12,14 @@ import { newDateTime } from '@/infra/date-time.ts'
 import {
   newInternalServerError,
   newUsernameUnavailableError,
-} from '@/infra/error/creators.ts'
+} from '@/error/creators.ts'
 import { newHashId, newHyphenlessUuid } from '@/infra/id.ts'
 import { sendTemplateMail } from '@/infra/mail.ts'
 import { hashPassword } from '@/infra/password.ts'
 import {
   client as meilisearch,
   USER_SEARCH_INDEX,
-} from '../infra/meilisearch.ts'
+} from '@/infra/meilisearch.ts'
 import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { getCount, mapEntity, UserDTO } from '@/user/service.ts'

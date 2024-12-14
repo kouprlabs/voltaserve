@@ -34,7 +34,7 @@ import cx from 'classnames'
 import AccountAPI from '@/client/idp/account'
 import UserAPI, { User } from '@/client/idp/user'
 import PasswordHints from '@/components/sign-up/password-hints'
-import { YupSchemaFactory } from '@/lib/validation'
+import { YupFactory } from '@/lib/validation'
 import { useAppSelector } from '@/store/hook'
 
 export type AccountChangePasswordProps = {
@@ -57,7 +57,7 @@ const AccountChangePassword = ({
   const initialValues: FormValues = { currentPassword: '', newPassword: '' }
   const formSchema = Yup.object().shape({
     currentPassword: Yup.string().required('Current password is required.'),
-    newPassword: YupSchemaFactory.password('New password'),
+    newPassword: YupFactory.password('New password'),
   })
   const { data: passwordRequirements } = AccountAPI.useGetPasswordRequirements()
 

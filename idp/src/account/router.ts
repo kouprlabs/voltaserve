@@ -11,13 +11,9 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import {
-  email,
-  fullName,
   handleValidationError,
-  password,
-  picture,
-  token,
-} from '@/infra/error/validation.ts'
+  ZodFactory,
+} from '@/lib/validation.ts'
 import {
   AccountConfirmEmailOptions,
   AccountCreateOptions,
@@ -37,10 +33,10 @@ router.post(
   zValidator(
     'json',
     z.object({
-      email,
-      password,
-      fullName,
-      picture,
+      email: ZodFactory.email(),
+      password: ZodFactory.password(),
+      fullName: ZodFactory.fullName(),
+      picture: ZodFactory.picture(),
     }),
     handleValidationError,
   ),
@@ -59,8 +55,8 @@ router.post(
   zValidator(
     'json',
     z.object({
-      token,
-      newPassword: password,
+      token: ZodFactory.token(),
+      newPassword: ZodFactory.password(),
     }),
     handleValidationError,
   ),
@@ -75,7 +71,7 @@ router.post(
   '/confirm_email',
   zValidator(
     'json',
-    z.object({ token }),
+    z.object({ token: ZodFactory.token() }),
     handleValidationError,
   ),
   async (c) => {
@@ -89,7 +85,7 @@ router.post(
   '/send_reset_password_email',
   zValidator(
     'json',
-    z.object({ email }),
+    z.object({ email: ZodFactory.email() }),
     handleValidationError,
   ),
   async (c) => {

@@ -19,16 +19,11 @@ import {
   newMissingQueryParamError,
   newPictureNotFoundError,
   newUserIsNotAdminError,
-} from '@/infra/error/creators.ts'
+} from '@/error/creators.ts'
 import {
-  email,
-  fullName,
   handleValidationError,
-  page,
-  password,
-  size,
-  token,
-} from '@/infra/error/validation.ts'
+  ZodFactory,
+} from '@/lib/validation.ts'
 import {
   deletePicture,
   drop,
@@ -85,7 +80,7 @@ router.post(
   '/me/update_full_name',
   zValidator(
     'json',
-    z.object({ fullName }),
+    z.object({ fullName: ZodFactory.fullName() }),
     handleValidationError,
   ),
   async (c) => {
@@ -98,7 +93,7 @@ router.post(
   '/me/update_email_request',
   zValidator(
     'json',
-    z.object({ email }),
+    z.object({ email: ZodFactory.email() }),
     handleValidationError,
   ),
   async (c) => {
@@ -111,7 +106,7 @@ router.post(
   '/me/update_email_confirmation',
   zValidator(
     'json',
-    z.object({ token }),
+    z.object({ token: ZodFactory.token() }),
     handleValidationError,
   ),
   async (c) => {
@@ -125,8 +120,8 @@ router.post(
   zValidator(
     'json',
     z.object({
-      currentPassword: password,
-      newPassword: password,
+      currentPassword: ZodFactory.password(),
+      newPassword: ZodFactory.password(),
     }),
     handleValidationError,
   ),
@@ -180,7 +175,7 @@ router.delete(
   '/me',
   zValidator(
     'json',
-    z.object({ password }),
+    z.object({ password: ZodFactory.password() }),
     handleValidationError,
   ),
   async (c) => {
@@ -196,8 +191,8 @@ router.get(
     'query',
     z.object({
       query: z.string().optional(),
-      page,
-      size,
+      page: ZodFactory.page(),
+      size: ZodFactory.size(),
     }),
     handleValidationError,
   ),
