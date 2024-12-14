@@ -9,11 +9,9 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Dict, Tuple, Iterable
-
 from psycopg import DatabaseError
-
 from . import exists
-from ..dependencies import conn, parse_sql_update_query
+from ..dependencies import conn
 from ..errors import EmptyDataException, NotFoundException
 
 
@@ -24,7 +22,6 @@ def fetch_organization(organization_id: str) -> Dict:
                 raise NotFoundException(
                     message=f"Organization with id={organization_id} does not exist!"
                 )
-
             return curs.execute(
                 f"""
                 SELECT id, name, create_time as "createTime", update_time as "updateTime" 
@@ -32,7 +29,6 @@ def fetch_organization(organization_id: str) -> Dict:
                 WHERE id='{organization_id}'
                 """
             ).fetchone()
-
     except DatabaseError as error:
         raise error
 
@@ -49,14 +45,10 @@ def fetch_organizations(page=1, size=10) -> Tuple[Iterable[Dict], int]:
                 LIMIT {size}
                 """
             ).fetchall()
-
             if data is None or data == {}:
                 raise EmptyDataException
-
             count = curs.execute('SELECT count(1) FROM "organization"').fetchone()
-
             return data, count["count"]
-
     except DatabaseError as error:
         raise error
 
@@ -65,7 +57,6 @@ def fetch_organization_count() -> Dict:
     try:
         with conn.cursor() as curs:
             return curs.execute('SELECT count(id) FROM "organization"').fetchone()
-
     except DatabaseError as error:
         raise error
 
@@ -87,10 +78,8 @@ def fetch_organization_users(
                 LIMIT {size}
                 """
             ).fetchall()
-
             if data is None or data == {}:
                 raise EmptyDataException
-
             count = curs.execute(
                 f"""
                 SELECT count(u.id) 
@@ -100,9 +89,7 @@ def fetch_organization_users(
                 WHERE o.id = '{organization_id}'
                 """
             ).fetchone()
-
             return data, count["count"]
-
     except DatabaseError as error:
         raise error
 
@@ -122,10 +109,8 @@ def fetch_organization_workspaces(
                 LIMIT {size}
                 """
             ).fetchall()
-
             if data is None or data == {}:
                 raise EmptyDataException
-
             count = curs.execute(
                 f"""
                 SELECT count(u.id) 
@@ -134,7 +119,6 @@ def fetch_organization_workspaces(
                 WHERE w.organization_id = '{organization_id}'
                 """
             ).fetchone()
-
             return data, count["count"]
     except DatabaseError as error:
         raise error
@@ -155,10 +139,8 @@ def fetch_organization_groups(
                 LIMIT {size}
                 """
             ).fetchall()
-
             if data is None or data == {}:
                 raise EmptyDataException
-
             count = curs.execute(
                 f"""
                 SELECT count(id) 
@@ -166,7 +148,6 @@ def fetch_organization_groups(
                 WHERE organization_id = '{organization_id}'
                 """
             ).fetchone()
-
             return data, count["count"]
     except DatabaseError as error:
         raise error

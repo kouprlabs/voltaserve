@@ -9,9 +9,7 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Annotated
-
-from fastapi import APIRouter, Depends, status, Response
-
+from fastapi import APIRouter, Depends, status
 from ..database import (
     fetch_organization,
     fetch_organizations,
@@ -20,7 +18,7 @@ from ..database import (
     fetch_organization_groups,
     fetch_organization_count,
 )
-from ..dependencies import JWTBearer, meilisearch_client, redis_conn
+from ..dependencies import JWTBearer, meilisearch_client
 from ..log import base_logger
 from ..errors import (
     NotFoundError,
@@ -47,8 +45,6 @@ from ..models import (
 organization_api_router = APIRouter(
     prefix="/organization", tags=["organization"], dependencies=[Depends(JWTBearer())]
 )
-
-
 logger = base_logger.getChild("organization")
 
 
@@ -58,7 +54,6 @@ logger = base_logger.getChild("organization")
 async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
     try:
         organization = fetch_organization(organization_id=data.id)
-
         return OrganizationResponse(**organization)
     except NotFoundException as e:
         logger.error(e)
@@ -85,7 +80,6 @@ async def get_organization_count():
 async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends()]):
     try:
         organizations, count = fetch_organizations(page=data.page, size=data.size)
-
         return OrganizationListResponse(
             data=organizations,
             totalElements=count,
@@ -111,7 +105,6 @@ async def get_search_organizations(
         organizations = meilisearch_client.index("organization").search(
             data.query, {"page": data.page, "hitsPerPage": data.size}
         )
-
         hits = []
         for organization in organizations["hits"]:
             try:
@@ -120,7 +113,6 @@ async def get_search_organizations(
             except NotFoundException:
                 pass
         count = len(organizations["hits"])
-
         return OrganizationListResponse(
             data=hits,
             totalElements=count,
@@ -147,7 +139,6 @@ async def get_organization_users(
         users, count = fetch_organization_users(
             organization_id=data.id, page=data.page, size=data.size
         )
-
         return OrganizationUserListResponse(
             data=users,
             totalElements=count,
@@ -177,7 +168,6 @@ async def get_organization_workspaces(
         workspaces, count = fetch_organization_workspaces(
             organization_id=data.id, page=data.page, size=data.size
         )
-
         return OrganizationWorkspaceListResponse(
             data=workspaces,
             totalElements=count,
@@ -207,7 +197,6 @@ async def get_organization_groups(
         groups, count = fetch_organization_groups(
             organization_id=data.id, page=data.page, size=data.size
         )
-
         return OrganizationWorkspaceListResponse(
             data=groups,
             totalElements=count,

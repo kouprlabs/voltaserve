@@ -9,11 +9,9 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Dict, Tuple, Iterable
-
 from psycopg import DatabaseError
-
 from . import exists
-from ..dependencies import conn, parse_sql_update_query
+from ..dependencies import conn
 from ..errors import EmptyDataException, NotFoundException
 
 
@@ -24,7 +22,6 @@ def fetch_workspace(_id: str) -> Dict:
                 raise NotFoundException(
                     message=f"Workspace with id={_id} does not exist!"
                 )
-
             data = curs.execute(
                 f"""
                 SELECT w.id, w.name, w.organization_id, o.name as "organizationName", 
@@ -35,7 +32,6 @@ def fetch_workspace(_id: str) -> Dict:
                 WHERE w.id = '{_id}'
                 """
             ).fetchone()
-
             return {
                 "id": data.get("id"),
                 "createTime": data.get("create_time"),
@@ -59,7 +55,6 @@ def fetch_workspace_count() -> Dict:
     try:
         with conn.cursor() as curs:
             return curs.execute('SELECT count(id) FROM "workspace"').fetchone()
-
     except DatabaseError as error:
         raise error
 
@@ -79,12 +74,9 @@ def fetch_workspaces(page=1, size=10) -> Tuple[Iterable[Dict], int]:
                 LIMIT {size}
                 """
             ).fetchall()
-
             if data is None or data == {}:
                 raise EmptyDataException
-
             count = curs.execute("SELECT count(1) FROM workspace").fetchone()
-
             return (
                 {
                     "id": d.get("id"),
@@ -103,6 +95,5 @@ def fetch_workspaces(page=1, size=10) -> Tuple[Iterable[Dict], int]:
                 }
                 for d in data
             ), count["count"]
-
     except DatabaseError as error:
         raise error

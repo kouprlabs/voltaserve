@@ -9,7 +9,6 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Optional
-
 from pydantic_settings import BaseSettings
 
 
@@ -19,14 +18,11 @@ class Settings(BaseSettings):
     POSTGRES_NAME: str
     POSTGRES_USER: str
     POSTGRES_PASSWORD: Optional[str]
-
     HOST: str
     WORKERS: int
     PORT: int
-
     SECURITY_JWT_SIGNING_KEY: str
     JWT_ALGORITHM: str
-
     URL: str
     SECURITY_CORS_ORIGINS: str
     API_URL: str
@@ -35,10 +31,8 @@ class Settings(BaseSettings):
     CONVERSION_URL: str
     LANGUAGE_URL: str
     MOSAIC_URL: str
-
     SEARCH_URL: str
     REDIS_URL: str
-
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "PLAIN"
 

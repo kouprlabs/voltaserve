@@ -9,7 +9,6 @@
 # AGPL-3.0-only in the root of this repository.
 
 from psycopg import DatabaseError
-
 from ..dependencies import conn
 
 

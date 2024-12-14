@@ -9,9 +9,7 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Annotated
-
-from fastapi import APIRouter, Depends, status, Response
-
+from fastapi import APIRouter, Depends, status
 from ..database import fetch_groups, fetch_group
 from ..database.group import fetch_group_count
 from ..dependencies import JWTBearer, meilisearch_client
@@ -32,12 +30,9 @@ from ..models import (
     GroupSearchRequest,
 )
 
-from ..dependencies import redis_conn
-
 group_api_router = APIRouter(
     prefix="/group", tags=["group"], dependencies=[Depends(JWTBearer())]
 )
-
 logger = base_logger.getChild("group")
 
 
@@ -45,7 +40,6 @@ logger = base_logger.getChild("group")
 async def get_group(data: Annotated[GroupRequest, Depends()]):
     try:
         group = fetch_group(_id=data.id)
-
         return GroupResponse(**group)
     except NotFoundException as e:
         logger.error(e)
@@ -72,7 +66,6 @@ async def get_group_count():
 async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
     try:
         groups, count = fetch_groups(page=data.page, size=data.size)
-
         return GroupListResponse(
             data=groups,
             totalElements=count,
@@ -96,7 +89,6 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
         groups = meilisearch_client.index("group").search(
             data.query, {"page": data.page, "hitsPerPage": data.size}
         )
-
         hits = []
         for group in groups["hits"]:
             try:
@@ -105,7 +97,6 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
             except NotFoundException:
                 pass
         count = len(groups["hits"])
-
         return GroupListResponse(
             data=hits,
             totalElements=count,

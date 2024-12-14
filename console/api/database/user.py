@@ -9,9 +9,7 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Tuple, Iterable, Dict
-
 from psycopg import DatabaseError
-
 from . import exists
 from ..dependencies import conn
 from ..errors import EmptyDataException, NotFoundException
@@ -26,7 +24,6 @@ def fetch_user_organizations(
                 raise NotFoundException(
                     message=f"User with id={user_id} does not exist!"
                 )
-
             data = curs.execute(
                 f"""
                 SELECT u.id, u."permission", u.create_time as "createTime", o.id as "organizationId", 
@@ -39,10 +36,8 @@ def fetch_user_organizations(
                 LIMIT {size}
                 """
             ).fetchall()
-
             if data is None or data == {}:
                 raise EmptyDataException
-
             count = curs.execute(
                 f"""
                 SELECT count(1) 
@@ -51,7 +46,6 @@ def fetch_user_organizations(
                 WHERE u.user_id = '{user_id}'
                 """
             ).fetchone()
-
             return data, count["count"]
     except DatabaseError as error:
         raise error
@@ -61,7 +55,6 @@ def fetch_user_count() -> Dict:
     try:
         with conn.cursor() as curs:
             return curs.execute('SELECT count(id) FROM "user"').fetchone()
-
     except DatabaseError as error:
         raise error
 
@@ -73,7 +66,6 @@ def fetch_user_workspaces(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict]
                 raise NotFoundException(
                     message=f"User with id={user_id} does not exist!"
                 )
-
             data = curs.execute(
                 f"""
                 SELECT u.id, u.permission, u.create_time as "createTime", w.id as "workspaceId", 
@@ -86,10 +78,8 @@ def fetch_user_workspaces(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict]
                 LIMIT {size}
                 """
             ).fetchall()
-
             if data is None or data == {}:
                 raise EmptyDataException
-
             count = curs.execute(
                 f"""
                 SELECT count(1) 
@@ -111,7 +101,6 @@ def fetch_user_groups(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], in
                 raise NotFoundException(
                     message=f"User with id={user_id} does not exist!"
                 )
-
             data = curs.execute(
                 f"""
                 SELECT u.id, u.permission, u.create_time as "createTime", g.id as "groupId", g."name" as "groupName" 
@@ -122,10 +111,8 @@ def fetch_user_groups(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], in
                 LIMIT {size}
                 """
             ).fetchall()
-
             if data is None or data == {}:
                 raise EmptyDataException
-
             count = curs.execute(
                 f"""
                 SELECT count(1) 
@@ -134,7 +121,6 @@ def fetch_user_groups(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], in
                 WHERE u.user_id = '{user_id}'
                 """
             ).fetchone()
-
             return data, count["count"]
     except DatabaseError as error:
         raise error

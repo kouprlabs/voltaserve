@@ -10,7 +10,6 @@
 
 from psycopg import connect
 from psycopg.rows import dict_row
-
 from . import settings
 
 conn = connect(

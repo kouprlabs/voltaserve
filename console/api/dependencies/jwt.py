@@ -11,7 +11,6 @@
 import jwt
 from fastapi import Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
 from . import settings
 from ..errors import GenericForbiddenException
 
@@ -28,7 +27,6 @@ class JWTBearer(HTTPBearer):
         if credentials:
             if not credentials.scheme == "Bearer":
                 raise GenericForbiddenException(detail="Invalid authentication scheme.")
-
             try:
                 decoded_token = jwt.decode(
                     jwt=credentials.credentials,
@@ -38,13 +36,10 @@ class JWTBearer(HTTPBearer):
                     issuer=settings.URL,
                     verify=True,
                 )
-
             except Exception as e:
                 raise GenericForbiddenException(detail=str(e)) from e
-
             if not decoded_token["is_admin"]:
                 raise GenericForbiddenException(detail="User is not admin.")
-
             return credentials.credentials
         else:
             raise GenericForbiddenException(detail="Invalid token.")
