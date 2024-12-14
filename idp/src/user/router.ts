@@ -114,7 +114,7 @@ router.post(
   ),
   async (c) => {
     const body = c.req.valid('json') as UserUpdateEmailConfirmationOptions
-    c.json(await updateEmailConfirmation(body))
+    return c.json(await updateEmailConfirmation(body))
   },
 )
 

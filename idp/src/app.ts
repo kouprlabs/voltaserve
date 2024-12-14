@@ -70,10 +70,10 @@ app.use('*', async (c, next) => {
 app.use('/v3/*', async (c, next) => {
   const jwtMiddleware = jwt({ secret: getConfig().token.jwtSigningKey })
   if (
+    c.req.path.startsWith('/v3/accounts') ||
     c.req.path.startsWith('/v3/users/me/picture') ||
     c.req.path === '/v3/token' ||
     c.req.path === '/v3/health' ||
-    c.req.path === '/v3/accounts' ||
     c.req.path === '/version'
   ) {
     return await next()
