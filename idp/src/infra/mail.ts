@@ -35,7 +35,6 @@ const transporter = nodemailer.createTransport({
 export function sendTemplateMail(
   template: string,
   address: string,
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   variables: Record<string, any>,
 ) {
   const params = yaml.load(

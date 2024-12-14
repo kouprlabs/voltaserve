@@ -151,8 +151,8 @@ export async function list({
   size,
   page,
 }: UserListOptions): Promise<UserAdminList> {
-  if (query && query.length >= 3) {
-    const users = await meilisearch
+  if (query) {
+    const hits = await meilisearch
       .index(USER_SEARCH_INDEX)
       .search(query, { page: page, hitsPerPage: size })
       .then((value) => {
@@ -161,24 +161,18 @@ export async function list({
           totalElements: value.totalHits,
         }
       })
+    const users = await userRepo.findMany(hits.data.map((value) => value.id))
     return {
-      data: (
-        await userRepo.findMany(
-          users.data.map((value) => {
-            return value.id
-          }),
-        )
-      ).map((value) => adminMapEntity(value)),
-      totalElements: users.totalElements,
-      totalPages: Math.floor((users.totalElements + size - 1) / size),
+      data: users.map(adminMapEntity),
+      totalElements: hits.totalElements,
+      totalPages: Math.floor((hits.totalElements + size - 1) / size),
       size: size,
       page: page,
     }
   } else {
+    const users = await userRepo.list(page, size)
     return {
-      data: (await userRepo.list(page, size)).map((value) =>
-        adminMapEntity(value)
-      ),
+      data: users.map(adminMapEntity),
       totalElements: await userRepo.getCount(),
       totalPages: Math.floor(((await userRepo.getCount()) + size - 1) / size),
       size: size,

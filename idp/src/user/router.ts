@@ -18,15 +18,17 @@ import {
   newInvalidJwtError,
   newMissingQueryParamError,
   newPictureNotFoundError,
+  newUserIsNotAdminError,
 } from '@/infra/error/creators.ts'
 import {
   email,
   fullName,
   handleValidationError,
+  page,
   password,
+  size,
   token,
 } from '@/infra/error/validation.ts'
-import { checkAdmin } from '@/token/service.ts'
 import {
   deletePicture,
   deleteUser,
@@ -194,17 +196,15 @@ router.get(
     'query',
     z.object({
       query: z.string().optional(),
-      page: z.string().regex(/^\d+$/, 'Must be a numeric value.').transform(
-        Number,
-      ),
-      size: z.string().regex(/^\d+$/, 'Must be a numeric value.').transform(
-        Number,
-      ),
+      page,
+      size,
     }),
     handleValidationError,
   ),
   async (c) => {
-    checkAdmin(c.req.header('Authorization')!)
+    if (!c.get('user').isAdmin) {
+      throw newUserIsNotAdminError()
+    }
     const { query, size, page } = c.req.valid('query') as UserListOptions
     return c.json(await list({ query, size, page }))
   },
@@ -218,7 +218,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    checkAdmin(c.req.header('Authorization')!)
+    if (!c.get('user').isAdmin) {
+      throw newUserIsNotAdminError()
+    }
     const { id } = c.req.param()
     const body = c.req.valid('json') as UserSuspendOptions
     await suspendUser(id, body)
@@ -234,7 +236,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    checkAdmin(c.req.header('Authorization')!)
+    if (!c.get('user').isAdmin) {
+      throw newUserIsNotAdminError()
+    }
     const { id } = c.req.param()
     const body = c.req.valid('json') as UserMakeAdminOptions
     await makeAdminUser(id, body)
@@ -243,7 +247,9 @@ router.post(
 )
 
 router.get('/:id', async (c) => {
-  checkAdmin(c.req.header('Authorization')!)
+  if (!c.get('user').isAdmin) {
+    throw newUserIsNotAdminError()
+  }
   const { id } = c.req.param()
   return c.json(await getUserByAdmin(id))
 })

@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { decode, sign } from 'hono/jwt'
+import { sign } from 'hono/jwt'
 import { getConfig } from '@/config/config.ts'
 import {
   newEmailNotConfirmedError,
@@ -15,7 +15,6 @@ import {
   newInvalidUsernameOrPasswordError,
   newMissingFormParamError,
   newRefreshTokenExpiredError,
-  newUserIsNotAdminError,
   newUserSuspendedError,
   newUserTemporarilyLockedError,
 } from '@/infra/error/creators.ts'
@@ -89,13 +88,6 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
   } else {
     // Should never end up here, but the Dino linter doesn't know that.
     throw newInvalidGrantType(options.grant_type)
-  }
-}
-
-export function checkAdmin(jwt: string) {
-  const { payload } = decode(jwt)
-  if (!payload.is_admin) {
-    throw newUserIsNotAdminError()
   }
 }
 

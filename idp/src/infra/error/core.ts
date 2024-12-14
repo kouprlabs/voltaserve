@@ -60,7 +60,6 @@ export type ErrorData = {
   message: string
   userMessage: string
   moreInfo: string
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   error?: any
 }
 
@@ -76,7 +75,6 @@ export type ErrorOptions = {
   code: ErrorCode
   message?: string
   userMessage?: string
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   error?: any
 }
 
