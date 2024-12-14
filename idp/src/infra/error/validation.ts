@@ -17,10 +17,10 @@ export function parseValidationError(result: ZodError): ErrorData {
   let userMessage: string | undefined
   if (result.errors) {
     message = result.errors
-      .map((e) => `${e.message} for ${e.path.join('.')}.`)
+      .map((e) => e.message ? `${e.message} (${e.path.join('.')}).` : undefined)
       .join(' ')
     userMessage = result.errors
-      .map((e) => `${e.message} for ${e.path.join('.')}.`)
+      .map((e) => e.message ? `${e.message} (${e.path.join('.')}).` : undefined)
       .join(' ')
   }
   return newError({
@@ -49,25 +49,25 @@ export const password = z
   .string()
   .min(
     getConfig().password.minLength,
-    `Password must be at least ${getConfig().password.minLength} characters long.`,
+    `Password must be at least ${getConfig().password.minLength} characters long`,
   )
   .regex(
     new RegExp(`(?=(.*[a-z]){${getConfig().password.minLowercase},})`),
-    `Password must contain at least ${getConfig().password.minLowercase} lowercase character(s).`,
+    `Password must contain at least ${getConfig().password.minLowercase} lowercase character(s)`,
   )
   .regex(
     new RegExp(`(?=(.*[A-Z]){${getConfig().password.minUppercase},})`),
-    `Password must contain at least ${getConfig().password.minUppercase} uppercase character(s).`,
+    `Password must contain at least ${getConfig().password.minUppercase} uppercase character(s)`,
   )
   .regex(
     new RegExp(`(?=(.*[0-9]){${getConfig().password.minNumbers},})`),
-    `Password must contain at least ${getConfig().password.minNumbers} number(s).`,
+    `Password must contain at least ${getConfig().password.minNumbers} number(s)`,
   )
   .regex(
     new RegExp(
       `(?=(.*[!@#$%^&*()_+\\-=\\[\\]{};':"\\|,.<>\\/?]){${getConfig().password.minSymbols},})`,
     ),
-    `Password must contain at least ${getConfig().password.minSymbols} symbol(s).`,
+    `Password must contain at least ${getConfig().password.minSymbols} symbol(s)`,
   )
 
 export const picture = z
@@ -82,7 +82,7 @@ export const picture = z
     } catch {
       return false
     }
-  }, { message: 'Picture must be a valid Base64 string and <= 3MB.' })
+  }, { message: 'Picture must be a valid Base64 string and <= 3MB' })
 
 export const email = z.string().email().trim().max(255)
 
