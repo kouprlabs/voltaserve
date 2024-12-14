@@ -67,8 +67,7 @@ router.post(
   async (c) => {
     const body = c.req.valid('json') as AccountResetPasswordOptions
     await resetPassword(body)
-    c.status(200)
-    return c.body(null)
+    return c.body(null, 200)
   },
 )
 
@@ -82,8 +81,7 @@ router.post(
   async (c) => {
     const body = c.req.valid('json') as AccountConfirmEmailOptions
     await confirmEmail(body)
-    c.status(200)
-    return c.body(null)
+    return c.body(null, 200)
   },
 )
 
@@ -97,8 +95,7 @@ router.post(
   async (c) => {
     const body = c.req.valid('json') as AccountSendResetPasswordEmailOptions
     await sendResetPasswordEmail(body)
-    c.status(204)
-    return c.body(null)
+    return c.body(null, 204)
   },
 )
 

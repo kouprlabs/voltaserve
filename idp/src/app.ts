@@ -10,6 +10,7 @@
 import '@/infra/env.ts'
 import { Hono } from 'hono'
 import { jwt } from 'hono/jwt'
+import { logger } from 'hono/logger'
 import accountRouter from '@/account/router.ts'
 import { getConfig } from '@/config/config.ts'
 import healthRouter from '@/health/router.ts'
@@ -28,6 +29,8 @@ import process from 'node:process'
 import { User } from '@/user/model.ts'
 
 const app = new Hono()
+
+app.use(logger())
 
 app.onError((error, c) => {
   if (error.message === 'Unauthorized') {
@@ -66,15 +69,16 @@ app.use('*', async (c, next) => {
 
 app.use('/v3/*', async (c, next) => {
   const jwtMiddleware = jwt({ secret: getConfig().token.jwtSigningKey })
-  switch (c.req.path) {
-    case '/v3/token':
-    case '/v3/users/me/picture:extension':
-    case '/v3/health':
-    case '/v3/accounts':
-    case '/version':
-      return await next()
-    default:
-      return await jwtMiddleware(c, next)
+  if (
+    c.req.path.startsWith('/v3/users/me/picture') ||
+    c.req.path === '/v3/token' ||
+    c.req.path === '/v3/health' ||
+    c.req.path === '/v3/accounts' ||
+    c.req.path === '/version'
+  ) {
+    return await next()
+  } else {
+    return await jwtMiddleware(c, next)
   }
 })
 

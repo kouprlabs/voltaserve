@@ -49,32 +49,34 @@ import {
   UserUpdateFullNameOptions,
   UserUpdatePasswordOptions,
 } from '@/user/service.ts'
-import { extname, join } from 'node:path'
+import { basename, extname, join } from 'node:path'
 import { Buffer } from 'node:buffer'
 import { UserListOptions } from '@/user/service.ts'
 
 const router = new Hono()
 
 router.get('/me', async (c) => {
-  c.json(await getUser(c.get('user').id))
+  return c.json(await getUser(c.get('user').id))
 })
 
-router.get('/me/picture:extension', async (c) => {
+router.get('/me/:filename', async (c) => {
+  const { filename } = c.req.param()
+  if (basename(filename, extname(filename)) !== 'picture') {
+    return c.body(null, 404)
+  }
   const accessToken = c.req.query('access_token')
   if (!accessToken) {
     throw newMissingQueryParamError('access_token')
   }
   const userId = await getUserIdFromAccessToken(accessToken)
   const { buffer, extension, mime } = await getUserPicture(userId)
-  if (extension !== c.req.param('extension')) {
+  if (extension !== extname(c.req.param('filename'))) {
     throw newPictureNotFoundError()
   }
-  c.res.headers.append(
-    'Content-Disposition',
-    `attachment; filename=picture.${extension}`,
-  )
-  c.res.headers.append('Content-Type', mime)
-  return c.body(buffer)
+  return c.body(buffer, 200, {
+    'Content-Type': mime,
+    'Content-Disposition': `attachment; filename=picture${extension}`,
+  })
 })
 
 router.post(
@@ -182,8 +184,7 @@ router.delete(
   async (c) => {
     const body = c.req.valid('json') as UserDeleteOptions
     await deleteUser(c.get('user').id, body)
-    c.status(204)
-    return c.body(null)
+    return c.body(null, 204)
   },
 )
 
@@ -221,8 +222,7 @@ router.post(
     const { id } = c.req.param()
     const body = c.req.valid('json') as UserSuspendOptions
     await suspendUser(id, body)
-    c.status(200)
-    return c.body(null)
+    return c.body(null, 200)
   },
 )
 
@@ -238,8 +238,7 @@ router.post(
     const { id } = c.req.param()
     const body = c.req.valid('json') as UserMakeAdminOptions
     await makeAdminUser(id, body)
-    c.status(200)
-    return c.body(null)
+    return c.body(null, 200)
   },
 )
 
