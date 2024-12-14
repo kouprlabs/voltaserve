@@ -16,11 +16,11 @@ const router = new Hono()
 router.get('', async (c) => {
   if (!postgres.connected) {
     c.status(503)
-    return
+    return c.body(null)
   }
   if (!(await meilisearch.isHealthy())) {
     c.status(503)
-    return
+    return c.body(null)
   }
   return c.text('OK')
 })

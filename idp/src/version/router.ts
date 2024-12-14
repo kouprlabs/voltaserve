@@ -7,12 +7,12 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { Request, Response, Router } from 'express'
+import { Hono } from 'hono'
 
-const router = Router()
+const router = new Hono()
 
-router.get('/', (_: Request, res: Response) => {
-  res.json({ version: '3.0.0' })
+router.get('/', (c) => {
+  return c.json({ version: '3.0.0' })
 })
 
 export default router

@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { NextFunction, Request, Response } from 'express'
 
 export enum ErrorCode {
   InternalServerError = 'internal_server_error',
@@ -31,7 +30,9 @@ export enum ErrorCode {
   SearchError = 'search_error',
 }
 
-const statuses: { [key: string]: number } = {
+type StatusCode = 500 | 400 | 401 | 403 | 404 | 409 | 429
+
+const statuses: { [key: string]: StatusCode } = {
   [ErrorCode.InternalServerError]: 500,
   [ErrorCode.RequestValidationError]: 400,
   [ErrorCode.UsernameUnavailable]: 409,
@@ -55,7 +56,7 @@ const statuses: { [key: string]: number } = {
 
 export type ErrorData = {
   code: string
-  status: number
+  status: StatusCode
   message: string
   userMessage: string
   moreInfo: string
@@ -65,7 +66,7 @@ export type ErrorData = {
 
 export type ErrorResponse = {
   code: string
-  status: number
+  status: StatusCode
   message: string
   userMessage: string
   moreInfo: string
@@ -99,27 +100,4 @@ export function newResponse(data: ErrorData): ErrorResponse {
     userMessage: data.userMessage,
     moreInfo: data.moreInfo,
   }
-}
-
-export function errorHandler(
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  error: any,
-  _: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  if (error.code && Object.values(ErrorCode).includes(error.code)) {
-    const data = error as ErrorData
-    if (data.error) {
-      console.error(data.error)
-    }
-    res.status(data.status).json(newResponse(data))
-  } else {
-    console.error(error)
-    res
-      .status(500)
-      .json(newResponse(newError({ code: ErrorCode.InternalServerError })))
-  }
-  next(error)
-  return
 }
