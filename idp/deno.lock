@@ -907,6 +907,7 @@
       "npm:globals@15.11.0",
       "npm:handlebars@4.7.8",
       "npm:hashids@2.3.0",
+      "npm:hono@4.6.13",
       "npm:jose@5.9.6",
       "npm:js-yaml@4.1.0",
       "npm:meilisearch@0.45.0",
@@ -916,7 +917,8 @@
       "npm:nodemailer@6.9.15",
       "npm:passport-jwt@4.0.1",
       "npm:passport@0.7.0",
-      "npm:uuid@10.0.0"
+      "npm:uuid@10.0.0",
+      "npm:zod@3.24.1"
     ]
   }
 }

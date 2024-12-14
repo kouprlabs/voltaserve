@@ -8,11 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import '@/infra/env.ts'
-import cors from 'cors'
-import express from 'express'
-import logger from 'morgan'
-import passport from 'passport'
-import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt'
+import { Hono } from 'hono'
 import accountRouter from '@/account/router.ts'
 import { getConfig } from '@/config/config.ts'
 import healthRouter from '@/health/router.ts'
@@ -29,12 +25,7 @@ import versionRouter from '@/version/router.ts'
 import { client as postgres } from '@/infra/postgres.ts'
 import process from 'node:process'
 
-const app = express()
-
-app.use(cors())
-app.use(logger('dev'))
-app.use(express.json({ limit: '3mb' }))
-app.use(express.urlencoded({ extended: true }))
+const app = new Hono()
 
 const { jwtSigningKey: secretOrKey, issuer, audience } = getConfig().token
 passport.use(
@@ -59,23 +50,17 @@ passport.use(
   ),
 )
 
-app.use('/v3/health', healthRouter)
-app.use('/v3/users', userRouter)
-app.use('/v3/accounts', accountRouter)
-app.use('/v3/token', tokenRouter)
-app.use('/version', versionRouter)
-
-app.use(errorHandler)
+app.route('/v3/health', healthRouter)
+app.route('/v3/users', userRouter)
+app.route('/v3/accounts', accountRouter)
+app.route('/v3/token', tokenRouter)
+app.route('/version', versionRouter)
 
 const port = getConfig().port
 
 postgres
   .connect()
-  .then(() => {
-    app.listen(port, () => {
-      console.log(`Listening on port ${port}`)
-    })
-  })
+  .then(() => Deno.serve({ port }, app.fetch))
   .catch((err) => {
     console.error(err)
     process.exit(1)
