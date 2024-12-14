@@ -68,7 +68,7 @@ def fetch_organization_users(
         with conn.cursor() as curs:
             data = curs.execute(
                 f"""
-                SELECT u.user_id as "id", u2.username, u2.picture, u."permission", u.create_time as "createTime" 
+                SELECT u.user_id as "id", u2.username, u2.picture, u."permission", u2.create_time as "createTime" 
                 FROM organization o 
                 JOIN userpermission u ON o.id = u.resource_id 
                 JOIN "user" u2 ON u.user_id = u2.id 
