@@ -31,7 +31,10 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
+import AccountAPI from '@/client/idp/account'
 import UserAPI, { User } from '@/client/idp/user'
+import PasswordHints from '@/components/sign-up/password-hints'
+import { YupSchemaFactory } from '@/lib/validation'
 import { useAppSelector } from '@/store/hook'
 
 export type AccountChangePasswordProps = {
@@ -53,9 +56,10 @@ const AccountChangePassword = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const initialValues: FormValues = { currentPassword: '', newPassword: '' }
   const formSchema = Yup.object().shape({
-    currentPassword: Yup.string().required('Current password is required'),
-    newPassword: Yup.string().required('New password is required'),
+    currentPassword: Yup.string().required('Current password is required.'),
+    newPassword: YupSchemaFactory.password('New password'),
   })
+  const { data: passwordRequirements } = AccountAPI.useGetPasswordRequirements()
 
   useEffect(() => {
     setIsModalOpen(open)
@@ -98,7 +102,7 @@ const AccountChangePassword = ({
           validateOnBlur={false}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ errors, touched, isSubmitting, values }) => (
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
@@ -137,6 +141,14 @@ const AccountChangePassword = ({
                         <FormErrorMessage>
                           {errors.newPassword}
                         </FormErrorMessage>
+                        {passwordRequirements ? (
+                          <div className="pt-1">
+                            <PasswordHints
+                              value={values.newPassword}
+                              requirements={passwordRequirements}
+                            />
+                          </div>
+                        ) : null}
                       </FormControl>
                     )}
                   </Field>

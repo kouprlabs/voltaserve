@@ -53,7 +53,7 @@ const OrganizationEditName = ({
   const mutate = useAppSelector((state) => state.ui.organization.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(255),
+    name: Yup.string().required('Name is required.').max(255),
   })
   const inputRef = useRef<HTMLInputElement>(null)
   useFocusAndSelectAll(inputRef, isModalOpen)

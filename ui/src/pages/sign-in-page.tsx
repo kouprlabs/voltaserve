@@ -46,9 +46,9 @@ const SignInPage = () => {
   const navigate = useNavigate()
   const formSchema = Yup.object().shape({
     email: Yup.string()
-      .email('Email is not valid')
-      .required('Email is required'),
-    password: Yup.string().required('Password is required'),
+      .email('Email is not valid.')
+      .required('Email is required.'),
+    password: Yup.string().required('Password is required.'),
   })
 
   const handleSignIn = useCallback(

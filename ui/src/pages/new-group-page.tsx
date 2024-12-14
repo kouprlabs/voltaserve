@@ -45,8 +45,8 @@ const NewGroupPage = () => {
   const mutate = useAppSelector((state) => state.ui.groups.mutate)
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(255),
-    organizationId: Yup.string().required('Organization is required'),
+    name: Yup.string().required('Name is required.').max(255),
+    organizationId: Yup.string().required('Organization is required.'),
   })
   const { data: organization } = OrganizationAPI.useGet(
     searchParams.get('org'),

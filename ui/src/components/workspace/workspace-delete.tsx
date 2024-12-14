@@ -55,8 +55,8 @@ const WorkspaceDelete = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string()
-      .required('Confirmation is required')
-      .oneOf([workspace.name], 'Invalid workspace name'),
+      .required('Confirmation is required.')
+      .oneOf([workspace.name], 'Invalid workspace name.'),
   })
 
   useEffect(() => {

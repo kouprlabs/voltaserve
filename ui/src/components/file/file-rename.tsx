@@ -51,7 +51,7 @@ const FileRename = () => {
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const { data: file, mutate: mutateFile } = FileAPI.useGet(id)
   const formSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(255),
+    name: Yup.string().required('Name is required.').max(255),
   })
   const inputRef = useRef<HTMLInputElement>(null)
   useFocusAndSelectAll(inputRef, isModalOpen)

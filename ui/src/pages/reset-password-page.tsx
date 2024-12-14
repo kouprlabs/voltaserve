@@ -31,6 +31,8 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import LayoutFull from '@/components/layout/layout-full'
+import PasswordHints from '@/components/sign-up/password-hints'
+import { YupSchemaFactory } from '@/lib/validation'
 
 type FormValues = {
   newPassword: string
@@ -41,17 +43,13 @@ const ResetPasswordPage = () => {
   const params = useParams()
   const token = params.token as string
   const formSchema = Yup.object().shape({
-    newPassword: Yup.string()
-      .required('Password is required')
-      .matches(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/,
-        'Must contain at least 8 characters, one Uppercase, one Lowercase, one number and one special character',
-      ),
+    newPassword: YupSchemaFactory.password('New password'),
     newPasswordConfirmation: Yup.string()
-      .oneOf([Yup.ref('newPassword'), undefined], 'Passwords do not match')
-      .required('Confirm your password'),
+      .oneOf([Yup.ref('newPassword'), undefined], 'Passwords do not match.')
+      .required('Confirm your password.'),
   })
   const [isCompleted, setIsCompleted] = useState(false)
+  const { data: passwordRequirements } = AccountAPI.useGetPasswordRequirements()
 
   const handleSubmit = useCallback(
     async (
@@ -110,7 +108,7 @@ const ResetPasswordPage = () => {
                 validateOnBlur={false}
                 onSubmit={handleSubmit}
               >
-                {({ errors, touched, isSubmitting }) => (
+                {({ errors, touched, isSubmitting, values }) => (
                   <Form className={cx('w-full')}>
                     <div
                       className={cx(
@@ -137,6 +135,14 @@ const ResetPasswordPage = () => {
                             <FormErrorMessage>
                               {errors.newPassword}
                             </FormErrorMessage>
+                            {passwordRequirements ? (
+                              <div className="pt-1">
+                                <PasswordHints
+                                  value={values.newPassword}
+                                  requirements={passwordRequirements}
+                                />
+                              </div>
+                            ) : null}
                           </FormControl>
                         )}
                       </Field>

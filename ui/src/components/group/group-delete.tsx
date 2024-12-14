@@ -51,8 +51,8 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string()
-      .required('Confirmation is required')
-      .oneOf([group.name], 'Invalid group name'),
+      .required('Confirmation is required.')
+      .oneOf([group.name], 'Invalid group name.'),
   })
 
   useEffect(() => {
