@@ -55,8 +55,8 @@ const OrganizationDelete = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string()
-      .required('Confirmation is required')
-      .oneOf([organization.name], 'Invalid organization name'),
+      .required('Confirmation is required.')
+      .oneOf([organization.name], 'Invalid organization name.'),
   })
 
   useEffect(() => {

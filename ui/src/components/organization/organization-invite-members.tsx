@@ -59,7 +59,7 @@ const OrganizationInviteMembers = ({
   )
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
-    emails: Yup.string().required('Email(s) are required'),
+    emails: Yup.string().required('Email(s) are required.'),
   })
 
   useEffect(() => {

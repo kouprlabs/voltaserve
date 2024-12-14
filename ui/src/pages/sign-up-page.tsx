@@ -43,14 +43,14 @@ type FormValues = {
 const SignUpPage = () => {
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false)
   const formSchema = Yup.object().shape({
-    fullName: Yup.string().required('Name is required'),
+    fullName: Yup.string().required('Name is required.'),
     email: Yup.string()
-      .email('Email is not valid')
-      .required('Email is required'),
-    password: Yup.string().required('Password is required'),
+      .email('Email is not valid.')
+      .required('Email is required.'),
+    password: Yup.string().required('Password is required.'),
     passwordConfirmation: Yup.string()
-      .oneOf([Yup.ref('password'), undefined], 'Passwords must match')
-      .required('Confirm your password'),
+      .oneOf([Yup.ref('password'), undefined], 'Passwords must match.')
+      .required('Confirm your password.'),
   })
   const { data: passwordRequirements } = AccountAPI.useGetPasswordRequirements()
 

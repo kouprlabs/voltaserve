@@ -47,7 +47,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
-    password: Yup.string().required('Password is required'),
+    password: Yup.string().required('Password is required.'),
   })
 
   useEffect(() => {

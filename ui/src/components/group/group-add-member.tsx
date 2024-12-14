@@ -52,7 +52,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [activeUser, setActiveUser] = useState<User>()
   const formSchema = Yup.object().shape({
-    userId: Yup.string().required('User is required'),
+    userId: Yup.string().required('User is required.'),
   })
 
   useEffect(() => {

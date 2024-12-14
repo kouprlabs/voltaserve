@@ -50,8 +50,8 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     email: Yup.string()
-      .required('Email is required')
-      .email('Must be a valid email')
+      .required('Email is required.')
+      .email('Must be a valid email.')
       .max(255),
   })
   const inputRef = useRef<HTMLInputElement>(null)

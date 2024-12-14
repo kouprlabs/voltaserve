@@ -53,7 +53,7 @@ const AccountEditFullName = ({
   const mutate = useAppSelector((state) => state.ui.account.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
-    fullName: Yup.string().required('Full name is required').max(255),
+    fullName: Yup.string().required('Full name is required.').max(255),
   })
   const inputRef = useRef<HTMLInputElement>(null)
   useFocusAndSelectAll(inputRef, isModalOpen)

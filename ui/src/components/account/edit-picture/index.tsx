@@ -59,20 +59,27 @@ const AccountEditPicture = ({
       .required()
       .test(
         'fileSize',
-        'Image is too big, should be less than 3 MB',
+        'Image is too big, should be less than 3 MB.',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (value: any) => value === null || (value && value.size <= 3000000),
       )
       .test(
         'fileType',
-        'Unsupported file format',
+        'File is not an image.',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (value: any) =>
           value === null ||
           (value &&
-            ['image/jpg', 'image/jpeg', 'image/gif', 'image/png'].includes(
-              value.type,
-            )),
+            [
+              'image/jpeg',
+              'image/png',
+              'image/gif',
+              'image/webp',
+              'image/bmp',
+              'image/tiff',
+              'image/svg+xml',
+              'image/x-icon',
+            ].includes(value.type)),
       ),
   })
 

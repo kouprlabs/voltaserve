@@ -65,9 +65,9 @@ const WorkspaceEditStorageCapacity = ({
     if (storageUsage) {
       return Yup.object().shape({
         storageCapacity: Yup.number()
-          .required('Storage capacity is required')
+          .required('Storage capacity is required.')
           .positive()
-          .min(storageUsage.bytes, 'Insufficient storage capacity'),
+          .min(storageUsage.bytes, 'Insufficient storage capacity.'),
       })
     } else {
       return null

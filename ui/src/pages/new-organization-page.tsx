@@ -34,7 +34,7 @@ const NewOrganizationPage = () => {
   const mutate = useAppSelector((state) => state.ui.organizations.mutate)
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(255),
+    name: Yup.string().required('Name is required.').max(255),
   })
 
   const handleSubmit = useCallback(

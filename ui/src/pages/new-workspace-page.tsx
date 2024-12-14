@@ -45,13 +45,13 @@ const NewWorkspacePage = () => {
   const mutate = useAppSelector((state) => state.ui.workspaces.mutate)
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(255),
-    organizationId: Yup.string().required('Organization is required'),
+    name: Yup.string().required('Name is required.').max(255),
+    organizationId: Yup.string().required('Organization is required.'),
     storageCapacity: Yup.number()
-      .required('Storage capacity is required')
+      .required('Storage capacity is required.')
       .positive()
       .integer()
-      .min(1, 'Invalid storage usage value'),
+      .min(1, 'Invalid storage usage value.'),
   })
 
   const handleSubmit = useCallback(

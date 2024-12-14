@@ -39,8 +39,8 @@ type FormValues = {
 const ForgotPasswordPage = () => {
   const formSchema = Yup.object().shape({
     email: Yup.string()
-      .email('Email is not valid')
-      .required('Email is required'),
+      .email('Email is not valid.')
+      .required('Email is required.'),
   })
   const [isCompleted, setIsCompleted] = useState(false)
 

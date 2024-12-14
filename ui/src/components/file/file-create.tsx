@@ -49,7 +49,7 @@ const FileCreate = () => {
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [inputRef, setInputRef] = useState<HTMLInputElement | null>()
   const formSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(255),
+    name: Yup.string().required('Name is required.').max(255),
   })
 
   useEffect(() => {
