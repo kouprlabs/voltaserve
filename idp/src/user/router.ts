@@ -31,13 +31,13 @@ import {
 } from '@/infra/error/validation.ts'
 import {
   deletePicture,
-  deleteUser,
-  getUser,
-  getUserByAdmin,
-  getUserPicture,
+  drop,
+  find,
+  findAsAdmin,
+  getPicture,
   list,
-  makeAdminUser,
-  suspendUser,
+  makeAdmin,
+  suspend,
   updateEmailConfirmation,
   updateEmailRequest,
   updateFullName,
@@ -58,7 +58,7 @@ import { UserListOptions } from '@/user/service.ts'
 const router = new Hono()
 
 router.get('/me', async (c) => {
-  return c.json(await getUser(c.get('user').id))
+  return c.json(await find(c.get('user').id))
 })
 
 router.get('/me/:filename', async (c) => {
@@ -71,7 +71,7 @@ router.get('/me/:filename', async (c) => {
     throw newMissingQueryParamError('access_token')
   }
   const userId = await getUserIdFromAccessToken(accessToken)
-  const { buffer, extension, mime } = await getUserPicture(userId)
+  const { buffer, extension, mime } = await getPicture(userId)
   if (extension !== extname(c.req.param('filename'))) {
     throw newPictureNotFoundError()
   }
@@ -185,7 +185,7 @@ router.delete(
   ),
   async (c) => {
     const body = c.req.valid('json') as UserDeleteOptions
-    await deleteUser(c.get('user').id, body)
+    await drop(c.get('user').id, body)
     return c.body(null, 204)
   },
 )
@@ -223,7 +223,7 @@ router.post(
     }
     const { id } = c.req.param()
     const body = c.req.valid('json') as UserSuspendOptions
-    await suspendUser(id, body)
+    await suspend(id, body)
     return c.body(null, 200)
   },
 )
@@ -241,7 +241,7 @@ router.post(
     }
     const { id } = c.req.param()
     const body = c.req.valid('json') as UserMakeAdminOptions
-    await makeAdminUser(id, body)
+    await makeAdmin(id, body)
     return c.body(null, 200)
   },
 )
@@ -251,7 +251,7 @@ router.get('/:id', async (c) => {
     throw newUserIsNotAdminError()
   }
   const { id } = c.req.param()
-  return c.json(await getUserByAdmin(id))
+  return c.json(await findAsAdmin(id))
 })
 
 async function getUserIdFromAccessToken(accessToken: string): Promise<string> {

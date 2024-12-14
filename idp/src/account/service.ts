@@ -22,7 +22,7 @@ import {
 } from '../infra/meilisearch.ts'
 import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
-import { getUserCount, mapEntity, UserDTO } from '@/user/service.ts'
+import { getCount, mapEntity, UserDTO } from '@/user/service.ts'
 
 export type AccountCreateOptions = {
   email: string
@@ -60,7 +60,9 @@ export async function createUser(
   if (!(await userRepo.isUsernameAvailable(options.email))) {
     throw newUsernameUnavailableError()
   }
-  if ((await getUserCount()) === 0) {
+  // First user is made an admin
+  const count = await getCount()
+  if (count === 0) {
     options.isAdmin = true
   }
   try {
