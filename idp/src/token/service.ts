@@ -17,7 +17,7 @@ import {
   newRefreshTokenExpiredError,
   newUserSuspendedError,
   newUserTemporarilyLockedError,
-} from '@/infra/error/creators.ts'
+} from '../error/creators.ts'
 import { newHyphenlessUuid } from '@/infra/id.ts'
 import { verifyPassword } from '@/infra/password.ts'
 import { User } from '@/user/model.ts'

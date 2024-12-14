@@ -12,7 +12,7 @@ import { newDateTime } from '@/infra/date-time.ts'
 import {
   newInternalServerError,
   newUsernameUnavailableError,
-} from '@/infra/error/creators.ts'
+} from '../error/creators.ts'
 import { newHashId, newHyphenlessUuid } from '@/infra/id.ts'
 import { sendTemplateMail } from '@/infra/mail.ts'
 import { hashPassword } from '@/infra/password.ts'

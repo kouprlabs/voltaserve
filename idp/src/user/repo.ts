@@ -10,7 +10,7 @@
 import {
   newInternalServerError,
   newUserNotFoundError,
-} from '@/infra/error/creators.ts'
+} from '../error/creators.ts'
 import { client } from '@/infra/postgres.ts'
 import { InsertOptions, UpdateOptions, User } from '@/user/model.ts'
 

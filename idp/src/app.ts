@@ -14,12 +14,7 @@ import { logger } from 'hono/logger'
 import accountRouter from '@/account/router.ts'
 import { getConfig } from '@/config/config.ts'
 import healthRouter from '@/health/router.ts'
-import {
-  ErrorCode,
-  ErrorData,
-  newError,
-  newResponse,
-} from '@/infra/error/core.ts'
+import { ErrorCode, ErrorData, newError, newResponse } from './error/core.ts'
 import tokenRouter from '@/token/router.ts'
 import userRepo from '@/user/repo.ts'
 import userRouter from '@/user/router.ts'

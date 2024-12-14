@@ -32,7 +32,7 @@ import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import LayoutFull from '@/components/layout/layout-full'
 import PasswordHints from '@/components/sign-up/password-hints'
-import { YupSchemaFactory } from '@/lib/validation'
+import { YupFactory } from '@/lib/validation'
 
 type FormValues = {
   newPassword: string
@@ -43,7 +43,7 @@ const ResetPasswordPage = () => {
   const params = useParams()
   const token = params.token as string
   const formSchema = Yup.object().shape({
-    newPassword: YupSchemaFactory.password('New password'),
+    newPassword: YupFactory.password('New password'),
     newPasswordConfirmation: Yup.string()
       .oneOf([Yup.ref('newPassword'), undefined], 'Passwords do not match.')
       .required('Confirm your password.'),

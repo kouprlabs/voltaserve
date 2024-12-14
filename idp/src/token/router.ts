@@ -11,7 +11,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { exchange, TokenExchangeOptions } from '@/token/service.ts'
-import { handleValidationError } from '@/infra/error/validation.ts'
+import { handleValidationError } from '../lib/validation.ts'
 
 const router = new Hono()
 

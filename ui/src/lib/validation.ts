@@ -9,7 +9,7 @@
 // AGPL-3.0-only in the root of this repository.
 import * as Yup from 'yup'
 
-export class YupSchemaFactory {
+export class YupFactory {
   static password(field: string) {
     return Yup.string()
       .required(`${field} is required.`)

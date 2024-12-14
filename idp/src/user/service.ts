@@ -23,8 +23,8 @@ import {
   newPictureNotFoundError,
   newUsernameUnavailableError,
   newUserNotFoundError,
-} from '@/infra/error/creators.ts'
-import { ErrorCode, newError } from '@/infra/error/core.ts'
+} from '../error/creators.ts'
+import { ErrorCode, newError } from '../error/core.ts'
 import { newHyphenlessUuid } from '@/infra/id.ts'
 import { sendTemplateMail } from '@/infra/mail.ts'
 import { hashPassword, verifyPassword } from '@/infra/password.ts'
