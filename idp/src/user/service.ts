@@ -197,7 +197,6 @@ export async function updateFullName(
 ): Promise<UserDTO> {
   let user = await userRepo.findById(id)
   user = await userRepo.update({ id: user.id, fullName: options.fullName })
-  console.log('>>>>>>>>>>>>', user)
   await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
