@@ -416,7 +416,9 @@ export function mapEntity(entity: User): UserDTO {
     email: entity.email,
     username: entity.username,
     fullName: entity.fullName,
-    pendingEmail: entity.emailUpdateValue,
+  }
+  if (entity.emailUpdateValue) {
+    user.pendingEmail = entity.emailUpdateValue
   }
   if (entity.picture) {
     user.picture = {

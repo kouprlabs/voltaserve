@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { decodeJwt, SignJWT } from 'jose'
+import { decode, sign } from 'hono/jwt'
 import { getConfig } from '@/config/config.ts'
 import {
   newEmailNotConfirmedError,
@@ -93,7 +93,8 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
 }
 
 export function checkAdmin(jwt: string) {
-  if (!decodeJwt(jwt).is_admin) {
+  const { payload } = decode(jwt)
+  if (!payload.is_admin) {
     throw newUserIsNotAdminError()
   }
 }
@@ -124,13 +125,18 @@ function validateParameters(options: TokenExchangeOptions) {
 async function newToken(userId: string, isAdmin: boolean): Promise<Token> {
   const config = getConfig().token
   const expiry = newAccessTokenExpiry()
-  const jwt = await new SignJWT({ sub: userId, is_admin: isAdmin })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setIssuer(config.issuer)
-    .setAudience(config.audience)
-    .setExpirationTime(expiry)
-    .sign(new TextEncoder().encode(config.jwtSigningKey))
+  const jwt = await sign(
+    {
+      sub: userId,
+      is_admin: isAdmin,
+      exp: expiry,
+      aud: config.audience,
+      iss: config.issuer,
+      iat: Math.floor(new Date().getTime() / 1000),
+    },
+    config.jwtSigningKey,
+    'HS256',
+  )
   const token: Token = {
     access_token: jwt,
     expires_in: expiry,

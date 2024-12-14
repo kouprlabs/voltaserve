@@ -16,55 +16,55 @@ import { InsertOptions, UpdateOptions, User } from '@/user/model.ts'
 
 class UserRepoImpl {
   async findById(id: string): Promise<User> {
-    const { rowCount, rows } = await client.queryObject(
+    const { rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE id = $1`,
       [id],
     )
-    if (rowCount && rowCount < 1) {
+    if (rows.length === 0) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByUsername(username: string): Promise<User> {
-    const { rowCount, rows } = await client.queryObject(
+    const { rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE username = $1`,
       [username],
     )
-    if (rowCount && rowCount < 1) {
+    if (rows.length === 0) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByEmail(email: string): Promise<User> {
-    const { rowCount, rows } = await client.queryObject(
+    const { rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE email = $1`,
       [email],
     )
-    if (rowCount && rowCount < 1) {
+    if (rows.length === 0) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByRefreshTokenValue(refreshTokenValue: string): Promise<User> {
-    const { rowCount, rows } = await client.queryObject(
+    const { rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE refresh_token_value = $1`,
       [refreshTokenValue],
     )
-    if (rowCount && rowCount < 1) {
+    if (rows.length === 0) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByResetPasswordToken(resetPasswordToken: string): Promise<User> {
-    const { rowCount, rows } = await client.queryObject(
+    const { rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE reset_password_token = $1`,
       [resetPasswordToken],
     )
-    if (rowCount && rowCount < 1) {
+    if (rows.length === 0) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
@@ -73,22 +73,22 @@ class UserRepoImpl {
   async findByEmailConfirmationToken(
     emailConfirmationToken: string,
   ): Promise<User> {
-    const { rowCount, rows } = await client.queryObject(
+    const { rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE email_confirmation_token = $1`,
       [emailConfirmationToken],
     )
-    if (rowCount && rowCount < 1) {
+    if (rows.length === 0) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
 
   async findByEmailUpdateToken(emailUpdateToken: string): Promise<User> {
-    const { rowCount, rows } = await client.queryObject(
+    const { rows } = await client.queryObject(
       `SELECT * FROM "user" WHERE email_update_token = $1`,
       [emailUpdateToken],
     )
-    if (rowCount && rowCount < 1) {
+    if (rows.length === 0) {
       throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
@@ -133,7 +133,7 @@ class UserRepoImpl {
   }
 
   async insert(data: InsertOptions): Promise<User> {
-    const { rowCount, rows } = await client.queryObject(
+    const { rowCount } = await client.queryObject(
       `INSERT INTO "user" (
         id,
         full_name,
@@ -167,10 +167,10 @@ class UserRepoImpl {
         new Date().toISOString(),
       ],
     )
-    if (rowCount && rowCount < 1) {
+    if (!rowCount || rowCount === 0) {
       throw newInternalServerError()
     }
-    return this.mapRow(rows[0])
+    return await this.findById(data.id)
   }
 
   async update(data: UpdateOptions): Promise<User> {
@@ -180,7 +180,7 @@ class UserRepoImpl {
     }
     Object.assign(entity, data)
     entity.updateTime = new Date().toISOString()
-    const { rowCount, rows } = await client.queryObject(
+    const { rowCount } = await client.queryObject(
       `UPDATE "user" 
         SET
           full_name = $1,
@@ -223,10 +223,10 @@ class UserRepoImpl {
         entity.id,
       ],
     )
-    if (rowCount && rowCount < 1) {
+    if (!rowCount || rowCount === 0) {
       throw newInternalServerError()
     }
-    return this.mapRow(rows[0])
+    return await this.findById(data.id)
   }
 
   async delete(id: string): Promise<void> {

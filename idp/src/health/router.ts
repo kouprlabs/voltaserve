@@ -7,22 +7,20 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { Request, Response, Router } from 'express'
+import { Hono } from 'hono'
 import { client as postgres } from '@/infra/postgres.ts'
 import { client as meilisearch } from '@/infra/meilisearch.ts'
 
-const router = Router()
+const router = new Hono()
 
-router.get('', async (_: Request, res: Response) => {
+router.get('', async (c) => {
   if (!postgres.connected) {
-    res.sendStatus(503)
-    return
+    return c.body(null, 503)
   }
   if (!(await meilisearch.isHealthy())) {
-    res.sendStatus(503)
-    return
+    return c.body(null, 503)
   }
-  res.send('OK')
+  return c.text('OK')
 })
 
 export default router

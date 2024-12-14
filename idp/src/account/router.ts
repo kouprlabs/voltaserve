@@ -7,10 +7,17 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { Request, Response, Router } from 'express'
-import { body, validationResult } from 'express-validator'
-import { getConfig } from '@/config/config.ts'
-import { parseValidationError } from '@/infra/error/validation.ts'
+import { Hono } from 'hono'
+import { z } from 'zod'
+import { zValidator } from '@hono/zod-validator'
+import {
+  email,
+  fullName,
+  handleValidationError,
+  password,
+  picture,
+  token,
+} from '@/infra/error/validation.ts'
 import {
   AccountConfirmEmailOptions,
   AccountCreateOptions,
@@ -23,75 +30,72 @@ import {
   sendResetPasswordEmail,
 } from '@/account/service.ts'
 
-const router = Router()
+const router = new Hono()
 
 router.post(
   '/',
-  body('email').isEmail().isLength({ max: 255 }),
-  body('password')
-    .isStrongPassword({
-      minLength: getConfig().password.minLength,
-      minLowercase: getConfig().password.minLowercase,
-      minUppercase: getConfig().password.minUppercase,
-      minNumbers: getConfig().password.minNumbers,
-      minSymbols: getConfig().password.minSymbols,
-    })
-    .isLength({ max: 10000 }),
-  body('fullName').isString().notEmpty().trim().escape().isLength({ max: 255 }),
-  body('picture').optional().isBase64().isByteLength({ max: 3000000 }),
-  async (req: Request, res: Response) => {
-    const result = validationResult(req)
-    if (!result.isEmpty()) {
-      throw parseValidationError(result)
-    }
-    res.json(await createUser(req.body as AccountCreateOptions))
+  zValidator(
+    'json',
+    z.object({
+      email,
+      password,
+      fullName,
+      picture,
+    }),
+    handleValidationError,
+  ),
+  async (c) => {
+    const body = c.req.valid('json') as AccountCreateOptions
+    return c.json(await createUser(body))
   },
 )
 
-router.get('/password_requirements', (_: Request, res: Response) => {
-  res.json(getPasswordRequirements())
+router.get('/password_requirements', (c) => {
+  return c.json(getPasswordRequirements())
 })
 
 router.post(
   '/reset_password',
-  body('token').isString().notEmpty().trim(),
-  body('newPassword').isStrongPassword(),
-  async (req: Request, res: Response) => {
-    const result = validationResult(req)
-    if (!result.isEmpty()) {
-      throw parseValidationError(result)
-    }
-    await resetPassword(req.body as AccountResetPasswordOptions)
-    res.sendStatus(200)
+  zValidator(
+    'json',
+    z.object({
+      token,
+      newPassword: password,
+    }),
+    handleValidationError,
+  ),
+  async (c) => {
+    const body = c.req.valid('json') as AccountResetPasswordOptions
+    await resetPassword(body)
+    return c.body(null, 200)
   },
 )
 
 router.post(
   '/confirm_email',
-  body('token').isString().notEmpty().trim(),
-  async (req: Request, res: Response) => {
-    const result = validationResult(req)
-    if (!result.isEmpty()) {
-      throw parseValidationError(result)
-    }
-    await confirmEmail(req.body as AccountConfirmEmailOptions)
-    res.sendStatus(200)
+  zValidator(
+    'json',
+    z.object({ token }),
+    handleValidationError,
+  ),
+  async (c) => {
+    const body = c.req.valid('json') as AccountConfirmEmailOptions
+    await confirmEmail(body)
+    return c.body(null, 200)
   },
 )
 
 router.post(
   '/send_reset_password_email',
-  body('email').isEmail().isLength({ max: 255 }),
-  async (req: Request, res: Response) => {
-    const result = validationResult(req)
-    if (!result.isEmpty()) {
-      throw parseValidationError(result)
-    }
-    res.json(
-      await sendResetPasswordEmail(
-        req.body as AccountSendResetPasswordEmailOptions,
-      ),
-    )
+  zValidator(
+    'json',
+    z.object({ email }),
+    handleValidationError,
+  ),
+  async (c) => {
+    const body = c.req.valid('json') as AccountSendResetPasswordEmailOptions
+    await sendResetPasswordEmail(body)
+    return c.body(null, 204)
   },
 )
 

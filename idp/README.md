@@ -2,13 +2,7 @@
 
 ## Getting Started
 
-Run for development:
-
-```shell
-deno task dev
-```
-
-Run for production:
+Run:
 
 ```shell
 deno task start
