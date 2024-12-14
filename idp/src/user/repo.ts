@@ -95,7 +95,7 @@ class UserRepoImpl {
   }
 
   async list(page: number, size: number): Promise<User[]> {
-    const { rows } = await client.queryArray(
+    const { rows } = await client.queryObject(
       `SELECT *
        FROM "user"
        ORDER BY create_time
@@ -103,18 +103,18 @@ class UserRepoImpl {
        LIMIT $2`,
       [(page - 1) * size, size],
     )
-    return this.mapList(rows)
+    return rows.map(this.mapRow)
   }
 
   async findMany(ids: string[]): Promise<User[]> {
-    const { rows } = await client.queryArray(
+    const { rows } = await client.queryObject(
       `SELECT *
        FROM "user"
        WHERE id = ANY ($1)
        ORDER BY create_time`,
       [ids],
     )
-    return this.mapList(rows)
+    return rows.map(this.mapRow)
   }
 
   async getCount(): Promise<number> {
@@ -255,7 +255,6 @@ class UserRepoImpl {
     return result[0].count > 1
   }
 
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   private mapRow(row: any): User {
     return {
       id: row.id,
@@ -278,11 +277,6 @@ class UserRepoImpl {
       createTime: row.create_time,
       updateTime: row.update_time,
     }
-  }
-
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  private mapList(list: any): User[] {
-    return list.map(this.mapRow)
   }
 }
 

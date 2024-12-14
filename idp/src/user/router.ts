@@ -18,24 +18,26 @@ import {
   newInvalidJwtError,
   newMissingQueryParamError,
   newPictureNotFoundError,
+  newUserIsNotAdminError,
 } from '@/infra/error/creators.ts'
 import {
   email,
   fullName,
   handleValidationError,
+  page,
   password,
+  size,
   token,
 } from '@/infra/error/validation.ts'
-import { checkAdmin } from '@/token/service.ts'
 import {
   deletePicture,
-  deleteUser,
-  getUser,
-  getUserByAdmin,
-  getUserPicture,
+  drop,
+  find,
+  findAsAdmin,
+  getPicture,
   list,
-  makeAdminUser,
-  suspendUser,
+  makeAdmin,
+  suspend,
   updateEmailConfirmation,
   updateEmailRequest,
   updateFullName,
@@ -56,7 +58,7 @@ import { UserListOptions } from '@/user/service.ts'
 const router = new Hono()
 
 router.get('/me', async (c) => {
-  return c.json(await getUser(c.get('user').id))
+  return c.json(await find(c.get('user').id))
 })
 
 router.get('/me/:filename', async (c) => {
@@ -69,7 +71,7 @@ router.get('/me/:filename', async (c) => {
     throw newMissingQueryParamError('access_token')
   }
   const userId = await getUserIdFromAccessToken(accessToken)
-  const { buffer, extension, mime } = await getUserPicture(userId)
+  const { buffer, extension, mime } = await getPicture(userId)
   if (extension !== extname(c.req.param('filename'))) {
     throw newPictureNotFoundError()
   }
@@ -183,7 +185,7 @@ router.delete(
   ),
   async (c) => {
     const body = c.req.valid('json') as UserDeleteOptions
-    await deleteUser(c.get('user').id, body)
+    await drop(c.get('user').id, body)
     return c.body(null, 204)
   },
 )
@@ -194,17 +196,15 @@ router.get(
     'query',
     z.object({
       query: z.string().optional(),
-      page: z.string().regex(/^\d+$/, 'Must be a numeric value.').transform(
-        Number,
-      ),
-      size: z.string().regex(/^\d+$/, 'Must be a numeric value.').transform(
-        Number,
-      ),
+      page,
+      size,
     }),
     handleValidationError,
   ),
   async (c) => {
-    checkAdmin(c.req.header('Authorization')!)
+    if (!c.get('user').isAdmin) {
+      throw newUserIsNotAdminError()
+    }
     const { query, size, page } = c.req.valid('query') as UserListOptions
     return c.json(await list({ query, size, page }))
   },
@@ -218,10 +218,12 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    checkAdmin(c.req.header('Authorization')!)
+    if (!c.get('user').isAdmin) {
+      throw newUserIsNotAdminError()
+    }
     const { id } = c.req.param()
     const body = c.req.valid('json') as UserSuspendOptions
-    await suspendUser(id, body)
+    await suspend(id, body)
     return c.body(null, 200)
   },
 )
@@ -234,18 +236,22 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    checkAdmin(c.req.header('Authorization')!)
+    if (!c.get('user').isAdmin) {
+      throw newUserIsNotAdminError()
+    }
     const { id } = c.req.param()
     const body = c.req.valid('json') as UserMakeAdminOptions
-    await makeAdminUser(id, body)
+    await makeAdmin(id, body)
     return c.body(null, 200)
   },
 )
 
 router.get('/:id', async (c) => {
-  checkAdmin(c.req.header('Authorization')!)
+  if (!c.get('user').isAdmin) {
+    throw newUserIsNotAdminError()
+  }
   const { id } = c.req.param()
-  return c.json(await getUserByAdmin(id))
+  return c.json(await findAsAdmin(id))
 })
 
 async function getUserIdFromAccessToken(accessToken: string): Promise<string> {

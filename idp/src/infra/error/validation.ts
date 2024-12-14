@@ -73,19 +73,42 @@ export const password = z
 export const picture = z
   .string()
   .optional()
-  .refine((value) => {
-    if (!value) {
-      return true
-    }
-    try {
-      return Buffer.from(value, 'base64').length <= 3000000
-    } catch {
-      return false
-    }
-  }, { message: 'Picture must be a valid Base64 string and <= 3MB' })
+  .refine(
+    (value) => {
+      if (!value) {
+        return true
+      }
+      try {
+        return Buffer.from(value, 'base64').length <= 3000000
+      } catch {
+        return false
+      }
+    },
+    { message: 'Picture must be a valid Base64 string and <= 3MB' },
+  )
 
-export const email = z.string().email().trim().max(255)
+export const email = z
+  .string()
+  .email()
+  .trim()
+  .max(255)
 
-export const fullName = z.string().nonempty().trim().max(255)
+export const fullName = z
+  .string()
+  .nonempty()
+  .trim()
+  .max(255)
 
-export const token = z.string().nonempty()
+export const token = z
+  .string()
+  .nonempty()
+
+export const page = z
+  .string()
+  .regex(/^\d+$/, 'Must be a numeric value')
+  .transform(Number)
+
+export const size = z
+  .string()
+  .regex(/^\d+$/, 'Must be a numeric value')
+  .transform(Number)

@@ -118,15 +118,15 @@ export type UserListOptions = {
   page: number
 }
 
-export async function getUser(id: string): Promise<UserDTO> {
+export async function find(id: string): Promise<UserDTO> {
   return mapEntity(await userRepo.findById(id))
 }
 
-export async function getUserByAdmin(id: string): Promise<UserAdminDTO> {
-  return adminMapEntity(await userRepo.findById(id))
+export async function findAsAdmin(id: string): Promise<UserAdminDTO> {
+  return mapAdminEntity(await userRepo.findById(id))
 }
 
-export async function getUserPicture(id: string): Promise<UserPictureResponse> {
+export async function getPicture(id: string): Promise<UserPictureResponse> {
   const user = await userRepo.findById(id)
   if (!user.picture) {
     throw newPictureNotFoundError()
@@ -146,13 +146,17 @@ export async function getUserPicture(id: string): Promise<UserPictureResponse> {
   return { buffer, extension, mime }
 }
 
+export async function getCount(): Promise<number> {
+  return await userRepo.getCount()
+}
+
 export async function list({
   query,
   size,
   page,
 }: UserListOptions): Promise<UserAdminList> {
-  if (query && query.length >= 3) {
-    const users = await meilisearch
+  if (query) {
+    const hits = await meilisearch
       .index(USER_SEARCH_INDEX)
       .search(query, { page: page, hitsPerPage: size })
       .then((value) => {
@@ -161,34 +165,24 @@ export async function list({
           totalElements: value.totalHits,
         }
       })
+    const users = await userRepo.findMany(hits.data.map((value) => value.id))
     return {
-      data: (
-        await userRepo.findMany(
-          users.data.map((value) => {
-            return value.id
-          }),
-        )
-      ).map((value) => adminMapEntity(value)),
-      totalElements: users.totalElements,
-      totalPages: Math.floor((users.totalElements + size - 1) / size),
+      data: users.map(mapAdminEntity),
+      totalElements: hits.totalElements,
+      totalPages: Math.floor((hits.totalElements + size - 1) / size),
       size: size,
       page: page,
     }
   } else {
+    const users = await userRepo.list(page, size)
     return {
-      data: (await userRepo.list(page, size)).map((value) =>
-        adminMapEntity(value)
-      ),
+      data: users.map(mapAdminEntity),
       totalElements: await userRepo.getCount(),
       totalPages: Math.floor(((await userRepo.getCount()) + size - 1) / size),
       size: size,
       page: page,
     }
   }
-}
-
-export async function getUserCount(): Promise<number> {
-  return await userRepo.getCount()
 }
 
 export async function updateFullName(
@@ -344,7 +338,7 @@ export async function deletePicture(id: string): Promise<UserDTO> {
   return mapEntity(user)
 }
 
-export async function deleteUser(id: string, options: UserDeleteOptions) {
+export async function drop(id: string, options: UserDeleteOptions) {
   const user = await userRepo.findById(id)
   if (verifyPassword(options.password, user.passwordHash)) {
     await userRepo.delete(user.id)
@@ -354,7 +348,7 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
   }
 }
 
-export async function suspendUser(id: string, options: UserSuspendOptions) {
+export async function suspend(id: string, options: UserSuspendOptions) {
   const user = await userRepo.findById(id)
   if (
     user.isAdmin &&
@@ -382,7 +376,7 @@ export async function suspendUser(id: string, options: UserSuspendOptions) {
   }
 }
 
-export async function makeAdminUser(id: string, options: UserMakeAdminOptions) {
+export async function makeAdmin(id: string, options: UserMakeAdminOptions) {
   const user = await userRepo.findById(id)
   if (
     user.isAdmin &&
@@ -428,7 +422,7 @@ export function mapEntity(entity: User): UserDTO {
   return user
 }
 
-export function adminMapEntity(entity: User): UserAdminDTO {
+export function mapAdminEntity(entity: User): UserAdminDTO {
   const user: UserAdminDTO = {
     id: entity.id,
     email: entity.email,
