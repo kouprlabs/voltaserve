@@ -145,8 +145,7 @@ const ConsolePanelGroups = () => {
                   setConfirmationHeader(<>Grant Owner Permission</>)
                   setConfirmationBody(
                     <>
-                      Are you sure you want to grant yourself owner permission
-                      on{' '}
+                      Do you want to grant yourself owner permission on{' '}
                       <span className={cx('font-bold')}>{workspace.name}</span>?
                     </>,
                   )
@@ -171,7 +170,7 @@ const ConsolePanelGroups = () => {
                   setConfirmationHeader(<>Revoke Permission</>)
                   setConfirmationBody(
                     <>
-                      Are you sure you want to revoke your permission on{' '}
+                      Do you want to revoke your permission on{' '}
                       <span className={cx('font-bold')}>{workspace.name}</span>?
                     </>,
                   )
