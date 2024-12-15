@@ -14,8 +14,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
-import { Avatar, Link as ChakraLink } from '@chakra-ui/react'
-import { Heading } from '@chakra-ui/react'
+import { Heading, Avatar, Link as ChakraLink } from '@chakra-ui/react'
 import {
   DataTable,
   IconRemoveModerator,
