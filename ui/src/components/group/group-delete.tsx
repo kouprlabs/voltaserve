@@ -94,7 +94,7 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                  <span>Are you sure you want to delete this group?</span>
+                  <span>Do you want to delete this group?</span>
                   <span>
                     Please type <b>{group.name}</b> to confirm.
                   </span>

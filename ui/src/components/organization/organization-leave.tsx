@@ -59,7 +59,7 @@ const OrganizationLeave = ({ open, id, onClose }: OrganizationLeaveProps) => {
         <ModalHeader>Leave Organization</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <span>Are you sure you want to leave this organization?</span>
+          <span>Do you want to leave this organization?</span>
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>

@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { ChangeEvent, useCallback, useRef, useState } from 'react'
-import { IconButton, Image } from '@chakra-ui/react'
+import { IconButton } from '@chakra-ui/react'
 import { IconEdit } from '@koupr/ui'
 import cx from 'classnames'
 
@@ -74,7 +74,7 @@ const AccountUploadPicture = ({
       >
         {src || initialValue ? (
           <div className={cx('relative', 'w-[400px]', 'h-[160px]')}>
-            <Image
+            <img
               src={src || initialValue || ''}
               className={cx(
                 'rounded',

@@ -9,8 +9,13 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Heading } from '@chakra-ui/react'
-import { Button, FormControl, FormErrorMessage, Input } from '@chakra-ui/react'
+import {
+  Heading,
+  Button,
+  FormControl,
+  FormErrorMessage,
+  Input,
+} from '@chakra-ui/react'
 import {
   Field,
   FieldAttributes,

@@ -99,7 +99,7 @@ const WorkspaceDelete = ({
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                  <span>Are you sure you want to delete this workspace?</span>
+                  <span>Do you want to delete this workspace?</span>
                   <span>
                     Please type <b>{workspace.name}</b> to confirm.
                   </span>

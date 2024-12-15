@@ -65,7 +65,7 @@ const GroupRemoveMember = ({
         <ModalCloseButton />
         <ModalBody>
           <div>
-            Are you sure you want to remove member{' '}
+            Do you want to remove member{' '}
             <span className={cx('font-bold')}>{userToString(user)}</span> from
             group <span className={cx('font-bold')}>{group.name}</span>?
           </div>
