@@ -19,9 +19,9 @@ import {
 } from '@dnd-kit/core'
 import cx from 'classnames'
 import { FileWithPath, useDropzone } from 'react-dropzone'
-import Hotkeys from 'react-hot-keys'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { List as ApiFileList } from '@/client/api/file'
-import { isMacOS } from '@/lib/helpers/os'
+import UploadMenu from '@/components/common/upload-menu'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -132,12 +132,92 @@ const FileList = ({ list, scale }: FileListProps) => {
   }, [dispatch])
 
   useEffect(() => {
+    if (isModalOpen) {
+      return
+    }
     if (isMenuOpen) {
       dispatch(contextMenuDidOpen())
     } else {
       dispatch(contextMenuDidClose())
     }
-  }, [isMenuOpen, dispatch])
+  }, [isMenuOpen, isModalOpen, dispatch])
+
+  useHotkeys(
+    'mod+a',
+    (keyboardEvent: KeyboardEvent) => {
+      if (isModalOpen) {
+        return
+      }
+      keyboardEvent.preventDefault()
+      dispatch(selectionUpdated(list?.data.map((f) => f.id)))
+    },
+    [list, isModalOpen, dispatch],
+  )
+
+  useHotkeys(
+    'mod+c',
+    () => {
+      if (isModalOpen) {
+        return
+      }
+      if (selection.length > 0) {
+        dispatch(copyModalDidOpen())
+      }
+    },
+    [selection, isModalOpen, dispatch],
+  )
+
+  useHotkeys(
+    'mod+x',
+    () => {
+      if (isModalOpen) {
+        return
+      }
+      if (selection.length > 0) {
+        dispatch(moveModalDidOpen())
+      }
+    },
+    [selection, isModalOpen, dispatch],
+  )
+
+  useHotkeys(
+    'mod+i',
+    () => {
+      if (isModalOpen) {
+        return
+      }
+      if (selection.length > 0) {
+        dispatch(infoModalDidOpen())
+      }
+    },
+    [selection, isModalOpen, dispatch],
+  )
+
+  useHotkeys(
+    'mod+e, f2',
+    () => {
+      if (isModalOpen) {
+        return
+      }
+      if (selection.length === 1) {
+        dispatch(renameModalDidOpen())
+      }
+    },
+    [selection, isModalOpen, dispatch],
+  )
+
+  useHotkeys(
+    'backspace, delete',
+    () => {
+      if (isModalOpen) {
+        return
+      }
+      if (selection.length > 0) {
+        dispatch(deleteModalDidOpen())
+      }
+    },
+    [selection, isModalOpen, dispatch],
+  )
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     dispatch(selectionAdded(event.active.id as string))
@@ -148,69 +228,8 @@ const FileList = ({ list, scale }: FileListProps) => {
     setActiveId(null)
   }, [])
 
-  const handleKeyDown = useCallback(
-    (keyName: string, event: KeyboardEvent) => {
-      console.log(keyName)
-      if (isModalOpen) {
-        return
-      }
-      event.preventDefault()
-      if (
-        (keyName === 'command+a' && isMacOS()) ||
-        (keyName === 'ctrl+a' && !isMacOS())
-      ) {
-        dispatch(selectionUpdated(list?.data.map((f) => f.id)))
-      } else if (
-        (keyName === 'command+c' && isMacOS()) ||
-        (keyName === 'ctrl+c' && !isMacOS())
-      ) {
-        if (selection.length > 0) {
-          dispatch(copyModalDidOpen())
-        }
-      } else if (
-        (keyName === 'command+x' && isMacOS()) ||
-        (keyName === 'ctrl+x' && !isMacOS())
-      ) {
-        if (selection.length > 0) {
-          dispatch(moveModalDidOpen())
-        }
-      } else if (
-        (keyName === 'command+i' && isMacOS()) ||
-        (keyName === 'ctrl+i' && !isMacOS())
-      ) {
-        if (selection.length > 0) {
-          dispatch(infoModalDidOpen())
-        }
-      } else if (
-        (keyName === 'command+e' && isMacOS()) ||
-        (keyName === 'f2' && !isMacOS())
-      ) {
-        if (selection.length === 1) {
-          dispatch(renameModalDidOpen())
-        }
-      } else if (
-        (keyName === 'command+backspace' && isMacOS()) ||
-        keyName === 'del'
-      ) {
-        if (selection.length > 0) {
-          dispatch(deleteModalDidOpen())
-        }
-      }
-    },
-    [selection, isModalOpen],
-  )
-
   return (
-    <Hotkeys
-      keyName={`
-        command+a,ctrl+a,
-        command+c,ctrl+c,
-        command+x,ctrl+x,
-        command+i,ctrl+i,
-        command+e,f2,
-        command+backspace,del`}
-      onKeyDown={handleKeyDown}
-    >
+    <>
       <div
         className={cx(
           'border-2',
@@ -232,7 +251,10 @@ const FileList = ({ list, scale }: FileListProps) => {
           onDragEnd={handleDragEnd}
         >
           {list.totalElements === 0 ? (
-            <SectionPlaceholder text="There are no items." />
+            <SectionPlaceholder
+              text="There are no items."
+              content={<UploadMenu />}
+            />
           ) : null}
           {viewType === FileViewType.Grid && list.totalElements > 0 ? (
             <div
@@ -300,7 +322,7 @@ const FileList = ({ list, scale }: FileListProps) => {
         position={menuPosition}
         onClose={() => setIsMenuOpen(false)}
       />
-    </Hotkeys>
+    </>
   )
 }
 

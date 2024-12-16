@@ -7,6 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
+import { IconCheckCircle } from '@koupr/ui'
 import cx from 'classnames'
 import { FileViewType } from '@/types/file'
 
@@ -59,7 +60,7 @@ const MultiSelectCheckbox = ({
         ></span>
       </div>
       {isChecked ? (
-        <span
+        <IconCheckCircle
           className={cx(
             'absolute',
             'top-0',
@@ -68,18 +69,13 @@ const MultiSelectCheckbox = ({
             'text-[18px]',
             'leading-[18px]',
             {
-              'material-symbols-rounded': !isChecked,
-              'material-symbols-rounded__filled': isChecked,
-            },
-            {
               'text-blue-500': isChecked,
               'text-gray-500': !isChecked,
               'dark:text-gray-600': !isChecked,
             },
           )}
-        >
-          check_circle
-        </span>
+          filled={isChecked}
+        />
       ) : null}
     </div>
   )

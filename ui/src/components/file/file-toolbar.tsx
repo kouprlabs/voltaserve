@@ -7,7 +7,14 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { ChangeEvent, ReactElement, useCallback, useRef, useState } from 'react'
+import {
+  ChangeEvent,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useParams } from 'react-router-dom'
 import {
   IconButton,
@@ -45,6 +52,8 @@ import {
   viewTypeToggled,
   selectionModeToggled,
   sortOrderToggled,
+  fileUploadDidClose,
+  folderUploadDidClose,
 } from '@/store/ui/files'
 import {
   createModalDidOpen,
@@ -77,10 +86,28 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const isContextMenuOpen = useAppSelector(
     (state) => state.ui.files.isContextMenuOpen,
   )
+  const isFileUploadOpen = useAppSelector(
+    (state) => state.ui.files.isFileUploadOpen,
+  )
+  const isFolderUploadOpen = useAppSelector(
+    (state) => state.ui.files.isFolderUploadOpen,
+  )
   const iconScales = [1, 1.25, 1.5, 1.75, 2.5]
   const fileUploadInput = useRef<HTMLInputElement>(null)
   const folderUploadInput = useRef<HTMLInputElement>(null)
   const { data: folder } = FileAPI.useGet(fileId)
+
+  useEffect(() => {
+    if (isFileUploadOpen) {
+      fileUploadInput?.current?.click()
+    }
+  }, [isFileUploadOpen, fileUploadInput])
+
+  useEffect(() => {
+    if (isFolderUploadOpen) {
+      folderUploadInput?.current?.click()
+    }
+  }, [isFolderUploadOpen, fileUploadInput])
 
   const handleUploadChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -109,6 +136,14 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
     },
     [workspaceId, fileId, dispatch],
   )
+
+  const handleFileUploadClick = useCallback(() => {
+    dispatch(fileUploadDidClose())
+  }, [dispatch])
+
+  const handleFolderUploadClick = useCallback(() => {
+    dispatch(folderUploadDidClose())
+  }, [dispatch])
 
   const handleIconScaleChange = useCallback(
     (value: number) => {
@@ -335,6 +370,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         type="file"
         multiple
         onChange={handleUploadChange}
+        onClick={handleFileUploadClick}
       />
       <input
         ref={folderUploadInput}
@@ -345,6 +381,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         webkitdirectory=""
         mozdirectory=""
         onChange={handleUploadChange}
+        onClick={handleFolderUploadClick}
       />
     </>
   )

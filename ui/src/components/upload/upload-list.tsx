@@ -8,9 +8,11 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { useEffect } from 'react'
+import { SectionPlaceholder } from '@koupr/ui'
 import cx from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { drawerDidClose } from '@/store/ui/uploads'
+import UploadMenu from '../common/upload-menu'
 import UploadItem from './upload-item'
 import { queue } from './upload-worker'
 
@@ -33,18 +35,23 @@ const UploadList = () => {
     }
   }, [items, dispatch])
 
-  if (items.length === 0) {
-    return <span>There are no uploads.</span>
-  }
-
   return (
-    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-      {items.map((u) => (
-        <div key={u.id} className={cx('flex', 'flex-col', 'gap-1.5')}>
-          <UploadItem upload={u} />
+    <>
+      {items.length === 0 ? (
+        <SectionPlaceholder
+          text="There are no uploads."
+          content={<UploadMenu />}
+        />
+      ) : (
+        <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+          {items.map((u) => (
+            <div key={u.id} className={cx('flex', 'flex-col', 'gap-1.5')}>
+              <UploadItem upload={u} />
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      )}
+    </>
   )
 }
 
