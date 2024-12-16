@@ -10,9 +10,9 @@
 import { useEffect } from 'react'
 import { SectionPlaceholder } from '@koupr/ui'
 import cx from 'classnames'
+import UploadMenu from '@/components/common/upload-menu'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { drawerDidClose } from '@/store/ui/uploads'
-import UploadMenu from '../common/upload-menu'
 import UploadItem from './upload-item'
 import { queue } from './upload-worker'
 
