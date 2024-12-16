@@ -35,6 +35,8 @@ export type FilesState = {
   isRenameModalOpen: boolean
   isSharingModalOpen: boolean
   isInfoModalOpen: boolean
+  isFileUploadOpen: boolean
+  isFolderUploadOpen: boolean
   isContextMenuOpen: boolean
   isSelectionMode: boolean
   iconScale: number
@@ -56,6 +58,8 @@ const initialState: FilesState = {
   isDeleteModalOpen: false,
   isRenameModalOpen: false,
   isSharingModalOpen: false,
+  isFileUploadOpen: false,
+  isFolderUploadOpen: false,
   isInfoModalOpen: false,
   isContextMenuOpen: false,
   iconScale: loadIconScale() || 1,
@@ -110,6 +114,12 @@ const slice = createSlice({
     infoModalDidOpen: (state) => {
       state.isInfoModalOpen = true
     },
+    fileUploadDidOpen: (state) => {
+      state.isFileUploadOpen = true
+    },
+    folderUploadDidOpen: (state) => {
+      state.isFolderUploadOpen = true
+    },
     contextMenuDidOpen: (state) => {
       state.isContextMenuOpen = true
     },
@@ -133,6 +143,12 @@ const slice = createSlice({
     },
     infoModalDidClose: (state) => {
       state.isInfoModalOpen = false
+    },
+    fileUploadDidClose: (state) => {
+      state.isFileUploadOpen = false
+    },
+    folderUploadDidClose: (state) => {
+      state.isFolderUploadOpen = false
     },
     allModalsDidClose: (state) => {
       state.isMoveModalOpen = false
@@ -198,6 +214,8 @@ export const {
   renameModalDidOpen,
   sharingModalDidOpen,
   infoModalDidOpen,
+  fileUploadDidOpen,
+  folderUploadDidOpen,
   contextMenuDidOpen,
   moveModalDidClose,
   copyModalDidClose,
@@ -206,6 +224,8 @@ export const {
   renameModalDidClose,
   sharingModalDidClose,
   infoModalDidClose,
+  fileUploadDidClose,
+  folderUploadDidClose,
   allModalsDidClose,
   contextMenuDidClose,
   multiSelectKeyUpdated,
