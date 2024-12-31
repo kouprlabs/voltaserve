@@ -11,7 +11,7 @@
 from psycopg import connect
 from psycopg.rows import dict_row
 
-from . import settings
+from .settings import settings
 
 conn = connect(
     conninfo=f"postgres://{settings.POSTGRES_USER}:"

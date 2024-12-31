@@ -13,7 +13,7 @@ from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from ..errors import GenericForbiddenException
-from . import settings
+from .settings import settings
 
 
 class JWTBearer(HTTPBearer):
