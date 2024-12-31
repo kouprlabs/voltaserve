@@ -10,6 +10,6 @@
 
 from meilisearch import Client
 
-from . import settings
+from .settings import settings
 
 meilisearch_client = Client(settings.SEARCH_URL)

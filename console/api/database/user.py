@@ -24,12 +24,12 @@ def fetch_user_organizations(user_id: str, page=1, size=10) -> Tuple[Iterable[Di
                 raise NotFoundException(message=f"User with id={user_id} does not exist!")
             data = curs.execute(
                 f"""
-                SELECT u.id, u."permission", u.create_time as "createTime", o.id as "organizationId", 
+                SELECT o.id, u."permission", o.create_time as "createTime", o.id as "organizationId", 
                 o."name" as "organizationName" 
                 FROM userpermission u 
                 JOIN organization o ON u.resource_id = o.id 
                 WHERE u.user_id = '{user_id}' 
-                ORDER BY u.create_time 
+                ORDER BY o.create_time 
                 OFFSET {(page - 1) * size} 
                 LIMIT {size}
                 """
@@ -64,12 +64,12 @@ def fetch_user_workspaces(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict]
                 raise NotFoundException(message=f"User with id={user_id} does not exist!")
             data = curs.execute(
                 f"""
-                SELECT u.id, u.permission, u.create_time as "createTime", w.id as "workspaceId", 
+                SELECT w.id, u.permission, w.create_time as "createTime", w.id as "workspaceId", 
                 w."name" as "workspaceName" 
                 FROM userpermission u 
                 JOIN workspace w ON u.resource_id = w.id 
                 WHERE u.user_id = '{user_id}' 
-                ORDER BY u.create_time 
+                ORDER BY w.create_time 
                 OFFSET {(page - 1) * size} 
                 LIMIT {size}
                 """
@@ -97,10 +97,10 @@ def fetch_user_groups(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], in
                 raise NotFoundException(message=f"User with id={user_id} does not exist!")
             data = curs.execute(
                 f"""
-                SELECT u.id, u.permission, u.create_time as "createTime", g.id as "groupId", g."name" as "groupName" 
+                SELECT g.id, u.permission, g.create_time as "createTime", g.id as "groupId", g."name" as "groupName" 
                 FROM userpermission u JOIN "group" g ON u.resource_id = g.id 
                 WHERE u.user_id = '{user_id}' 
-                ORDER BY u.create_time 
+                ORDER BY g.create_time 
                 OFFSET {(page - 1) * size} 
                 LIMIT {size}
                 """
