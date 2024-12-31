@@ -5,7 +5,7 @@
 Install dependencies:
 
 ```shell
-poetry install --no-interaction --no-cache
+poetry install
 ```
 
 Run:
