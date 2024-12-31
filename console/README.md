@@ -1,4 +1,4 @@
-# Voltaserve Console API
+# Voltaserve Console
 
 ## Getting Started
 
