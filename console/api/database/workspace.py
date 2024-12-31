@@ -8,20 +8,20 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-from typing import Dict, Tuple, Iterable
+from typing import Dict, Iterable, Tuple
+
 from psycopg import DatabaseError
-from . import exists
+
 from ..dependencies import conn
 from ..errors import EmptyDataException, NotFoundException
+from . import exists
 
 
 def fetch_workspace(_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
             if not exists(curs=curs, tablename="workspace", _id=_id):
-                raise NotFoundException(
-                    message=f"Workspace with id={_id} does not exist!"
-                )
+                raise NotFoundException(message=f"Workspace with id={_id} does not exist!")
             data = curs.execute(
                 f"""
                 SELECT w.id, w.name, w.organization_id, o.name as "organizationName", 

@@ -11,20 +11,20 @@
 import time
 import uuid
 
-from fastapi import FastAPI, Request, Response, status, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 
-from .dependencies import settings, conn
-from .errors import ServiceUnavailableError, ForbiddenError
+from .dependencies import conn, settings
+from .errors import ForbiddenError, ServiceUnavailableError
 from .log import req_logger, resp_logger
-from .models import GenericServiceUnavailableResponse, GenericErrorResponse
+from .models import GenericErrorResponse, GenericServiceUnavailableResponse
 from .routers import (
     group_api_router,
     organization_api_router,
-    workspace_api_router,
-    users_api_router,
     overview_api_router,
     user_permission_api_router,
+    users_api_router,
+    workspace_api_router,
 )
 
 
@@ -98,9 +98,7 @@ app.include_router(user_permission_api_router)
 async def add_process_time_header(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
-    response.headers["X-Process-Time-Ms"] = str(
-        round((time.time() - start_time) * 1000, 4)
-    )
+    response.headers["X-Process-Time-Ms"] = str(round((time.time() - start_time) * 1000, 4))
     return response
 
 
@@ -115,9 +113,7 @@ async def root():
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_204_NO_CONTENT: {},
-        status.HTTP_503_SERVICE_UNAVAILABLE: {
-            "model": GenericServiceUnavailableResponse
-        },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": GenericServiceUnavailableResponse},
     },
 )
 async def liveness(response: Response):
@@ -137,9 +133,7 @@ async def liveness(response: Response):
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_204_NO_CONTENT: {},
-        status.HTTP_503_SERVICE_UNAVAILABLE: {
-            "model": GenericServiceUnavailableResponse
-        },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": GenericServiceUnavailableResponse},
     },
 )
 async def readiness(response: Response):

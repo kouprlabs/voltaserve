@@ -4,7 +4,19 @@ version = "3.0.0"
 license = "BUSL-1.1"
 description = "Voltaserve Language"
 authors = ["Anass Bouassaba <anass@voltaserve.com>"]
-readme = "README.md"
+packages = [
+    { include = 'api/' },
+    { include = 'api/routers' },
+    { include = 'api/services' },
+]
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Framework :: FastAPI",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Development Status :: 5 - Production/Stable",
+]
 
 [tool.poetry.dependencies]
 python = "3.11.9"
@@ -13,10 +25,17 @@ spacy = "3.7.4"
 requests = "2.32.2"
 pyyaml = "6.0.2"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "24.4.2"
 flake8 = "7.1.0"
+isort = "5.13.2"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"

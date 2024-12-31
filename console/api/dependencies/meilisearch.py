@@ -9,6 +9,7 @@
 # AGPL-3.0-only in the root of this repository.
 
 from meilisearch import Client
+
 from . import settings
 
 meilisearch_client = Client(settings.SEARCH_URL)

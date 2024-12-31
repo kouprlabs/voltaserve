@@ -8,15 +8,14 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
+from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse, Response
-from fastapi import status, HTTPException
+
 from .error_codes import errors
 
 
 class GenericForbiddenException(HTTPException):
-    def __init__(
-        self, status_code: int = status.HTTP_403_FORBIDDEN, detail="Forbidden"
-    ):
+    def __init__(self, status_code: int = status.HTTP_403_FORBIDDEN, detail="Forbidden"):
         super().__init__(status_code=status_code, detail=detail)
 
 
@@ -47,9 +46,7 @@ class UnknownApiError(GenericError):
         message: str = "Internal server error",
         user_message: str | None = None,
     ):
-        super().__init__(
-            status_code=status_code, message=message, user_message=user_message
-        )
+        super().__init__(status_code=status_code, message=message, user_message=user_message)
 
 
 class NoContentError(Response):
@@ -79,9 +76,7 @@ class ServiceUnavailableError(GenericError):
         message: str = "Service unavailable",
         user_message: str | None = None,
     ):
-        super().__init__(
-            status_code=status_code, message=message, user_message=user_message
-        )
+        super().__init__(status_code=status_code, message=message, user_message=user_message)
 
 
 class ForbiddenError(GenericError):
@@ -92,6 +87,4 @@ class ForbiddenError(GenericError):
         message: str = "Forbidden",
         user_message: str | None = None,
     ):
-        super().__init__(
-            status_code=status_code, message=message, user_message=user_message
-        )
+        super().__init__(status_code=status_code, message=message, user_message=user_message)

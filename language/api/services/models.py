@@ -8,17 +8,21 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-import spacy.cli
 import pip
 import pkg_resources
+import spacy.cli
 import yaml
 
-with open("models.yaml", "r") as f:
-    models = yaml.safe_load(f)
+with open("models.yaml", "r") as file:
+    models = yaml.safe_load(file)
+
+
+def highlight(text):
+    return f"\033[1m{text}\033[0m"
 
 
 nlp = {}
-package_max_length = max(len(model["package"]) for model in models.values())
+padding = max(len(model["package"]) for model in models.values())
 for key in models.keys():
     package = models[key]["package"]
     url = models[key]["url"]
@@ -31,5 +35,4 @@ for key in models.keys():
     nlp[key] = spacy.load(package)
     nlp[key].add_pipe("sentencizer")
 
-    highlighted_package = f"\033[1m{package.ljust(package_max_length)}\033[0m"
-    print(f"🧠 Model {highlighted_package} loaded.")
+    print(f"🧠 Loaded model {highlight(package.ljust(padding))} for language {highlight(key)}.")

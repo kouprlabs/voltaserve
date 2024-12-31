@@ -10,13 +10,15 @@
 
 import datetime
 from typing import List
+
 from pydantic import Field
+
 from ..models.organization import OrganizationResponse
 from .generic import (
-    GenericPaginationRequest,
-    GenericResponse,
     GenericListResponse,
+    GenericPaginationRequest,
     GenericRequest,
+    GenericResponse,
     GenericSearchRequest,
 )
 

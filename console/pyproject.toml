@@ -2,25 +2,25 @@
 name = "voltaserve-console"
 version = "3.0.0"
 license = "BUSL-1.1"
-description = "Asynchronous API for voltaserve-console microservice"
+description = "Voltaserve Console"
 authors = ["Piotr Łoboda <voltaserve@lobson.pl>"]
 maintainers = ["Piotr Łoboda <voltaserve@lobson.pl>"]
 packages = [
-        {include = 'api/'},
-        {include = 'api/routers'},
-        {include = 'api/models'},
-        {include = 'api/database'},
-        {include = 'api/errors'},
-        {include = 'api/dependencies'}
-    ]
-
+    { include = 'api/' },
+    { include = 'api/routers' },
+    { include = 'api/models' },
+    { include = 'api/database' },
+    { include = 'api/errors' },
+    { include = 'api/dependencies' },
+]
 classifiers = [
-        "Programming Language :: Python :: 3.11",
-        "Framework :: FastAPI",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: POSIX :: Linux",
-        "Development Status :: 5 - Production/Stable"
-    ]
+    "Programming Language :: Python :: 3.11",
+    "Framework :: FastAPI",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Development Status :: 5 - Production/Stable",
+]
 
 [tool.poetry.dependencies]
 python = "3.11.9"
@@ -40,4 +40,10 @@ sqids = "0.5.0"
 [tool.poetry.group.dev.dependencies]
 flake8 = "7.1.1"
 black = "24.10.0"
+isort = "5.13.2"
 
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"

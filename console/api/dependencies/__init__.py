@@ -8,9 +8,9 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-from .settings import settings
-from .meilisearch import meilisearch_client
 from .database import conn
-from .utils import parse_sql_update_query, camel_to_snake, new_id, new_timestamp
 from .jwt import JWTBearer
+from .meilisearch import meilisearch_client
 from .redis import redis_conn
+from .settings import settings
+from .utils import camel_to_snake, new_id, new_timestamp, parse_sql_update_query

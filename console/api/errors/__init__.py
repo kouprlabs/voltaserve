@@ -9,12 +9,12 @@
 # AGPL-3.0-only in the root of this repository.
 
 from .api_errors import (
-    NotFoundError,
-    NoContentError,
-    ServiceUnavailableError,
-    UnknownApiError,
     ForbiddenError,
     GenericForbiddenException,
+    NoContentError,
+    NotFoundError,
+    ServiceUnavailableError,
+    UnknownApiError,
 )
 from .database_errors import EmptyDataException, NotFoundException
 from .error_codes import errors

@@ -23,11 +23,17 @@ poetry run python -m api.uvi --reload
 Lint code:
 
 ```shell
-flake8 .
+poetry run flake8 .
 ```
 
 Format code:
 
 ```shell
-black .
+poetry run black .
+```
+
+Sort imports:
+
+```shell
+poetry run isort .
 ```

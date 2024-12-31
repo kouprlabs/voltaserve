@@ -10,12 +10,14 @@
 
 import datetime
 from typing import List, Literal
+
 from pydantic import BaseModel
+
 from .generic import (
-    GenericPaginationRequest,
-    GenericResponse,
     GenericListResponse,
+    GenericPaginationRequest,
     GenericRequest,
+    GenericResponse,
 )
 
 

@@ -10,11 +10,12 @@
 
 import datetime
 from typing import List
+
 from .generic import (
-    GenericPaginationRequest,
-    GenericResponse,
     GenericListResponse,
+    GenericPaginationRequest,
     GenericRequest,
+    GenericResponse,
 )
 
 

@@ -9,48 +9,46 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
+
 from ..database import (
     fetch_organization,
-    fetch_organizations,
+    fetch_organization_count,
+    fetch_organization_groups,
     fetch_organization_users,
     fetch_organization_workspaces,
-    fetch_organization_groups,
-    fetch_organization_count,
+    fetch_organizations,
 )
 from ..dependencies import JWTBearer, meilisearch_client
-from ..log import base_logger
 from ..errors import (
-    NotFoundError,
     EmptyDataException,
     NoContentError,
+    NotFoundError,
     NotFoundException,
     UnknownApiError,
 )
+from ..log import base_logger
 from ..models import (
-    OrganizationResponse,
-    OrganizationRequest,
-    OrganizationListResponse,
-    OrganizationListRequest,
-    OrganizationWorkspaceListRequest,
-    OrganizationWorkspaceListResponse,
-    OrganizationGroupListResponse,
+    CountResponse,
     OrganizationGroupListRequest,
+    OrganizationGroupListResponse,
+    OrganizationListRequest,
+    OrganizationListResponse,
+    OrganizationRequest,
+    OrganizationResponse,
+    OrganizationSearchRequest,
     OrganizationUserListRequest,
     OrganizationUserListResponse,
-    CountResponse,
-    OrganizationSearchRequest,
+    OrganizationWorkspaceListRequest,
+    OrganizationWorkspaceListResponse,
 )
 
-organization_api_router = APIRouter(
-    prefix="/organization", tags=["organization"], dependencies=[Depends(JWTBearer())]
-)
+organization_api_router = APIRouter(prefix="/organization", tags=["organization"], dependencies=[Depends(JWTBearer())])
 logger = base_logger.getChild("organization")
 
 
-@organization_api_router.get(
-    path="", responses={status.HTTP_200_OK: {"model": OrganizationResponse}}
-)
+@organization_api_router.get(path="", responses={status.HTTP_200_OK: {"model": OrganizationResponse}})
 async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
     try:
         organization = fetch_organization(organization_id=data.id)
@@ -63,9 +61,7 @@ async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
         return UnknownApiError()
 
 
-@organization_api_router.get(
-    path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}}
-)
+@organization_api_router.get(path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}})
 async def get_organization_count():
     try:
         return CountResponse(**fetch_organization_count())
@@ -74,9 +70,7 @@ async def get_organization_count():
         return UnknownApiError()
 
 
-@organization_api_router.get(
-    path="/all", responses={status.HTTP_200_OK: {"model": OrganizationListResponse}}
-)
+@organization_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": OrganizationListResponse}})
 async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends()]):
     try:
         organizations, count = fetch_organizations(page=data.page, size=data.size)
@@ -95,12 +89,8 @@ async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends
         return UnknownApiError()
 
 
-@organization_api_router.get(
-    path="/search", responses={status.HTTP_200_OK: {"model": OrganizationListResponse}}
-)
-async def get_search_organizations(
-    data: Annotated[OrganizationSearchRequest, Depends()]
-):
+@organization_api_router.get(path="/search", responses={status.HTTP_200_OK: {"model": OrganizationListResponse}})
+async def get_search_organizations(data: Annotated[OrganizationSearchRequest, Depends()]):
     try:
         organizations = meilisearch_client.index("organization").search(
             data.query, {"page": data.page, "hitsPerPage": data.size}
@@ -132,13 +122,9 @@ async def get_search_organizations(
     path="/users",
     responses={status.HTTP_200_OK: {"model": OrganizationUserListResponse}},
 )
-async def get_organization_users(
-    data: Annotated[OrganizationUserListRequest, Depends()]
-):
+async def get_organization_users(data: Annotated[OrganizationUserListRequest, Depends()]):
     try:
-        users, count = fetch_organization_users(
-            organization_id=data.id, page=data.page, size=data.size
-        )
+        users, count = fetch_organization_users(organization_id=data.id, page=data.page, size=data.size)
         return OrganizationUserListResponse(
             data=users,
             totalElements=count,
@@ -161,13 +147,9 @@ async def get_organization_users(
     path="/workspaces",
     responses={status.HTTP_200_OK: {"model": OrganizationWorkspaceListResponse}},
 )
-async def get_organization_workspaces(
-    data: Annotated[OrganizationWorkspaceListRequest, Depends()]
-):
+async def get_organization_workspaces(data: Annotated[OrganizationWorkspaceListRequest, Depends()]):
     try:
-        workspaces, count = fetch_organization_workspaces(
-            organization_id=data.id, page=data.page, size=data.size
-        )
+        workspaces, count = fetch_organization_workspaces(organization_id=data.id, page=data.page, size=data.size)
         return OrganizationWorkspaceListResponse(
             data=workspaces,
             totalElements=count,
@@ -190,13 +172,9 @@ async def get_organization_workspaces(
     path="/groups",
     responses={status.HTTP_200_OK: {"model": OrganizationGroupListResponse}},
 )
-async def get_organization_groups(
-    data: Annotated[OrganizationGroupListRequest, Depends()]
-):
+async def get_organization_groups(data: Annotated[OrganizationGroupListRequest, Depends()]):
     try:
-        groups, count = fetch_organization_groups(
-            organization_id=data.id, page=data.page, size=data.size
-        )
+        groups, count = fetch_organization_groups(organization_id=data.id, page=data.page, size=data.size)
         return OrganizationWorkspaceListResponse(
             data=groups,
             totalElements=count,

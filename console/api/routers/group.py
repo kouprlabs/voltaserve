@@ -9,30 +9,30 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
-from ..database import fetch_groups, fetch_group
+
+from ..database import fetch_group, fetch_groups
 from ..database.group import fetch_group_count
 from ..dependencies import JWTBearer, meilisearch_client
-from ..log import base_logger
 from ..errors import (
-    NotFoundError,
-    NoContentError,
     EmptyDataException,
+    NoContentError,
+    NotFoundError,
     NotFoundException,
     UnknownApiError,
 )
+from ..log import base_logger
 from ..models import (
-    GroupResponse,
+    CountResponse,
     GroupListRequest,
     GroupListResponse,
     GroupRequest,
-    CountResponse,
+    GroupResponse,
     GroupSearchRequest,
 )
 
-group_api_router = APIRouter(
-    prefix="/group", tags=["group"], dependencies=[Depends(JWTBearer())]
-)
+group_api_router = APIRouter(prefix="/group", tags=["group"], dependencies=[Depends(JWTBearer())])
 logger = base_logger.getChild("group")
 
 
@@ -49,9 +49,7 @@ async def get_group(data: Annotated[GroupRequest, Depends()]):
         return UnknownApiError()
 
 
-@group_api_router.get(
-    path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}}
-)
+@group_api_router.get(path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}})
 async def get_group_count():
     try:
         return CountResponse(**fetch_group_count())
@@ -60,9 +58,7 @@ async def get_group_count():
         return UnknownApiError()
 
 
-@group_api_router.get(
-    path="/all", responses={status.HTTP_200_OK: {"model": GroupListResponse}}
-)
+@group_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": GroupListResponse}})
 async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
     try:
         groups, count = fetch_groups(page=data.page, size=data.size)
@@ -81,14 +77,10 @@ async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
         return UnknownApiError()
 
 
-@group_api_router.get(
-    path="/search", responses={status.HTTP_200_OK: {"model": GroupListResponse}}
-)
+@group_api_router.get(path="/search", responses={status.HTTP_200_OK: {"model": GroupListResponse}})
 async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
     try:
-        groups = meilisearch_client.index("group").search(
-            data.query, {"page": data.page, "hitsPerPage": data.size}
-        )
+        groups = meilisearch_client.index("group").search(data.query, {"page": data.page, "hitsPerPage": data.size})
         hits = []
         for group in groups["hits"]:
             try:

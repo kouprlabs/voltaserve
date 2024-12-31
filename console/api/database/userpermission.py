@@ -9,6 +9,7 @@
 # AGPL-3.0-only in the root of this repository.
 
 from psycopg import DatabaseError
+
 from api.dependencies import conn, new_id, new_timestamp
 
 

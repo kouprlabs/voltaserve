@@ -44,6 +44,12 @@ jobs:
           version: 24.10.0
           src: console
 
+      - name: Lint Using isort
+        uses: isort/isort-action@v1
+        with:
+          isort-version: 5.13.2
+          configuration: --profile=black
+
     permissions:
       contents: read
       pull-requests: read
@@ -74,4 +80,3 @@ jobs:
           context: ./console
           push: false
           platforms: linux/${{ matrix.platform }}
-
