@@ -48,6 +48,7 @@ jobs:
         uses: isort/isort-action@v1
         with:
           isort-version: 5.13.2
+          configuration: --profile=black
 
     permissions:
       contents: read
