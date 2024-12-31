@@ -13,8 +13,6 @@ import psycopg
 
 def exists(curs: psycopg.cursor, tablename: str, _id: str) -> bool:
     try:
-        return curs.execute(
-            f"SELECT EXISTS(SELECT 1 FROM \"{tablename}\" WHERE id = '{_id}');"
-        ).fetchone()["exists"]
+        return curs.execute(f"SELECT EXISTS(SELECT 1 FROM \"{tablename}\" WHERE id = '{_id}');").fetchone()["exists"]
     except Exception as e:
         raise e

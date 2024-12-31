@@ -9,35 +9,35 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
+
 from ..database import (
+    fetch_user_count,
+    fetch_user_groups,
     fetch_user_organizations,
     fetch_user_workspaces,
-    fetch_user_groups,
-    fetch_user_count,
 )
 from ..dependencies import JWTBearer
-from ..log import base_logger
 from ..errors import (
-    NotFoundError,
     EmptyDataException,
     NoContentError,
+    NotFoundError,
     NotFoundException,
     UnknownApiError,
 )
+from ..log import base_logger
 from ..models import (
+    CountResponse,
+    UserGroupListRequest,
+    UserGroupListResponse,
     UserOrganizationListRequest,
     UserOrganizationListResponse,
-    UserWorkspaceListResponse,
     UserWorkspaceListRequest,
-    UserGroupListResponse,
-    UserGroupListRequest,
-    CountResponse,
+    UserWorkspaceListResponse,
 )
 
-users_api_router = APIRouter(
-    prefix="/user", tags=["user"], dependencies=[Depends(JWTBearer())]
-)
+users_api_router = APIRouter(prefix="/user", tags=["user"], dependencies=[Depends(JWTBearer())])
 logger = base_logger.getChild("user")
 
 
@@ -45,13 +45,9 @@ logger = base_logger.getChild("user")
     path="/organizations",
     responses={status.HTTP_200_OK: {"model": UserOrganizationListResponse}},
 )
-async def get_user_organizations(
-    data: Annotated[UserOrganizationListRequest, Depends()]
-):
+async def get_user_organizations(data: Annotated[UserOrganizationListRequest, Depends()]):
     try:
-        organizations, count = fetch_user_organizations(
-            user_id=data.id, page=data.page, size=data.size
-        )
+        organizations, count = fetch_user_organizations(user_id=data.id, page=data.page, size=data.size)
         return UserOrganizationListResponse(
             data=organizations,
             totalElements=count,
@@ -76,9 +72,7 @@ async def get_user_organizations(
 )
 async def get_user_workspaces(data: Annotated[UserWorkspaceListRequest, Depends()]):
     try:
-        workspaces, count = fetch_user_workspaces(
-            user_id=data.id, page=data.page, size=data.size
-        )
+        workspaces, count = fetch_user_workspaces(user_id=data.id, page=data.page, size=data.size)
         return UserWorkspaceListResponse(
             data=workspaces,
             totalElements=count,
@@ -97,14 +91,10 @@ async def get_user_workspaces(data: Annotated[UserWorkspaceListRequest, Depends(
         return UnknownApiError()
 
 
-@users_api_router.get(
-    path="/groups", responses={status.HTTP_200_OK: {"model": UserGroupListResponse}}
-)
+@users_api_router.get(path="/groups", responses={status.HTTP_200_OK: {"model": UserGroupListResponse}})
 async def get_user_groups(data: Annotated[UserGroupListRequest, Depends()]):
     try:
-        groups, count = fetch_user_groups(
-            user_id=data.id, page=data.page, size=data.size
-        )
+        groups, count = fetch_user_groups(user_id=data.id, page=data.page, size=data.size)
         return UserGroupListResponse(
             data=groups,
             totalElements=count,
@@ -123,9 +113,7 @@ async def get_user_groups(data: Annotated[UserGroupListRequest, Depends()]):
         return UnknownApiError()
 
 
-@users_api_router.get(
-    path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}}
-)
+@users_api_router.get(path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}})
 async def get_user_count():
     try:
         return CountResponse(**fetch_user_count())

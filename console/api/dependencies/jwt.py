@@ -10,9 +10,10 @@
 
 import jwt
 from fastapi import Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from . import settings
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
 from ..errors import GenericForbiddenException
+from . import settings
 
 
 class JWTBearer(HTTPBearer):
@@ -21,9 +22,7 @@ class JWTBearer(HTTPBearer):
 
     async def __call__(self, request: Request):
         jwt.api_jws.PyJWS.header_typ = False
-        credentials: HTTPAuthorizationCredentials = await super(
-            JWTBearer, self
-        ).__call__(request)
+        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
                 raise GenericForbiddenException(detail="Invalid authentication scheme.")

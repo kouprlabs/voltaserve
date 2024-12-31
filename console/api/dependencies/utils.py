@@ -8,10 +8,11 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 import sys
+import time
+import uuid
 from datetime import datetime, timezone
 from functools import reduce
-import uuid
-import time
+
 from sqids import Sqids
 
 
@@ -26,9 +27,7 @@ def parse_sql_update_query(tablename: str, data: dict):
         if k != "id" and isinstance(v, datetime)
     )
     data_fields = ", ".join(
-        f"{camel_to_snake(k)} = '{v}'"
-        for k, v in data.items()
-        if k != "id" and not isinstance(v, datetime)
+        f"{camel_to_snake(k)} = '{v}'" for k, v in data.items() if k != "id" and not isinstance(v, datetime)
     )
     return (
         f'UPDATE "{tablename}" SET {data_fields} WHERE id = \'{data["id"]}\';'

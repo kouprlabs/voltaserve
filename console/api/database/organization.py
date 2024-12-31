@@ -8,20 +8,20 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-from typing import Dict, Tuple, Iterable
+from typing import Dict, Iterable, Tuple
+
 from psycopg import DatabaseError
-from . import exists
+
 from ..dependencies import conn
 from ..errors import EmptyDataException, NotFoundException
+from . import exists
 
 
 def fetch_organization(organization_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
             if not exists(curs=curs, tablename="organization", _id=organization_id):
-                raise NotFoundException(
-                    message=f"Organization with id={organization_id} does not exist!"
-                )
+                raise NotFoundException(message=f"Organization with id={organization_id} does not exist!")
             return curs.execute(
                 f"""
                 SELECT id, name, create_time as "createTime", update_time as "updateTime" 
@@ -61,9 +61,7 @@ def fetch_organization_count() -> Dict:
         raise error
 
 
-def fetch_organization_users(
-    organization_id: str, page=1, size=10
-) -> Tuple[Iterable[Dict], int]:
+def fetch_organization_users(organization_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             data = curs.execute(
@@ -94,9 +92,7 @@ def fetch_organization_users(
         raise error
 
 
-def fetch_organization_workspaces(
-    organization_id: str, page=1, size=10
-) -> Tuple[Iterable[Dict], int]:
+def fetch_organization_workspaces(organization_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             data = curs.execute(
@@ -124,9 +120,7 @@ def fetch_organization_workspaces(
         raise error
 
 
-def fetch_organization_groups(
-    organization_id: str, page=1, size=10
-) -> Tuple[Iterable[Dict], int]:
+def fetch_organization_groups(organization_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             data = curs.execute(

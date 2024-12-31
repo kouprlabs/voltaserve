@@ -8,9 +8,10 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-from flask import Blueprint, request, jsonify
-from ..services.models import nlp
+from flask import Blueprint, jsonify, request
+
 from ..services.entities import EntityExtractor
+from ..services.models import nlp
 
 bp = Blueprint("entities", __name__)
 

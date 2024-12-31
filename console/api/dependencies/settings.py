@@ -9,6 +9,7 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Optional
+
 from pydantic_settings import BaseSettings
 
 

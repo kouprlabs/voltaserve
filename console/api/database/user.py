@@ -8,22 +8,20 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-from typing import Tuple, Iterable, Dict
+from typing import Dict, Iterable, Tuple
+
 from psycopg import DatabaseError
-from . import exists
+
 from ..dependencies import conn
 from ..errors import EmptyDataException, NotFoundException
+from . import exists
 
 
-def fetch_user_organizations(
-    user_id: str, page=1, size=10
-) -> Tuple[Iterable[Dict], int]:
+def fetch_user_organizations(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             if not exists(curs=curs, tablename="user", _id=user_id):
-                raise NotFoundException(
-                    message=f"User with id={user_id} does not exist!"
-                )
+                raise NotFoundException(message=f"User with id={user_id} does not exist!")
             data = curs.execute(
                 f"""
                 SELECT u.id, u."permission", u.create_time as "createTime", o.id as "organizationId", 
@@ -63,9 +61,7 @@ def fetch_user_workspaces(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict]
     try:
         with conn.cursor() as curs:
             if not exists(curs=curs, tablename="user", _id=user_id):
-                raise NotFoundException(
-                    message=f"User with id={user_id} does not exist!"
-                )
+                raise NotFoundException(message=f"User with id={user_id} does not exist!")
             data = curs.execute(
                 f"""
                 SELECT u.id, u.permission, u.create_time as "createTime", w.id as "workspaceId", 
@@ -98,9 +94,7 @@ def fetch_user_groups(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], in
     try:
         with conn.cursor() as curs:
             if not exists(curs=curs, tablename="user", _id=user_id):
-                raise NotFoundException(
-                    message=f"User with id={user_id} does not exist!"
-                )
+                raise NotFoundException(message=f"User with id={user_id} does not exist!")
             data = curs.execute(
                 f"""
                 SELECT u.id, u.permission, u.create_time as "createTime", g.id as "groupId", g."name" as "groupName" 

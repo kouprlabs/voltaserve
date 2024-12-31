@@ -8,8 +8,9 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-import string
 import re
+import string
+
 from spacy.language import Language
 
 
@@ -61,11 +62,7 @@ class EntityExtractor:
         Returns:
             list: A filtered list of entities.
         """
-        return [
-            entity
-            for entity in entities
-            if len(entity["text"]) >= 3 and entity["label"] != "CARDINAL"
-        ]
+        return [entity for entity in entities if len(entity["text"]) >= 3 and entity["label"] != "CARDINAL"]
 
     @staticmethod
     def group_and_count_frequency(entities):
@@ -81,9 +78,7 @@ class EntityExtractor:
                 and values are the corresponding counts.
         """
         result = {}
-        whitespace_and_non_printable = string.whitespace + "".join(
-            chr(i) for i in range(32)
-        )
+        whitespace_and_non_printable = string.whitespace + "".join(chr(i) for i in range(32))
         for entity in entities:
             entity["text"] = entity["text"].strip(whitespace_and_non_printable)
             key = entity["text"].lower()

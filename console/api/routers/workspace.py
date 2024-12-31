@@ -9,29 +9,27 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
-from ..database import (
-    fetch_workspace,
-    fetch_workspaces,
-    fetch_workspace_count,
-)
+
+from ..database import fetch_workspace, fetch_workspace_count, fetch_workspaces
 from ..dependencies import JWTBearer, meilisearch_client
-from ..log import base_logger
 from ..errors import (
-    NotFoundError,
     EmptyDataException,
     NoContentError,
+    NotFoundError,
     NotFoundException,
     UnknownApiError,
 )
+from ..log import base_logger
 from ..models import (
-    WorkspaceResponse,
-    WorkspaceRequest,
-    WorkspaceListResponse,
-    WorkspaceListRequest,
-    GenericUnexpectedErrorResponse,
-    GenericAcceptedResponse,
     CountResponse,
+    GenericAcceptedResponse,
+    GenericUnexpectedErrorResponse,
+    WorkspaceListRequest,
+    WorkspaceListResponse,
+    WorkspaceRequest,
+    WorkspaceResponse,
     WorkspaceSearchRequest,
 )
 
@@ -39,9 +37,7 @@ workspace_api_router = APIRouter(
     prefix="/workspace",
     tags=["workspace"],
     responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "model": GenericUnexpectedErrorResponse
-        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": GenericUnexpectedErrorResponse},
         status.HTTP_202_ACCEPTED: {"model": GenericAcceptedResponse},
     },
     dependencies=[Depends(JWTBearer())],
@@ -49,9 +45,7 @@ workspace_api_router = APIRouter(
 logger = base_logger.getChild("workspace")
 
 
-@workspace_api_router.get(
-    path="", responses={status.HTTP_200_OK: {"model": WorkspaceResponse}}
-)
+@workspace_api_router.get(path="", responses={status.HTTP_200_OK: {"model": WorkspaceResponse}})
 async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
     try:
         workspace = fetch_workspace(_id=data.id)
@@ -64,9 +58,7 @@ async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
         return UnknownApiError()
 
 
-@workspace_api_router.get(
-    path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}}
-)
+@workspace_api_router.get(path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}})
 async def get_workspace_count():
     try:
         return CountResponse(**fetch_workspace_count())
@@ -75,9 +67,7 @@ async def get_workspace_count():
         return UnknownApiError()
 
 
-@workspace_api_router.get(
-    path="/all", responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}}
-)
+@workspace_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}})
 async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
     try:
         workspaces, count = fetch_workspaces(page=data.page, size=data.size)
@@ -96,9 +86,7 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
         return UnknownApiError()
 
 
-@workspace_api_router.get(
-    path="/search", responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}}
-)
+@workspace_api_router.get(path="/search", responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}})
 async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends()]):
     try:
         workspaces = meilisearch_client.index("workspace").search(

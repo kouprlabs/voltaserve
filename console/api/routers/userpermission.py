@@ -9,6 +9,7 @@
 # AGPL-3.0-only in the root of this repository.
 
 from fastapi import APIRouter, Depends, Response, status
+
 from api.database import grant_user_permission, revoke_user_permission
 from api.dependencies import JWTBearer, redis_conn
 from api.models.userpermission import (

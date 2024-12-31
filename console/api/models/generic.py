@@ -9,7 +9,8 @@
 # AGPL-3.0-only in the root of this repository.
 
 import datetime
-from typing import List, Any
+from typing import Any, List
+
 from fastapi import status
 from pydantic import BaseModel, Field
 

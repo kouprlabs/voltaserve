@@ -9,6 +9,7 @@ poetry install
 ```
 
 Run:
+
 ```shell
 poetry run flask run --host=0.0.0.0 --port=8084
 ```
@@ -26,6 +27,13 @@ poetry run flake8 .
 ```
 
 Format code:
+
 ```shell
 poetry run black .
+```
+
+Sort imports:
+
+```shell
+poetry run isort .
 ```

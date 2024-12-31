@@ -9,7 +9,9 @@
 # AGPL-3.0-only in the root of this repository.
 
 from typing import List
-from pydantic import BaseModel, AnyHttpUrl
+
+from pydantic import AnyHttpUrl, BaseModel
+
 from . import GenericListResponse, GenericRequest
 
 

@@ -9,10 +9,10 @@
 # AGPL-3.0-only in the root of this repository.
 
 from flask import Flask
+
 from api.routers.entities import bp as entities_bp
 from api.routers.health import bp as health_bp
 from api.routers.version import bp as version_bp
-
 
 app = Flask(__name__)
 

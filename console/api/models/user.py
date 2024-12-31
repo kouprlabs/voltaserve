@@ -10,12 +10,14 @@
 
 import datetime
 from typing import List
+
 from pydantic import EmailStr, Field
+
 from .generic import (
-    GenericPaginationRequest,
-    GenericResponse,
     GenericListResponse,
+    GenericPaginationRequest,
     GenericRequest,
+    GenericResponse,
 )
 
 

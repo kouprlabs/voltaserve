@@ -31,12 +31,9 @@ if __name__ == "__main__":
         )
     elif settings.LOG_FORMAT == "PLAIN":
         log_config["formatters"]["access"]["fmt"] = (
-            "%(asctime)s|%(name)s|%(levelname)s|%(client_addr)s|"
-            "%(request_line)s|%(status_code)s"
+            "%(asctime)s|%(name)s|%(levelname)s|%(client_addr)s|" "%(request_line)s|%(status_code)s"
         )
-        log_config["formatters"]["default"][
-            "fmt"
-        ] = "%(asctime)s|%(name)s|%(levelname)s|%(message)s"
+        log_config["formatters"]["default"]["fmt"] = "%(asctime)s|%(name)s|%(levelname)s|%(message)s"
     else:
         raise ValueError("Wrong logging format, available JSON and PLAIN")
     if settings.LOG_LEVEL == "DEBUG":
