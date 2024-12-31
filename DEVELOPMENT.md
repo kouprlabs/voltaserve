@@ -47,26 +47,6 @@ ALTER DATABASE voltaserve OWNER TO voltaserve;
 
 Run the [migrations/migrate]() tool in the newly created database.
 
-#### CockroachDB (alternative to PostgreSQL)
-
-Download the [binary archive](https://www.cockroachlabs.com/docs/releases) and extract the archive.
-
-Start CockroachDB:
-
-```shell
-./cockroach start-single-node --insecure --http-addr=0.0.0.0:18080
-```
-
-Using DBeaver or any PostgreSQL GUI, connect with `root` and no password, then create a user and database:
-
-```sql
-CREATE DATABASE voltaserve;
-CREATE USER voltaserve;
-GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
-```
-
-Run the [migrations/migrate]() tool in the newly created database.
-
 #### Redis
 
 Download the [source archive](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-from-source/) and follow the guide to build from the source.
