@@ -18,7 +18,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 
@@ -410,7 +409,7 @@ func (cl *FileClient) DeleteOne(id string) error {
 	return cl.successfulResponseOrThrow(resp)
 }
 
-func (cl *FileClient) DownloadOriginal(file *File, outputPath string, rangeHeader *string) error {
+func (cl *FileClient) DownloadOriginal(file *File, w io.Writer, rangeHeader *string) error {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/files/%s/original%s?access_token=%s", cl.config.APIURL, file.ID, file.Snapshot.Original.Extension, cl.token.AccessToken), nil)
 	if err != nil {
 		return err
@@ -429,17 +428,9 @@ func (cl *FileClient) DownloadOriginal(file *File, outputPath string, rangeHeade
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	out, err := os.Create(outputPath) //nolint:gosec // Known safe value
-	if err != nil {
+	if _, err := io.Copy(w, resp.Body); err != nil {
 		return err
 	}
-	defer func(out *os.File) {
-		err := out.Close()
-		if err != nil {
-			infra.GetLogger().Error(err.Error())
-		}
-	}(out)
-	_, err = io.Copy(out, resp.Body)
 	return err
 }
 

@@ -349,7 +349,9 @@ func (svc *FileService) DownloadOriginalBuffer(id string, rangeHeader string, bu
 		var ri *infra.RangeInterval
 		if rangeHeader != "" {
 			ri = infra.NewRangeInterval(rangeHeader, objectInfo.Size)
-			ri.ApplyToMinIOGetObjectOptions(&opts)
+			if err := opts.SetRange(ri.Start, ri.End); err != nil {
+				return nil, nil, nil, err
+			}
 		}
 		if _, err := svc.s3.GetObjectWithBuffer(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, buf, opts); err != nil {
 			return nil, nil, nil, err
@@ -384,7 +386,9 @@ func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf
 		var ri *infra.RangeInterval
 		if rangeHeader != "" {
 			ri = infra.NewRangeInterval(rangeHeader, objectInfo.Size)
-			ri.ApplyToMinIOGetObjectOptions(&opts)
+			if err := opts.SetRange(ri.Start, ri.End); err != nil {
+				return nil, nil, nil, err
+			}
 		}
 		if _, err := svc.s3.GetObjectWithBuffer(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket, buf, opts); err != nil {
 			return nil, nil, nil, err

@@ -12,14 +12,9 @@ package handler
 
 import (
 	"fmt"
-	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/google/uuid"
 
 	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
@@ -49,17 +44,8 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(err, w)
 		return
 	}
-	outputPath := filepath.Join(os.TempDir(), uuid.New().String())
-	rangeHeader := r.Header.Get("Range")
-	if rangeHeader != "" {
-		fmt.Printf("Received Range: %s\n", rangeHeader)
-	}
-	err = cl.DownloadOriginal(file, outputPath, &rangeHeader)
-	if err != nil {
-		infra.HandleError(err, w)
-		return
-	}
 	size := file.Snapshot.Original.Size
+	rangeHeader := r.Header.Get("Range")
 	if rangeHeader != "" {
 		rangeHeader = strings.Replace(rangeHeader, "bytes=", "", 1)
 		parts := strings.Split(rangeHeader, "-")
@@ -76,47 +62,24 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 		}
 		chunkSize := rangeEnd - rangeStart + 1
 		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", rangeStart, rangeEnd, size))
-		fmt.Printf("Sending Content-Range: %s\n", fmt.Sprintf("bytes %d-%d/%d", rangeStart, rangeEnd, size))
 		w.Header().Set("Accept-Ranges", "bytes")
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", chunkSize))
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.WriteHeader(http.StatusPartialContent)
-		file, err := os.Open(outputPath) //nolint:gosec // Known safe path
-		if err != nil {
-			infra.HandleError(err, w)
-			return
-		}
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				infra.HandleError(err, w)
+		if err := cl.DownloadOriginal(file, w, &rangeHeader); err != nil {
+			if !strings.Contains(err.Error(), "write: broken pipe") && !strings.Contains(err.Error(), "write: connection reset by peer") {
+				infra.GetLogger().Error(err)
 			}
-		}(file)
-		if _, err := io.Copy(w, file); err != nil {
-			return
-		}
-		if err := os.Remove(outputPath); err != nil {
 			return
 		}
 	} else {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.WriteHeader(http.StatusOK)
-		file, err := os.Open(outputPath) //nolint:gosec // Known safe path
-		if err != nil {
-			infra.HandleError(err, w)
-			return
-		}
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				infra.HandleError(err, w)
+		if err := cl.DownloadOriginal(file, w, &rangeHeader); err != nil {
+			if !strings.Contains(err.Error(), "write: broken pipe") && !strings.Contains(err.Error(), "write: connection reset by peer") {
+				infra.GetLogger().Error(err)
 			}
-		}(file)
-		if _, err := io.Copy(w, file); err != nil {
-			return
-		}
-		if err := os.Remove(outputPath); err != nil {
 			return
 		}
 	}

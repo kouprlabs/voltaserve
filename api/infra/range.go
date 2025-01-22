@@ -16,7 +16,6 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/minio/minio-go/v7"
 )
 
 const (
@@ -33,16 +32,13 @@ type RangeInterval struct {
 func NewRangeInterval(header string, fileSize int64) *RangeInterval {
 	ri := &RangeInterval{FileSize: fileSize}
 	if header != "" {
-		parts := strings.Split(header, "=")
-		if len(parts) == 2 {
-			ranges := strings.Split(parts[1], "-")
-			ri.Start, _ = strconv.ParseInt(ranges[0], 10, 64)
-			if len(ranges) > 1 && ranges[1] != "" {
-				ri.End, _ = strconv.ParseInt(ranges[1], 10, 64)
-			} else {
-				// Indicates an open-ended range
-				ri.End = 0
-			}
+		ranges := strings.Split(header, "-")
+		ri.Start, _ = strconv.ParseInt(ranges[0], 10, 64)
+		if len(ranges) > 1 && ranges[1] != "" {
+			ri.End, _ = strconv.ParseInt(ranges[1], 10, 64)
+		} else {
+			// Indicates an open-ended range
+			ri.End = 0
 		}
 	}
 	ri.adjustRange()
@@ -62,10 +58,6 @@ func (ri *RangeInterval) adjustRange() {
 	if ri.End-ri.Start+1 > MaxRangeSize && ri.End != 0 {
 		ri.End = ri.Start + MaxRangeSize - 1
 	}
-}
-
-func (ri *RangeInterval) ApplyToMinIOGetObjectOptions(opts *minio.GetObjectOptions) {
-	_ = opts.SetRange(ri.Start, ri.End)
 }
 
 func (ri *RangeInterval) ApplyToFiberContext(ctx *fiber.Ctx) {
