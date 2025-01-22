@@ -928,6 +928,9 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	if rangeInterval != nil {
 		rangeInterval.ApplyToFiberContext(c)
 		c.Status(http.StatusPartialContent)
+	} else {
+		c.Set("Content-Length", fmt.Sprintf("%d", len(buf.Bytes())))
+		c.Status(http.StatusOK)
 	}
 	return c.Send(buf.Bytes())
 }
@@ -980,6 +983,9 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	if rangeInterval != nil {
 		rangeInterval.ApplyToFiberContext(c)
 		c.Status(http.StatusPartialContent)
+	} else {
+		c.Set("Content-Length", fmt.Sprintf("%d", len(buf.Bytes())))
+		c.Status(http.StatusOK)
 	}
 	return c.Send(buf.Bytes())
 }
