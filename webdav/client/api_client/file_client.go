@@ -68,7 +68,7 @@ type Snapshot struct {
 
 type Download struct {
 	Extension string      `json:"extension"`
-	Size      int         `json:"size"`
+	Size      int64       `json:"size"`
 	Image     *ImageProps `json:"image,omitempty"`
 }
 
@@ -410,8 +410,16 @@ func (cl *FileClient) DeleteOne(id string) error {
 	return cl.successfulResponseOrThrow(resp)
 }
 
-func (cl *FileClient) DownloadOriginal(file *File, outputPath string) error {
-	resp, err := http.Get(fmt.Sprintf("%s/v3/files/%s/original%s?access_token=%s", cl.config.APIURL, file.ID, file.Snapshot.Original.Extension, cl.token.AccessToken))
+func (cl *FileClient) DownloadOriginal(file *File, outputPath string, rangeHeader *string) error {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/files/%s/original%s?access_token=%s", cl.config.APIURL, file.ID, file.Snapshot.Original.Extension, cl.token.AccessToken), nil)
+	if err != nil {
+		return err
+	}
+	if rangeHeader != nil {
+		req.Header.Set("Range", *rangeHeader)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}

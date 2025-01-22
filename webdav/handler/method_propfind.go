@@ -60,7 +60,7 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 				</D:response>
 			</D:multistatus>`,
 			helper.EncodeURIComponent(file.Name),
-			func() int {
+			func() int64 {
 				if file.Type == api_client.FileTypeFile && file.Snapshot != nil && file.Snapshot.Original != nil {
 					return file.Snapshot.Original.Size
 				}
@@ -120,7 +120,7 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 					}
 					return ""
 				}(),
-				func() int {
+				func() int64 {
 					if item.Type == api_client.FileTypeFile && item.Snapshot != nil && item.Snapshot.Original != nil {
 						return item.Snapshot.Original.Size
 					}
