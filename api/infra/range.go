@@ -12,11 +12,11 @@ package infra
 
 import (
 	"fmt"
-	"github.com/minio/minio-go/v7"
 	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/minio/minio-go/v7"
 )
 
 const (
