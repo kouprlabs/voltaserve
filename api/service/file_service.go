@@ -346,15 +346,17 @@ func (svc *FileService) DownloadOriginalBuffer(id string, rangeHeader string, bu
 			return nil, nil, nil, err
 		}
 		opts := minio.GetObjectOptions{}
-		var ri *infra.RangeInterval
+		var rangeInterval *infra.RangeInterval
 		if rangeHeader != "" {
-			ri = infra.NewRangeInterval(rangeHeader, objectInfo.Size)
-			ri.ApplyToMinIOGetObjectOptions(&opts)
+			rangeInterval = infra.NewRangeInterval(rangeHeader, objectInfo.Size)
+			if err := rangeInterval.ApplyToMinIOGetObjectOptions(&opts); err != nil {
+				return nil, nil, nil, err
+			}
 		}
 		if _, err := svc.s3.GetObjectWithBuffer(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, buf, opts); err != nil {
 			return nil, nil, nil, err
 		}
-		return file, snapshot, ri, nil
+		return file, snapshot, rangeInterval, nil
 	} else {
 		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
@@ -381,15 +383,17 @@ func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf
 			return nil, nil, nil, err
 		}
 		opts := minio.GetObjectOptions{}
-		var ri *infra.RangeInterval
+		var rangeInterval *infra.RangeInterval
 		if rangeHeader != "" {
-			ri = infra.NewRangeInterval(rangeHeader, objectInfo.Size)
-			ri.ApplyToMinIOGetObjectOptions(&opts)
+			rangeInterval = infra.NewRangeInterval(rangeHeader, objectInfo.Size)
+			if err := rangeInterval.ApplyToMinIOGetObjectOptions(&opts); err != nil {
+				return nil, nil, nil, err
+			}
 		}
 		if _, err := svc.s3.GetObjectWithBuffer(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket, buf, opts); err != nil {
 			return nil, nil, nil, err
 		}
-		return file, snapshot, ri, nil
+		return file, snapshot, rangeInterval, nil
 	} else {
 		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}

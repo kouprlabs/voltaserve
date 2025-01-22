@@ -21,7 +21,7 @@ import (
 
 const (
 	MaxRangeSize     = 250 * 1024 * 1024 // 250 MB
-	DefaultChunkSize = 250 * 1024 * 1024 // Default size to serve for open-ended ranges
+	DefaultChunkSize = 250 * 1024 * 1024 // 250 MB, default size to serve for open-ended ranges
 )
 
 type RangeInterval struct {
@@ -33,16 +33,16 @@ type RangeInterval struct {
 func NewRangeInterval(header string, fileSize int64) *RangeInterval {
 	ri := &RangeInterval{FileSize: fileSize}
 	if header != "" {
-		parts := strings.Split(header, "=")
-		if len(parts) == 2 {
-			ranges := strings.Split(parts[1], "-")
-			ri.Start, _ = strconv.ParseInt(ranges[0], 10, 64)
-			if len(ranges) > 1 && ranges[1] != "" {
-				ri.End, _ = strconv.ParseInt(ranges[1], 10, 64)
-			} else {
-				// Indicates an open-ended range
-				ri.End = 0
-			}
+		if strings.HasPrefix(header, "bytes=") {
+			header = strings.Split(header, "=")[1]
+		}
+		ranges := strings.Split(header, "-")
+		ri.Start, _ = strconv.ParseInt(ranges[0], 10, 64)
+		if len(ranges) > 1 && ranges[1] != "" {
+			ri.End, _ = strconv.ParseInt(ranges[1], 10, 64)
+		} else {
+			// Indicates an open-ended range
+			ri.End = 0
 		}
 	}
 	ri.adjustRange()
@@ -64,12 +64,12 @@ func (ri *RangeInterval) adjustRange() {
 	}
 }
 
-func (ri *RangeInterval) ApplyToMinIOGetObjectOptions(opts *minio.GetObjectOptions) {
-	_ = opts.SetRange(ri.Start, ri.End)
+func (ri *RangeInterval) ApplyToMinIOGetObjectOptions(opts *minio.GetObjectOptions) error {
+	return opts.SetRange(ri.Start, ri.End)
 }
 
-func (ri *RangeInterval) ApplyToFiberContext(ctx *fiber.Ctx) {
-	ctx.Set("Accept-Ranges", "bytes")
-	ctx.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", ri.Start, ri.End, ri.FileSize))
-	ctx.Set("Content-Length", fmt.Sprintf("%d", ri.End-ri.Start+1))
+func (ri *RangeInterval) ApplyToFiberContext(c *fiber.Ctx) {
+	c.Set("Accept-Ranges", "bytes")
+	c.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", ri.Start, ri.End, ri.FileSize))
+	c.Set("Content-Length", fmt.Sprintf("%d", ri.End-ri.Start+1))
 }
