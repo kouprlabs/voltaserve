@@ -47,9 +47,9 @@ logger = base_logger.getChild("workspace")
 
 
 @workspace_api_router.get(path="", responses={status.HTTP_200_OK: {"model": WorkspaceResponse}})
-async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
+async def get_workspace(data: Annotated[WorkspaceRequest, Depends()], user_id: str = Depends(get_user_id)):
     try:
-        workspace = fetch_workspace(_id=data.id)
+        workspace = fetch_workspace(_id=data.id, user_id=user_id)
         return WorkspaceResponse(**workspace)
     except NotFoundException as e:
         logger.error(e)
@@ -93,7 +93,9 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()], u
 
 
 @workspace_api_router.get(path="/search", responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}})
-async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends()]):
+async def get_search_workspaces(
+    data: Annotated[WorkspaceSearchRequest, Depends()], user_id: str = Depends(get_user_id)
+):
     try:
         workspaces = meilisearch_client.index("workspace").search(
             data.query, {"page": data.page, "hitsPerPage": data.size}
@@ -101,7 +103,7 @@ async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends(
         hits = []
         for workspace in workspaces["hits"]:
             try:
-                workspace = fetch_workspace(workspace["id"])
+                workspace = fetch_workspace(workspace["id"], user_id)
                 hits.append(workspace)
             except NotFoundException:
                 pass

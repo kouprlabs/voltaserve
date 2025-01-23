@@ -17,18 +17,26 @@ from ..errors import EmptyDataException, NotFoundException
 from . import exists
 
 
-def fetch_organization(organization_id: str) -> Dict:
+def fetch_organization(organization_id: str, user_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
             if not exists(curs=curs, tablename="organization", _id=organization_id):
                 raise NotFoundException(message=f"Organization with id={organization_id} does not exist!")
-            return curs.execute(
+            data = curs.execute(
                 f"""
-                SELECT id, name, create_time as "createTime", update_time as "updateTime" 
-                FROM organization 
-                WHERE id='{organization_id}'
+                SELECT o.id, o.name, o.create_time, o.update_time, up.permission 
+                FROM organization o 
+                LEFT JOIN  userpermission up ON up.resource_id = o.id AND up.user_id = '{user_id}' 
+                WHERE o.id='{organization_id}'
                 """
             ).fetchone()
+            return {
+                "id": data.get("id"),
+                "name": data.get("name"),
+                "permission": data.get("permission"),
+                "createTime": data.get("create_time"),
+                "updateTime": data.get("update_time"),
+            }
     except DatabaseError as error:
         raise error
 

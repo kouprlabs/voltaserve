@@ -17,7 +17,7 @@ from ..errors import EmptyDataException, NotFoundException
 from . import exists
 
 
-def fetch_workspace(_id: str) -> Dict:
+def fetch_workspace(_id: str, user_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
             if not exists(curs=curs, tablename="workspace", _id=_id):
@@ -26,9 +26,11 @@ def fetch_workspace(_id: str) -> Dict:
                 f"""
                 SELECT w.id, w.name, w.organization_id, o.name as "organizationName", 
                 o.create_time as "organization_create_time", o.update_time as "organization_update_time", 
-                w.storage_capacity, w.root_id, w.bucket, w.create_time, w.update_time 
+                w.storage_capacity, w.root_id, w.bucket, w.create_time, w.update_time, 
+                up.permission 
                 FROM workspace w 
                 JOIN organization o ON w.organization_id = o.id 
+                LEFT JOIN  userpermission up ON up.resource_id = w.id AND up.user_id = '{user_id}'
                 WHERE w.id = '{_id}'
                 """
             ).fetchone()
@@ -46,6 +48,7 @@ def fetch_workspace(_id: str) -> Dict:
                     "createTime": data.get("organization_create_time"),
                     "updateTime": data.get("organization_update_time"),
                 },
+                "permission": data.get("permission"),
             }
     except DatabaseError as error:
         raise error

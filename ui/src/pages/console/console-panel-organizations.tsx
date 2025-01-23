@@ -132,12 +132,12 @@ const ConsolePanelOrganizations = () => {
               },
               {
                 title: 'Properties',
-                renderCell: (workspace) => (
-                  <>
-                    {workspace.permission ? (
-                      <Badge colorScheme="blue">Owner</Badge>
+                renderCell: (organization) => (
+                  <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+                    {organization.permission ? (
+                      <Badge variant="outline">Owner</Badge>
                     ) : null}
-                  </>
+                  </div>
                 ),
               },
             ]}
@@ -145,18 +145,23 @@ const ConsolePanelOrganizations = () => {
               {
                 label: 'Grant Owner Permission',
                 icon: <IconShield />,
-                onClick: async (workspace) => {
+                isHiddenFn: (organization) =>
+                  organization.permission === 'owner',
+                onClick: async (organization) => {
                   setConfirmationHeader(<>Grant Owner Permission</>)
                   setConfirmationBody(
                     <>
                       Do you want to grant yourself owner permission on{' '}
-                      <span className={cx('font-bold')}>{workspace.name}</span>?
+                      <span className={cx('font-bold')}>
+                        {organization.name}
+                      </span>
+                      ?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
                     await ConsoleAPI.grantUserPermission({
                       userId: getUserId(),
-                      resourceId: workspace.id,
+                      resourceId: organization.id,
                       resourceType: 'organization',
                       permission: 'owner',
                     })
@@ -170,18 +175,22 @@ const ConsolePanelOrganizations = () => {
                 label: 'Revoke Permission',
                 icon: <IconRemoveModerator />,
                 isDestructive: true,
-                onClick: async (workspace) => {
+                isHiddenFn: (organization) => !organization.permission,
+                onClick: async (organization) => {
                   setConfirmationHeader(<>Revoke Permission</>)
                   setConfirmationBody(
                     <>
                       Do you want to revoke your permission on{' '}
-                      <span className={cx('font-bold')}>{workspace.name}</span>?
+                      <span className={cx('font-bold')}>
+                        {organization.name}
+                      </span>
+                      ?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
                     await ConsoleAPI.revokeUserPermission({
                       userId: getUserId(),
-                      resourceId: workspace.id,
+                      resourceId: organization.id,
                       resourceType: 'organization',
                     })
                     await mutate()

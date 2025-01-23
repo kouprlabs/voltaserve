@@ -137,12 +137,12 @@ const ConsolePanelGroups = () => {
               },
               {
                 title: 'Properties',
-                renderCell: (workspace) => (
-                  <>
-                    {workspace.permission ? (
-                      <Badge colorScheme="blue">Owner</Badge>
+                renderCell: (group) => (
+                  <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+                    {group.permission ? (
+                      <Badge variant="outline">Owner</Badge>
                     ) : null}
-                  </>
+                  </div>
                 ),
               },
             ]}
@@ -150,18 +150,19 @@ const ConsolePanelGroups = () => {
               {
                 label: 'Grant Owner Permission',
                 icon: <IconShield />,
-                onClick: async (workspace) => {
+                isHiddenFn: (group) => group.permission === 'owner',
+                onClick: async (group) => {
                   setConfirmationHeader(<>Grant Owner Permission</>)
                   setConfirmationBody(
                     <>
                       Do you want to grant yourself owner permission on{' '}
-                      <span className={cx('font-bold')}>{workspace.name}</span>?
+                      <span className={cx('font-bold')}>{group.name}</span>?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
                     await ConsoleAPI.grantUserPermission({
                       userId: getUserId(),
-                      resourceId: workspace.id,
+                      resourceId: group.id,
                       resourceType: 'group',
                       permission: 'owner',
                     })
@@ -175,18 +176,19 @@ const ConsolePanelGroups = () => {
                 label: 'Revoke Permission',
                 icon: <IconRemoveModerator />,
                 isDestructive: true,
-                onClick: async (workspace) => {
+                isHiddenFn: (group) => !group.permission,
+                onClick: async (group) => {
                   setConfirmationHeader(<>Revoke Permission</>)
                   setConfirmationBody(
                     <>
                       Do you want to revoke your permission on{' '}
-                      <span className={cx('font-bold')}>{workspace.name}</span>?
+                      <span className={cx('font-bold')}>{group.name}</span>?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
                     await ConsoleAPI.revokeUserPermission({
                       userId: getUserId(),
-                      resourceId: workspace.id,
+                      resourceId: group.id,
                       resourceType: 'group',
                     })
                     await mutate()
