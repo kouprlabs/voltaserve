@@ -148,7 +148,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		file, err := r.fileSvc.Create(service.FileCreateOptions{
 			Name:        name,
 			Type:        model.FileTypeFile,
-			ParentID:    &parentID,
+			ParentID:    parentID,
 			WorkspaceID: workspaceID,
 		}, userID)
 		if err != nil {
@@ -177,7 +177,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		res, err := r.fileSvc.Create(service.FileCreateOptions{
 			Name:        name,
 			Type:        model.FileTypeFolder,
-			ParentID:    &parentID,
+			ParentID:    parentID,
 			WorkspaceID: workspaceID,
 		}, userID)
 		if err != nil {
@@ -1125,7 +1125,7 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	file, err := r.fileSvc.Create(service.FileCreateOptions{
 		Name:        name,
 		Type:        model.FileTypeFile,
-		ParentID:    &parentID,
+		ParentID:    parentID,
 		WorkspaceID: workspaceID,
 	}, userID)
 	if err != nil {

@@ -94,10 +94,10 @@ func NewFileService() *FileService {
 }
 
 type FileCreateOptions struct {
-	WorkspaceID string  `json:"workspaceId" validate:"required"`
-	Name        string  `json:"name"        validate:"required,max=255"`
-	Type        string  `json:"type"        validate:"required,oneof=file folder"`
-	ParentID    *string `json:"parentId"    validate:"required"`
+	WorkspaceID string `json:"workspaceId" validate:"required"`
+	Name        string `json:"name"        validate:"required,max=255"`
+	Type        string `json:"type"        validate:"required,oneof=file folder"`
+	ParentID    string `json:"parentId"    validate:"required"`
 }
 
 type File struct {
@@ -114,56 +114,62 @@ type File struct {
 }
 
 func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, error) {
-	var components []string
-	for _, component := range strings.Split(opts.Name, "/") {
-		if component != "" {
-			components = append(components, component)
-		}
-	}
+	path := helper.PathFromFilename(opts.Name)
 	parentID := opts.ParentID
-	if len(components) > 1 {
-		for _, component := range components[:len(components)-1] {
-			existing, err := svc.getChildWithName(*parentID, component)
-			if err != nil {
-				return nil, err
-			}
-			if existing != nil {
-				parentID = new(string)
-				*parentID = existing.GetID()
-			} else {
-				res, err := svc.create(FileCreateOptions{
-					Name:        component,
-					Type:        model.FileTypeFolder,
-					ParentID:    parentID,
-					WorkspaceID: opts.WorkspaceID,
-				}, userID)
-				if err != nil {
-					return nil, err
-				}
-				parentID = &res.ID
-			}
+	if len(path) > 1 {
+		newParentID, err := svc.createDirectoriesForPath(path, parentID, opts.WorkspaceID, userID)
+		if err != nil {
+			return nil, err
 		}
+		parentID = *newParentID
 	}
-	name := components[len(components)-1]
 	return svc.create(FileCreateOptions{
 		WorkspaceID: opts.WorkspaceID,
-		Name:        name,
+		Name:        helper.FilenameFromPath(path),
 		Type:        opts.Type,
 		ParentID:    parentID,
 	}, userID)
 }
 
-func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, error) {
-	if len(*opts.ParentID) > 0 {
-		if err := svc.validateParent(*opts.ParentID, userID); err != nil {
-			return nil, err
-		}
-		existing, err := svc.getChildWithName(*opts.ParentID, opts.Name)
+func (svc *FileService) createDirectoriesForPath(path []string, parentID string, workspaceID string, userID string) (*string, error) {
+	for _, component := range path[:len(path)-1] {
+		existing, err := svc.getChildWithName(parentID, component)
 		if err != nil {
 			return nil, err
 		}
 		if existing != nil {
-			return nil, errorpkg.NewFileWithSimilarNameExistsError()
+			parentID = existing.GetID()
+		} else {
+			folder, err := svc.create(FileCreateOptions{
+				Name:        component,
+				Type:        model.FileTypeFolder,
+				ParentID:    parentID,
+				WorkspaceID: workspaceID,
+			}, userID)
+			if err != nil {
+				return nil, err
+			}
+			parentID = folder.ID
+		}
+	}
+	return &parentID, nil
+}
+
+func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, error) {
+	if len(opts.ParentID) > 0 {
+		if err := svc.validateParent(opts.ParentID, userID); err != nil {
+			return nil, err
+		}
+		existing, err := svc.getChildWithName(opts.ParentID, opts.Name)
+		if err != nil {
+			return nil, err
+		}
+		if existing != nil {
+			res, err := svc.fileMapper.mapOne(existing, userID)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
 		}
 	}
 	file, err := svc.fileRepo.Insert(repo.FileInsertOptions{
