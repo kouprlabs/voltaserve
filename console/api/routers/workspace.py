@@ -68,7 +68,12 @@ async def get_workspace_count():
         return UnknownApiError()
 
 
-@workspace_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}})
+@workspace_api_router.get(
+    path="/all",
+    responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}},
+    response_model=WorkspaceListResponse,
+    response_model_exclude_none=True,
+)
 async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()], user_id: str = Depends(get_user_id)):
     try:
         workspaces, count = fetch_workspaces(user_id=user_id, page=data.page, size=data.size)

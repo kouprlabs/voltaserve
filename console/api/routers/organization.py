@@ -71,7 +71,12 @@ async def get_organization_count():
         return UnknownApiError()
 
 
-@organization_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": OrganizationListResponse}})
+@organization_api_router.get(
+    path="/all",
+    responses={status.HTTP_200_OK: {"model": OrganizationListResponse}},
+    response_model=OrganizationListResponse,
+    response_model_exclude_none=True,
+)
 async def get_all_organizations(
     data: Annotated[OrganizationListRequest, Depends()], user_id: str = Depends(get_user_id)
 ):

@@ -59,7 +59,12 @@ async def get_group_count():
         return UnknownApiError()
 
 
-@group_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": GroupListResponse}})
+@group_api_router.get(
+    path="/all",
+    responses={status.HTTP_200_OK: {"model": GroupListResponse}},
+    response_model=GroupListResponse,
+    response_model_exclude_none=True,
+)
 async def get_all_groups(data: Annotated[GroupListRequest, Depends()], user_id: str = Depends(get_user_id)):
     try:
         groups, count = fetch_groups(user_id=user_id, page=data.page, size=data.size)
