@@ -67,7 +67,7 @@ def fetch_workspaces(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int
                 SELECT w.id, w.name, w.organization_id, o.name as "organization_name", 
                 o.create_time as "organization_create_time", o.update_time as "organization_update_time", 
                 w.storage_capacity, w.root_id, w.bucket, w.create_time, w.update_time, 
-                up.permission AS "permission" 
+                up.permission 
                 FROM workspace w 
                 JOIN organization o ON w.organization_id = o.id 
                 LEFT JOIN  userpermission up ON up.resource_id = w.id AND up.user_id = '{user_id}' 

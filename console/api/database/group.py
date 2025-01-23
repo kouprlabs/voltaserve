@@ -66,7 +66,7 @@ def fetch_groups(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
                 SELECT g.id as "group_id", g."name" as "group_name", g.create_time as "group_create_time", 
                 g.update_time as "group_update_time", o.id as "org_id", o."name" as "org_name", 
                 o.create_time as "org_create_time", o.update_time as "org_update_time", 
-                up.permission AS "permission" 
+                up.permission 
                 FROM "group" g 
                 JOIN organization o ON g.organization_id = o.id 
                 LEFT JOIN  userpermission up ON up.resource_id = g.id AND up.user_id = '{user_id}' 
