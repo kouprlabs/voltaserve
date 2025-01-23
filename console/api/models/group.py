@@ -38,6 +38,7 @@ class GroupSearchRequest(GenericSearchRequest):
 class GroupResponse(GenericResponse):
     name: str
     organization: OrganizationResponse
+    permission: str | None = Field(None)
     createTime: datetime.datetime = Field(None)
     updateTime: datetime.datetime = Field(None)
 

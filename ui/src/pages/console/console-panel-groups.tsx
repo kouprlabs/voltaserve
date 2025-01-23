@@ -14,7 +14,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
-import { Heading, Avatar, Link as ChakraLink } from '@chakra-ui/react'
+import { Heading, Avatar, Link as ChakraLink, Badge } from '@chakra-ui/react'
 import {
   DataTable,
   IconRemoveModerator,
@@ -133,6 +133,16 @@ const ConsolePanelGroups = () => {
                 title: 'Updated',
                 renderCell: (group) => (
                   <RelativeDate date={new Date(group.updateTime)} />
+                ),
+              },
+              {
+                title: 'Properties',
+                renderCell: (workspace) => (
+                  <>
+                    {workspace.permission ? (
+                      <Badge colorScheme="blue">Owner</Badge>
+                    ) : null}
+                  </>
                 ),
               },
             ]}

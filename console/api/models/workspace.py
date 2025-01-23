@@ -45,6 +45,7 @@ class WorkspaceResponse(GenericResponse):
     storageCapacity: float
     rootId: str | None = Field(None)
     bucket: str | None = Field(None)
+    permission: str | None = Field(None)
     createTime: datetime.datetime
     updateTime: datetime.datetime
 

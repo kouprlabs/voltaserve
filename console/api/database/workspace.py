@@ -59,16 +59,18 @@ def fetch_workspace_count() -> Dict:
         raise error
 
 
-def fetch_workspaces(page=1, size=10) -> Tuple[Iterable[Dict], int]:
+def fetch_workspaces(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             data = curs.execute(
                 f"""
                 SELECT w.id, w.name, w.organization_id, o.name as "organization_name", 
                 o.create_time as "organization_create_time", o.update_time as "organization_update_time", 
-                w.storage_capacity, w.root_id, w.bucket, w.create_time, w.update_time 
+                w.storage_capacity, w.root_id, w.bucket, w.create_time, w.update_time, 
+                up.permission AS "permission" 
                 FROM workspace w 
                 JOIN organization o ON w.organization_id = o.id 
+                LEFT JOIN  userpermission up ON up.resource_id = w.id AND up.user_id = '{user_id}' 
                 ORDER BY w.create_time 
                 OFFSET {(page - 1) * size} 
                 LIMIT {size}
@@ -92,6 +94,7 @@ def fetch_workspaces(page=1, size=10) -> Tuple[Iterable[Dict], int]:
                         "createTime": d.get("organization_create_time"),
                         "updateTime": d.get("organization_update_time"),
                     },
+                    "permission": d.get("permission"),
                 }
                 for d in data
             ), count["count"]

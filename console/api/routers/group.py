@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, status
 from ..database import fetch_group, fetch_groups
 from ..database.group import fetch_group_count
 from ..dependencies import JWTBearer, meilisearch_client
+from ..dependencies.user import get_user_id
 from ..errors import (
     EmptyDataException,
     NoContentError,
@@ -59,9 +60,9 @@ async def get_group_count():
 
 
 @group_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": GroupListResponse}})
-async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
+async def get_all_groups(data: Annotated[GroupListRequest, Depends()], user_id: str = Depends(get_user_id)):
     try:
-        groups, count = fetch_groups(page=data.page, size=data.size)
+        groups, count = fetch_groups(user_id=user_id, page=data.page, size=data.size)
         return GroupListResponse(
             data=groups,
             totalElements=count,

@@ -154,7 +154,7 @@ const ConsolePanelUsers = () => {
                 ),
               },
               {
-                title: 'Props',
+                title: 'Properties',
                 renderCell: (user) => (
                   <div className={cx('flex', 'flex-row', 'gap-0.5')}>
                     {user.isAdmin ? (

@@ -21,6 +21,7 @@ from ..database import (
     fetch_organizations,
 )
 from ..dependencies import JWTBearer, meilisearch_client
+from ..dependencies.user import get_user_id
 from ..errors import (
     EmptyDataException,
     NoContentError,
@@ -71,9 +72,11 @@ async def get_organization_count():
 
 
 @organization_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": OrganizationListResponse}})
-async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends()]):
+async def get_all_organizations(
+    data: Annotated[OrganizationListRequest, Depends()], user_id: str = Depends(get_user_id)
+):
     try:
-        organizations, count = fetch_organizations(page=data.page, size=data.size)
+        organizations, count = fetch_organizations(user_id=user_id, page=data.page, size=data.size)
         return OrganizationListResponse(
             data=organizations,
             totalElements=count,

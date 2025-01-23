@@ -29,6 +29,7 @@ export interface CommonFields {
 
 export interface ConsoleOrganization extends CommonFields {
   name: string
+  permission: string | null
 }
 
 export interface ConsoleOrganizationUser extends CommonFields {
@@ -41,6 +42,7 @@ export interface ConsoleOrganizationUser extends CommonFields {
 export interface ConsoleGroup extends CommonFields {
   name: string
   organization: ConsoleOrganization
+  permission: string | null
 }
 
 export interface ConsoleGroupUser extends CommonFields {
@@ -56,6 +58,7 @@ export interface ConsoleWorkspace extends CommonFields {
   storageCapacity: number
   rootId: string
   bucket: string
+  permission: string | null
 }
 
 export interface ConsoleWorkspaceUser extends CommonFields {

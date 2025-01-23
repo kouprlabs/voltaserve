@@ -39,6 +39,6 @@ class JWTBearer(HTTPBearer):
                 raise GenericForbiddenException(detail=str(e)) from e
             if not decoded_token["is_admin"]:
                 raise GenericForbiddenException(detail="User is not admin.")
-            return credentials.credentials
+            return decoded_token["sub"]
         else:
             raise GenericForbiddenException(detail="Invalid token.")

@@ -33,14 +33,15 @@ def fetch_organization(organization_id: str) -> Dict:
         raise error
 
 
-def fetch_organizations(page=1, size=10) -> Tuple[Iterable[Dict], int]:
+def fetch_organizations(user_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             data = curs.execute(
                 f"""
-                SELECT id, name, create_time as "createTime", update_time as "updateTime" 
-                FROM "organization" 
-                ORDER BY create_time 
+                SELECT o.id, o.name, o.create_time, o.update_time, up.permission 
+                FROM "organization" o
+                LEFT JOIN  userpermission up ON up.resource_id = o.id AND up.user_id = '{user_id}' 
+                ORDER BY o.create_time 
                 OFFSET {(page - 1) * size} 
                 LIMIT {size}
                 """
@@ -48,7 +49,16 @@ def fetch_organizations(page=1, size=10) -> Tuple[Iterable[Dict], int]:
             if data is None or data == {}:
                 raise EmptyDataException
             count = curs.execute('SELECT count(1) FROM "organization"').fetchone()
-            return data, count["count"]
+            return (
+                {
+                    "id": d.get("id"),
+                    "name": d.get("name"),
+                    "permission": d.get("permission"),
+                    "createTime": d.get("create_time"),
+                    "updateTime": d.get("update_time"),
+                }
+                for d in data
+            ), count["count"]
     except DatabaseError as error:
         raise error
 

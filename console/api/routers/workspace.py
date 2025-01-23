@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_workspace, fetch_workspace_count, fetch_workspaces
 from ..dependencies import JWTBearer, meilisearch_client
+from ..dependencies.user import get_user_id
 from ..errors import (
     EmptyDataException,
     NoContentError,
@@ -68,9 +69,9 @@ async def get_workspace_count():
 
 
 @workspace_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}})
-async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
+async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()], user_id: str = Depends(get_user_id)):
     try:
-        workspaces, count = fetch_workspaces(page=data.page, size=data.size)
+        workspaces, count = fetch_workspaces(user_id=user_id, page=data.page, size=data.size)
         return WorkspaceListResponse(
             data=workspaces,
             totalElements=count,
