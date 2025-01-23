@@ -203,7 +203,7 @@ func newFileRepo() *fileRepo {
 type FileInsertOptions struct {
 	Name        string
 	WorkspaceID string
-	ParentID    *string
+	ParentID    string
 	Type        string
 }
 
@@ -214,7 +214,7 @@ func (repo *fileRepo) Insert(opts FileInsertOptions) (model.File, error) {
 		WorkspaceID: opts.WorkspaceID,
 		Name:        opts.Name,
 		Type:        opts.Type,
-		ParentID:    opts.ParentID,
+		ParentID:    &opts.ParentID,
 	}
 	if db := repo.db.Create(&file); db.Error != nil {
 		return nil, db.Error
