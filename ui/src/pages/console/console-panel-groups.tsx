@@ -14,7 +14,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
-import { Heading, Avatar, Link as ChakraLink } from '@chakra-ui/react'
+import { Heading, Avatar, Link as ChakraLink, Badge } from '@chakra-ui/react'
 import {
   DataTable,
   IconRemoveModerator,
@@ -135,23 +135,34 @@ const ConsolePanelGroups = () => {
                   <RelativeDate date={new Date(group.updateTime)} />
                 ),
               },
+              {
+                title: 'Properties',
+                renderCell: (group) => (
+                  <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+                    {group.permission ? (
+                      <Badge variant="outline">Owner</Badge>
+                    ) : null}
+                  </div>
+                ),
+              },
             ]}
             actions={[
               {
                 label: 'Grant Owner Permission',
                 icon: <IconShield />,
-                onClick: async (workspace) => {
+                isHiddenFn: (group) => group.permission === 'owner',
+                onClick: async (group) => {
                   setConfirmationHeader(<>Grant Owner Permission</>)
                   setConfirmationBody(
                     <>
                       Do you want to grant yourself owner permission on{' '}
-                      <span className={cx('font-bold')}>{workspace.name}</span>?
+                      <span className={cx('font-bold')}>{group.name}</span>?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
                     await ConsoleAPI.grantUserPermission({
                       userId: getUserId(),
-                      resourceId: workspace.id,
+                      resourceId: group.id,
                       resourceType: 'group',
                       permission: 'owner',
                     })
@@ -165,18 +176,19 @@ const ConsolePanelGroups = () => {
                 label: 'Revoke Permission',
                 icon: <IconRemoveModerator />,
                 isDestructive: true,
-                onClick: async (workspace) => {
+                isHiddenFn: (group) => !group.permission,
+                onClick: async (group) => {
                   setConfirmationHeader(<>Revoke Permission</>)
                   setConfirmationBody(
                     <>
                       Do you want to revoke your permission on{' '}
-                      <span className={cx('font-bold')}>{workspace.name}</span>?
+                      <span className={cx('font-bold')}>{group.name}</span>?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
                     await ConsoleAPI.revokeUserPermission({
                       userId: getUserId(),
-                      resourceId: workspace.id,
+                      resourceId: group.id,
                       resourceType: 'group',
                     })
                     await mutate()

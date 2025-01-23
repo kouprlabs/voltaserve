@@ -154,22 +154,16 @@ const ConsolePanelUsers = () => {
                 ),
               },
               {
-                title: 'Props',
+                title: 'Properties',
                 renderCell: (user) => (
                   <div className={cx('flex', 'flex-row', 'gap-0.5')}>
                     {user.isAdmin ? (
-                      <Badge mr="1" fontSize="0.8em" colorScheme="blue">
-                        Admin
-                      </Badge>
+                      <Badge colorScheme="blue">Admin</Badge>
                     ) : null}
                     {user.isActive ? (
-                      <Badge mr="1" fontSize="0.8em" colorScheme="green">
-                        Active
-                      </Badge>
+                      <Badge colorScheme="green">Active</Badge>
                     ) : (
-                      <Badge mr="1" fontSize="0.8em" colorScheme="gray">
-                        Inactive
-                      </Badge>
+                      <Badge colorScheme="gray">Inactive</Badge>
                     )}
                     {getUserId() === user.id ? (
                       <Badge colorScheme="red">It's you</Badge>

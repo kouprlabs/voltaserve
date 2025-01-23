@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, status
 from ..database import fetch_group, fetch_groups
 from ..database.group import fetch_group_count
 from ..dependencies import JWTBearer, meilisearch_client
+from ..dependencies.user import get_user_id
 from ..errors import (
     EmptyDataException,
     NoContentError,
@@ -37,9 +38,9 @@ logger = base_logger.getChild("group")
 
 
 @group_api_router.get(path="", responses={status.HTTP_200_OK: {"model": GroupResponse}})
-async def get_group(data: Annotated[GroupRequest, Depends()]):
+async def get_group(data: Annotated[GroupRequest, Depends()], user_id: str = Depends(get_user_id)):
     try:
-        group = fetch_group(_id=data.id)
+        group = fetch_group(_id=data.id, user_id=user_id)
         return GroupResponse(**group)
     except NotFoundException as e:
         logger.error(e)
@@ -58,10 +59,15 @@ async def get_group_count():
         return UnknownApiError()
 
 
-@group_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": GroupListResponse}})
-async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
+@group_api_router.get(
+    path="/all",
+    responses={status.HTTP_200_OK: {"model": GroupListResponse}},
+    response_model=GroupListResponse,
+    response_model_exclude_none=True,
+)
+async def get_all_groups(data: Annotated[GroupListRequest, Depends()], user_id: str = Depends(get_user_id)):
     try:
-        groups, count = fetch_groups(page=data.page, size=data.size)
+        groups, count = fetch_groups(user_id=user_id, page=data.page, size=data.size)
         return GroupListResponse(
             data=groups,
             totalElements=count,
@@ -78,13 +84,13 @@ async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
 
 
 @group_api_router.get(path="/search", responses={status.HTTP_200_OK: {"model": GroupListResponse}})
-async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
+async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()], user_id: str = Depends(get_user_id)):
     try:
         groups = meilisearch_client.index("group").search(data.query, {"page": data.page, "hitsPerPage": data.size})
         hits = []
         for group in groups["hits"]:
             try:
-                group = fetch_group(group["id"])
+                group = fetch_group(group["id"], user_id)
                 hits.append(group)
             except NotFoundException:
                 pass

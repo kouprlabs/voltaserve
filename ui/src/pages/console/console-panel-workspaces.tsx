@@ -14,7 +14,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
-import { Heading, Avatar, Link as ChakraLink } from '@chakra-ui/react'
+import { Heading, Avatar, Link as ChakraLink, Badge } from '@chakra-ui/react'
 import {
   DataTable,
   IconRemoveModerator,
@@ -143,11 +143,22 @@ const ConsolePanelWorkspaces = () => {
                   <RelativeDate date={new Date(workspace.updateTime)} />
                 ),
               },
+              {
+                title: 'Properties',
+                renderCell: (workspace) => (
+                  <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+                    {workspace.permission ? (
+                      <Badge variant="outline">Owner</Badge>
+                    ) : null}
+                  </div>
+                ),
+              },
             ]}
             actions={[
               {
                 label: 'Grant Owner Permission',
                 icon: <IconShield />,
+                isHiddenFn: (workspace) => workspace.permission === 'owner',
                 onClick: async (workspace) => {
                   setConfirmationHeader(<>Grant Owner Permission</>)
                   setConfirmationBody(
@@ -185,6 +196,7 @@ const ConsolePanelWorkspaces = () => {
                 label: 'Revoke Permission',
                 icon: <IconRemoveModerator />,
                 isDestructive: true,
+                isHiddenFn: (workspace) => !workspace.permission,
                 onClick: async (workspace) => {
                   setConfirmationHeader(<>Revoke Permission</>)
                   setConfirmationBody(

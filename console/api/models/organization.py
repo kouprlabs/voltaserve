@@ -48,6 +48,7 @@ class OrganizationGroupListRequest(GenericRequest, GenericPaginationRequest):
 
 class OrganizationResponse(GenericResponse):
     name: str
+    permission: str | None = Field(None)
     createTime: datetime.datetime = Field(None)
     updateTime: datetime.datetime = Field(None)
 

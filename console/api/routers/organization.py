@@ -21,6 +21,7 @@ from ..database import (
     fetch_organizations,
 )
 from ..dependencies import JWTBearer, meilisearch_client
+from ..dependencies.user import get_user_id
 from ..errors import (
     EmptyDataException,
     NoContentError,
@@ -49,9 +50,9 @@ logger = base_logger.getChild("organization")
 
 
 @organization_api_router.get(path="", responses={status.HTTP_200_OK: {"model": OrganizationResponse}})
-async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
+async def get_organization(data: Annotated[OrganizationRequest, Depends()], user_id: str = Depends(get_user_id)):
     try:
-        organization = fetch_organization(organization_id=data.id)
+        organization = fetch_organization(organization_id=data.id, user_id=user_id)
         return OrganizationResponse(**organization)
     except NotFoundException as e:
         logger.error(e)
@@ -70,10 +71,17 @@ async def get_organization_count():
         return UnknownApiError()
 
 
-@organization_api_router.get(path="/all", responses={status.HTTP_200_OK: {"model": OrganizationListResponse}})
-async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends()]):
+@organization_api_router.get(
+    path="/all",
+    responses={status.HTTP_200_OK: {"model": OrganizationListResponse}},
+    response_model=OrganizationListResponse,
+    response_model_exclude_none=True,
+)
+async def get_all_organizations(
+    data: Annotated[OrganizationListRequest, Depends()], user_id: str = Depends(get_user_id)
+):
     try:
-        organizations, count = fetch_organizations(page=data.page, size=data.size)
+        organizations, count = fetch_organizations(user_id=user_id, page=data.page, size=data.size)
         return OrganizationListResponse(
             data=organizations,
             totalElements=count,
@@ -90,7 +98,9 @@ async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends
 
 
 @organization_api_router.get(path="/search", responses={status.HTTP_200_OK: {"model": OrganizationListResponse}})
-async def get_search_organizations(data: Annotated[OrganizationSearchRequest, Depends()]):
+async def get_search_organizations(
+    data: Annotated[OrganizationSearchRequest, Depends()], user_id: str = Depends(get_user_id)
+):
     try:
         organizations = meilisearch_client.index("organization").search(
             data.query, {"page": data.page, "hitsPerPage": data.size}
@@ -98,7 +108,7 @@ async def get_search_organizations(data: Annotated[OrganizationSearchRequest, De
         hits = []
         for organization in organizations["hits"]:
             try:
-                organization = fetch_organization(organization["id"])
+                organization = fetch_organization(organization["id"], user_id)
                 hits.append(organization)
             except NotFoundException:
                 pass
