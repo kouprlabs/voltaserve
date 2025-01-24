@@ -12,6 +12,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useColorMode } from '@chakra-ui/react'
 import { Helmet } from 'react-helmet-async'
 import { useMedia } from 'react-use'
+import { loadTheme } from '@/local-storage'
 import { useAppDispatch } from '@/store/hook'
 import { allModalsDidClose as allModalsDidCloseForFiles } from '@/store/ui/files'
 import { allModalsDidClose as allModalsDidCloseForInsights } from '@/store/ui/insights'
@@ -19,8 +20,6 @@ import { allModalsDidClose as allModalsDidCloseForMosaic } from '@/store/ui/mosa
 import { allModalsDidClose as allModalsDidCloseForOrganizations } from '@/store/ui/organizations'
 import { allModalsDidClose as allModalsDidCloseForSearchFilter } from '@/store/ui/search-filter'
 import { allModalsDidClose as allModalsDidCloseForSnapshots } from '@/store/ui/snapshots'
-
-const THEME_LOCAL_STORAGE_KEY = 'voltaserve_theme'
 
 const RootPage = () => {
   const location = useLocation()
@@ -37,7 +36,7 @@ const RootPage = () => {
   }, [location.pathname, navigate])
 
   useEffect(() => {
-    if (localStorage.getItem(THEME_LOCAL_STORAGE_KEY) === 'system') {
+    if (loadTheme() === 'system') {
       setColorMode(isSystemDark ? 'dark' : 'light')
     }
   }, [isSystemDark])
