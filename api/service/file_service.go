@@ -1302,7 +1302,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 				log.GetLogger().Error(err)
 			}
 		}
-		/* Delete snapshot mappings from tree */
+		/* Delete snapshot mappings from tree, this causes the snapshots to become dangling */
 		if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
 			log.GetLogger().Error(err)
 		}

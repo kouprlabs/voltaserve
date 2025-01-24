@@ -334,7 +334,7 @@ const FileMenu = ({
                   <span>Delete</span>
                   {isMacOS ? (
                     <div>
-                      <Kbd>⌘</Kbd>+<Kbd>delete</Kbd>
+                      <Kbd>delete</Kbd>
                     </div>
                   ) : (
                     <div>
