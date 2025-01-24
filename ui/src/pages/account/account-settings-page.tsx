@@ -12,9 +12,7 @@ import {
   IconButton,
   IconButtonProps,
   Progress,
-  Switch,
   Tooltip,
-  useColorMode,
 } from '@chakra-ui/react'
 import {
   IconEdit,
@@ -33,6 +31,7 @@ import AccountChangePassword from '@/components/account/account-change-password'
 import AccountDelete from '@/components/account/account-delete'
 import AccountEditEmail from '@/components/account/account-edit-email'
 import AccountEditFullName from '@/components/account/account-edit-full-name'
+import AccountThemeSwitcher from '@/components/account/account-theme-switcher'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
@@ -46,7 +45,6 @@ const EditButton = (props: IconButtonProps) => (
 )
 
 const AccountSettingsPage = () => {
-  const { colorMode, toggleColorMode } = useColorMode()
   const {
     data: user,
     error: userError,
@@ -184,12 +182,7 @@ const AccountSettingsPage = () => {
                 rows: [
                   {
                     label: 'Dark mode',
-                    content: (
-                      <Switch
-                        isChecked={colorMode === 'dark'}
-                        onChange={() => toggleColorMode()}
-                      />
-                    ),
+                    content: <AccountThemeSwitcher />,
                   },
                 ],
               },
