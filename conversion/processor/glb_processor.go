@@ -247,14 +247,14 @@ func (p *GLBProcessor) hasAnimations(filePath string) bool {
 	var jsonChunk []byte
 	for offset < len(data) {
 		if offset+chunkHeaderSize > len(data) {
-			fmt.Println("Invalid chunk header in GLB file.")
+			// Invalid chunk header in GLB file
 			return false
 		}
 		chunkLength := binary.LittleEndian.Uint32(data[offset : offset+4])
 		chunkType := string(data[offset+4 : offset+8])
 		offset += chunkHeaderSize
 		if offset+int(chunkLength) > len(data) {
-			fmt.Println("Chunk length exceeds file size in GLB file.")
+			// Chunk length exceeds file size in GLB file
 			return false
 		}
 		if chunkType == "JSON" {
