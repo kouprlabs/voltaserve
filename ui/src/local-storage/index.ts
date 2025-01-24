@@ -111,3 +111,15 @@ export function loadTokenExpiry(): string | null {
 export function removeTokenExpiry() {
   return localStorage.removeItem(TOKEN_EXPIRY)
 }
+
+const THEME = 'voltaserve_theme'
+
+export type ThemeValue = 'light' | 'dark' | 'system'
+
+export function loadTheme(): ThemeValue {
+  return localStorage.getItem(THEME) as ThemeValue
+}
+
+export function saveTheme(theme: ThemeValue) {
+  localStorage.setItem(THEME, theme)
+}

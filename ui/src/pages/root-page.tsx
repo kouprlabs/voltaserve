@@ -11,6 +11,8 @@ import { useCallback, useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useColorMode } from '@chakra-ui/react'
 import { Helmet } from 'react-helmet-async'
+import { useMedia } from 'react-use'
+import { loadTheme } from '@/local-storage'
 import { useAppDispatch } from '@/store/hook'
 import { allModalsDidClose as allModalsDidCloseForFiles } from '@/store/ui/files'
 import { allModalsDidClose as allModalsDidCloseForInsights } from '@/store/ui/insights'
@@ -23,7 +25,8 @@ const RootPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const { colorMode } = useColorMode()
+  const { colorMode, setColorMode } = useColorMode()
+  const isSystemDark = useMedia('(prefers-color-scheme: dark)')
 
   useEffect(() => {
     closeAllModals()
@@ -31,6 +34,12 @@ const RootPage = () => {
       navigate('/workspace')
     }
   }, [location.pathname, navigate])
+
+  useEffect(() => {
+    if (loadTheme() === 'system') {
+      setColorMode(isSystemDark ? 'dark' : 'light')
+    }
+  }, [isSystemDark])
 
   useEffect(() => {
     const element = document.querySelector("link[rel='icon']")
