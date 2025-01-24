@@ -10,7 +10,7 @@ interface ThemeOption extends OptionBase {
   label: string
 }
 
-const LOCAL_STORAGE_KEY = 'voltaserve-ui-color-mode'
+const LOCAL_STORAGE_KEY = 'voltaserve_theme'
 
 const AccountThemeSwitcher = () => {
   const { colorMode, setColorMode } = useColorMode()
