@@ -226,6 +226,7 @@ bpy.ops.render.render(write_still=True)
 func (p *GLBProcessor) hasAnimations(filePath string) bool {
 	file, err := os.Open(filePath)
 	if err != nil {
+		infra.GetLogger().Error(err)
 		return false
 	}
 	defer func(file *os.File) {
@@ -235,6 +236,7 @@ func (p *GLBProcessor) hasAnimations(filePath string) bool {
 	}(file)
 	data, err := io.ReadAll(file)
 	if err != nil {
+		infra.GetLogger().Error(err)
 		return false
 	}
 	// GLB Header is 12 bytes: magic (4 bytes) + version (4 bytes) + length (4 bytes)
@@ -271,6 +273,7 @@ func (p *GLBProcessor) hasAnimations(filePath string) bool {
 	}
 	var gltf GLTF
 	if err := json.Unmarshal(jsonChunk, &gltf); err != nil {
+		infra.GetLogger().Error(err)
 		return false
 	}
 	return len(gltf.Animations) > 0
