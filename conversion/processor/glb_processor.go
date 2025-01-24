@@ -224,7 +224,7 @@ bpy.ops.render.render(write_still=True)
 }
 
 func (p *GLBProcessor) hasAnimations(filePath string) bool {
-	file, err := os.Open(filePath)
+	file, err := os.Open(filePath) //nolint:gosec // Known path
 	if err != nil {
 		infra.GetLogger().Error(err)
 		return false
