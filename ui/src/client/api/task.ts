@@ -12,6 +12,7 @@ import { apiFetcher } from '@/client/fetcher'
 
 export enum SortBy {
   Name = 'name',
+  Status = 'status',
   DateCreated = 'date_created',
   DateModified = 'date_modified',
 }

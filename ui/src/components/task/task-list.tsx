@@ -33,7 +33,7 @@ const TasksList = () => {
     isLoading: listIsLoading,
     mutate: mutateList,
   } = TaskAPI.useList(
-    { page, size, sortOrder: SortOrder.Desc, sortBy: SortBy.DateCreated },
+    { page, size, sortOrder: SortOrder.Desc, sortBy: SortBy.Status },
     swrConfig(),
   )
   const { hasPageSwitcher } = usePageMonitor({
