@@ -359,6 +359,15 @@ func (svc *TaskService) doSorting(data []model.Task, sortBy string, sortOrder st
 			}
 		})
 		return data
+	} else if sortBy == SortByStatus {
+		sort.Slice(data, func(i, j int) bool {
+			if sortOrder == SortOrderDesc {
+				return data[i].GetStatus() == model.TaskStatusRunning && data[j].GetStatus() != model.TaskStatusRunning
+			} else {
+				return data[i].GetStatus() == model.TaskStatusWaiting && data[j].GetStatus() != model.TaskStatusWaiting
+			}
+		})
+		return data
 	} else if sortBy == SortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())

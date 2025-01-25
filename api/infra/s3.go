@@ -145,6 +145,25 @@ func (mgr *S3Manager) RemoveObject(objectName string, bucketName string, opts mi
 	return nil
 }
 
+func (mgr *S3Manager) RemoveFolder(objectName string, bucketName string, opts minio.RemoveObjectOptions) error {
+	if err := mgr.Connect(); err != nil {
+		return err
+	}
+	objectCh := mgr.client.ListObjects(context.Background(), bucketName, minio.ListObjectsOptions{
+		Prefix:    objectName,
+		Recursive: true,
+	})
+	for object := range objectCh {
+		if object.Err != nil {
+			return object.Err
+		}
+		if err := mgr.client.RemoveObject(context.Background(), bucketName, object.Key, opts); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (mgr *S3Manager) CreateBucket(bucketName string) error {
 	if err := mgr.Connect(); err != nil {
 		return err

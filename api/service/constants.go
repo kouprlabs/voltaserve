@@ -18,6 +18,7 @@ const (
 	SortBySize         = "size"
 	SortByVersion      = "version"
 	SortByFrequency    = "frequency"
+	SortByStatus       = "status"
 	SortByDateCreated  = "date_created"
 	SortByDateModified = "date_modified"
 )

@@ -21,6 +21,7 @@ func IsValidSortBy(value string) bool {
 		value == service.SortByFullName ||
 		value == service.SortByVersion ||
 		value == service.SortByFrequency ||
+		value == service.SortByStatus ||
 		value == service.SortByDateCreated ||
 		value == service.SortByDateModified
 }

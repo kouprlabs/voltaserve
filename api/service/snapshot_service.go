@@ -11,6 +11,8 @@
 package service
 
 import (
+	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/minio/minio-go/v7"
 	"path/filepath"
 	"sort"
 	"time"
@@ -36,7 +38,9 @@ type SnapshotService struct {
 	fileRepo       repo.FileRepo
 	fileSearch     *search.FileSearch
 	fileMapper     *FileMapper
+	taskRepo       repo.TaskRepo
 	taskCache      *cache.TaskCache
+	s3             *infra.S3Manager
 	config         *config.Config
 }
 
@@ -50,7 +54,9 @@ func NewSnapshotService() *SnapshotService {
 		fileSearch:     search.NewFileSearch(),
 		fileMapper:     NewFileMapper(),
 		fileRepo:       repo.NewFileRepo(),
+		taskRepo:       repo.NewTaskRepo(),
 		taskCache:      cache.NewTaskCache(),
+		s3:             infra.NewS3Manager(),
 		config:         config.GetConfig(),
 	}
 }
@@ -276,7 +282,8 @@ func (svc *SnapshotService) Detach(id string, userID string) error {
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return err
 	}
-	if _, err := svc.snapshotCache.Get(id); err != nil {
+	snapshot, err := svc.snapshotCache.Get(id)
+	if err != nil {
 		return err
 	}
 	if err := svc.snapshotRepo.Detach(id, file.GetID()); err != nil {
@@ -287,6 +294,14 @@ func (svc *SnapshotService) Detach(id string, userID string) error {
 		return err
 	}
 	if associationCount == 0 {
+		if snapshot.GetTaskID() != nil {
+			if err := svc.taskRepo.Delete(*snapshot.GetTaskID()); err != nil {
+				return err
+			}
+			if err := svc.taskCache.Delete(*snapshot.GetTaskID()); err != nil {
+				return err
+			}
+		}
 		if err := svc.snapshotRepo.Delete(id); err != nil {
 			return err
 		}
@@ -295,6 +310,113 @@ func (svc *SnapshotService) Detach(id string, userID string) error {
 		}
 	}
 	return nil
+}
+
+func (svc *SnapshotService) DeleteForFile(fileID string) error {
+	var snapshots []model.Snapshot
+	snapshots, err := svc.snapshotRepo.FindAllForFile(fileID)
+	if err != nil {
+		return err
+	}
+	svc.deleteAssociatedTasks(snapshots)
+	svc.deleteFromS3(snapshots)
+	svc.deleteFromCache(snapshots)
+	if err := svc.snapshotRepo.DeleteMappingsForFile(fileID); err == nil {
+		if err := svc.clearSnapshotIDOnFile(fileID); err == nil {
+			svc.deleteFromRepo(snapshots)
+		}
+	}
+	return nil
+}
+
+func (svc *SnapshotService) clearSnapshotIDOnFile(fileID string) error {
+	file, err := svc.fileCache.Get(fileID)
+	if err != nil {
+		return err
+	}
+	file.SetSnapshotID(nil)
+	if err = svc.fileRepo.Save(file); err != nil {
+		return err
+	}
+	if err = svc.fileCache.Set(file); err != nil {
+		return err
+	}
+	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *SnapshotService) deleteAssociatedTasks(snapshots []model.Snapshot) {
+	for _, snapshot := range snapshots {
+		if snapshot.GetTaskID() != nil {
+			if err := svc.taskRepo.Delete(*snapshot.GetTaskID()); err != nil {
+				log.GetLogger().Error(err)
+			}
+			if err := svc.taskCache.Delete(*snapshot.GetTaskID()); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+	}
+}
+
+func (svc *SnapshotService) deleteFromS3(snapshots []model.Snapshot) {
+	for _, s := range snapshots {
+		if s.HasOriginal() {
+			if err := svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+		if s.HasPreview() {
+			if err := svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+		if s.HasText() {
+			if err := svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+		if s.HasThumbnail() {
+			if err := svc.s3.RemoveObject(s.GetThumbnail().Key, s.GetThumbnail().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+		if s.HasMosaic() {
+			if err := svc.s3.RemoveFolder(s.GetMosaic().Key, s.GetMosaic().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+		if s.HasEntities() {
+			if err := svc.s3.RemoveObject(s.GetEntities().Key, s.GetEntities().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+		if s.HasOCR() {
+			if err := svc.s3.RemoveObject(s.GetOCR().Key, s.GetOCR().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+		if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}
+}
+
+func (svc *SnapshotService) deleteFromCache(snapshots []model.Snapshot) {
+	for _, s := range snapshots {
+		if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}
+}
+
+func (svc *SnapshotService) deleteFromRepo(snapshots []model.Snapshot) {
+	for _, s := range snapshots {
+		if err := svc.snapshotRepo.Delete(s.GetID()); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}
 }
 
 type SnapshotPatchOptions struct {

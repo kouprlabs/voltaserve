@@ -56,6 +56,7 @@ type FileService struct {
 	groupGuard     *guard.GroupGuard
 	groupMapper    *groupMapper
 	permissionRepo repo.PermissionRepo
+	taskRepo       repo.TaskRepo
 	taskCache      *cache.TaskCache
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
@@ -84,6 +85,7 @@ func NewFileService() *FileService {
 		groupGuard:     guard.NewGroupGuard(),
 		groupMapper:    newGroupMapper(),
 		permissionRepo: repo.NewPermissionRepo(),
+		taskRepo:       repo.NewTaskRepo(),
 		taskCache:      cache.NewTaskCache(),
 		taskSvc:        NewTaskService(),
 		fileIdent:      infra.NewFileIdentifier(),
@@ -1250,7 +1252,6 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Deleting.",
@@ -1267,7 +1268,6 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 			log.GetLogger().Error(err)
 		}
 	}(task.GetID())
-
 	if file.GetParentID() == nil {
 		workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 		if err != nil {
@@ -1278,97 +1278,77 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return err
 	}
-
 	treeIDs, err := svc.fileRepo.FindTreeIDs(file.GetID())
 	if err != nil {
 		return err
 	}
-
-	/* Delete file from repo */
-	if err := svc.fileRepo.Delete(id); err != nil {
-		return err
-	}
-
-	go func(ids []string) {
-		/* Delete tree from repo */
-		const ChunkSize = 1000
-		for i := 0; i < len(ids); i += ChunkSize {
-			end := i + ChunkSize
-			if end > len(ids) {
-				end = len(ids)
-			}
-			chunk := ids[i:end]
-			if err := svc.fileRepo.DeleteChunk(chunk); err != nil {
-				log.GetLogger().Error(err)
-			}
+	if file.GetType() == model.FileTypeFolder {
+		/* If it's a folder, first we delete its root from the cache to a give quick user feedback */
+		if err := svc.fileCache.Delete(id); err != nil {
+			return err
 		}
-		/* Delete snapshot mappings from tree, this causes the snapshots to become dangling */
+		/* Then we follow up by deleting the entire tree in a Go routine */
+		go func(treeIDs []string) {
+			svc.deleteSnapshots(treeIDs)
+			svc.deleteFromCache(treeIDs)
+			svc.deleteFromRepo(treeIDs)
+			svc.deleteFromSearch(treeIDs)
+		}(treeIDs)
+	} else if file.GetType() == model.FileTypeFile {
+		/* In the case of a file, we delete everything synchronously */
 		if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
 			log.GetLogger().Error(err)
 		}
-		/* Fetch dangling snapshots */
-		var danglingSnapshots []model.Snapshot
-		danglingSnapshots, err = svc.snapshotRepo.FindAllDangling()
-		if err != nil {
+		if err := svc.snapshotSvc.DeleteForFile(id); err != nil {
 			log.GetLogger().Error(err)
 		}
-		/* Delete dangling snapshots from S3 */
-		for _, s := range danglingSnapshots {
-			if s.HasOriginal() {
-				if err = svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					log.GetLogger().Error(err)
-				}
-			}
-			if s.HasPreview() {
-				if err = svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					log.GetLogger().Error(err)
-				}
-			}
-			if s.HasText() {
-				if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					log.GetLogger().Error(err)
-				}
-			}
-			if s.HasThumbnail() {
-				if err = svc.s3.RemoveObject(s.GetThumbnail().Key, s.GetThumbnail().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					log.GetLogger().Error(err)
-				}
-			}
-			if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
-				log.GetLogger().Error(err)
-			}
-		}
-		/* Delete dangling snapshots from cache */
-		for _, s := range danglingSnapshots {
-			if err = svc.snapshotCache.Delete(s.GetID()); err != nil {
-				log.GetLogger().Error(err)
-			}
-		}
-		/* Delete dangling snapshots from repo */
-		if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
+		if err := svc.fileCache.Delete(id); err != nil {
 			log.GetLogger().Error(err)
 		}
-	}(treeIDs)
-
-	/* Delete from cache */
-	go func(ids []string) {
-		for _, treeID := range treeIDs {
-			if err := svc.fileCache.Delete(treeID); err != nil {
-				// Here we intentionally don't return an error or panic, we just print the error
-				log.GetLogger().Error(err)
-			}
+		if err := svc.fileRepo.Delete(id); err != nil {
+			log.GetLogger().Error(err)
 		}
-	}(treeIDs)
-
-	/* Delete from search */
-	go func(ids []string) {
 		if err := svc.fileSearch.Delete(treeIDs); err != nil {
-			// Here we intentionally don't return an error or panic, we just print the error
 			log.GetLogger().Error(err)
 		}
-	}(treeIDs)
-
+	}
 	return nil
+}
+
+func (svc *FileService) deleteSnapshots(ids []string) {
+	for _, id := range ids {
+		if err := svc.snapshotSvc.DeleteForFile(id); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}
+}
+
+func (svc *FileService) deleteFromRepo(ids []string) {
+	const ChunkSize = 1000
+	for i := 0; i < len(ids); i += ChunkSize {
+		end := i + ChunkSize
+		if end > len(ids) {
+			end = len(ids)
+		}
+		chunk := ids[i:end]
+		if err := svc.fileRepo.DeleteChunk(chunk); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}
+}
+
+func (svc *FileService) deleteFromCache(ids []string) {
+	for _, id := range ids {
+		if err := svc.fileCache.Delete(id); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}
+}
+
+func (svc *FileService) deleteFromSearch(ids []string) {
+	if err := svc.fileSearch.Delete(ids); err != nil {
+		log.GetLogger().Error(err)
+	}
 }
 
 type FileDeleteManyOptions struct {
