@@ -11,11 +11,11 @@
 package service
 
 import (
-	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/minio/minio-go/v7"
 	"path/filepath"
 	"sort"
 	"time"
+
+	"github.com/minio/minio-go/v7"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
@@ -23,6 +23,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
