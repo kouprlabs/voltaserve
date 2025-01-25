@@ -31,7 +31,7 @@ const TaskDrawer = () => {
     isLoading: countIsLoading,
     mutate: mutateCount,
   } = TaskAPI.useGetCount(swrConfig())
-  const countIsReady = count !== undefined && !countError
+  const countIsReady = count != null && !countError
 
   useEffect(() => {
     if (isDrawerOpen) {
