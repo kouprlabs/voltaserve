@@ -1287,7 +1287,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		if err := svc.fileCache.Delete(id); err != nil {
 			return err
 		}
-		/* Then we follow up by deleting the entire tree in a Go routine */
+		/* Then we follow up by deleting the entire tree in a goroutine */
 		go func(treeIDs []string) {
 			svc.deleteSnapshots(treeIDs)
 			svc.deleteFromCache(treeIDs)
