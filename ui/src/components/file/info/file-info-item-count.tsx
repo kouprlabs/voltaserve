@@ -21,8 +21,8 @@ const FileInfoItemCount = ({ file }: FileInfoItemCountProps) => {
           {error ? (
             <span className={cx('text-red-500')}>Failed to load.</span>
           ) : null}
-          {count && !error ? <span>{count}</span> : null}
-          {!count && !error ? <span>Calculating…</span> : null}
+          {count != null && !error ? <span>{count}</span> : null}
+          {count == null && !error ? <span>Calculating…</span> : null}
         </div>
       </StatNumber>
     </Stat>
