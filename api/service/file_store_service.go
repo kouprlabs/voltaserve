@@ -25,7 +25,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type FileStore struct {
+type FileStoreService struct {
 	fileCache      *cache.FileCache
 	fileCoreSvc    *FileCore
 	fileMapper     *FileMapper
@@ -39,8 +39,8 @@ type FileStore struct {
 	pipelineClient *conversion_client.PipelineClient
 }
 
-func NewFileStore() *FileStore {
-	return &FileStore{
+func NewFileStoreService() *FileStoreService {
+	return &FileStoreService{
 		fileCache:      cache.NewFileCache(),
 		fileCoreSvc:    NewFileCore(),
 		fileMapper:     NewFileMapper(),
@@ -60,7 +60,7 @@ type StoreOptions struct {
 	Path        *string
 }
 
-func (svc *FileStore) Store(id string, opts StoreOptions, userID string) (*File, error) {
+func (svc *FileStoreService) Store(id string, opts StoreOptions, userID string) (*File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ type storeProperties struct {
 	ExceedsProcessingLimit bool
 }
 
-func (svc *FileStore) getProperties(file model.File, opts StoreOptions) (storeProperties, error) {
+func (svc *FileStoreService) getProperties(file model.File, opts StoreOptions) (storeProperties, error) {
 	props := storeProperties{}
 	if opts.S3Reference == nil {
 		var err error
@@ -118,7 +118,7 @@ func (svc *FileStore) getProperties(file model.File, opts StoreOptions) (storePr
 	return props, nil
 }
 
-func (svc *FileStore) getPropertiesFromPath(file model.File, opts StoreOptions) (storeProperties, error) {
+func (svc *FileStoreService) getPropertiesFromPath(file model.File, opts StoreOptions) (storeProperties, error) {
 	stat, err := os.Stat(*opts.Path)
 	if err != nil {
 		return storeProperties{}, err
@@ -142,7 +142,7 @@ func (svc *FileStore) getPropertiesFromPath(file model.File, opts StoreOptions) 
 	}, nil
 }
 
-func (svc *FileStore) getPropertiesFromS3Reference(opts StoreOptions) storeProperties {
+func (svc *FileStoreService) getPropertiesFromS3Reference(opts StoreOptions) storeProperties {
 	return storeProperties{
 		SnapshotID: opts.S3Reference.SnapshotID,
 		Path:       opts.S3Reference.Key,
@@ -157,14 +157,14 @@ func (svc *FileStore) getPropertiesFromS3Reference(opts StoreOptions) storePrope
 	}
 }
 
-func (svc *FileStore) store(props storeProperties) error {
+func (svc *FileStoreService) store(props storeProperties) error {
 	if err := svc.s3.PutFile(props.Original.Key, props.Path, props.ContentType, props.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (svc *FileStore) createSnapshot(file model.File, props storeProperties) (model.Snapshot, error) {
+func (svc *FileStoreService) createSnapshot(file model.File, props storeProperties) (model.Snapshot, error) {
 	s := repo.NewSnapshot()
 	s.SetID(props.SnapshotID)
 	if props.ExceedsProcessingLimit {
@@ -184,7 +184,7 @@ func (svc *FileStore) createSnapshot(file model.File, props storeProperties) (mo
 	return s, nil
 }
 
-func (svc *FileStore) assignSnapshotToFile(file model.File, snapshot model.Snapshot) error {
+func (svc *FileStoreService) assignSnapshotToFile(file model.File, snapshot model.Snapshot) error {
 	file.SetSnapshotID(helper.ToPtr(snapshot.GetID()))
 	if err := svc.fileCoreSvc.SaveAndSync(file); err != nil {
 		return err
@@ -195,7 +195,7 @@ func (svc *FileStore) assignSnapshotToFile(file model.File, snapshot model.Snaps
 	return nil
 }
 
-func (svc *FileStore) createTask(file model.File, userID string) (model.Task, error) {
+func (svc *FileStoreService) createTask(file model.File, userID string) (model.Task, error) {
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Waiting.",
@@ -210,7 +210,7 @@ func (svc *FileStore) createTask(file model.File, userID string) (model.Task, er
 	return task, nil
 }
 
-func (svc *FileStore) process(file model.File, snapshot model.Snapshot, props storeProperties, userID string) error {
+func (svc *FileStoreService) process(file model.File, snapshot model.Snapshot, props storeProperties, userID string) error {
 	task, err := svc.createTask(file, userID)
 	if err != nil {
 		return err
