@@ -17,21 +17,21 @@ import (
 	"github.com/kouprlabs/voltaserve/api/search"
 )
 
-type FileCoreService struct {
+type FileCore struct {
 	fileRepo   repo.FileRepo
 	fileSearch *search.FileSearch
 	fileCache  *cache.FileCache
 }
 
-func NewFileCoreService() *FileCoreService {
-	return &FileCoreService{
+func NewFileCore() *FileCore {
+	return &FileCore{
 		fileRepo:   repo.NewFileRepo(),
 		fileCache:  cache.NewFileCache(),
 		fileSearch: search.NewFileSearch(),
 	}
 }
 
-func (svc *FileCoreService) GetChildWithName(id string, name string) (model.File, error) {
+func (svc *FileCore) GetChildWithName(id string, name string) (model.File, error) {
 	children, err := svc.fileRepo.FindChildren(id)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (svc *FileCoreService) GetChildWithName(id string, name string) (model.File
 	return nil, nil
 }
 
-func (svc *FileCoreService) Sync(file model.File) error {
+func (svc *FileCore) Sync(file model.File) error {
 	if err := svc.fileSearch.Update([]model.File{file}); err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (svc *FileCoreService) Sync(file model.File) error {
 	return nil
 }
 
-func (svc *FileCoreService) SaveAndSync(file model.File) error {
+func (svc *FileCore) SaveAndSync(file model.File) error {
 	if err := svc.fileRepo.Save(file); err != nil {
 		return err
 	}

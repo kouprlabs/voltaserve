@@ -916,17 +916,17 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	buf := r.bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer r.bufferPool.Put(buf)
-	file, snapshot, rangeInterval, err := r.fileSvc.DownloadOriginalBuffer(id, c.Get("Range"), buf, userID)
+	download, err := r.fileSvc.DownloadOriginalBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(snapshot.GetOriginal().Key), ".") != extension {
+	if strings.TrimPrefix(filepath.Ext(download.Snapshot.GetOriginal().Key), ".") != extension {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
-	if rangeInterval != nil {
-		rangeInterval.ApplyToFiberContext(c)
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(download.File.GetName())))
+	if download.RangeInterval != nil {
+		download.RangeInterval.ApplyToFiberContext(c)
 		c.Status(http.StatusPartialContent)
 	} else {
 		c.Set("Content-Length", fmt.Sprintf("%d", len(buf.Bytes())))
@@ -971,17 +971,17 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	buf := r.bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer r.bufferPool.Put(buf)
-	file, snapshot, rangeInterval, err := r.fileSvc.DownloadPreviewBuffer(id, c.Get("Range"), buf, userID)
+	download, err := r.fileSvc.DownloadPreviewBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(snapshot.GetPreview().Key), ".") != extension {
+	if strings.TrimPrefix(filepath.Ext(download.Snapshot.GetPreview().Key), ".") != extension {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
-	if rangeInterval != nil {
-		rangeInterval.ApplyToFiberContext(c)
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(download.File.GetName())))
+	if download.RangeInterval != nil {
+		download.RangeInterval.ApplyToFiberContext(c)
 		c.Status(http.StatusPartialContent)
 	} else {
 		c.Set("Content-Length", fmt.Sprintf("%d", len(buf.Bytes())))

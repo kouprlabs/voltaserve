@@ -12,23 +12,25 @@ package service
 
 import (
 	"bytes"
+
+	"github.com/minio/minio-go/v7"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
-	"github.com/minio/minio-go/v7"
 )
 
-type FileDownloadService struct {
+type FileDownload struct {
 	fileCache     *cache.FileCache
 	fileGuard     *guard.FileGuard
 	snapshotCache *cache.SnapshotCache
 	s3            *infra.S3Manager
 }
 
-func NewFileDownloadService() *FileDownloadService {
-	return &FileDownloadService{
+func NewFileDownload() *FileDownload {
+	return &FileDownload{
 		fileCache:     cache.NewFileCache(),
 		fileGuard:     guard.NewFileGuard(),
 		snapshotCache: cache.NewSnapshotCache(),
@@ -36,66 +38,80 @@ func NewFileDownloadService() *FileDownloadService {
 	}
 }
 
-func (svc *FileDownloadService) DownloadOriginalBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (model.File, model.Snapshot, *infra.RangeInterval, error) {
+type DownloadResult struct {
+	File          model.File
+	Snapshot      model.Snapshot
+	RangeInterval *infra.RangeInterval
+}
+
+func (svc *FileDownload) DownloadOriginalBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if err = svc.check(file); err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if snapshot.HasOriginal() {
 		rangeInterval, err := svc.downloadS3Object(snapshot.GetOriginal(), rangeHeader, buf)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
-		return file, snapshot, rangeInterval, nil
+		return &DownloadResult{
+			File:          file,
+			Snapshot:      snapshot,
+			RangeInterval: rangeInterval,
+		}, nil
 	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 }
 
-func (svc *FileDownloadService) DownloadPreviewBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (model.File, model.Snapshot, *infra.RangeInterval, error) {
+func (svc *FileDownload) DownloadPreviewBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if err = svc.check(file); err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if snapshot.HasPreview() {
 		rangeInterval, err := svc.downloadS3Object(snapshot.GetPreview(), rangeHeader, buf)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
-		return file, snapshot, rangeInterval, nil
+		return &DownloadResult{
+			File:          file,
+			Snapshot:      snapshot,
+			RangeInterval: rangeInterval,
+		}, nil
 	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 }
 
-func (svc *FileDownloadService) check(file model.File) error {
+func (svc *FileDownload) check(file model.File) error {
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return errorpkg.NewFileIsNotAFileError(file)
 	}
 	return nil
 }
 
-func (svc *FileDownloadService) downloadS3Object(s3Object *model.S3Object, rangeHeader string, buf *bytes.Buffer) (*infra.RangeInterval, error) {
+func (svc *FileDownload) downloadS3Object(s3Object *model.S3Object, rangeHeader string, buf *bytes.Buffer) (*infra.RangeInterval, error) {
 	objectInfo, err := svc.s3.StatObject(s3Object.Key, s3Object.Bucket, minio.StatObjectOptions{})
 	if err != nil {
 		return nil, err
@@ -114,7 +130,7 @@ func (svc *FileDownloadService) downloadS3Object(s3Object *model.S3Object, range
 	return nil, nil
 }
 
-func (svc *FileDownloadService) DownloadThumbnailBuffer(id string, buf *bytes.Buffer, userID string) (model.Snapshot, error) {
+func (svc *FileDownload) DownloadThumbnailBuffer(id string, buf *bytes.Buffer, userID string) (model.Snapshot, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
