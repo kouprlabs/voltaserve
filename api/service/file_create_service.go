@@ -40,6 +40,13 @@ func NewFileCreateService() *FileCreateService {
 	}
 }
 
+type FileCreateOptions struct {
+	WorkspaceID string `json:"workspaceId" validate:"required"`
+	Name        string `json:"name"        validate:"required,max=255"`
+	Type        string `json:"type"        validate:"required,oneof=file folder"`
+	ParentID    string `json:"parentId"    validate:"required"`
+}
+
 func (svc *FileCreateService) Create(opts FileCreateOptions, userID string) (*File, error) {
 	path := helper.PathFromFilename(opts.Name)
 	parentID := opts.ParentID

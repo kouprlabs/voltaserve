@@ -11,7 +11,10 @@
 package service
 
 import (
+	"errors"
 	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
@@ -21,6 +24,7 @@ type FileCoreService struct {
 	fileRepo   repo.FileRepo
 	fileSearch *search.FileSearch
 	fileCache  *cache.FileCache
+	fileGuard  *guard.FileGuard
 }
 
 func NewFileCoreService() *FileCoreService {
@@ -28,6 +32,7 @@ func NewFileCoreService() *FileCoreService {
 		fileRepo:   repo.NewFileRepo(),
 		fileCache:  cache.NewFileCache(),
 		fileSearch: search.NewFileSearch(),
+		fileGuard:  guard.NewFileGuard(),
 	}
 }
 
@@ -62,4 +67,34 @@ func (svc *FileCoreService) SaveAndSync(file model.File) error {
 		return err
 	}
 	return nil
+}
+
+func (svc *FileCoreService) DoAuthorization(data []model.File, userID string) ([]model.File, error) {
+	var res []model.File
+	for _, f := range data {
+		if svc.fileGuard.IsAuthorized(userID, f, model.PermissionViewer) {
+			res = append(res, f)
+		}
+	}
+	return res, nil
+}
+
+func (svc *FileCoreService) DoAuthorizationByIDs(ids []string, userID string) ([]model.File, error) {
+	var res []model.File
+	for _, id := range ids {
+		var f model.File
+		f, err := svc.fileCache.Get(id)
+		if err != nil {
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+		if svc.fileGuard.IsAuthorized(userID, f, model.PermissionViewer) {
+			res = append(res, f)
+		}
+	}
+	return res, nil
 }
