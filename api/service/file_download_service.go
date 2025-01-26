@@ -12,12 +12,14 @@ package service
 
 import (
 	"bytes"
+
+	"github.com/minio/minio-go/v7"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
-	"github.com/minio/minio-go/v7"
 )
 
 type FileDownloadService struct {
