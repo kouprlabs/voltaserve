@@ -268,27 +268,9 @@ func (svc *SnapshotService) deleteForFile(fileID string) error {
 	svc.deleteFromS3(snapshots)
 	svc.deleteFromCache(snapshots)
 	if err := svc.snapshotRepo.DeleteMappingsForFile(fileID); err == nil {
-		if err := svc.clearSnapshotIDOnFile(fileID); err == nil {
+		if err := svc.fileRepo.ClearSnapshotID(fileID); err == nil {
 			svc.deleteFromRepo(snapshots)
 		}
-	}
-	return nil
-}
-
-func (svc *SnapshotService) clearSnapshotIDOnFile(fileID string) error {
-	file, err := svc.fileCache.Get(fileID)
-	if err != nil {
-		return err
-	}
-	file.SetSnapshotID(nil)
-	if err = svc.fileRepo.Save(file); err != nil {
-		return err
-	}
-	if err = svc.fileCache.Set(file); err != nil {
-		return err
-	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-		return err
 	}
 	return nil
 }

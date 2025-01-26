@@ -42,6 +42,7 @@ type FileRepo interface {
 	CountItems(id string) (int64, error)
 	IsGrandChildOf(id string, ancestorID string) (bool, error)
 	ComputeSize(id string) (int64, error)
+	ClearSnapshotID(id string) error
 	GrantUserPermission(id string, userID string, permission string) error
 	RevokeUserPermission(tree []model.File, userID string) error
 	GrantGroupPermission(id string, groupID string, permission string) error
@@ -533,6 +534,13 @@ func (repo *fileRepo) ComputeSize(id string) (int64, error) {
 		return res.Result, db.Error
 	}
 	return res.Result, nil
+}
+
+func (repo *fileRepo) ClearSnapshotID(id string) error {
+	if db := repo.db.Exec("UPDATE file SET snapshot_id = NULL WHERE id = ?", id); db.Error != nil {
+		return db.Error
+	}
+	return nil
 }
 
 func (repo *fileRepo) GrantUserPermission(id string, userID string, permission string) error {

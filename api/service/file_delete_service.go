@@ -108,8 +108,11 @@ func (svc *FileDeleteService) deleteFolder(id string) error {
 	if err != nil {
 		return err
 	}
-	// Start by deleting the folder's root from the cache to give a quick user feedback
+	// Start by deleting the folder's root to give a quick user feedback
 	if err := svc.fileCache.Delete(id); err != nil {
+		return err
+	}
+	if err := svc.fileRepo.Delete(id); err != nil {
 		return err
 	}
 	go func(treeIDs []string) {
