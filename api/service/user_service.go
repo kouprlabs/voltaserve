@@ -55,20 +55,6 @@ func NewUserService() *UserService {
 	}
 }
 
-type User struct {
-	ID         string   `json:"id"`
-	FullName   string   `json:"fullName"`
-	Picture    *Picture `json:"picture,omitempty"`
-	Email      string   `json:"email"`
-	Username   string   `json:"username"`
-	CreateTime string   `json:"createTime"`
-	UpdateTime *string  `json:"updateTime"`
-}
-
-type Picture struct {
-	Extension string `json:"extension"`
-}
-
 type UserListOptions struct {
 	Query               string
 	OrganizationID      string
@@ -79,14 +65,6 @@ type UserListOptions struct {
 	SortOrder           string
 	Page                uint64
 	Size                uint64
-}
-
-type UserList struct {
-	Data          []*User `json:"data"`
-	TotalPages    uint64  `json:"totalPages"`
-	TotalElements uint64  `json:"totalElements"`
-	Page          uint64  `json:"page"`
-	Size          uint64  `json:"size"`
 }
 
 func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, error) {
@@ -100,8 +78,8 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(users, opts.SortBy, opts.SortOrder)
-	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+	sorted := svc.sort(users, opts.SortBy, opts.SortOrder)
+	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
 	mapped, err := svc.userMapper.mapMany(paged)
 	if err != nil {
 		return nil, err
@@ -113,11 +91,6 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 		Page:          opts.Page,
 		Size:          uint64(len(mapped)),
 	}, nil
-}
-
-type UserProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *UserService) Probe(opts UserListOptions, userID string) (*UserProbe, error) {
@@ -154,68 +127,17 @@ func (svc *UserService) findAll(opts UserListOptions, userID string) ([]model.Us
 			return nil, err
 		}
 	}
-	res := make([]model.User, 0)
+	var res []model.User
 	var err error
 	if opts.Query == "" {
-		if opts.OrganizationID != "" && opts.GroupID != "" && opts.ExcludeGroupMembers {
-			orgMembers, err := svc.orgRepo.FindMembers(opts.OrganizationID)
-			if err != nil {
-				return nil, err
-			}
-			groupMembers, err := svc.groupRepo.FindMembers(opts.GroupID)
-			if err != nil {
-				return nil, err
-			}
-			for _, om := range orgMembers {
-				isGroupMember := false
-				for _, gm := range groupMembers {
-					if om.GetID() == gm.GetID() {
-						isGroupMember = true
-						break
-					}
-				}
-				if !isGroupMember {
-					res = append(res, om)
-				}
-			}
-		} else if opts.OrganizationID != "" {
-			res, err = svc.orgRepo.FindMembers(opts.OrganizationID)
-			if err != nil {
-				return nil, err
-			}
-		} else if opts.GroupID != "" {
-			res, err = svc.groupRepo.FindMembers(opts.GroupID)
-			if err != nil {
-				return nil, err
-			}
+		res, err = svc.load(opts)
+		if err != nil {
+			return nil, err
 		}
 	} else {
-		count, err := svc.userRepo.Count()
+		res, err = svc.search(opts)
 		if err != nil {
 			return nil, err
-		}
-		users, err := svc.userSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
-		if err != nil {
-			return nil, err
-		}
-		var members []model.User
-		if opts.OrganizationID != "" {
-			members, err = svc.orgRepo.FindMembers(opts.OrganizationID)
-			if err != nil {
-				return nil, err
-			}
-		} else if opts.GroupID != "" {
-			members, err = svc.groupRepo.FindMembers(opts.GroupID)
-			if err != nil {
-				return nil, err
-			}
-		}
-		for _, m := range members {
-			for _, u := range users {
-				if u.GetID() == m.GetID() {
-					res = append(res, m)
-				}
-			}
 		}
 	}
 	if opts.ExcludeMe {
@@ -231,7 +153,78 @@ func (svc *UserService) findAll(opts UserListOptions, userID string) ([]model.Us
 	}
 }
 
-func (svc *UserService) doSorting(data []model.User, sortBy string, sortOrder string) []model.User {
+func (svc *UserService) load(opts UserListOptions) ([]model.User, error) {
+	res := make([]model.User, 0)
+	var err error
+	if opts.OrganizationID != "" && opts.GroupID != "" && opts.ExcludeGroupMembers {
+		orgMembers, err := svc.orgRepo.FindMembers(opts.OrganizationID)
+		if err != nil {
+			return nil, err
+		}
+		groupMembers, err := svc.groupRepo.FindMembers(opts.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		for _, om := range orgMembers {
+			isGroupMember := false
+			for _, gm := range groupMembers {
+				if om.GetID() == gm.GetID() {
+					isGroupMember = true
+					break
+				}
+			}
+			if !isGroupMember {
+				res = append(res, om)
+			}
+		}
+	} else if opts.OrganizationID != "" {
+		res, err = svc.orgRepo.FindMembers(opts.OrganizationID)
+		if err != nil {
+			return nil, err
+		}
+	} else if opts.GroupID != "" {
+		res, err = svc.groupRepo.FindMembers(opts.GroupID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (svc *UserService) search(opts UserListOptions) ([]model.User, error) {
+	res := make([]model.User, 0)
+	var err error
+	count, err := svc.userRepo.Count()
+	if err != nil {
+		return nil, err
+	}
+	users, err := svc.userSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+	if err != nil {
+		return nil, err
+	}
+	var members []model.User
+	if opts.OrganizationID != "" {
+		members, err = svc.orgRepo.FindMembers(opts.OrganizationID)
+		if err != nil {
+			return nil, err
+		}
+	} else if opts.GroupID != "" {
+		members, err = svc.groupRepo.FindMembers(opts.GroupID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	for _, m := range members {
+		for _, u := range users {
+			if u.GetID() == m.GetID() {
+				res = append(res, m)
+			}
+		}
+	}
+	return res, nil
+}
+
+func (svc *UserService) sort(data []model.User, sortBy string, sortOrder string) []model.User {
 	if sortBy == SortByEmail {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -254,7 +247,7 @@ func (svc *UserService) doSorting(data []model.User, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *UserService) doPagination(data []model.User, page, size uint64) ([]model.User, uint64, uint64) {
+func (svc *UserService) paginate(data []model.User, page, size uint64) ([]model.User, uint64, uint64) {
 	totalElements := uint64(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
@@ -265,8 +258,7 @@ func (svc *UserService) doPagination(data []model.User, page, size uint64) ([]mo
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 type ExtractPictureJustification struct {
@@ -335,35 +327,4 @@ func (svc *UserService) findUserForPicture(id string, justification ExtractPictu
 		}
 	}
 	return user, nil
-}
-
-type userMapper struct{}
-
-func newUserMapper() *userMapper {
-	return &userMapper{}
-}
-
-func (mp *userMapper) mapOne(user model.User) *User {
-	res := &User{
-		ID:         user.GetID(),
-		FullName:   user.GetFullName(),
-		Email:      user.GetEmail(),
-		Username:   user.GetUsername(),
-		CreateTime: user.GetCreateTime(),
-		UpdateTime: user.GetUpdateTime(),
-	}
-	if user.GetPicture() != nil {
-		res.Picture = &Picture{
-			Extension: helper.Base64ToExtension(*user.GetPicture()),
-		}
-	}
-	return res
-}
-
-func (mp *userMapper) mapMany(users []model.User) ([]*User, error) {
-	res := make([]*User, 0)
-	for _, user := range users {
-		res = append(res, mp.mapOne(user))
-	}
-	return res, nil
 }

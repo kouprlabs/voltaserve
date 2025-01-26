@@ -70,15 +70,6 @@ type OrganizationCreateOptions struct {
 	Image *string `json:"image"`
 }
 
-type Organization struct {
-	ID         string  `json:"id"`
-	Name       string  `json:"name"`
-	Image      *string `json:"image,omitempty"`
-	Permission string  `json:"permission"`
-	CreateTime string  `json:"createTime"`
-	UpdateTime *string `json:"updateTime,omitempty"`
-}
-
 func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID string) (*Organization, error) {
 	org, err := svc.orgRepo.Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewID(),
@@ -127,14 +118,6 @@ type OrganizationListOptions struct {
 	SortOrder string
 }
 
-type OrganizationList struct {
-	Data          []*Organization `json:"data"`
-	TotalPages    uint64          `json:"totalPages"`
-	TotalElements uint64          `json:"totalElements"`
-	Page          uint64          `json:"page"`
-	Size          uint64          `json:"size"`
-}
-
 func (svc *OrganizationService) List(opts OrganizationListOptions, userID string) (*OrganizationList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
@@ -146,8 +129,8 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
-	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
+	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
 	mapped, err := svc.orgMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -159,11 +142,6 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 		Page:          opts.Page,
 		Size:          uint64(len(mapped)),
 	}, nil
-}
-
-type OrganizationProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *OrganizationService) Probe(opts OrganizationListOptions, userID string) (*OrganizationProbe, error) {
@@ -185,7 +163,7 @@ func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID str
 		if err != nil {
 			return nil, err
 		}
-		res, err = svc.doAuthorizationByIDs(ids, userID)
+		res, err = svc.authorizeIDs(ids, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -208,7 +186,7 @@ func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID str
 			}
 			orgs = append(orgs, org)
 		}
-		res, err = svc.doAuthorization(orgs, userID)
+		res, err = svc.authorize(orgs, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -263,19 +241,36 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	if err != nil {
 		return err
 	}
+	if err := svc.canRemoveMember(memberID, org, userID); err != nil {
+		return err
+	}
+	if err := svc.revokeGroupPermissions(memberID, org); err != nil {
+		return err
+	}
+	if err := svc.revokeWorkspacePermissions(memberID, org); err != nil {
+		return err
+	}
+	if err := svc.orgRepo.RevokeUserPermission(id, memberID); err != nil {
+		return err
+	}
+	if _, err := svc.orgCache.Refresh(org.GetID()); err != nil {
+		return err
+	}
+	return nil
+}
 
-	/* Ensure the member exists before proceeding. */
+func (svc *OrganizationService) canRemoveMember(memberID string, org model.Organization, userID string) error {
+	// Ensure the member exists before proceeding
 	if _, err := svc.userRepo.Find(memberID); err != nil {
 		return err
 	}
-
+	// Only organization owners are allowed to remove members
 	if memberID != userID {
 		if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
 			return err
 		}
 	}
-
-	/* Make sure member is not the last remaining owner of the organization */
+	// Make sure member is not the last remaining owner of the organization
 	ownerCount, err := svc.orgRepo.CountOwners(org.GetID())
 	if err != nil {
 		return err
@@ -283,8 +278,10 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	if svc.orgGuard.IsAuthorized(memberID, org, model.PermissionOwner) && ownerCount == 1 {
 		return errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(org)
 	}
+	return nil
+}
 
-	/* Revoke permissions from all groups belonging to this organization. */
+func (svc *OrganizationService) revokeGroupPermissions(memberID string, org model.Organization) error {
 	groupsIDs, err := svc.groupRepo.FindIDsByOrganization(org.GetID())
 	if err != nil {
 		return err
@@ -297,8 +294,10 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 			log.GetLogger().Error(err)
 		}
 	}
+	return nil
+}
 
-	/* Revoke permissions from all workspaces belonging to this organization */
+func (svc *OrganizationService) revokeWorkspacePermissions(memberID string, org model.Organization) error {
 	workspaceIDs, err := svc.workspaceRepo.FindIDsByOrganization(org.GetID())
 	if err != nil {
 		return err
@@ -311,18 +310,10 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 			log.GetLogger().Error(err)
 		}
 	}
-
-	/* Revoke permission from organization */
-	if err := svc.orgRepo.RevokeUserPermission(id, memberID); err != nil {
-		return err
-	}
-	if _, err := svc.orgCache.Refresh(org.GetID()); err != nil {
-		return err
-	}
 	return nil
 }
 
-func (svc *OrganizationService) doAuthorization(data []model.Organization, userID string) ([]model.Organization, error) {
+func (svc *OrganizationService) authorize(data []model.Organization, userID string) ([]model.Organization, error) {
 	var res []model.Organization
 	for _, o := range data {
 		if svc.orgGuard.IsAuthorized(userID, o, model.PermissionViewer) {
@@ -332,7 +323,7 @@ func (svc *OrganizationService) doAuthorization(data []model.Organization, userI
 	return res, nil
 }
 
-func (svc *OrganizationService) doAuthorizationByIDs(ids []string, userID string) ([]model.Organization, error) {
+func (svc *OrganizationService) authorizeIDs(ids []string, userID string) ([]model.Organization, error) {
 	var res []model.Organization
 	for _, id := range ids {
 		var o model.Organization
@@ -352,7 +343,7 @@ func (svc *OrganizationService) doAuthorizationByIDs(ids []string, userID string
 	return res, nil
 }
 
-func (svc *OrganizationService) doSorting(data []model.Organization, sortBy string, sortOrder string) []model.Organization {
+func (svc *OrganizationService) sort(data []model.Organization, sortBy string, sortOrder string) []model.Organization {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -392,7 +383,7 @@ func (svc *OrganizationService) doSorting(data []model.Organization, sortBy stri
 	return data
 }
 
-func (svc *OrganizationService) doPagination(data []model.Organization, page, size uint64) (pageData []model.Organization, totalElements uint64, totalPages uint64) {
+func (svc *OrganizationService) paginate(data []model.Organization, page, size uint64) (pageData []model.Organization, totalElements uint64, totalPages uint64) {
 	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
@@ -414,58 +405,4 @@ func (svc *OrganizationService) sync(org model.Organization) error {
 		return err
 	}
 	return nil
-}
-
-type organizationMapper struct {
-	groupCache *cache.GroupCache
-}
-
-func newOrganizationMapper() *organizationMapper {
-	return &organizationMapper{
-		groupCache: cache.NewGroupCache(),
-	}
-}
-
-func (mp *organizationMapper) mapOne(m model.Organization, userID string) (*Organization, error) {
-	res := &Organization{
-		ID:         m.GetID(),
-		Name:       m.GetName(),
-		CreateTime: m.GetCreateTime(),
-		UpdateTime: m.GetUpdateTime(),
-	}
-	res.Permission = model.PermissionNone
-	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-			res.Permission = p.GetValue()
-		}
-	}
-	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupID())
-		if err != nil {
-			return nil, err
-		}
-		for _, u := range g.GetMembers() {
-			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-				res.Permission = p.GetValue()
-			}
-		}
-	}
-	return res, nil
-}
-
-func (mp *organizationMapper) mapMany(orgs []model.Organization, userID string) ([]*Organization, error) {
-	res := make([]*Organization, 0)
-	for _, org := range orgs {
-		o, err := mp.mapOne(org, userID)
-		if err != nil {
-			var e *errorpkg.ErrorResponse
-			if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-		res = append(res, o)
-	}
-	return res, nil
 }

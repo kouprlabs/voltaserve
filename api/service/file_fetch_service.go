@@ -132,12 +132,13 @@ func (svc *FileFetchService) ListByPath(path string, userID string) ([]*File, er
 		}
 		return res, nil
 	} else {
+		// This should never happen
 		return nil, errorpkg.NewInternalServerError(fmt.Errorf("invalid file type %s", file.GetType()))
 	}
 }
 
 func (svc *FileFetchService) getWorkspacesAsFiles(userID string) ([]*File, error) {
-	workspaces, err := svc.workspaceSvc.findAllWithoutOptions(userID)
+	workspaces, err := svc.workspaceSvc.findAll(userID)
 	if err != nil {
 		return nil, err
 	}

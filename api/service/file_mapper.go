@@ -22,7 +22,7 @@ import (
 
 type fileMapper struct {
 	groupCache     *cache.GroupCache
-	snapshotMapper *SnapshotMapper
+	snapshotMapper *snapshotMapper
 	snapshotCache  *cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
 	config         *config.Config
@@ -31,7 +31,7 @@ type fileMapper struct {
 func newFileMapper() *fileMapper {
 	return &fileMapper{
 		groupCache:     cache.NewGroupCache(),
-		snapshotMapper: NewSnapshotMapper(),
+		snapshotMapper: newSnapshotMapper(),
 		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
 		config:         config.GetConfig(),
