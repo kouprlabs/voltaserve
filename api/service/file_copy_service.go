@@ -28,8 +28,8 @@ type FileCopyService struct {
 	fileSearch   *search.FileSearch
 	fileCache    *cache.FileCache
 	fileGuard    *guard.FileGuard
-	fileMapper   *FileMapper
-	fileCoreSvc  *FileCoreService
+	fileMapper   *fileMapper
+	fileCoreSvc  *fileCoreService
 	taskSvc      *TaskService
 	snapshotRepo repo.SnapshotRepo
 }
@@ -40,8 +40,8 @@ func NewFileCopyService() *FileCopyService {
 		fileSearch:   search.NewFileSearch(),
 		fileCache:    cache.NewFileCache(),
 		fileGuard:    guard.NewFileGuard(),
-		fileMapper:   NewFileMapper(),
-		fileCoreSvc:  NewFileCoreService(),
+		fileMapper:   newFileMapper(),
+		fileCoreSvc:  newFileCoreService(),
 		taskSvc:      NewTaskService(),
 		snapshotRepo: repo.NewSnapshotRepo(),
 	}
@@ -99,7 +99,7 @@ func (svc *FileCopyService) copy(source model.File, target model.File, userID st
 }
 
 func (svc *FileCopyService) createTask(file model.File, userID string) (model.Task, error) {
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Copying.",
 		UserID:          userID,
@@ -110,7 +110,7 @@ func (svc *FileCopyService) createTask(file model.File, userID string) (model.Ta
 	if err != nil {
 		return nil, err
 	}
-	return task, nil
+	return res, nil
 }
 
 func (svc *FileCopyService) check(source model.File, target model.File, userID string) error {
@@ -173,7 +173,7 @@ func (svc *FileCopyService) cloneTree(source model.File, target model.File, tree
 		clones[index].SetParentID(&id)
 	}
 	root.SetParentID(helper.ToPtr(target.GetID()))
-	existing, err := svc.fileCoreSvc.GetChildWithName(target.GetID(), root.GetName())
+	existing, err := svc.fileCoreSvc.getChildWithName(target.GetID(), root.GetName())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -254,7 +254,7 @@ func (svc *FileCopyService) refreshUpdateTime(target model.File) error {
 	if err := svc.fileRepo.Save(target); err != nil {
 		return err
 	}
-	if err := svc.fileCoreSvc.Sync(target); err != nil {
+	if err := svc.fileCoreSvc.sync(target); err != nil {
 		return err
 	}
 	return nil

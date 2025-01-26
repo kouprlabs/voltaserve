@@ -21,15 +21,15 @@ import (
 	"github.com/kouprlabs/voltaserve/api/search"
 )
 
-type FileCoreService struct {
+type fileCoreService struct {
 	fileRepo   repo.FileRepo
 	fileSearch *search.FileSearch
 	fileCache  *cache.FileCache
 	fileGuard  *guard.FileGuard
 }
 
-func NewFileCoreService() *FileCoreService {
-	return &FileCoreService{
+func newFileCoreService() *fileCoreService {
+	return &fileCoreService{
 		fileRepo:   repo.NewFileRepo(),
 		fileCache:  cache.NewFileCache(),
 		fileSearch: search.NewFileSearch(),
@@ -37,7 +37,7 @@ func NewFileCoreService() *FileCoreService {
 	}
 }
 
-func (svc *FileCoreService) GetChildWithName(id string, name string) (model.File, error) {
+func (svc *fileCoreService) getChildWithName(id string, name string) (model.File, error) {
 	children, err := svc.fileRepo.FindChildren(id)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (svc *FileCoreService) GetChildWithName(id string, name string) (model.File
 	return nil, nil
 }
 
-func (svc *FileCoreService) Sync(file model.File) error {
+func (svc *fileCoreService) sync(file model.File) error {
 	if err := svc.fileSearch.Update([]model.File{file}); err != nil {
 		return err
 	}
@@ -60,17 +60,17 @@ func (svc *FileCoreService) Sync(file model.File) error {
 	return nil
 }
 
-func (svc *FileCoreService) SaveAndSync(file model.File) error {
+func (svc *fileCoreService) saveAndSync(file model.File) error {
 	if err := svc.fileRepo.Save(file); err != nil {
 		return err
 	}
-	if err := svc.Sync(file); err != nil {
+	if err := svc.sync(file); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (svc *FileCoreService) Authorize(files []model.File, userID string) ([]model.File, error) {
+func (svc *fileCoreService) authorize(files []model.File, userID string) ([]model.File, error) {
 	var res []model.File
 	for _, f := range files {
 		if svc.fileGuard.IsAuthorized(userID, f, model.PermissionViewer) {
@@ -80,7 +80,7 @@ func (svc *FileCoreService) Authorize(files []model.File, userID string) ([]mode
 	return res, nil
 }
 
-func (svc *FileCoreService) AuthorizeIDs(ids []string, userID string) ([]model.File, error) {
+func (svc *fileCoreService) authorizeIDs(ids []string, userID string) ([]model.File, error) {
 	var res []model.File
 	for _, id := range ids {
 		var f model.File

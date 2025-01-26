@@ -20,7 +20,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type FileMapper struct {
+type fileMapper struct {
 	groupCache     *cache.GroupCache
 	snapshotMapper *SnapshotMapper
 	snapshotCache  *cache.SnapshotCache
@@ -28,8 +28,8 @@ type FileMapper struct {
 	config         *config.Config
 }
 
-func NewFileMapper() *FileMapper {
-	return &FileMapper{
+func newFileMapper() *fileMapper {
+	return &fileMapper{
 		groupCache:     cache.NewGroupCache(),
 		snapshotMapper: NewSnapshotMapper(),
 		snapshotCache:  cache.NewSnapshotCache(),
@@ -38,7 +38,7 @@ func NewFileMapper() *FileMapper {
 	}
 }
 
-func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
+func (mp *fileMapper) mapOne(m model.File, userID string) (*File, error) {
 	res := &File{
 		ID:          m.GetID(),
 		WorkspaceID: m.GetWorkspaceID(),
@@ -91,7 +91,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 	return res, nil
 }
 
-func (mp *FileMapper) mapMany(data []model.File, userID string) ([]*File, error) {
+func (mp *fileMapper) mapMany(data []model.File, userID string) ([]*File, error) {
 	res := make([]*File, 0)
 	for _, file := range data {
 		f, err := mp.mapOne(file, userID)

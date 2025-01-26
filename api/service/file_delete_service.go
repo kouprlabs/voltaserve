@@ -89,7 +89,7 @@ func (svc *FileDeleteService) check(file model.File) error {
 }
 
 func (svc *FileDeleteService) createTask(file model.File, userID string) (model.Task, error) {
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Deleting.",
 		UserID:          userID,
@@ -100,7 +100,7 @@ func (svc *FileDeleteService) createTask(file model.File, userID string) (model.
 	if err != nil {
 		return nil, err
 	}
-	return task, nil
+	return res, nil
 }
 
 func (svc *FileDeleteService) deleteFolder(id string) error {
@@ -125,7 +125,7 @@ func (svc *FileDeleteService) deleteFile(id string) error {
 	if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
 		log.GetLogger().Error(err)
 	}
-	if err := svc.snapshotSvc.DeleteForFile(id); err != nil {
+	if err := svc.snapshotSvc.deleteForFile(id); err != nil {
 		log.GetLogger().Error(err)
 	}
 	if err := svc.fileCache.Delete(id); err != nil {
@@ -142,7 +142,7 @@ func (svc *FileDeleteService) deleteFile(id string) error {
 
 func (svc *FileDeleteService) deleteSnapshots(ids []string) {
 	for _, id := range ids {
-		if err := svc.snapshotSvc.DeleteForFile(id); err != nil {
+		if err := svc.snapshotSvc.deleteForFile(id); err != nil {
 			log.GetLogger().Error(err)
 		}
 	}

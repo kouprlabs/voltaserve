@@ -38,7 +38,7 @@ type WorkspaceService struct {
 	fileRepo        repo.FileRepo
 	fileCache       *cache.FileCache
 	fileGuard       *guard.FileGuard
-	fileMapper      *FileMapper
+	fileMapper      *fileMapper
 	s3              *infra.S3Manager
 	config          *config.Config
 }
@@ -53,7 +53,7 @@ func NewWorkspaceService() *WorkspaceService {
 		fileRepo:        repo.NewFileRepo(),
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
-		fileMapper:      NewFileMapper(),
+		fileMapper:      newFileMapper(),
 		s3:              infra.NewS3Manager(),
 		config:          config.GetConfig(),
 	}

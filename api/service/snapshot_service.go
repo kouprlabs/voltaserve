@@ -38,7 +38,7 @@ type SnapshotService struct {
 	fileGuard      *guard.FileGuard
 	fileRepo       repo.FileRepo
 	fileSearch     *search.FileSearch
-	fileMapper     *FileMapper
+	fileMapper     *fileMapper
 	taskRepo       repo.TaskRepo
 	taskCache      *cache.TaskCache
 	s3             *infra.S3Manager
@@ -53,23 +53,13 @@ func NewSnapshotService() *SnapshotService {
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
 		fileSearch:     search.NewFileSearch(),
-		fileMapper:     NewFileMapper(),
+		fileMapper:     newFileMapper(),
 		fileRepo:       repo.NewFileRepo(),
 		taskRepo:       repo.NewTaskRepo(),
 		taskCache:      cache.NewTaskCache(),
 		s3:             infra.NewS3Manager(),
 		config:         config.GetConfig(),
 	}
-}
-
-func (svc *SnapshotService) SaveAndSync(snapshot model.Snapshot) error {
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	return nil
 }
 
 type Snapshot struct {
@@ -313,7 +303,7 @@ func (svc *SnapshotService) Detach(id string, userID string) error {
 	return nil
 }
 
-func (svc *SnapshotService) DeleteForFile(fileID string) error {
+func (svc *SnapshotService) deleteForFile(fileID string) error {
 	var snapshots []model.Snapshot
 	snapshots, err := svc.snapshotRepo.FindAllForFile(fileID)
 	if err != nil {
@@ -471,8 +461,18 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 
-func (svc *SnapshotService) IsTaskPending(snapshot model.Snapshot) (*bool, error) {
+func (svc *SnapshotService) isTaskPending(snapshot model.Snapshot) (*bool, error) {
 	return isTaskPending(snapshot, svc.taskCache)
+}
+
+func (svc *SnapshotService) saveAndSync(snapshot model.Snapshot) error {
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return nil
 }
 
 func isTaskPending(snapshot model.Snapshot, taskCache *cache.TaskCache) (*bool, error) {

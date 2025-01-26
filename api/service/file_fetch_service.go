@@ -29,8 +29,8 @@ type FileFetchService struct {
 	fileRepo       repo.FileRepo
 	fileSearch     *search.FileSearch
 	fileGuard      *guard.FileGuard
-	fileMapper     *FileMapper
-	fileCoreSvc    *FileCoreService
+	fileMapper     *fileMapper
+	fileCoreSvc    *fileCoreService
 	fileIdent      *infra.FileIdentifier
 	userRepo       repo.UserRepo
 	workspaceRepo  repo.WorkspaceRepo
@@ -44,8 +44,8 @@ func NewFileFetchService() *FileFetchService {
 		fileRepo:       repo.NewFileRepo(),
 		fileSearch:     search.NewFileSearch(),
 		fileGuard:      guard.NewFileGuard(),
-		fileMapper:     NewFileMapper(),
-		fileCoreSvc:    NewFileCoreService(),
+		fileMapper:     newFileMapper(),
+		fileCoreSvc:    newFileCoreService(),
 		fileIdent:      infra.NewFileIdentifier(),
 		userRepo:       repo.NewUserRepo(),
 		workspaceRepo:  repo.NewWorkspaceRepo(),
@@ -219,7 +219,7 @@ func (svc *FileFetchService) getAuthorizedChildren(id string, userID string) ([]
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.fileCoreSvc.AuthorizeIDs(childrenIDs, userID)
+	authorized, err := svc.fileCoreSvc.authorizeIDs(childrenIDs, userID)
 	if err != nil {
 		return nil, err
 	}

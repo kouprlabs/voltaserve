@@ -151,7 +151,7 @@ func (svc *FileReprocessService) getTree(file model.File, userID string) ([]mode
 }
 
 func (svc *FileReprocessService) createTask(file model.File, userID string) (model.Task, error) {
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Waiting.",
 		UserID:          userID,
@@ -162,7 +162,7 @@ func (svc *FileReprocessService) createTask(file model.File, userID string) (mod
 	if err != nil {
 		return nil, err
 	}
-	return task, nil
+	return res, nil
 }
 
 func (svc *FileReprocessService) runPipeline(file model.File, snapshot model.Snapshot, userID string) error {
@@ -171,7 +171,7 @@ func (svc *FileReprocessService) runPipeline(file model.File, snapshot model.Sna
 		return err
 	}
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return err
 	}
 	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{

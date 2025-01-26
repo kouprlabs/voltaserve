@@ -32,8 +32,8 @@ type FileListService struct {
 	fileRepo       repo.FileRepo
 	fileSearch     *search.FileSearch
 	fileGuard      *guard.FileGuard
-	fileCoreSvc    *FileCoreService
-	fileMapper     *FileMapper
+	fileCoreSvc    *fileCoreService
+	fileMapper     *fileMapper
 	fileIdent      *infra.FileIdentifier
 	workspaceRepo  repo.WorkspaceRepo
 	workspaceGuard *guard.WorkspaceGuard
@@ -45,8 +45,8 @@ func NewFileListService() *FileListService {
 		fileRepo:       repo.NewFileRepo(),
 		fileSearch:     search.NewFileSearch(),
 		fileGuard:      guard.NewFileGuard(),
-		fileCoreSvc:    NewFileCoreService(),
-		fileMapper:     NewFileMapper(),
+		fileCoreSvc:    newFileCoreService(),
+		fileMapper:     newFileMapper(),
 		fileIdent:      infra.NewFileIdentifier(),
 		workspaceRepo:  repo.NewWorkspaceRepo(),
 		workspaceGuard: guard.NewWorkspaceGuard(),
@@ -184,7 +184,7 @@ func (svc *FileListService) list(data []model.File, parent model.File, opts File
 	} else {
 		filtered = data
 	}
-	authorized, err := svc.fileCoreSvc.Authorize(filtered, userID)
+	authorized, err := svc.fileCoreSvc.authorize(filtered, userID)
 	if err != nil {
 		return nil, err
 	}

@@ -27,8 +27,8 @@ import (
 
 type FileStoreService struct {
 	fileCache      *cache.FileCache
-	fileCoreSvc    *FileCoreService
-	fileMapper     *FileMapper
+	fileCoreSvc    *fileCoreService
+	fileMapper     *fileMapper
 	workspaceCache *cache.WorkspaceCache
 	snapshotRepo   repo.SnapshotRepo
 	snapshotCache  *cache.SnapshotCache
@@ -42,8 +42,8 @@ type FileStoreService struct {
 func NewFileStoreService() *FileStoreService {
 	return &FileStoreService{
 		fileCache:      cache.NewFileCache(),
-		fileCoreSvc:    NewFileCoreService(),
-		fileMapper:     NewFileMapper(),
+		fileCoreSvc:    newFileCoreService(),
+		fileMapper:     newFileMapper(),
 		workspaceCache: cache.NewWorkspaceCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
 		snapshotCache:  cache.NewSnapshotCache(),
@@ -165,28 +165,28 @@ func (svc *FileStoreService) store(props fileStoreProperties) error {
 }
 
 func (svc *FileStoreService) createSnapshot(file model.File, props fileStoreProperties) (model.Snapshot, error) {
-	s := repo.NewSnapshot()
-	s.SetID(props.SnapshotID)
+	res := repo.NewSnapshot()
+	res.SetID(props.SnapshotID)
 	if props.ExceedsProcessingLimit {
-		s.SetStatus(model.SnapshotStatusReady)
+		res.SetStatus(model.SnapshotStatusReady)
 	} else {
-		s.SetStatus(model.SnapshotStatusWaiting)
+		res.SetStatus(model.SnapshotStatusWaiting)
 	}
 	latestVersion, err := svc.snapshotRepo.FindLatestVersionForFile(file.GetID())
 	if err != nil {
 		return nil, err
 	}
-	s.SetVersion(latestVersion + 1)
-	s.SetOriginal(&props.Original)
-	if err := svc.snapshotSvc.SaveAndSync(s); err != nil {
+	res.SetVersion(latestVersion + 1)
+	res.SetOriginal(&props.Original)
+	if err := svc.snapshotSvc.saveAndSync(res); err != nil {
 		return nil, err
 	}
-	return s, nil
+	return res, nil
 }
 
 func (svc *FileStoreService) assignSnapshotToFile(file model.File, snapshot model.Snapshot) error {
 	file.SetSnapshotID(helper.ToPtr(snapshot.GetID()))
-	if err := svc.fileCoreSvc.SaveAndSync(file); err != nil {
+	if err := svc.fileCoreSvc.saveAndSync(file); err != nil {
 		return err
 	}
 	if err := svc.snapshotRepo.MapWithFile(snapshot.GetID(), file.GetID()); err != nil {
@@ -196,7 +196,7 @@ func (svc *FileStoreService) assignSnapshotToFile(file model.File, snapshot mode
 }
 
 func (svc *FileStoreService) createTask(file model.File, userID string) (model.Task, error) {
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Waiting.",
 		UserID:          userID,
@@ -207,7 +207,7 @@ func (svc *FileStoreService) createTask(file model.File, userID string) (model.T
 	if err != nil {
 		return nil, err
 	}
-	return task, nil
+	return res, nil
 }
 
 func (svc *FileStoreService) process(file model.File, snapshot model.Snapshot, props fileStoreProperties, userID string) error {
@@ -216,7 +216,7 @@ func (svc *FileStoreService) process(file model.File, snapshot model.Snapshot, p
 		return err
 	}
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return err
 	}
 	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{

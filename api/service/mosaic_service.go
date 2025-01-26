@@ -71,7 +71,7 @@ func (svc *MosaicService) Create(id string, userID string) (*Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	isTaskPending, err := svc.snapshotSvc.isTaskPending(snapshot)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (svc *MosaicService) Create(id string, userID string) (*Task, error) {
 	}
 	snapshot.SetStatus(model.SnapshotStatusWaiting)
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
 	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
@@ -125,7 +125,7 @@ func (svc *MosaicService) Delete(id string, userID string) (*Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	isTaskPending, err := svc.snapshotSvc.isTaskPending(snapshot)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func (svc *MosaicService) Delete(id string, userID string) (*Task, error) {
 	}
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
 	go func(task model.Task, snapshot model.Snapshot) {
@@ -172,7 +172,7 @@ func (svc *MosaicService) Delete(id string, userID string) (*Task, error) {
 		snapshot.SetMosaic(nil)
 		snapshot.SetTaskID(nil)
 		snapshot.SetStatus(model.SnapshotStatusReady)
-		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 			log.GetLogger().Error(err)
 			return
 		}
