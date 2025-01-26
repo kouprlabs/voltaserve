@@ -117,14 +117,7 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if isTaskPending {
 		return nil, errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
-		Name:            "Waiting.",
-		UserID:          userID,
-		IsIndeterminate: true,
-		Status:          model.TaskStatusWaiting,
-		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
-	})
+	task, err := svc.createWaitingTask(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -134,20 +127,7 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
-	key := snapshot.GetOriginal().Key
-	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
-		key = snapshot.GetPreview().Key
-	}
-	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
-		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
-		TaskID:     task.GetID(),
-		SnapshotID: snapshot.GetID(),
-		Bucket:     snapshot.GetOriginal().Bucket,
-		Key:        key,
-		Payload: map[string]string{
-			"language": opts.LanguageID,
-		},
-	}); err != nil {
+	if err := svc.runPipeline(snapshot, task); err != nil {
 		return nil, err
 	}
 	res, err := svc.taskMapper.mapOne(task)
@@ -186,14 +166,7 @@ func (svc *InsightsService) Patch(id string, userID string) (*Task, error) {
 	if previous == nil || previous.GetLanguage() == nil {
 		return nil, errorpkg.NewSnapshotCannotBePatchedError(nil)
 	}
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
-		Name:            "Waiting.",
-		UserID:          userID,
-		IsIndeterminate: true,
-		Status:          model.TaskStatusWaiting,
-		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
-	})
+	task, err := svc.createWaitingTask(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -203,17 +176,43 @@ func (svc *InsightsService) Patch(id string, userID string) (*Task, error) {
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
+	if err := svc.runPipeline(snapshot, task); err != nil {
+		return nil, err
+	}
+	res, err := svc.taskMapper.mapOne(task)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *InsightsService) runPipeline(snapshot model.Snapshot, task model.Task) error {
+	key := snapshot.GetOriginal().Key
+	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
+		key = snapshot.GetPreview().Key
+	}
 	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetPreview().Bucket,
-		Key:        snapshot.GetPreview().Key,
+		Key:        key,
 		Payload:    map[string]string{"language": *snapshot.GetLanguage()},
 	}); err != nil {
-		return nil, err
+		return err
 	}
-	res, err := svc.taskMapper.mapOne(task)
+	return nil
+}
+
+func (svc *InsightsService) createWaitingTask(file model.File, userID string) (model.Task, error) {
+	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Waiting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusWaiting,
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
+	})
 	if err != nil {
 		return nil, err
 	}

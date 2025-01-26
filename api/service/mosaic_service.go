@@ -87,7 +87,7 @@ func (svc *MosaicService) Create(id string, userID string) (*Task, error) {
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
-	if err := svc.runPipeline(task, snapshot); err != nil {
+	if err := svc.runPipeline(snapshot, task); err != nil {
 		return nil, err
 	}
 	res, err := svc.taskMapper.mapOne(task)
@@ -97,7 +97,7 @@ func (svc *MosaicService) Create(id string, userID string) (*Task, error) {
 	return res, nil
 }
 
-func (svc *MosaicService) runPipeline(task model.Task, snapshot model.Snapshot) error {
+func (svc *MosaicService) runPipeline(snapshot model.Snapshot, task model.Task) error {
 	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(conversion_client.PipelineMosaic),
 		TaskID:     task.GetID(),
