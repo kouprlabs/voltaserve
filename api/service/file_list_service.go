@@ -116,57 +116,80 @@ func (svc *FileListService) List(id string, opts FileListOptions, userID string)
 	}
 	var data []model.File
 	if opts.Query != nil && opts.Query.Text != nil {
-		filter := fmt.Sprintf("workspaceId=\"%s\"", workspace.GetID())
-		if opts.Query.Type != nil {
-			filter += fmt.Sprintf(" AND type=\"%s\"", *opts.Query.Type)
-		}
-		hits, err := svc.fileSearch.Query(*opts.Query.Text, infra.QueryOptions{Filter: filter})
+		data, err = svc.search(opts.Query, workspace)
 		if err != nil {
 			return nil, err
-		}
-		for _, hit := range hits {
-			var f model.File
-			f, err := svc.fileCache.Get(hit.GetID())
-			if err != nil {
-				var e *errorpkg.ErrorResponse
-				// We don't want to break if the search engine contains files that shouldn't be there
-				if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {
-					continue
-				} else {
-					return nil, err
-				}
-			}
-			data = append(data, f)
 		}
 	} else {
-		ids, err := svc.fileRepo.FindChildrenIDs(id)
+		data, err = svc.getChildren(id)
 		if err != nil {
 			return nil, err
 		}
-		for _, id := range ids {
-			var f model.File
-			f, err := svc.fileCache.Get(id)
-			if err != nil {
+	}
+	return svc.list(data, parent, opts, userID)
+}
+
+func (svc *FileListService) search(query *FileQuery, workspace model.Workspace) ([]model.File, error) {
+	var res []model.File
+	filter := fmt.Sprintf("workspaceId=\"%s\"", workspace.GetID())
+	if query.Type != nil {
+		filter += fmt.Sprintf(" AND type=\"%s\"", *query.Type)
+	}
+	hits, err := svc.fileSearch.Query(*query.Text, infra.QueryOptions{Filter: filter})
+	if err != nil {
+		return nil, err
+	}
+	for _, hit := range hits {
+		var file model.File
+		file, err := svc.fileCache.Get(hit.GetID())
+		if err != nil {
+			var e *errorpkg.ErrorResponse
+			// We don't want to break if the search engine contains files that shouldn't be there
+			if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {
+				continue
+			} else {
 				return nil, err
 			}
-			data = append(data, f)
 		}
+		res = append(res, file)
 	}
+	return res, nil
+}
+
+func (svc *FileListService) getChildren(id string) ([]model.File, error) {
+	var res []model.File
+	ids, err := svc.fileRepo.FindChildrenIDs(id)
+	if err != nil {
+		return nil, err
+	}
+	for _, id := range ids {
+		var file model.File
+		file, err := svc.fileCache.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, file)
+	}
+	return res, nil
+}
+
+func (svc *FileListService) list(data []model.File, parent model.File, opts FileListOptions, userID string) (*FileList, error) {
 	var filtered []model.File
+	var err error
 	if opts.Query != nil {
-		filtered, err = svc.doQueryFiltering(data, *opts.Query, parent)
+		filtered, err = svc.filterWithQuery(data, *opts.Query, parent)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		filtered = data
 	}
+	authorized, err := svc.fileCoreSvc.Authorize(filtered, userID)
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.fileCoreSvc.DoAuthorization(filtered, userID)
-	if err != nil {
-		return nil, err
-	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
-	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+	sorted := svc.sort(authorized, opts.SortBy, opts.SortOrder, userID)
+	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
 	mappedData, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -182,236 +205,253 @@ func (svc *FileListService) List(id string, opts FileListOptions, userID string)
 	return res, nil
 }
 
-func (svc *FileListService) doSorting(data []model.File, sortBy string, sortOrder string, userID string) []model.File {
+func (svc *FileListService) sort(data []model.File, sortBy string, sortOrder string, userID string) []model.File {
 	if sortBy == SortByName {
-		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
-				return data[i].GetName() > data[j].GetName()
-			} else {
-				return data[i].GetName() < data[j].GetName()
-			}
-		})
-		return data
+		return svc.sortByName(data, sortOrder)
 	} else if sortBy == SortBySize {
-		sort.Slice(data, func(i, j int) bool {
-			fileA, err := svc.fileMapper.mapOne(data[i], userID)
-			if err != nil {
-				return false
-			}
-			fileB, err := svc.fileMapper.mapOne(data[j], userID)
-			if err != nil {
-				return false
-			}
-			var sizeA int64 = 0
-			if fileA.Snapshot != nil && fileA.Snapshot.Original != nil {
-				sizeA = *fileA.Snapshot.Original.Size
-			}
-			var sizeB int64 = 0
-			if fileB.Snapshot != nil && fileB.Snapshot.Original != nil {
-				sizeB = *fileB.Snapshot.Original.Size
-			}
-			if sortOrder == SortOrderDesc {
-				return sizeA > sizeB
-			} else {
-				return sizeA < sizeB
-			}
-		})
-		return data
+		return svc.sortBySize(data, sortOrder, userID)
 	} else if sortBy == SortByDateCreated {
-		sort.Slice(data, func(i, j int) bool {
-			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
-			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+		return svc.sortByDateCreated(data, sortOrder)
+	} else if sortBy == SortByDateModified {
+		return svc.sortByDateModified(data, sortOrder)
+	} else if sortBy == SortByKind {
+		return svc.sortByKind(data, userID)
+	}
+	return data
+}
+
+func (svc *FileListService) sortByName(data []model.File, sortOrder string) []model.File {
+	sort.Slice(data, func(i, j int) bool {
+		if sortOrder == SortOrderDesc {
+			return data[i].GetName() > data[j].GetName()
+		} else {
+			return data[i].GetName() < data[j].GetName()
+		}
+	})
+	return data
+}
+
+func (svc *FileListService) sortBySize(data []model.File, sortOrder string, userID string) []model.File {
+	sort.Slice(data, func(i, j int) bool {
+		fileA, err := svc.fileMapper.mapOne(data[i], userID)
+		if err != nil {
+			return false
+		}
+		fileB, err := svc.fileMapper.mapOne(data[j], userID)
+		if err != nil {
+			return false
+		}
+		var sizeA int64 = 0
+		if fileA.Snapshot != nil && fileA.Snapshot.Original != nil {
+			sizeA = *fileA.Snapshot.Original.Size
+		}
+		var sizeB int64 = 0
+		if fileB.Snapshot != nil && fileB.Snapshot.Original != nil {
+			sizeB = *fileB.Snapshot.Original.Size
+		}
+		if sortOrder == SortOrderDesc {
+			return sizeA > sizeB
+		} else {
+			return sizeA < sizeB
+		}
+	})
+	return data
+}
+
+func (svc *FileListService) sortByDateCreated(data []model.File, sortOrder string) []model.File {
+	sort.Slice(data, func(i, j int) bool {
+		a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
+		b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+		if sortOrder == SortOrderDesc {
+			return a.UnixMilli() > b.UnixMilli()
+		} else {
+			return a.UnixMilli() < b.UnixMilli()
+		}
+	})
+	return data
+}
+
+func (svc *FileListService) sortByDateModified(data []model.File, sortOrder string) []model.File {
+	sort.Slice(data, func(i, j int) bool {
+		if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
+			a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
+			b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
 			if sortOrder == SortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
-		})
-		return data
-	} else if sortBy == SortByDateModified {
-		sort.Slice(data, func(i, j int) bool {
-			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
-				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
-				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
-				if sortOrder == SortOrderDesc {
-					return a.UnixMilli() > b.UnixMilli()
-				} else {
-					return a.UnixMilli() < b.UnixMilli()
-				}
-			} else {
-				return false
-			}
-		})
-		return data
-	} else if sortBy == SortByKind {
-		folders, _ := rxgo.Just(data)().
-			Filter(func(v interface{}) bool {
-				return v.(model.File).GetType() == model.FileTypeFolder
-			}).
-			ToSlice(0)
-		files, _ := rxgo.Just(data)().
-			Filter(func(v interface{}) bool {
-				return v.(model.File).GetType() == model.FileTypeFile
-			}).
-			ToSlice(0)
-		images, _ := rxgo.Just(files)().
-			Filter(func(file interface{}) bool {
-				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
-				if err != nil {
-					return false
-				}
-				if f.Snapshot != nil && f.Snapshot.Original == nil {
-					return false
-				}
-				if f.Snapshot != nil && svc.fileIdent.IsImage(f.Snapshot.Original.Extension) {
-					return true
-				}
-				return false
-			}).
-			ToSlice(0)
-		pdfs, _ := rxgo.Just(files)().
-			Filter(func(file interface{}) bool {
-				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
-				if err != nil {
-					return false
-				}
-				if f.Snapshot != nil && f.Snapshot.Original == nil {
-					return false
-				}
-				if f.Snapshot != nil && svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) {
-					return true
-				}
-				return false
-			}).
-			ToSlice(0)
-		documents, _ := rxgo.Just(files)().
-			Filter(func(file interface{}) bool {
-				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
-				if err != nil {
-					return false
-				}
-				if f.Snapshot != nil && f.Snapshot.Original == nil {
-					return false
-				}
-				if f.Snapshot != nil && svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) {
-					return true
-				}
-				return false
-			}).
-			ToSlice(0)
-		videos, _ := rxgo.Just(files)().
-			Filter(func(file interface{}) bool {
-				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
-				if err != nil {
-					return false
-				}
-				if f.Snapshot != nil && f.Snapshot.Original == nil {
-					return false
-				}
-				if f.Snapshot != nil && svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) {
-					return true
-				}
-				return false
-			}).
-			ToSlice(0)
-		texts, _ := rxgo.Just(files)().
-			Filter(func(file interface{}) bool {
-				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
-				if err != nil {
-					return false
-				}
-				if f.Snapshot != nil && f.Snapshot.Original == nil {
-					return false
-				}
-				if f.Snapshot != nil && svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
-					return true
-				}
-				return false
-			}).
-			ToSlice(0)
-		others, _ := rxgo.Just(files)().
-			Filter(func(file interface{}) bool {
-				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
-				if err != nil {
-					return false
-				}
-				if f.Snapshot != nil && f.Snapshot.Original == nil {
-					return false
-				}
-				if f.Snapshot != nil &&
-					!svc.fileIdent.IsImage(f.Snapshot.Original.Extension) &&
-					!svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) &&
-					!svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) &&
-					!svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) &&
-					!svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
-					return true
-				}
-				return false
-			}).
-			ToSlice(0)
-		var res []model.File
-		for _, v := range folders {
-			var file model.File
-			file, err := svc.fileCache.Get(v.(model.File).GetID())
-			if err != nil {
-				return data
-			}
-			res = append(res, file)
+		} else {
+			return false
 		}
-		for _, v := range images {
-			var file model.File
-			file, err := svc.fileCache.Get(v.(model.File).GetID())
-			if err != nil {
-				return data
-			}
-			res = append(res, file)
-		}
-		for _, v := range pdfs {
-			var file model.File
-			file, err := svc.fileCache.Get(v.(model.File).GetID())
-			if err != nil {
-				return data
-			}
-			res = append(res, file)
-		}
-		for _, v := range documents {
-			var file model.File
-			file, err := svc.fileCache.Get(v.(model.File).GetID())
-			if err != nil {
-				return data
-			}
-			res = append(res, file)
-		}
-		for _, v := range videos {
-			var file model.File
-			file, err := svc.fileCache.Get(v.(model.File).GetID())
-			if err != nil {
-				return data
-			}
-			res = append(res, file)
-		}
-		for _, v := range texts {
-			var file model.File
-			file, err := svc.fileCache.Get(v.(model.File).GetID())
-			if err != nil {
-				return data
-			}
-			res = append(res, file)
-		}
-		for _, v := range others {
-			var file model.File
-			file, err := svc.fileCache.Get(v.(model.File).GetID())
-			if err != nil {
-				return data
-			}
-			res = append(res, file)
-		}
-		return res
-	}
+	})
 	return data
 }
 
-func (svc *FileListService) doPagination(data []model.File, page, size uint64) (pageData []model.File, totalElements uint64, totalPages uint64) {
+func (svc *FileListService) sortByKind(data []model.File, userID string) []model.File {
+	var res []model.File
+	res = append(res, svc.filterFolders(data)...)
+	res = append(res, svc.filterFiles(data)...)
+	res = append(res, svc.filterImages(data, userID)...)
+	res = append(res, svc.filterPDFs(data, userID)...)
+	res = append(res, svc.filterDocuments(data, userID)...)
+	res = append(res, svc.filterVideos(data, userID)...)
+	res = append(res, svc.filterTexts(data, userID)...)
+	res = append(res, svc.filterOthers(data, userID)...)
+	return res
+}
+
+func (svc *FileListService) getFromCache(data []interface{}) []model.File {
+	var res []model.File
+	for _, v := range data {
+		var file model.File
+		file, err := svc.fileCache.Get(v.(model.File).GetID())
+		if err != nil {
+			continue
+		}
+		res = append(res, file)
+	}
+	return res
+}
+
+func (svc *FileListService) filterFolders(data []model.File) []model.File {
+	folders, _ := rxgo.Just(data)().
+		Filter(func(v interface{}) bool {
+			return v.(model.File).GetType() == model.FileTypeFolder
+		}).
+		ToSlice(0)
+	return svc.getFromCache(folders)
+}
+
+func (svc *FileListService) filterFiles(data []model.File) []model.File {
+	files, _ := rxgo.Just(data)().
+		Filter(func(v interface{}) bool {
+			return v.(model.File).GetType() == model.FileTypeFile
+		}).
+		ToSlice(0)
+	return svc.getFromCache(files)
+}
+
+func (svc *FileListService) filterImages(data []model.File, userID string) []model.File {
+	images, _ := rxgo.Just(data)().
+		Filter(func(file interface{}) bool {
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			if err != nil {
+				return false
+			}
+			if f.Snapshot != nil && f.Snapshot.Original == nil {
+				return false
+			}
+			if f.Snapshot != nil && svc.fileIdent.IsImage(f.Snapshot.Original.Extension) {
+				return true
+			}
+			return false
+		}).
+		ToSlice(0)
+	return svc.getFromCache(images)
+}
+
+func (svc *FileListService) filterPDFs(data []model.File, userID string) []model.File {
+	pdfs, _ := rxgo.Just(data)().
+		Filter(func(file interface{}) bool {
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			if err != nil {
+				return false
+			}
+			if f.Snapshot != nil && f.Snapshot.Original == nil {
+				return false
+			}
+			if f.Snapshot != nil && svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) {
+				return true
+			}
+			return false
+		}).
+		ToSlice(0)
+	return svc.getFromCache(pdfs)
+}
+
+func (svc *FileListService) filterDocuments(data []model.File, userID string) []model.File {
+	documents, _ := rxgo.Just(data)().
+		Filter(func(file interface{}) bool {
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			if err != nil {
+				return false
+			}
+			if f.Snapshot != nil && f.Snapshot.Original == nil {
+				return false
+			}
+			if f.Snapshot != nil && svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) {
+				return true
+			}
+			return false
+		}).
+		ToSlice(0)
+	return svc.getFromCache(documents)
+}
+
+func (svc *FileListService) filterVideos(data []model.File, userID string) []model.File {
+	videos, _ := rxgo.Just(data)().
+		Filter(func(file interface{}) bool {
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			if err != nil {
+				return false
+			}
+			if f.Snapshot != nil && f.Snapshot.Original == nil {
+				return false
+			}
+			if f.Snapshot != nil && svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) {
+				return true
+			}
+			return false
+		}).
+		ToSlice(0)
+	return svc.getFromCache(videos)
+}
+
+func (svc *FileListService) filterTexts(data []model.File, userID string) []model.File {
+	texts, _ := rxgo.Just(data)().
+		Filter(func(file interface{}) bool {
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			if err != nil {
+				return false
+			}
+			if f.Snapshot != nil && f.Snapshot.Original == nil {
+				return false
+			}
+			if f.Snapshot != nil && svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
+				return true
+			}
+			return false
+		}).
+		ToSlice(0)
+	return svc.getFromCache(texts)
+}
+
+func (svc *FileListService) filterOthers(data []model.File, userID string) []model.File {
+	others, _ := rxgo.Just(data)().
+		Filter(func(file interface{}) bool {
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			if err != nil {
+				return false
+			}
+			if f.Snapshot != nil && f.Snapshot.Original == nil {
+				return false
+			}
+			if f.Snapshot != nil &&
+				!svc.fileIdent.IsImage(f.Snapshot.Original.Extension) &&
+				!svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) &&
+				!svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) &&
+				!svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) &&
+				!svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
+				return true
+			}
+			return false
+		}).
+		ToSlice(0)
+	return svc.getFromCache(others)
+}
+
+func (svc *FileListService) paginate(data []model.File, page, size uint64) (pageData []model.File, totalElements uint64, totalPages uint64) {
 	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
@@ -425,7 +465,7 @@ func (svc *FileListService) doPagination(data []model.File, page, size uint64) (
 	return data[startIndex:endIndex], totalElements, totalPages
 }
 
-func (svc *FileListService) doQueryFiltering(data []model.File, opts FileQuery, parent model.File) ([]model.File, error) {
+func (svc *FileListService) filterWithQuery(data []model.File, opts FileQuery, parent model.File) ([]model.File, error) {
 	filtered, _ := rxgo.Just(data)().
 		Filter(func(v interface{}) bool {
 			return v.(model.File).GetWorkspaceID() == parent.GetWorkspaceID()

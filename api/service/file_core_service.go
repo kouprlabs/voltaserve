@@ -70,9 +70,9 @@ func (svc *FileCoreService) SaveAndSync(file model.File) error {
 	return nil
 }
 
-func (svc *FileCoreService) DoAuthorization(data []model.File, userID string) ([]model.File, error) {
+func (svc *FileCoreService) Authorize(files []model.File, userID string) ([]model.File, error) {
 	var res []model.File
-	for _, f := range data {
+	for _, f := range files {
 		if svc.fileGuard.IsAuthorized(userID, f, model.PermissionViewer) {
 			res = append(res, f)
 		}
@@ -80,7 +80,7 @@ func (svc *FileCoreService) DoAuthorization(data []model.File, userID string) ([
 	return res, nil
 }
 
-func (svc *FileCoreService) DoAuthorizationByIDs(ids []string, userID string) ([]model.File, error) {
+func (svc *FileCoreService) AuthorizeIDs(ids []string, userID string) ([]model.File, error) {
 	var res []model.File
 	for _, id := range ids {
 		var f model.File
