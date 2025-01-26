@@ -29,6 +29,7 @@ type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
 	FindByVersion(version int64) (model.Snapshot, error)
 	FindAllForFile(fileID string) ([]model.Snapshot, error)
+	FindExclusiveForFile(fileID string) ([]model.Snapshot, error)
 	FindAllForTask(taskID string) ([]*snapshotEntity, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
@@ -526,20 +527,6 @@ func (repo *snapshotRepo) DeleteMappingsForFile(fileID string) error {
 	return nil
 }
 
-func (repo *snapshotRepo) findAllForFile(fileID string) ([]*snapshotEntity, error) {
-	var res []*snapshotEntity
-	db := repo.db.
-		Raw(`SELECT * FROM snapshot s
-             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
-             WHERE sf.file_id = ? ORDER BY s.version`,
-			fileID).
-		Scan(&res)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	return res, nil
-}
-
 func (repo *snapshotRepo) DeleteMappingsForTree(fileID string) error {
 	db := repo.db.
 		Exec(`WITH RECURSIVE rec (id, parent_id, create_time) AS
@@ -554,12 +541,38 @@ func (repo *snapshotRepo) DeleteMappingsForTree(fileID string) error {
 }
 
 func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {
-	snapshots, err := repo.findAllForFile(fileID)
-	if err != nil {
-		return nil, err
+	var entities []*snapshotEntity
+	db := repo.db.
+		Raw(`SELECT * FROM snapshot s
+             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
+             WHERE sf.file_id = ? ORDER BY s.version`,
+			fileID).
+		Scan(&entities)
+	if db.Error != nil {
+		return nil, db.Error
 	}
 	var res []model.Snapshot
-	for _, s := range snapshots {
+	for _, s := range entities {
+		res = append(res, s)
+	}
+	return res, nil
+}
+
+func (repo *snapshotRepo) FindExclusiveForFile(fileID string) ([]model.Snapshot, error) {
+	var entities []*snapshotEntity
+	db := repo.db.
+		Raw(`SELECT s.* FROM snapshot s
+             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
+             WHERE sf.file_id = ?
+             AND NOT EXISTS (SELECT 1 FROM snapshot_file sf2 WHERE sf2.snapshot_id = s.id AND sf2.file_id != ?)
+             ORDER BY s.version`,
+			fileID, fileID).
+		Scan(&entities)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	var res []model.Snapshot
+	for _, s := range entities {
 		res = append(res, s)
 	}
 	return res, nil
