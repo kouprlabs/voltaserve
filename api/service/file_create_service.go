@@ -20,34 +20,27 @@ import (
 	"github.com/kouprlabs/voltaserve/api/search"
 )
 
-type FileCreate struct {
+type FileCreateService struct {
 	fileRepo    repo.FileRepo
 	fileSearch  *search.FileSearch
 	fileCache   *cache.FileCache
 	fileGuard   *guard.FileGuard
 	fileMapper  *FileMapper
-	fileCoreSvc *FileCore
+	fileCoreSvc *FileCoreService
 }
 
-func NewFileCreate() *FileCreate {
-	return &FileCreate{
+func NewFileCreateService() *FileCreateService {
+	return &FileCreateService{
 		fileRepo:    repo.NewFileRepo(),
 		fileSearch:  search.NewFileSearch(),
 		fileCache:   cache.NewFileCache(),
 		fileGuard:   guard.NewFileGuard(),
 		fileMapper:  NewFileMapper(),
-		fileCoreSvc: NewFileCore(),
+		fileCoreSvc: NewFileCoreService(),
 	}
 }
 
-type FileCreateOptions struct {
-	WorkspaceID string `json:"workspaceId" validate:"required"`
-	Name        string `json:"name"        validate:"required,max=255"`
-	Type        string `json:"type"        validate:"required,oneof=file folder"`
-	ParentID    string `json:"parentId"    validate:"required"`
-}
-
-func (svc *FileCreate) Create(opts FileCreateOptions, userID string) (*File, error) {
+func (svc *FileCreateService) Create(opts FileCreateOptions, userID string) (*File, error) {
 	path := helper.PathFromFilename(opts.Name)
 	parentID := opts.ParentID
 	if len(path) > 1 {
@@ -65,7 +58,7 @@ func (svc *FileCreate) Create(opts FileCreateOptions, userID string) (*File, err
 	}, userID)
 }
 
-func (svc *FileCreate) createDirectoriesForPath(path []string, parentID string, workspaceID string, userID string) (*string, error) {
+func (svc *FileCreateService) createDirectoriesForPath(path []string, parentID string, workspaceID string, userID string) (*string, error) {
 	for _, component := range path[:len(path)-1] {
 		existing, err := svc.fileCoreSvc.GetChildWithName(parentID, component)
 		if err != nil {
@@ -89,7 +82,7 @@ func (svc *FileCreate) createDirectoriesForPath(path []string, parentID string, 
 	return &parentID, nil
 }
 
-func (svc *FileCreate) create(opts FileCreateOptions, userID string) (*File, error) {
+func (svc *FileCreateService) create(opts FileCreateOptions, userID string) (*File, error) {
 	if len(opts.ParentID) > 0 {
 		if err := svc.validateParent(opts.ParentID, userID); err != nil {
 			return nil, err
@@ -132,7 +125,7 @@ func (svc *FileCreate) create(opts FileCreateOptions, userID string) (*File, err
 	return res, nil
 }
 
-func (svc *FileCreate) validateParent(id string, userID string) error {
+func (svc *FileCreateService) validateParent(id string, userID string) error {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err

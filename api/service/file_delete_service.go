@@ -21,7 +21,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/search"
 )
 
-type FileDelete struct {
+type FileDeleteService struct {
 	fileRepo       repo.FileRepo
 	fileSearch     *search.FileSearch
 	fileGuard      *guard.FileGuard
@@ -32,8 +32,8 @@ type FileDelete struct {
 	snapshotSvc    *SnapshotService
 }
 
-func NewFileDelete() *FileDelete {
-	return &FileDelete{
+func NewFileDeleteService() *FileDeleteService {
+	return &FileDeleteService{
 		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileSearch:     search.NewFileSearch(),
@@ -45,7 +45,7 @@ func NewFileDelete() *FileDelete {
 	}
 }
 
-func (svc *FileDelete) DeleteOne(id string, userID string) error {
+func (svc *FileDeleteService) DeleteOne(id string, userID string) error {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (svc *FileDelete) DeleteOne(id string, userID string) error {
 	return svc.delete(file)
 }
 
-func (svc *FileDelete) delete(file model.File) error {
+func (svc *FileDeleteService) delete(file model.File) error {
 	if file.GetType() == model.FileTypeFolder {
 		return svc.deleteFolder(file.GetID())
 	} else if file.GetType() == model.FileTypeFile {
@@ -77,7 +77,7 @@ func (svc *FileDelete) delete(file model.File) error {
 	return nil
 }
 
-func (svc *FileDelete) check(file model.File) error {
+func (svc *FileDeleteService) check(file model.File) error {
 	if file.GetParentID() == nil {
 		workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 		if err != nil {
@@ -88,7 +88,7 @@ func (svc *FileDelete) check(file model.File) error {
 	return nil
 }
 
-func (svc *FileDelete) createTask(file model.File, userID string) (model.Task, error) {
+func (svc *FileDeleteService) createTask(file model.File, userID string) (model.Task, error) {
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Deleting.",
@@ -103,12 +103,12 @@ func (svc *FileDelete) createTask(file model.File, userID string) (model.Task, e
 	return task, nil
 }
 
-func (svc *FileDelete) deleteFolder(id string) error {
+func (svc *FileDeleteService) deleteFolder(id string) error {
 	treeIDs, err := svc.fileRepo.FindTreeIDs(id)
 	if err != nil {
 		return err
 	}
-	// Start by deleting the folder's root from the cache to give a quick user feedback
+	// Start by deleting the folder's root from the cache to a give quick user feedback
 	if err := svc.fileCache.Delete(id); err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func (svc *FileDelete) deleteFolder(id string) error {
 	return nil
 }
 
-func (svc *FileDelete) deleteFile(id string) error {
+func (svc *FileDeleteService) deleteFile(id string) error {
 	if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
 		log.GetLogger().Error(err)
 	}
@@ -140,7 +140,7 @@ func (svc *FileDelete) deleteFile(id string) error {
 	return nil
 }
 
-func (svc *FileDelete) deleteSnapshots(ids []string) {
+func (svc *FileDeleteService) deleteSnapshots(ids []string) {
 	for _, id := range ids {
 		if err := svc.snapshotSvc.DeleteForFile(id); err != nil {
 			log.GetLogger().Error(err)
@@ -148,7 +148,7 @@ func (svc *FileDelete) deleteSnapshots(ids []string) {
 	}
 }
 
-func (svc *FileDelete) deleteFromRepo(ids []string) {
+func (svc *FileDeleteService) deleteFromRepo(ids []string) {
 	const ChunkSize = 1000
 	for i := 0; i < len(ids); i += ChunkSize {
 		end := i + ChunkSize
@@ -162,7 +162,7 @@ func (svc *FileDelete) deleteFromRepo(ids []string) {
 	}
 }
 
-func (svc *FileDelete) deleteFromCache(ids []string) {
+func (svc *FileDeleteService) deleteFromCache(ids []string) {
 	for _, id := range ids {
 		if err := svc.fileCache.Delete(id); err != nil {
 			log.GetLogger().Error(err)
@@ -170,7 +170,7 @@ func (svc *FileDelete) deleteFromCache(ids []string) {
 	}
 }
 
-func (svc *FileDelete) deleteFromSearch(ids []string) {
+func (svc *FileDeleteService) deleteFromSearch(ids []string) {
 	if err := svc.fileSearch.Delete(ids); err != nil {
 		log.GetLogger().Error(err)
 	}
@@ -185,7 +185,7 @@ type FileDeleteManyResult struct {
 	Failed    []string `json:"failed"`
 }
 
-func (svc *FileDelete) DeleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
+func (svc *FileDeleteService) DeleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
 	res := &FileDeleteManyResult{
 		Failed:    make([]string, 0),
 		Succeeded: make([]string, 0),

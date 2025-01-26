@@ -11,8 +11,6 @@
 package service
 
 import (
-	"time"
-
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
@@ -21,31 +19,32 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
+	"time"
 )
 
-type FileMove struct {
+type FileMoveService struct {
 	fileRepo    repo.FileRepo
 	fileSearch  *search.FileSearch
 	fileCache   *cache.FileCache
 	fileGuard   *guard.FileGuard
 	fileMapper  *FileMapper
-	fileCoreSvc *FileCore
+	fileCoreSvc *FileCoreService
 	taskSvc     *TaskService
 }
 
-func NewFileMove() *FileMove {
-	return &FileMove{
+func NewFileMoveService() *FileMoveService {
+	return &FileMoveService{
 		fileRepo:    repo.NewFileRepo(),
 		fileSearch:  search.NewFileSearch(),
 		fileCache:   cache.NewFileCache(),
 		fileGuard:   guard.NewFileGuard(),
 		fileMapper:  NewFileMapper(),
-		fileCoreSvc: NewFileCore(),
+		fileCoreSvc: NewFileCoreService(),
 		taskSvc:     NewTaskService(),
 	}
 }
 
-func (svc *FileMove) MoveOne(sourceID string, targetID string, userID string) (*File, error) {
+func (svc *FileMoveService) MoveOne(sourceID string, targetID string, userID string) (*File, error) {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return nil, err
@@ -69,7 +68,7 @@ func (svc *FileMove) MoveOne(sourceID string, targetID string, userID string) (*
 	return svc.move(source, target, userID)
 }
 
-func (svc *FileMove) move(source model.File, target model.File, userID string) (*File, error) {
+func (svc *FileMoveService) move(source model.File, target model.File, userID string) (*File, error) {
 	if err := svc.fileRepo.MoveSourceIntoTarget(target.GetID(), source.GetID()); err != nil {
 		return nil, err
 	}
@@ -88,7 +87,7 @@ func (svc *FileMove) move(source model.File, target model.File, userID string) (
 	return res, nil
 }
 
-func (svc *FileMove) createTask(file model.File, userID string) (model.Task, error) {
+func (svc *FileMoveService) createTask(file model.File, userID string) (model.Task, error) {
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Moving.",
@@ -103,7 +102,7 @@ func (svc *FileMove) createTask(file model.File, userID string) (model.Task, err
 	return task, nil
 }
 
-func (svc *FileMove) check(source model.File, target model.File, userID string) error {
+func (svc *FileMoveService) check(source model.File, target model.File, userID string) error {
 	if source.GetParentID() != nil {
 		existing, err := svc.fileCoreSvc.GetChildWithName(target.GetID(), source.GetName())
 		if err != nil {
@@ -138,7 +137,7 @@ func (svc *FileMove) check(source model.File, target model.File, userID string) 
 	return nil
 }
 
-func (svc *FileMove) refreshUpdateAndCreateTime(source model.File, target model.File) error {
+func (svc *FileMoveService) refreshUpdateAndCreateTime(source model.File, target model.File) error {
 	now := time.Now().UTC().Format(time.RFC3339)
 	source.SetUpdateTime(&now)
 	if err := svc.fileRepo.Save(source); err != nil {
@@ -167,7 +166,7 @@ type FileMoveManyResult struct {
 	Failed    []string `json:"failed"`
 }
 
-func (svc *FileMove) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
+func (svc *FileMoveService) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
 	res := &FileMoveManyResult{
 		Failed:    make([]string, 0),
 		Succeeded: make([]string, 0),

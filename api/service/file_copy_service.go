@@ -11,8 +11,6 @@
 package service
 
 import (
-	"time"
-
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
@@ -21,33 +19,34 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
+	"time"
 )
 
-type FileCopy struct {
+type FileCopyService struct {
 	fileRepo     repo.FileRepo
 	fileSearch   *search.FileSearch
 	fileCache    *cache.FileCache
 	fileGuard    *guard.FileGuard
 	fileMapper   *FileMapper
-	fileCoreSvc  *FileCore
+	fileCoreSvc  *FileCoreService
 	taskSvc      *TaskService
 	snapshotRepo repo.SnapshotRepo
 }
 
-func NewFileCopy() *FileCopy {
-	return &FileCopy{
+func NewFileCopyService() *FileCopyService {
+	return &FileCopyService{
 		fileRepo:     repo.NewFileRepo(),
 		fileSearch:   search.NewFileSearch(),
 		fileCache:    cache.NewFileCache(),
 		fileGuard:    guard.NewFileGuard(),
 		fileMapper:   NewFileMapper(),
-		fileCoreSvc:  NewFileCore(),
+		fileCoreSvc:  NewFileCoreService(),
 		taskSvc:      NewTaskService(),
 		snapshotRepo: repo.NewSnapshotRepo(),
 	}
 }
 
-func (svc *FileCopy) CopyOne(sourceID string, targetID string, userID string) (*File, error) {
+func (svc *FileCopyService) CopyOne(sourceID string, targetID string, userID string) (*File, error) {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return nil, err
@@ -71,7 +70,7 @@ func (svc *FileCopy) CopyOne(sourceID string, targetID string, userID string) (*
 	return svc.copy(source, target, userID)
 }
 
-func (svc *FileCopy) copy(source model.File, target model.File, userID string) (*File, error) {
+func (svc *FileCopyService) copy(source model.File, target model.File, userID string) (*File, error) {
 	tree, err := svc.getTree(source)
 	if err != nil {
 		return nil, err
@@ -98,7 +97,7 @@ func (svc *FileCopy) copy(source model.File, target model.File, userID string) (
 	return res, nil
 }
 
-func (svc *FileCopy) createTask(file model.File, userID string) (model.Task, error) {
+func (svc *FileCopyService) createTask(file model.File, userID string) (model.Task, error) {
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Copying.",
@@ -113,7 +112,7 @@ func (svc *FileCopy) createTask(file model.File, userID string) (model.Task, err
 	return task, nil
 }
 
-func (svc *FileCopy) check(source model.File, target model.File, userID string) error {
+func (svc *FileCopyService) check(source model.File, target model.File, userID string) error {
 	if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
 		return err
 	}
@@ -136,7 +135,7 @@ func (svc *FileCopy) check(source model.File, target model.File, userID string) 
 	return nil
 }
 
-func (svc *FileCopy) getTree(source model.File) ([]model.File, error) {
+func (svc *FileCopyService) getTree(source model.File) ([]model.File, error) {
 	var ids []string
 	ids, err := svc.fileRepo.FindTreeIDs(source.GetID())
 	if err != nil {
@@ -153,7 +152,7 @@ func (svc *FileCopy) getTree(source model.File) ([]model.File, error) {
 	return tree, nil
 }
 
-func (svc *FileCopy) cloneTree(source model.File, target model.File, tree []model.File, userID string) (model.File, []model.File, []model.UserPermission, error) {
+func (svc *FileCopyService) cloneTree(source model.File, target model.File, tree []model.File, userID string) (model.File, []model.File, []model.UserPermission, error) {
 	var rootIndex int
 	ids := make(map[string]string)
 	var clones []model.File
@@ -183,7 +182,7 @@ func (svc *FileCopy) cloneTree(source model.File, target model.File, tree []mode
 	return root, clones, permissions, nil
 }
 
-func (svc *FileCopy) newClone(file model.File) model.File {
+func (svc *FileCopyService) newClone(file model.File) model.File {
 	f := repo.NewFile()
 	f.SetID(helper.NewID())
 	f.SetParentID(file.GetParentID())
@@ -195,7 +194,7 @@ func (svc *FileCopy) newClone(file model.File) model.File {
 	return f
 }
 
-func (svc *FileCopy) newUserPermission(file model.File, userID string) model.UserPermission {
+func (svc *FileCopyService) newUserPermission(file model.File, userID string) model.UserPermission {
 	p := repo.NewUserPermission()
 	p.SetID(helper.NewID())
 	p.SetUserID(userID)
@@ -205,7 +204,7 @@ func (svc *FileCopy) newUserPermission(file model.File, userID string) model.Use
 	return p
 }
 
-func (svc *FileCopy) persist(clones []model.File, permissions []model.UserPermission) error {
+func (svc *FileCopyService) persist(clones []model.File, permissions []model.UserPermission) error {
 	const BulkInsertChunkSize = 1000
 	if err := svc.fileRepo.BulkInsert(clones, BulkInsertChunkSize); err != nil {
 		return err
@@ -216,7 +215,7 @@ func (svc *FileCopy) persist(clones []model.File, permissions []model.UserPermis
 	return nil
 }
 
-func (svc *FileCopy) attachSnapshots(clones []model.File, tree []model.File) error {
+func (svc *FileCopyService) attachSnapshots(clones []model.File, tree []model.File) error {
 	const BulkInsertChunkSize = 1000
 	var mappings []*repo.SnapshotFileEntity
 	for index, clone := range clones {
@@ -234,7 +233,7 @@ func (svc *FileCopy) attachSnapshots(clones []model.File, tree []model.File) err
 	return nil
 }
 
-func (svc *FileCopy) cache(clones []model.File, userID string) {
+func (svc *FileCopyService) cache(clones []model.File, userID string) {
 	for _, clone := range clones {
 		if _, err := svc.fileCache.RefreshWithExisting(clone, userID); err != nil {
 			log.GetLogger().Error(err)
@@ -242,13 +241,13 @@ func (svc *FileCopy) cache(clones []model.File, userID string) {
 	}
 }
 
-func (svc *FileCopy) index(clones []model.File) {
+func (svc *FileCopyService) index(clones []model.File) {
 	if err := svc.fileSearch.Index(clones); err != nil {
 		log.GetLogger().Error(err)
 	}
 }
 
-func (svc *FileCopy) refreshUpdateTime(target model.File) error {
+func (svc *FileCopyService) refreshUpdateTime(target model.File) error {
 	now := helper.NewTimestamp()
 	target.SetUpdateTime(&now)
 	if err := svc.fileRepo.Save(target); err != nil {
@@ -271,7 +270,7 @@ type FileCopyManyResult struct {
 	Failed    []string `json:"failed"`
 }
 
-func (svc *FileCopy) CopyMany(opts FileCopyManyOptions, userID string) (*FileCopyManyResult, error) {
+func (svc *FileCopyService) CopyMany(opts FileCopyManyOptions, userID string) (*FileCopyManyResult, error) {
 	res := &FileCopyManyResult{
 		New:       make([]string, 0),
 		Succeeded: make([]string, 0),

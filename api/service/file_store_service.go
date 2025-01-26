@@ -11,23 +11,21 @@
 package service
 
 import (
-	"os"
-	"path/filepath"
-	"strings"
-
-	"github.com/minio/minio-go/v7"
-
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/minio/minio-go/v7"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type FileStoreService struct {
 	fileCache      *cache.FileCache
-	fileCoreSvc    *FileCore
+	fileCoreSvc    *FileCoreService
 	fileMapper     *FileMapper
 	workspaceCache *cache.WorkspaceCache
 	snapshotRepo   repo.SnapshotRepo
@@ -42,7 +40,7 @@ type FileStoreService struct {
 func NewFileStoreService() *FileStoreService {
 	return &FileStoreService{
 		fileCache:      cache.NewFileCache(),
-		fileCoreSvc:    NewFileCore(),
+		fileCoreSvc:    NewFileCoreService(),
 		fileMapper:     NewFileMapper(),
 		workspaceCache: cache.NewWorkspaceCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
