@@ -46,25 +46,25 @@ func NewFileReprocessService() *FileReprocessService {
 	}
 }
 
-type ReprocessResponse struct {
+type FileReprocessResponse struct {
 	Accepted []string `json:"accepted"`
 	Rejected []string `json:"rejected"`
 }
 
-func (r *ReprocessResponse) AppendAccepted(id string) {
+func (r *FileReprocessResponse) AppendAccepted(id string) {
 	if !slices.Contains(r.Accepted, id) {
 		r.Accepted = append(r.Accepted, id)
 	}
 }
 
-func (r *ReprocessResponse) AppendRejected(id string) {
+func (r *FileReprocessResponse) AppendRejected(id string) {
 	if !slices.Contains(r.Rejected, id) {
 		r.Rejected = append(r.Rejected, id)
 	}
 }
 
-func (svc *FileReprocessService) Reprocess(id string, userID string) (*ReprocessResponse, error) {
-	resp := &ReprocessResponse{
+func (svc *FileReprocessService) Reprocess(id string, userID string) (*FileReprocessResponse, error) {
+	resp := &FileReprocessResponse{
 		// We intend to send an empty array to the caller, better than nil
 		Accepted: []string{},
 		Rejected: []string{},

@@ -55,12 +55,12 @@ func NewFileStoreService() *FileStoreService {
 	}
 }
 
-type StoreOptions struct {
+type FileStoreOptions struct {
 	S3Reference *model.S3Reference
 	Path        *string
 }
 
-func (svc *FileStoreService) Store(id string, opts StoreOptions, userID string) (*File, error) {
+func (svc *FileStoreService) Store(id string, opts FileStoreOptions, userID string) (*File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func (svc *FileStoreService) Store(id string, opts StoreOptions, userID string) 
 	return res, nil
 }
 
-type storeProperties struct {
+type fileStoreProperties struct {
 	SnapshotID             string
 	Size                   int64
 	Path                   string
@@ -103,13 +103,13 @@ type storeProperties struct {
 	ExceedsProcessingLimit bool
 }
 
-func (svc *FileStoreService) getProperties(file model.File, opts StoreOptions) (storeProperties, error) {
-	props := storeProperties{}
+func (svc *FileStoreService) getProperties(file model.File, opts FileStoreOptions) (fileStoreProperties, error) {
+	props := fileStoreProperties{}
 	if opts.S3Reference == nil {
 		var err error
 		props, err = svc.getPropertiesFromPath(file, opts)
 		if err != nil {
-			return storeProperties{}, err
+			return fileStoreProperties{}, err
 		}
 	} else {
 		props = svc.getPropertiesFromS3Reference(opts)
@@ -118,17 +118,17 @@ func (svc *FileStoreService) getProperties(file model.File, opts StoreOptions) (
 	return props, nil
 }
 
-func (svc *FileStoreService) getPropertiesFromPath(file model.File, opts StoreOptions) (storeProperties, error) {
+func (svc *FileStoreService) getPropertiesFromPath(file model.File, opts FileStoreOptions) (fileStoreProperties, error) {
 	stat, err := os.Stat(*opts.Path)
 	if err != nil {
-		return storeProperties{}, err
+		return fileStoreProperties{}, err
 	}
 	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
-		return storeProperties{}, err
+		return fileStoreProperties{}, err
 	}
 	snapshotID := helper.NewID()
-	return storeProperties{
+	return fileStoreProperties{
 		SnapshotID: snapshotID,
 		Path:       *opts.Path,
 		Size:       stat.Size(),
@@ -142,8 +142,8 @@ func (svc *FileStoreService) getPropertiesFromPath(file model.File, opts StoreOp
 	}, nil
 }
 
-func (svc *FileStoreService) getPropertiesFromS3Reference(opts StoreOptions) storeProperties {
-	return storeProperties{
+func (svc *FileStoreService) getPropertiesFromS3Reference(opts FileStoreOptions) fileStoreProperties {
+	return fileStoreProperties{
 		SnapshotID: opts.S3Reference.SnapshotID,
 		Path:       opts.S3Reference.Key,
 		Size:       opts.S3Reference.Size,
@@ -157,14 +157,14 @@ func (svc *FileStoreService) getPropertiesFromS3Reference(opts StoreOptions) sto
 	}
 }
 
-func (svc *FileStoreService) store(props storeProperties) error {
+func (svc *FileStoreService) store(props fileStoreProperties) error {
 	if err := svc.s3.PutFile(props.Original.Key, props.Path, props.ContentType, props.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (svc *FileStoreService) createSnapshot(file model.File, props storeProperties) (model.Snapshot, error) {
+func (svc *FileStoreService) createSnapshot(file model.File, props fileStoreProperties) (model.Snapshot, error) {
 	s := repo.NewSnapshot()
 	s.SetID(props.SnapshotID)
 	if props.ExceedsProcessingLimit {
@@ -210,7 +210,7 @@ func (svc *FileStoreService) createTask(file model.File, userID string) (model.T
 	return task, nil
 }
 
-func (svc *FileStoreService) process(file model.File, snapshot model.Snapshot, props storeProperties, userID string) error {
+func (svc *FileStoreService) process(file model.File, snapshot model.Snapshot, props fileStoreProperties, userID string) error {
 	task, err := svc.createTask(file, userID)
 	if err != nil {
 		return err

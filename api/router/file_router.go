@@ -187,7 +187,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 				log.GetLogger().Error(err)
 			}
 		}(tmpPath)
-		file, err = r.fileStoreSvc.Store(file.ID, service.StoreOptions{Path: &tmpPath}, userID)
+		file, err = r.fileStoreSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
 		if err != nil {
 			return err
 		}
@@ -253,7 +253,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 			log.GetLogger().Error(err)
 		}
 	}(tmpPath)
-	file, err = r.fileStoreSvc.Store(file.ID, service.StoreOptions{Path: &tmpPath}, userID)
+	file, err = r.fileStoreSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
 	if err != nil {
 		return err
 	}
@@ -623,7 +623,7 @@ func (r *FileRouter) PatchName(c *fiber.Ctx) error {
 //	@Id				files_reprocess
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.ReprocessResponse
+//	@Success		200	{object}	service.FileReprocessResponse
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/reprocess [post]
@@ -1153,7 +1153,7 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	file, err = r.fileStoreSvc.Store(file.ID, service.StoreOptions{
+	file, err = r.fileStoreSvc.Store(file.ID, service.FileStoreOptions{
 		S3Reference: &model.S3Reference{
 			Key:         s3Key,
 			Bucket:      s3Bucket,
@@ -1239,7 +1239,7 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 	if !*ok {
 		return errorpkg.NewStorageLimitExceededError()
 	}
-	file, err = r.fileStoreSvc.Store(file.ID, service.StoreOptions{
+	file, err = r.fileStoreSvc.Store(file.ID, service.FileStoreOptions{
 		S3Reference: &model.S3Reference{
 			Key:         s3Key,
 			Bucket:      s3Bucket,
