@@ -178,7 +178,7 @@ func (svc *FileStoreService) createSnapshot(file model.File, props fileStoreProp
 	}
 	res.SetVersion(latestVersion + 1)
 	res.SetOriginal(&props.Original)
-	if err := svc.snapshotSvc.saveAndSync(res); err != nil {
+	if err := svc.snapshotSvc.insertAndSync(res); err != nil {
 		return nil, err
 	}
 	return res, nil

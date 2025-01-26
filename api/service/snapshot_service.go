@@ -412,6 +412,16 @@ func (svc *SnapshotService) saveAndSync(snapshot model.Snapshot) error {
 	return nil
 }
 
+func (svc *SnapshotService) insertAndSync(snapshot model.Snapshot) error {
+	if err := svc.snapshotRepo.Insert(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return nil
+}
+
 func isTaskPending(snapshot model.Snapshot, taskCache *cache.TaskCache) (bool, error) {
 	if snapshot.GetTaskID() != nil {
 		task, err := taskCache.Get(*snapshot.GetTaskID())
