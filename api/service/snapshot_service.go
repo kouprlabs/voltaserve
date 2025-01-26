@@ -260,7 +260,7 @@ func (svc *SnapshotService) Detach(id string, userID string) error {
 
 func (svc *SnapshotService) deleteForFile(fileID string) error {
 	var snapshots []model.Snapshot
-	snapshots, err := svc.snapshotRepo.FindAllForFile(fileID)
+	snapshots, err := svc.snapshotRepo.FindExclusiveForFile(fileID)
 	if err != nil {
 		return err
 	}
