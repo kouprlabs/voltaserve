@@ -209,12 +209,16 @@ type FileInsertOptions struct {
 
 func (repo *fileRepo) Insert(opts FileInsertOptions) (model.File, error) {
 	id := helper.NewID()
+	var parentID *string
+	if opts.ParentID != "" {
+		parentID = &opts.ParentID
+	}
 	file := fileEntity{
 		ID:          id,
 		WorkspaceID: opts.WorkspaceID,
 		Name:        opts.Name,
 		Type:        opts.Type,
-		ParentID:    &opts.ParentID,
+		ParentID:    parentID,
 	}
 	if db := repo.db.Create(&file); db.Error != nil {
 		return nil, db.Error

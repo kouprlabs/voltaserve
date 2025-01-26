@@ -241,7 +241,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	if err != nil {
 		return err
 	}
-	if err := svc.canRemoveMember(memberID, org, userID); err != nil {
+	if err := svc.checkUserCanRemoveMember(memberID, org, userID); err != nil {
 		return err
 	}
 	if err := svc.revokeGroupPermissions(memberID, org); err != nil {
@@ -259,7 +259,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	return nil
 }
 
-func (svc *OrganizationService) canRemoveMember(memberID string, org model.Organization, userID string) error {
+func (svc *OrganizationService) checkUserCanRemoveMember(memberID string, org model.Organization, userID string) error {
 	// Ensure the member exists before proceeding
 	if _, err := svc.userRepo.Find(memberID); err != nil {
 		return err
