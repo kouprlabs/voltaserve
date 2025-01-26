@@ -19,7 +19,7 @@ import (
 type FileService struct {
 	coreSvc       *FileCore
 	createSvc     *FileCreate
-	storeSvc      *FileStoreService
+	storeSvc      *FileStore
 	deleteSvc     *FileDelete
 	moveSvc       *FileMove
 	copySvc       *FileCopy
@@ -35,7 +35,7 @@ func NewFileService() *FileService {
 	return &FileService{
 		coreSvc:       NewFileCore(),
 		createSvc:     NewFileCreate(),
-		storeSvc:      NewFileStoreService(),
+		storeSvc:      NewFileStore(),
 		deleteSvc:     NewFileDelete(),
 		moveSvc:       NewFileMove(),
 		copySvc:       NewFileCopy(),
