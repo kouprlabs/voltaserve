@@ -50,19 +50,6 @@ func NewTaskService() *TaskService {
 	}
 }
 
-type Task struct {
-	ID              string            `json:"id"`
-	Name            string            `json:"name"`
-	Error           *string           `json:"error,omitempty"`
-	Percentage      *int              `json:"percentage,omitempty"`
-	IsIndeterminate bool              `json:"isIndeterminate"`
-	UserID          string            `json:"userId"`
-	Status          string            `json:"status"`
-	Payload         map[string]string `json:"payload,omitempty"`
-	CreateTime      string            `json:"createTime"`
-	UpdateTime      *string           `json:"updateTime,omitempty"`
-}
-
 type TaskCreateOptions struct {
 	Name            string            `json:"name"`
 	Error           *string           `json:"error,omitempty"`
@@ -173,14 +160,6 @@ type TaskListOptions struct {
 	SortOrder string
 }
 
-type TaskList struct {
-	Data          []*Task `json:"data"`
-	TotalPages    uint64  `json:"totalPages"`
-	TotalElements uint64  `json:"totalElements"`
-	Page          uint64  `json:"page"`
-	Size          uint64  `json:"size"`
-}
-
 func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
@@ -192,8 +171,8 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
-	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
+	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
 	mapped, err := svc.taskMapper.mapMany(paged)
 	if err != nil {
 		return nil, err
@@ -205,11 +184,6 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 		Page:          opts.Page,
 		Size:          uint64(len(mapped)),
 	}, nil
-}
-
-type TaskProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, error) {
@@ -231,7 +205,7 @@ func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Ta
 		if err != nil {
 			return nil, err
 		}
-		res, err = svc.doAuthorizationByIDs(ids, userID)
+		res, err = svc.authorizeIDs(ids, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -254,7 +228,7 @@ func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Ta
 			}
 			tasks = append(tasks, task)
 		}
-		res, err = svc.doAuthorization(tasks, userID)
+		res, err = svc.authorize(tasks, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -295,7 +269,7 @@ func (svc *TaskService) DismissAll(userID string) (*TaskDismissAllResult, error)
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.doAuthorizationByIDs(ids, userID)
+	authorized, err := svc.authorizeIDs(ids, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -319,7 +293,7 @@ func (svc *TaskService) Delete(id string) error {
 	return svc.deleteAndSync(id)
 }
 
-func (svc *TaskService) doAuthorization(data []model.Task, userID string) ([]model.Task, error) {
+func (svc *TaskService) authorize(data []model.Task, userID string) ([]model.Task, error) {
 	var res []model.Task
 	for _, t := range data {
 		if t.GetUserID() == userID {
@@ -329,7 +303,7 @@ func (svc *TaskService) doAuthorization(data []model.Task, userID string) ([]mod
 	return res, nil
 }
 
-func (svc *TaskService) doAuthorizationByIDs(ids []string, userID string) ([]model.Task, error) {
+func (svc *TaskService) authorizeIDs(ids []string, userID string) ([]model.Task, error) {
 	var res []model.Task
 	for _, id := range ids {
 		var t model.Task
@@ -349,7 +323,7 @@ func (svc *TaskService) doAuthorizationByIDs(ids []string, userID string) ([]mod
 	return res, nil
 }
 
-func (svc *TaskService) doSorting(data []model.Task, sortBy string, sortOrder string) []model.Task {
+func (svc *TaskService) sort(data []model.Task, sortBy string, sortOrder string) []model.Task {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -398,7 +372,7 @@ func (svc *TaskService) doSorting(data []model.Task, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *TaskService) doPagination(data []model.Task, page, size uint64) (pageData []model.Task, totalElements uint64, totalPages uint64) {
+func (svc *TaskService) paginate(data []model.Task, page, size uint64) (pageData []model.Task, totalElements uint64, totalPages uint64) {
 	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
@@ -444,7 +418,7 @@ func (svc *TaskService) deleteAndSync(id string) error {
 	if err != nil {
 		return err
 	}
-	/* Clear task ID field from all snapshots and files in both repo and cache */
+	// Clear task ID field from all snapshots and files in both repo and cache
 	for _, snapshot := range snapshots {
 		snapshot.SetTaskID(nil)
 		if err = svc.snapshotRepo.Save(snapshot); err != nil {
@@ -465,7 +439,7 @@ func (svc *TaskService) deleteAndSync(id string) error {
 			log.GetLogger().Error(err)
 		}
 	}
-	/* Proceed with deleting the task */
+	// Proceed with deleting the task
 	if err = svc.taskRepo.Delete(id); err != nil {
 		return err
 	}
@@ -476,46 +450,4 @@ func (svc *TaskService) deleteAndSync(id string) error {
 		return err
 	}
 	return nil
-}
-
-type taskMapper struct {
-	groupCache *cache.TaskCache
-}
-
-func newTaskMapper() *taskMapper {
-	return &taskMapper{
-		groupCache: cache.NewTaskCache(),
-	}
-}
-
-func (mp *taskMapper) mapOne(m model.Task) (*Task, error) {
-	return &Task{
-		ID:              m.GetID(),
-		Name:            m.GetName(),
-		Error:           m.GetError(),
-		Percentage:      m.GetPercentage(),
-		IsIndeterminate: m.GetIsIndeterminate(),
-		UserID:          m.GetUserID(),
-		Status:          m.GetStatus(),
-		Payload:         m.GetPayload(),
-		CreateTime:      m.GetCreateTime(),
-		UpdateTime:      m.GetUpdateTime(),
-	}, nil
-}
-
-func (mp *taskMapper) mapMany(tasks []model.Task) ([]*Task, error) {
-	res := make([]*Task, 0)
-	for _, task := range tasks {
-		t, err := mp.mapOne(task)
-		if err != nil {
-			var e *errorpkg.ErrorResponse
-			if errors.As(err, &e) && e.Code == errorpkg.NewTaskNotFoundError(nil).Code {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-		res = append(res, t)
-	}
-	return res, nil
 }

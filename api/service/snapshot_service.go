@@ -11,7 +11,6 @@
 package service
 
 import (
-	"path/filepath"
 	"sort"
 	"time"
 
@@ -22,7 +21,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
@@ -33,12 +31,12 @@ import (
 type SnapshotService struct {
 	snapshotRepo   repo.SnapshotRepo
 	snapshotCache  *cache.SnapshotCache
-	snapshotMapper *SnapshotMapper
+	snapshotMapper *snapshotMapper
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
 	fileRepo       repo.FileRepo
 	fileSearch     *search.FileSearch
-	fileMapper     *FileMapper
+	fileMapper     *fileMapper
 	taskRepo       repo.TaskRepo
 	taskCache      *cache.TaskCache
 	s3             *infra.S3Manager
@@ -49,57 +47,17 @@ func NewSnapshotService() *SnapshotService {
 	return &SnapshotService{
 		snapshotRepo:   repo.NewSnapshotRepo(),
 		snapshotCache:  cache.NewSnapshotCache(),
-		snapshotMapper: NewSnapshotMapper(),
+		snapshotMapper: newSnapshotMapper(),
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
 		fileSearch:     search.NewFileSearch(),
-		fileMapper:     NewFileMapper(),
+		fileMapper:     newFileMapper(),
 		fileRepo:       repo.NewFileRepo(),
 		taskRepo:       repo.NewTaskRepo(),
 		taskCache:      cache.NewTaskCache(),
 		s3:             infra.NewS3Manager(),
 		config:         config.GetConfig(),
 	}
-}
-
-func (svc *SnapshotService) SaveAndSync(snapshot model.Snapshot) error {
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	return nil
-}
-
-type Snapshot struct {
-	ID         string            `json:"id"`
-	Version    int64             `json:"version"`
-	Original   *Download         `json:"original,omitempty"`
-	Preview    *Download         `json:"preview,omitempty"`
-	OCR        *Download         `json:"ocr,omitempty"`
-	Text       *Download         `json:"text,omitempty"`
-	Entities   *Download         `json:"entities,omitempty"`
-	Mosaic     *Download         `json:"mosaic,omitempty"`
-	Thumbnail  *Download         `json:"thumbnail,omitempty"`
-	Language   *string           `json:"language,omitempty"`
-	Status     string            `json:"status,omitempty"`
-	IsActive   bool              `json:"isActive"`
-	Task       *SnapshotTaskInfo `json:"task,omitempty"`
-	CreateTime string            `json:"createTime"`
-	UpdateTime *string           `json:"updateTime,omitempty"`
-}
-
-type Download struct {
-	Extension string               `json:"extension,omitempty"`
-	Size      *int64               `json:"size,omitempty"`
-	Image     *model.ImageProps    `json:"image,omitempty"`
-	Document  *model.DocumentProps `json:"document,omitempty"`
-}
-
-type SnapshotTaskInfo struct {
-	ID        string `json:"id"`
-	IsPending bool   `json:"isPending"`
 }
 
 type SnapshotListOptions struct {
@@ -109,22 +67,14 @@ type SnapshotListOptions struct {
 	SortOrder string
 }
 
-type SnapshotList struct {
-	Data          []*Snapshot `json:"data"`
-	TotalPages    uint64      `json:"totalPages"`
-	TotalElements uint64      `json:"totalElements"`
-	Page          uint64      `json:"page"`
-	Size          uint64      `json:"size"`
-}
-
 func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
 	all, file, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
 	}
-	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
-	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
-	mapped := NewSnapshotMapper().mapMany(paged, *file.GetSnapshotID())
+	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
+	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
+	mapped := newSnapshotMapper().mapMany(paged, *file.GetSnapshotID())
 	return &SnapshotList{
 		Data:          mapped,
 		TotalPages:    totalPages,
@@ -132,11 +82,6 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 		Page:          opts.Page,
 		Size:          uint64(len(mapped)),
 	}, nil
-}
-
-type SnapshotProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *SnapshotService) Probe(fileID string, opts SnapshotListOptions, userID string) (*SnapshotProbe, error) {
@@ -184,7 +129,7 @@ func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, use
 	return res, file, nil
 }
 
-func (svc *SnapshotService) doSorting(data []model.Snapshot, sortBy string, sortOrder string) []model.Snapshot {
+func (svc *SnapshotService) sort(data []model.Snapshot, sortBy string, sortOrder string) []model.Snapshot {
 	if sortBy == SortByVersion {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -224,7 +169,7 @@ func (svc *SnapshotService) doSorting(data []model.Snapshot, sortBy string, sort
 	return data
 }
 
-func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint64) (pageData []model.Snapshot, totalElements uint64, totalPages uint64) {
+func (svc *SnapshotService) paginate(data []model.Snapshot, page, size uint64) (pageData []model.Snapshot, totalElements uint64, totalPages uint64) {
 	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
@@ -313,7 +258,7 @@ func (svc *SnapshotService) Detach(id string, userID string) error {
 	return nil
 }
 
-func (svc *SnapshotService) DeleteForFile(fileID string) error {
+func (svc *SnapshotService) deleteForFile(fileID string) error {
 	var snapshots []model.Snapshot
 	snapshots, err := svc.snapshotRepo.FindAllForFile(fileID)
 	if err != nil {
@@ -323,27 +268,9 @@ func (svc *SnapshotService) DeleteForFile(fileID string) error {
 	svc.deleteFromS3(snapshots)
 	svc.deleteFromCache(snapshots)
 	if err := svc.snapshotRepo.DeleteMappingsForFile(fileID); err == nil {
-		if err := svc.clearSnapshotIDOnFile(fileID); err == nil {
+		if err := svc.fileRepo.ClearSnapshotID(fileID); err == nil {
 			svc.deleteFromRepo(snapshots)
 		}
-	}
-	return nil
-}
-
-func (svc *SnapshotService) clearSnapshotIDOnFile(fileID string) error {
-	file, err := svc.fileCache.Get(fileID)
-	if err != nil {
-		return err
-	}
-	file.SetSnapshotID(nil)
-	if err = svc.fileRepo.Save(file); err != nil {
-		return err
-	}
-	if err = svc.fileCache.Set(file); err != nil {
-		return err
-	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-		return err
 	}
 	return nil
 }
@@ -471,98 +398,29 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 
-func (svc *SnapshotService) IsTaskPending(snapshot model.Snapshot) (*bool, error) {
+func (svc *SnapshotService) isTaskPending(snapshot model.Snapshot) (bool, error) {
 	return isTaskPending(snapshot, svc.taskCache)
 }
 
-func isTaskPending(snapshot model.Snapshot, taskCache *cache.TaskCache) (*bool, error) {
+func (svc *SnapshotService) saveAndSync(snapshot model.Snapshot) error {
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func isTaskPending(snapshot model.Snapshot, taskCache *cache.TaskCache) (bool, error) {
 	if snapshot.GetTaskID() != nil {
 		task, err := taskCache.Get(*snapshot.GetTaskID())
 		if err != nil {
-			return nil, err
+			return false, err
 		}
 		if task.GetStatus() == model.TaskStatusWaiting || task.GetStatus() == model.TaskStatusRunning {
-			return helper.ToPtr(true), nil
+			return true, nil
 		}
 	}
-	return helper.ToPtr(false), nil
-}
-
-type SnapshotMapper struct {
-	taskCache *cache.TaskCache
-}
-
-func NewSnapshotMapper() *SnapshotMapper {
-	return &SnapshotMapper{
-		taskCache: cache.NewTaskCache(),
-	}
-}
-
-func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
-	s := &Snapshot{
-		ID:         m.GetID(),
-		Version:    m.GetVersion(),
-		Status:     m.GetStatus(),
-		Language:   m.GetLanguage(),
-		CreateTime: m.GetCreateTime(),
-		UpdateTime: m.GetUpdateTime(),
-	}
-	if m.HasOriginal() {
-		s.Original = mp.mapS3Object(m.GetOriginal())
-	}
-	if m.HasPreview() {
-		s.Preview = mp.mapS3Object(m.GetPreview())
-	}
-	if m.HasOCR() {
-		s.OCR = mp.mapS3Object(m.GetOCR())
-	}
-	if m.HasText() {
-		s.Text = mp.mapS3Object(m.GetText())
-	}
-	if m.HasEntities() {
-		s.Entities = mp.mapS3Object(m.GetEntities())
-	}
-	if m.HasMosaic() {
-		s.Mosaic = mp.mapS3Object(m.GetMosaic())
-	}
-	if m.HasThumbnail() {
-		s.Thumbnail = mp.mapS3Object(m.GetThumbnail())
-	}
-	if m.GetTaskID() != nil {
-		s.Task = &SnapshotTaskInfo{
-			ID: *m.GetTaskID(),
-		}
-		isPending, err := isTaskPending(m, mp.taskCache)
-		if err != nil {
-			log.GetLogger().Error(err)
-		} else {
-			s.Task.IsPending = *isPending
-		}
-	}
-
-	return s
-}
-
-func (mp *SnapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) []*Snapshot {
-	res := make([]*Snapshot, 0)
-	for _, snapshot := range snapshots {
-		s := mp.mapOne(snapshot)
-		s.IsActive = activeID == snapshot.GetID()
-		res = append(res, s)
-	}
-	return res
-}
-
-func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
-	download := &Download{
-		Extension: filepath.Ext(o.Key),
-		Size:      o.Size,
-	}
-	if o.Image != nil {
-		download.Image = o.Image
-	}
-	if o.Document != nil {
-		download.Document = o.Document
-	}
-	return download
+	return false, nil
 }

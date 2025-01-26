@@ -38,7 +38,7 @@ type SearchManager struct {
 func NewSearchManager() *SearchManager {
 	if searchClient == nil {
 		searchClient = meilisearch.New(config.GetConfig().Search.URL)
-		/* Configure file index */
+		// Configure file index
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        FileSearchIndex,
 			PrimaryKey: "id",
@@ -59,7 +59,7 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
-		/* Configure group index */
+		// Configure group index
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        GroupSearchIndex,
 			PrimaryKey: "id",
@@ -78,7 +78,7 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
-		/* Configure workspace index */
+		// Configure workspace index
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        WorkspaceSearchIndex,
 			PrimaryKey: "id",
@@ -99,7 +99,7 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
-		/* Configure organization index */
+		// Configure organization index
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        OrganizationSearchIndex,
 			PrimaryKey: "id",
@@ -117,7 +117,7 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
-		/* Configure user index */
+		// Configure user index
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        UserSearchIndex,
 			PrimaryKey: "id",
@@ -135,7 +135,7 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
-		/* Configure task index */
+		// Configure task index
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        TaskSearchIndex,
 			PrimaryKey: "id",

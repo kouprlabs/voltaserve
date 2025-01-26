@@ -136,7 +136,6 @@ export function isAudio(ext?: string | null) {
       '.oga',
       '.ogg',
       '.mp3',
-      '.mp4',
       '.flac',
       '.midi',
       '.ape',

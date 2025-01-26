@@ -110,44 +110,24 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err != nil {
 		return nil, err
 	}
-	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	isTaskPending, err := svc.snapshotSvc.isTaskPending(snapshot)
 	if err != nil {
 		return nil, err
 	}
-	if *isTaskPending {
+	if isTaskPending {
 		return nil, errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
-		Name:            "Waiting.",
-		UserID:          userID,
-		IsIndeterminate: true,
-		Status:          model.TaskStatusWaiting,
-		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
-	})
+	task, err := svc.createWaitingTask(file, userID)
 	if err != nil {
 		return nil, err
 	}
 	snapshot.SetLanguage(opts.LanguageID)
 	snapshot.SetStatus(model.SnapshotStatusWaiting)
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
-	key := snapshot.GetOriginal().Key
-	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
-		key = snapshot.GetPreview().Key
-	}
-	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
-		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
-		TaskID:     task.GetID(),
-		SnapshotID: snapshot.GetID(),
-		Bucket:     snapshot.GetOriginal().Bucket,
-		Key:        key,
-		Payload: map[string]string{
-			"language": opts.LanguageID,
-		},
-	}); err != nil {
+	if err := svc.runPipeline(snapshot, task); err != nil {
 		return nil, err
 	}
 	res, err := svc.taskMapper.mapOne(task)
@@ -172,11 +152,11 @@ func (svc *InsightsService) Patch(id string, userID string) (*Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	isTaskPending, err := svc.snapshotSvc.isTaskPending(snapshot)
 	if err != nil {
 		return nil, err
 	}
-	if *isTaskPending {
+	if isTaskPending {
 		return nil, errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
@@ -186,7 +166,46 @@ func (svc *InsightsService) Patch(id string, userID string) (*Task, error) {
 	if previous == nil || previous.GetLanguage() == nil {
 		return nil, errorpkg.NewSnapshotCannotBePatchedError(nil)
 	}
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+	task, err := svc.createWaitingTask(file, userID)
+	if err != nil {
+		return nil, err
+	}
+	snapshot.SetStatus(model.SnapshotStatusWaiting)
+	snapshot.SetLanguage(*previous.GetLanguage())
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
+		return nil, err
+	}
+	if err := svc.runPipeline(snapshot, task); err != nil {
+		return nil, err
+	}
+	res, err := svc.taskMapper.mapOne(task)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *InsightsService) runPipeline(snapshot model.Snapshot, task model.Task) error {
+	key := snapshot.GetOriginal().Key
+	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
+		key = snapshot.GetPreview().Key
+	}
+	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
+		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
+		TaskID:     task.GetID(),
+		SnapshotID: snapshot.GetID(),
+		Bucket:     snapshot.GetPreview().Bucket,
+		Key:        key,
+		Payload:    map[string]string{"language": *snapshot.GetLanguage()},
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *InsightsService) createWaitingTask(file model.File, userID string) (model.Task, error) {
+	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Waiting.",
 		UserID:          userID,
@@ -194,26 +213,6 @@ func (svc *InsightsService) Patch(id string, userID string) (*Task, error) {
 		Status:          model.TaskStatusWaiting,
 		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 	})
-	if err != nil {
-		return nil, err
-	}
-	snapshot.SetStatus(model.SnapshotStatusWaiting)
-	snapshot.SetLanguage(*previous.GetLanguage())
-	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-		return nil, err
-	}
-	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
-		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
-		TaskID:     task.GetID(),
-		SnapshotID: snapshot.GetID(),
-		Bucket:     snapshot.GetPreview().Bucket,
-		Key:        snapshot.GetPreview().Key,
-		Payload:    map[string]string{"language": *snapshot.GetLanguage()},
-	}); err != nil {
-		return nil, err
-	}
-	res, err := svc.taskMapper.mapOne(task)
 	if err != nil {
 		return nil, err
 	}
@@ -238,15 +237,15 @@ func (svc *InsightsService) Delete(id string, userID string) (*Task, error) {
 	if !snapshot.HasEntities() {
 		return nil, errorpkg.NewInsightsNotFoundError(nil)
 	}
-	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	isTaskPending, err := svc.snapshotSvc.isTaskPending(snapshot)
 	if err != nil {
 		return nil, err
 	}
-	if *isTaskPending {
+	if isTaskPending {
 		return nil, errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
@@ -261,7 +260,7 @@ func (svc *InsightsService) Delete(id string, userID string) (*Task, error) {
 		return nil, err
 	}
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
 	go func(task model.Task, snapshot model.Snapshot) {
@@ -292,7 +291,7 @@ func (svc *InsightsService) Delete(id string, userID string) (*Task, error) {
 		snapshot.SetEntities(nil)
 		snapshot.SetTaskID(nil)
 		snapshot.SetStatus(model.SnapshotStatusReady)
-		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 			log.GetLogger().Error(err)
 			return
 		}
@@ -313,7 +312,7 @@ func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
 		return err
 	}
 	snapshot.SetText(nil)
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return err
 	}
 	return nil
@@ -328,7 +327,7 @@ func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
 		return err
 	}
 	snapshot.SetEntities(nil)
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return err
 	}
 	return nil

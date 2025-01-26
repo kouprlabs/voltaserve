@@ -42,6 +42,7 @@ type FileRepo interface {
 	CountItems(id string) (int64, error)
 	IsGrandChildOf(id string, ancestorID string) (bool, error)
 	ComputeSize(id string) (int64, error)
+	ClearSnapshotID(id string) error
 	GrantUserPermission(id string, userID string, permission string) error
 	RevokeUserPermission(tree []model.File, userID string) error
 	GrantGroupPermission(id string, groupID string, permission string) error
@@ -209,12 +210,16 @@ type FileInsertOptions struct {
 
 func (repo *fileRepo) Insert(opts FileInsertOptions) (model.File, error) {
 	id := helper.NewID()
+	var parentID *string
+	if opts.ParentID != "" {
+		parentID = &opts.ParentID
+	}
 	file := fileEntity{
 		ID:          id,
 		WorkspaceID: opts.WorkspaceID,
 		Name:        opts.Name,
 		Type:        opts.Type,
-		ParentID:    &opts.ParentID,
+		ParentID:    parentID,
 	}
 	if db := repo.db.Create(&file); db.Error != nil {
 		return nil, db.Error
@@ -261,7 +266,7 @@ func (repo *fileRepo) find(id string) (*fileEntity, error) {
 func (repo *fileRepo) FindChildren(id string) ([]model.File, error) {
 	var entities []*fileEntity
 	db := repo.db.
-		Raw("SELECT * FROM file WHERE parent_id = ? ORDER BY create_time ASC", id).
+		Raw("SELECT * FROM file WHERE parent_id = ? ORDER BY create_time", id).
 		Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
@@ -363,7 +368,7 @@ func (repo *fileRepo) FindIDsByWorkspace(workspaceID string) ([]string, error) {
 	}
 	var ids []IDResult
 	db := repo.db.
-		Raw("SELECT id result FROM file WHERE workspace_id = ? ORDER BY create_time ASC", workspaceID).
+		Raw("SELECT id result FROM file WHERE workspace_id = ? ORDER BY create_time", workspaceID).
 		Scan(&ids)
 	if db.Error != nil {
 		return nil, db.Error
@@ -451,7 +456,7 @@ func (repo *fileRepo) FindChildrenIDs(id string) ([]string, error) {
 	}
 	var values []Value
 	db := repo.db.
-		Raw("SELECT id result FROM file WHERE parent_id = ? ORDER BY create_time ASC", id).
+		Raw("SELECT id result FROM file WHERE parent_id = ? ORDER BY create_time", id).
 		Scan(&values)
 	if db.Error != nil {
 		return []string{}, db.Error
@@ -531,8 +536,15 @@ func (repo *fileRepo) ComputeSize(id string) (int64, error) {
 	return res.Result, nil
 }
 
+func (repo *fileRepo) ClearSnapshotID(id string) error {
+	if db := repo.db.Exec("UPDATE file SET snapshot_id = NULL WHERE id = ?", id); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
 func (repo *fileRepo) GrantUserPermission(id string, userID string, permission string) error {
-	/* Grant permission to workspace */
+	// Grant 'viewer' permission to workspace
 	db := repo.db.
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               (SELECT ?, ?, w.id, 'viewer', ? FROM file f
@@ -543,7 +555,7 @@ func (repo *fileRepo) GrantUserPermission(id string, userID string, permission s
 		return db.Error
 	}
 
-	/* Grant 'viewer' permission to path files */
+	// Grant 'viewer' permission to path files
 	path, err := repo.FindPath(id)
 	if err != nil {
 		return err
@@ -558,7 +570,7 @@ func (repo *fileRepo) GrantUserPermission(id string, userID string, permission s
 		}
 	}
 
-	/* Grant the requested permission to tree files */
+	// Grant the requested permission to tree files
 	tree, err := repo.FindTree(id)
 	if err != nil {
 		return err
@@ -589,7 +601,7 @@ func (repo *fileRepo) RevokeUserPermission(tree []model.File, userID string) err
 }
 
 func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission string) error {
-	/* Grant permission to workspace */
+	// Grant permission to workspace
 	db := repo.db.
 		Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
               (SELECT ?, ?, w.id, 'viewer', ? FROM file f
@@ -600,7 +612,7 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission
 		return db.Error
 	}
 
-	/* Grant 'viewer' permission to path files */
+	// Grant 'viewer' permission to path files
 	path, err := repo.FindPath(id)
 	if err != nil {
 		return err
@@ -615,7 +627,7 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission
 		}
 	}
 
-	/* Grant the requested permission to tree files */
+	// Grant the requested permission to tree files
 	tree, err := repo.FindTree(id)
 	if err != nil {
 		return err
