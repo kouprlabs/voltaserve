@@ -113,7 +113,7 @@ func (svc *FileDownloadService) downloadS3Object(s3Object *model.S3Object, range
 	if _, err := svc.s3.GetObjectWithBuffer(s3Object.Key, s3Object.Bucket, buf, opts); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return rangeInterval, nil
 }
 
 func (svc *FileDownloadService) DownloadThumbnailBuffer(id string, buf *bytes.Buffer, userID string) (model.Snapshot, error) {
