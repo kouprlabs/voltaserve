@@ -31,6 +31,7 @@ const injectCssImportPlugin = () => {
     },
   }
 }
+
 export default [
   {
     input: 'src/index.tsx',
