@@ -30,8 +30,13 @@ import { getPictureUrl } from '@/lib/helpers/picture'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/account'
+import { AccountExtensions } from '@/types/extensibility'
 
-const AccountLayout = () => {
+export type AccountLayoutProps = {
+  extensions?: AccountExtensions
+}
+
+const AccountLayout = ({ extensions }: AccountLayoutProps) => {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
@@ -54,6 +59,13 @@ const AccountLayout = () => {
       setTabIndex(0)
     } else if (segment === 'invitation') {
       setTabIndex(1)
+    } else {
+      const index = extensions?.pages
+        ?.filter((page) => page.tab)
+        .findIndex((page) => page.path === location.pathname)
+      if (index !== undefined && index !== -1) {
+        setTabIndex(index + 2)
+      }
     }
   }, [location])
 
@@ -152,6 +164,13 @@ const AccountLayout = () => {
                       ) : null}
                     </div>
                   </Tab>
+                  {extensions?.pages
+                    ?.filter((page) => page.tab)
+                    .map((page, index) => (
+                      <Tab key={index} onClick={() => navigate(page.path)}>
+                        {page.tab!.label}
+                      </Tab>
+                    ))}
                 </TabList>
               </Tabs>
               <Outlet />

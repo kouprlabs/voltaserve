@@ -1,6 +1,6 @@
 {
   "name": "@voltaserve/ui",
-  "version": "3.0.0",
+  "version": "3.0.0-dev.6",
   "license": "BUSL-1.1",
   "type": "module",
   "source": "src/index.tsx",
@@ -14,7 +14,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
-    "build:rollup": "rollup -c --bundleConfigAsCjs",
+    "build:rollup": "rollup -c --bundleConfigAsCjs && bun ./scripts/post-build.ts",
     "tsc": "tsc",
     "preview": "vite preview",
     "format": "prettier --write .",
@@ -95,6 +95,7 @@
   "devDependencies": {
     "@rollup/plugin-alias": "5.1.1",
     "@rollup/plugin-commonjs": "28.0.1",
+    "@rollup/plugin-image": "3.0.3",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-strip": "3.0.4",
     "@rollup/plugin-typescript": "12.1.1",
@@ -116,6 +117,7 @@
     "globals": "15.12.0",
     "postcss": "8.4.47",
     "prettier": "3.3.3",
+    "rimraf": "6.0.1",
     "rollup": "4.24.4",
     "rollup-plugin-dts": "6.1.1",
     "rollup-plugin-peer-deps-external": "2.2.4",

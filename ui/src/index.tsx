@@ -13,17 +13,20 @@ import { ChakraProvider } from '@chakra-ui/react'
 import { theme } from '@koupr/ui'
 import { HelmetProvider } from 'react-helmet-async'
 import store from '@/store/configure-store'
-import router from './router'
+import { Extensions } from '@/types/extensibility'
+import { createRouter } from './router'
 import './styles.css'
 
-const Voltaserve = () => (
+export type VoltaserveProps = {
+  extensions?: Extensions
+}
+
+export const Voltaserve = ({ extensions }: VoltaserveProps) => (
   <Provider store={store}>
     <ChakraProvider theme={theme}>
       <HelmetProvider>
-        <RouterProvider router={router} />
+        <RouterProvider router={createRouter({ extensions })} />
       </HelmetProvider>
     </ChakraProvider>
   </Provider>
 )
-
-export default Voltaserve

@@ -1,5 +1,6 @@
 import alias from '@rollup/plugin-alias'
 import commonjs from '@rollup/plugin-commonjs'
+import image from '@rollup/plugin-image'
 import resolve from '@rollup/plugin-node-resolve'
 import strip from '@rollup/plugin-strip'
 import typescript from '@rollup/plugin-typescript'
@@ -9,7 +10,6 @@ import path from 'path'
 import { dts } from 'rollup-plugin-dts'
 import peerDepsExternal from 'rollup-plugin-peer-deps-external'
 import postcss from 'rollup-plugin-postcss'
-import svg from 'rollup-plugin-svg'
 
 const require = createRequire(import.meta.url)
 const pkg = require('./package.json')
@@ -92,11 +92,10 @@ export default [
       commonjs(),
       typescript({
         tsconfig: 'tsconfig.rollup.json',
-        jsx: 'react-jsx',
         include: ['src/**/*.{ts,tsx}'],
         exclude: ['src/main.tsx'],
       }),
-      svg(),
+      image(),
       postcss({
         extract: true,
       }),

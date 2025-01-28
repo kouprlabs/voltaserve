@@ -16,6 +16,7 @@ import TaskDrawer from '@/components/task/task-drawer'
 import { getAdminStatus } from '@/infra/token'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { activeNavChanged, NavType } from '@/store/ui/nav'
+import { Extensions } from '@/types/extensibility'
 import UploadDrawer from '../upload/upload-drawer'
 import {
   CreateGroupButton,
@@ -24,7 +25,11 @@ import {
 } from './app-bar-buttons'
 import AppBarSearch from './app-bar-search'
 
-const AppBar = () => {
+export type AppBarProps = {
+  extensions?: Extensions
+}
+
+const AppBar = ({ extensions }: AppBarProps) => {
   const dispatch = useAppDispatch()
   const location = useLocation()
   const activeNav = useAppSelector((state) => state.ui.nav.active)
@@ -60,7 +65,7 @@ const AppBar = () => {
           {getAdminStatus() ? <ConsoleButton /> : null}
           <UploadDrawer />
           <TaskDrawer />
-          <AccountMenu />
+          <AccountMenu extensions={extensions?.account} />
         </>
       }
     />
