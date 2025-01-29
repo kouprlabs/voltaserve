@@ -18,6 +18,12 @@ Build for production:
 bun run build
 ```
 
+Build as a library:
+
+```shell
+bun run build:rollup
+```
+
 Run for production:
 
 ```shell
