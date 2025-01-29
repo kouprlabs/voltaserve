@@ -9,10 +9,10 @@
 // AGPL-3.0-only in the root of this repository.
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { List } from '@/client/api/workspace'
+import { WorkspaceList } from '@/client/api/workspace'
 
 type WorkspacesState = {
-  mutate?: KeyedMutator<List>
+  mutate?: KeyedMutator<WorkspaceList>
 }
 
 const initialState: WorkspacesState = {}
@@ -21,7 +21,10 @@ const slice = createSlice({
   name: 'workspaces',
   initialState,
   reducers: {
-    mutateUpdated: (state, action: PayloadAction<KeyedMutator<List>>) => {
+    mutateUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<WorkspaceList>>,
+    ) => {
       state.mutate = action.payload
     },
   },

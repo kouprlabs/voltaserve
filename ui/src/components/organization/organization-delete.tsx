@@ -32,7 +32,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import OrganizationAPI, { Organization } from '@/client/api/organization'
+import { OrganizationAPI, Organization } from '@/client/api/organization'
 import { useAppSelector } from '@/store/hook'
 
 export type OrganizationDeleteProps = {

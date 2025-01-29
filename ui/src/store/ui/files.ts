@@ -9,7 +9,7 @@
 // AGPL-3.0-only in the root of this repository.
 import { KeyedMutator } from 'swr'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { List, SortBy, SortOrder } from '@/client/api/file'
+import { FileList, FileSortBy, FileSortOrder } from '@/client/api/file'
 import {
   loadFileSortBy,
   loadFileSortOrder,
@@ -40,10 +40,10 @@ export type FilesState = {
   isContextMenuOpen: boolean
   isSelectionMode: boolean
   iconScale: number
-  sortBy: SortBy
-  sortOrder: SortOrder
+  sortBy: FileSortBy
+  sortOrder: FileSortOrder
   viewType: FileViewType
-  mutate?: KeyedMutator<List | undefined>
+  mutate?: KeyedMutator<FileList | undefined>
 }
 
 const initialState: FilesState = {
@@ -63,8 +63,8 @@ const initialState: FilesState = {
   isInfoModalOpen: false,
   isContextMenuOpen: false,
   iconScale: loadIconScale() || 1,
-  sortBy: loadFileSortBy() || SortBy.DateCreated,
-  sortOrder: loadFileSortOrder() || SortOrder.Desc,
+  sortBy: loadFileSortBy() || FileSortBy.DateCreated,
+  sortOrder: loadFileSortOrder() || FileSortOrder.Desc,
   viewType: loadFileViewType() || FileViewType.Grid,
   isSelectionMode: false,
 }
@@ -172,13 +172,15 @@ const slice = createSlice({
       state.iconScale = action.payload
       saveIconScale(state.iconScale)
     },
-    sortByUpdated: (state, action: PayloadAction<SortBy>) => {
+    sortByUpdated: (state, action: PayloadAction<FileSortBy>) => {
       state.sortBy = action.payload
       saveFileSortBy(state.sortBy)
     },
     sortOrderToggled: (state) => {
       state.sortOrder =
-        state.sortOrder === SortOrder.Asc ? SortOrder.Desc : SortOrder.Asc
+        state.sortOrder === FileSortOrder.Asc
+          ? FileSortOrder.Desc
+          : FileSortOrder.Asc
       saveFileSortOrder(state.sortOrder)
     },
     viewTypeToggled: (state) => {
@@ -193,7 +195,7 @@ const slice = createSlice({
     },
     mutateUpdated: (
       state,
-      action: PayloadAction<KeyedMutator<List | undefined>>,
+      action: PayloadAction<KeyedMutator<FileList | undefined>>,
     ) => {
       state.mutate = action.payload
     },

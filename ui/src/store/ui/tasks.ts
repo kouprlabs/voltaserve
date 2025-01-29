@@ -9,11 +9,11 @@
 // AGPL-3.0-only in the root of this repository.
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { List } from '@/client/api/task'
+import { TaskList } from '@/client/api/task'
 
 type TasksState = {
   isDrawerOpen: boolean
-  mutateList?: KeyedMutator<List>
+  mutateList?: KeyedMutator<TaskList>
   mutateCount?: KeyedMutator<number>
 }
 
@@ -31,7 +31,10 @@ const slice = createSlice({
     drawerDidClose: (state) => {
       state.isDrawerOpen = false
     },
-    mutateListUpdated: (state, action: PayloadAction<KeyedMutator<List>>) => {
+    mutateListUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<TaskList>>,
+    ) => {
       state.mutateList = action.payload
     },
     mutateCountUpdated: (

@@ -9,11 +9,11 @@
 // AGPL-3.0-only in the root of this repository.
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { Info } from '@/client/api/insights'
+import { InsightsInfo } from '@/client/api/insights'
 
 type InsightsState = {
   isModalOpen: boolean
-  mutateInfo?: KeyedMutator<Info>
+  mutateInfo?: KeyedMutator<InsightsInfo>
 }
 
 const initialState: InsightsState = {
@@ -33,7 +33,10 @@ const slice = createSlice({
     allModalsDidClose: (state) => {
       state.isModalOpen = false
     },
-    mutateInfoUpdated: (state, action: PayloadAction<KeyedMutator<Info>>) => {
+    mutateInfoUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<InsightsInfo>>,
+    ) => {
       state.mutateInfo = action.payload
     },
   },

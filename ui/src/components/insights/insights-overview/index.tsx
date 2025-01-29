@@ -22,7 +22,7 @@ import {
   Tabs,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import InsightsAPI from '@/client/api/insights'
+import { InsightsAPI } from '@/client/api/insights'
 import { useAppSelector } from '@/store/hook'
 import InsightsOverviewArtifacts from './insights-overview-artifacts'
 import InsightsOverviewChart from './insights-overview-chart'

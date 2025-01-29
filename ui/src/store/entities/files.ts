@@ -8,10 +8,10 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { List } from '@/client/api/file'
+import { FileList } from '@/client/api/file'
 
 type FilesState = {
-  list?: List
+  list?: FileList
 }
 
 const initialState: FilesState = {}
@@ -20,7 +20,7 @@ const slice = createSlice({
   name: 'files',
   initialState,
   reducers: {
-    listUpdated: (state, action: PayloadAction<List>) => {
+    listUpdated: (state, action: PayloadAction<FileList>) => {
       state.list = action.payload
     },
   },

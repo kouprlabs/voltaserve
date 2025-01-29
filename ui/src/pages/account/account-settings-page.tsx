@@ -23,9 +23,9 @@ import {
   SectionError,
 } from '@koupr/ui'
 import cx from 'classnames'
-import StorageAPI from '@/client/api/storage'
+import { StorageAPI } from '@/client/api/storage'
 import { errorToString } from '@/client/error'
-import UserAPI from '@/client/idp/user'
+import { AuthUserAPI } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountChangePassword from '@/components/account/account-change-password'
 import AccountDelete from '@/components/account/account-delete'
@@ -54,7 +54,7 @@ const AccountSettingsPage = ({ extensions }: AccountSettingsPageProps) => {
     data: user,
     error: userError,
     isLoading: userIsLoading,
-  } = UserAPI.useGet()
+  } = AuthUserAPI.useGet()
   const {
     data: storageUsage,
     error: storageUsageError,

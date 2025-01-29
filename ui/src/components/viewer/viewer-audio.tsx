@@ -9,7 +9,7 @@
 // AGPL-3.0-only in the root of this repository.
 import { useMemo } from 'react'
 import { File } from '@/client/api/file'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { getAccessTokenOrRedirect } from '@/client/token'
 
 export type ViewerAudioProps = {
   file: File

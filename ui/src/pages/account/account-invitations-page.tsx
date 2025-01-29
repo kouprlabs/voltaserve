@@ -23,9 +23,13 @@ import {
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
-import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
+import {
+  InvitationAPI,
+  InvitationSortBy,
+  InvitationSortOrder,
+} from '@/client/api/invitation'
 import { errorToString } from '@/client/error'
-import UserAPI from '@/client/idp/user'
+import { AuthUserAPI } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { incomingInvitationPaginationStorage } from '@/infra/pagination'
 import { getPictureUrlById } from '@/lib/helpers/picture'
@@ -42,7 +46,7 @@ const AccountInvitationsPage = () => {
     data: user,
     error: userError,
     isLoading: userIsLoading,
-  } = UserAPI.useGet()
+  } = AuthUserAPI.useGet()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -54,7 +58,12 @@ const AccountInvitationsPage = () => {
     isLoading: listIsLoading,
     mutate,
   } = InvitationAPI.useGetIncoming(
-    { page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc },
+    {
+      page,
+      size,
+      sortBy: InvitationSortBy.DateCreated,
+      sortOrder: InvitationSortOrder.Desc,
+    },
     swrConfig(),
   )
   const userIsReady = user && !userError

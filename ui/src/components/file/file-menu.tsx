@@ -36,7 +36,7 @@ import {
   IconVisibility,
 } from '@koupr/ui'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
+import { FileAPI } from '@/client/api/file'
 import {
   geEditorPermission,
   geOwnerPermission,

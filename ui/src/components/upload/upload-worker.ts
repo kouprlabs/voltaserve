@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { FileWithPath } from 'react-dropzone'
-import FileAPI, { FileType } from '@/client/api/file'
+import { FileAPI, FileType } from '@/client/api/file'
 import { errorToString } from '@/client/error'
 import store from '@/store/configure-store'
 import {

@@ -35,7 +35,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
+import { WorkspaceAPI, WorkspaceSortOrder } from '@/client/api/workspace'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { workspacePaginationStorage } from '@/infra/pagination'
@@ -60,7 +60,7 @@ const WorkspaceListPage = () => {
     isLoading: listIsLoading,
     mutate,
   } = WorkspaceAPI.useList(
-    { query, page, size, sortOrder: SortOrder.Desc },
+    { query, page, size, sortOrder: WorkspaceSortOrder.Desc },
     swrConfig(),
   )
   const { hasPagination } = usePageMonitor({

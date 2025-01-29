@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { encode, decode } from 'js-base64'
-import { Query as FileQuery } from '@/client/api/file'
+import { FileQuery } from '@/client/api/file'
 
 export function encodeQuery(value: string) {
   return encode(value, true)

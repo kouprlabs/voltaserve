@@ -10,7 +10,7 @@
 import { Progress, Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import StorageAPI from '@/client/api/storage'
+import { StorageAPI } from '@/client/api/storage'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 
 export type FileInfoStorageProps = {

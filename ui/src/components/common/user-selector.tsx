@@ -34,7 +34,7 @@ import {
   usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
-import UserAPI, { SortOrder, User } from '@/client/api/user'
+import { UserAPI, UserSortOrder, User } from '@/client/api/user'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { getPictureUrlById } from '@/lib/helpers/picture'
@@ -73,7 +73,7 @@ const UserSelector = ({
       excludeGroupMembers,
       page,
       size,
-      sortOrder: SortOrder.Desc,
+      sortOrder: UserSortOrder.Desc,
     },
     swrConfig(),
   )

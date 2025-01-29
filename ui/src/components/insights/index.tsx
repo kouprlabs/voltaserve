@@ -16,8 +16,8 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { SectionError, SectionSpinner } from '@koupr/ui'
-import FileAPI from '@/client/api/file'
-import InsightsAPI from '@/client/api/insights'
+import { FileAPI } from '@/client/api/file'
+import { InsightsAPI } from '@/client/api/insights'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'

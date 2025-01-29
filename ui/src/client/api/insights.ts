@@ -11,55 +11,55 @@ import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { Snapshot } from './snapshot'
 
-export type CreateOptions = {
+export type InsightsCreateOptions = {
   languageId: string
 }
 
-export type Language = {
+export type InsightsLanguage = {
   id: string
   iso6393: string
   name: string
 }
 
-export type Info = {
+export type InsightsInfo = {
   isAvailable: boolean
   isOutdated: boolean
   snapshot?: Snapshot
 }
 
-export type Entity = {
+export type InsightsEntity = {
   text: string
   label: string
   frequency: number
 }
 
-export type EntityList = {
-  data: Entity[]
+export type InsightsEntityList = {
+  data: InsightsEntity[]
   totalPages: number
   totalElements: number
   page: number
   size: number
 }
 
-export type ListEntitiesOptions = {
+export type InsightsListEntitiesOptions = {
   query?: string
   size?: number
   page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
+  sortBy?: InsightsSortBy
+  sortOrder?: InsightsSortOrder
 }
 
-export enum SortBy {
+export enum InsightsSortBy {
   Name = 'name',
   Frequency = 'frequency',
 }
 
-export enum SortOrder {
+export enum InsightsSortOrder {
   Asc = 'asc',
   Desc = 'desc',
 }
 
-type ListEntitiesQueryParams = {
+type InsightsListEntitiesQueryParams = {
   page?: string
   size?: string
   sort_by?: string
@@ -67,8 +67,8 @@ type ListEntitiesQueryParams = {
   query?: string
 }
 
-export default class InsightsAPI {
-  static create(id: string, options: CreateOptions, showError = true) {
+export class InsightsAPI {
+  static create(id: string, options: InsightsCreateOptions, showError = true) {
     return apiFetcher({
       url: `/insights/${id}`,
       method: 'POST',
@@ -96,14 +96,14 @@ export default class InsightsAPI {
     swrOptions?: SWRConfiguration,
   ) {
     const url = `/insights/${id}/info`
-    return useSWR<Info>(
+    return useSWR<InsightsInfo>(
       id ? url : null,
       () =>
         apiFetcher({
           url,
           method: 'GET',
           showError: false,
-        }) as Promise<Info>,
+        }) as Promise<InsightsInfo>,
       swrOptions,
     )
   }
@@ -112,33 +112,35 @@ export default class InsightsAPI {
     return apiFetcher({
       url: `/insights/${id}/info`,
       method: 'GET',
-    }) as Promise<Info>
+    }) as Promise<InsightsInfo>
   }
 
   static useGetLanguages(swrOptions?: SWRConfiguration) {
     const url = `/insights/languages`
-    return useSWR<Language[]>(
+    return useSWR<InsightsLanguage[]>(
       url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<Language[]>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<InsightsLanguage[]>,
       swrOptions,
     )
   }
 
   static useListEntities(
     id: string | null | undefined,
-    options?: ListEntitiesOptions,
+    options?: InsightsListEntitiesOptions,
     swrOptions?: SWRConfiguration,
   ) {
     const url = `/insights/${id}/entities?${this.paramsFromListOptions(options)}`
-    return useSWR<EntityList>(
+    return useSWR<InsightsEntityList>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<EntityList>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<InsightsEntityList>,
       swrOptions,
     )
   }
 
-  static paramsFromListOptions(options?: ListEntitiesOptions): URLSearchParams {
-    const params: ListEntitiesQueryParams = {}
+  static paramsFromListOptions(
+    options?: InsightsListEntitiesOptions,
+  ): URLSearchParams {
+    const params: InsightsListEntitiesQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }

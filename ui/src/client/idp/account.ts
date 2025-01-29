@@ -9,29 +9,29 @@
 // AGPL-3.0-only in the root of this repository.
 import useSWR, { SWRConfiguration } from 'swr'
 import { idpFetcher } from '@/client/fetcher'
-import { User } from './user'
+import { AuthUser } from './user'
 
-export type CreateOptions = {
+export type AccountCreateOptions = {
   email: string
   password: string
   fullName: string
   picture?: string
 }
 
-export type SendResetPasswordEmailOptions = {
+export type AccountSendResetPasswordEmailOptions = {
   email: string
 }
 
-export type ResetPasswordOptions = {
+export type AccountResetPasswordOptions = {
   token: string
   newPassword: string
 }
 
-export type ConfirmEmailOptions = {
+export type AccountConfirmEmailOptions = {
   token: string
 }
 
-export type PasswordRequirements = {
+export type AccountPasswordRequirements = {
   minLength: number
   minLowercase: number
   minUppercase: number
@@ -39,18 +39,20 @@ export type PasswordRequirements = {
   minSymbols: number
 }
 
-export default class AccountAPI {
-  static create(options: CreateOptions) {
+export class AccountAPI {
+  static create(options: AccountCreateOptions) {
     return idpFetcher({
       url: `/accounts`,
       method: 'POST',
       body: JSON.stringify(options),
       redirect: false,
       authenticate: false,
-    }) as Promise<User>
+    }) as Promise<AuthUser>
   }
 
-  static async sendResetPasswordEmail(options: SendResetPasswordEmailOptions) {
+  static async sendResetPasswordEmail(
+    options: AccountSendResetPasswordEmailOptions,
+  ) {
     return idpFetcher({
       url: `/accounts/send_reset_password_email`,
       method: 'POST',
@@ -58,7 +60,7 @@ export default class AccountAPI {
     })
   }
 
-  static async resetPassword(options: ResetPasswordOptions) {
+  static async resetPassword(options: AccountResetPasswordOptions) {
     return idpFetcher({
       url: `/accounts/reset_password`,
       method: 'POST',
@@ -66,7 +68,7 @@ export default class AccountAPI {
     })
   }
 
-  static async confirmEmail(options: ConfirmEmailOptions) {
+  static async confirmEmail(options: AccountConfirmEmailOptions) {
     return idpFetcher({
       url: `/accounts/confirm_email`,
       method: 'POST',
@@ -83,9 +85,13 @@ export default class AccountAPI {
 
   static useGetPasswordRequirements(swrOptions?: SWRConfiguration) {
     const url = `/accounts/password_requirements`
-    return useSWR<PasswordRequirements | undefined>(
+    return useSWR<AccountPasswordRequirements | undefined>(
       url,
-      () => idpFetcher({ url, method: 'GET' }) as Promise<PasswordRequirements>,
+      () =>
+        idpFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<AccountPasswordRequirements>,
       swrOptions,
     )
   }

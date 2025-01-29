@@ -9,13 +9,13 @@
 // AGPL-3.0-only in the root of this repository.
 import { KeyedMutator } from 'swr'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { List } from '@/client/api/snapshot'
+import { SnapshotList } from '@/client/api/snapshot'
 
 export type SnapshotsState = {
   selection: string[]
   isListModalOpen: boolean
   isDetachModalOpen: boolean
-  snapshotMutate?: KeyedMutator<List | undefined>
+  snapshotMutate?: KeyedMutator<SnapshotList | undefined>
 }
 
 const initialState: SnapshotsState = {
@@ -33,7 +33,7 @@ const slice = createSlice({
     },
     mutateUpdated: (
       state,
-      action: PayloadAction<KeyedMutator<List | undefined>>,
+      action: PayloadAction<KeyedMutator<SnapshotList | undefined>>,
     ) => {
       state.snapshotMutate = action.payload
     },

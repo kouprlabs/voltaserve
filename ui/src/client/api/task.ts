@@ -10,14 +10,14 @@
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 
-export enum SortBy {
+export enum TaskSortBy {
   Name = 'name',
   Status = 'status',
   DateCreated = 'date_created',
   DateModified = 'date_modified',
 }
 
-export enum SortOrder {
+export enum TaskSortOrder {
   Asc = 'asc',
   Desc = 'desc',
 }
@@ -29,11 +29,11 @@ export type Task = {
   percentage?: number
   isIndeterminate: boolean
   userId: string
-  status: Status
+  status: TaskStatus
   payload?: TaskPayload
 }
 
-export enum Status {
+export enum TaskStatus {
   Waiting = 'waiting',
   Running = 'running',
   Success = 'success',
@@ -44,7 +44,7 @@ export type TaskPayload = {
   object?: string
 }
 
-export type List = {
+export type TaskList = {
   data: Task[]
   totalPages: number
   totalElements: number
@@ -52,15 +52,15 @@ export type List = {
   size: number
 }
 
-export type ListOptions = {
+export type TaskListOptions = {
   query?: string
   size?: number
   page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
+  sortBy?: TaskSortBy
+  sortOrder?: TaskSortOrder
 }
 
-type ListQueryParams = {
+type TaskListQueryParams = {
   page?: string
   size?: string
   sort_by?: string
@@ -68,7 +68,7 @@ type ListQueryParams = {
   query?: string
 }
 
-export default class TaskAPI {
+export class TaskAPI {
   static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/tasks/${id}`
     return useSWR<Task>(
@@ -78,24 +78,24 @@ export default class TaskAPI {
     )
   }
 
-  static list(options?: ListOptions) {
+  static list(options?: TaskListOptions) {
     return apiFetcher({
       url: `/tasks?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<List>
+    }) as Promise<TaskList>
   }
 
-  static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
+  static useList(options?: TaskListOptions, swrOptions?: SWRConfiguration) {
     const url = `/tasks?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
+    return useSWR<TaskList>(
       url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<TaskList>,
       swrOptions,
     )
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
+  static paramsFromListOptions(options?: TaskListOptions): URLSearchParams {
+    const params: TaskListQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }

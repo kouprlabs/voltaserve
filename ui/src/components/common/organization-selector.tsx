@@ -34,9 +34,10 @@ import {
   usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
-import OrganizationAPI, {
+import {
+  OrganizationAPI,
   Organization,
-  SortOrder,
+  OrganizationSortOrder,
 } from '@/client/api/organization'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
@@ -62,7 +63,7 @@ const OrganizationSelector = ({
     isLoading: listIsLoading,
     mutate,
   } = OrganizationAPI.useList(
-    { query, page, size, sortOrder: SortOrder.Desc },
+    { query, page, size, sortOrder: OrganizationSortOrder.Desc },
     swrConfig(),
   )
   const { hasPageSwitcher } = usePageMonitor({

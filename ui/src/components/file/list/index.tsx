@@ -20,7 +20,7 @@ import {
 import cx from 'classnames'
 import { FileWithPath, useDropzone } from 'react-dropzone'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { List as ApiFileList } from '@/client/api/file'
+import { FileList as ApiFileList } from '@/client/api/file'
 import UploadMenu from '@/components/common/upload-menu'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'

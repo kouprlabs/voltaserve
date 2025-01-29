@@ -12,9 +12,9 @@ import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import { SectionError, SectionSpinner, Select } from '@koupr/ui'
 import { OptionBase, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
-import InsightsAPI, { Language } from '@/client/api/insights'
-import TaskAPI from '@/client/api/task'
+import { FileAPI } from '@/client/api/file'
+import { InsightsAPI, InsightsLanguage } from '@/client/api/insights'
+import { TaskAPI } from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -35,7 +35,7 @@ const InsightsCreate = () => {
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
   const mutateInfo = useAppSelector((state) => state.ui.insights.mutateInfo)
-  const [language, setLanguage] = useState<Language>()
+  const [language, setLanguage] = useState<InsightsLanguage>()
   const {
     data: languages,
     error: languagesError,

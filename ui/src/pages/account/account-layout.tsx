@@ -21,9 +21,9 @@ import {
 import { IconEdit, NumberTag, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import InvitationAPI from '@/client/api/invitation'
+import { InvitationAPI } from '@/client/api/invitation'
 import { errorToString } from '@/client/error'
-import UserAPI from '@/client/idp/user'
+import { AuthUserAPI } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
 import { getPictureUrl } from '@/lib/helpers/picture'
@@ -46,7 +46,7 @@ const AccountLayout = ({ extensions }: AccountLayoutProps) => {
     isLoading: userIsLoading,
     error: userError,
     mutate,
-  } = UserAPI.useGet(swrConfig())
+  } = AuthUserAPI.useGet(swrConfig())
   const { data: invitationCount } =
     InvitationAPI.useGetIncomingCount(swrConfig())
   const [tabIndex, setTabIndex] = useState(0)

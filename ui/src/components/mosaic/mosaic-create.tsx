@@ -10,8 +10,8 @@
 import { useCallback } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import cx from 'classnames'
-import MosaicAPI from '@/client/api/mosaic'
-import TaskAPI from '@/client/api/task'
+import { MosaicAPI } from '@/client/api/mosaic'
+import { TaskAPI } from '@/client/api/task'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/mosaic'
 

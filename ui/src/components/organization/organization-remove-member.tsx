@@ -19,13 +19,13 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import OrganizationAPI, { Organization } from '@/client/api/organization'
-import { User } from '@/client/idp/user'
+import { OrganizationAPI, Organization } from '@/client/api/organization'
+import { AuthUser } from '@/client/idp/user'
 import userToString from '@/lib/helpers/user-to-string'
 
 export type OrganizationRemoveMemberProps = {
   organization: Organization
-  user: User
+  user: AuthUser
   isOpen: boolean
   onClose?: () => void
   onCompleted?: () => void

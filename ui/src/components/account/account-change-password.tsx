@@ -31,15 +31,15 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import AccountAPI from '@/client/idp/account'
-import UserAPI, { User } from '@/client/idp/user'
+import { AccountAPI } from '@/client/idp/account'
+import { AuthUserAPI, AuthUser } from '@/client/idp/user'
 import PasswordHints from '@/components/sign-up/password-hints'
 import { YupFactory } from '@/lib/validation'
 import { useAppSelector } from '@/store/hook'
 
 export type AccountChangePasswordProps = {
   open: boolean
-  user: User
+  user: AuthUser
   onClose?: () => void
 }
 
@@ -72,7 +72,7 @@ const AccountChangePassword = ({
     ) => {
       setSubmitting(true)
       try {
-        const result = await UserAPI.updatePassword({
+        const result = await AuthUserAPI.updatePassword({
           currentPassword,
           newPassword,
         })

@@ -26,7 +26,7 @@ import {
 } from '@chakra-ui/react'
 import { IconClose, IconSearch, IconTune, NotificationBadge } from '@koupr/ui'
 import cx from 'classnames'
-import { Query as FileQuery } from '@/client/api/file'
+import { FileQuery } from '@/client/api/file'
 import {
   decodeFileQuery,
   decodeQuery,

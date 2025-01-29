@@ -10,10 +10,10 @@
 import { Button } from '@chakra-ui/react'
 import { IconOpenInNew, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
+import { FileAPI } from '@/client/api/file'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { getAccessTokenOrRedirect } from '@/client/token'
 import { useAppSelector } from '@/store/hook'
 
 const InsightsOverviewArtifacts = () => {

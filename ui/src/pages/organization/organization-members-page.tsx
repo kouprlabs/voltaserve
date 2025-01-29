@@ -28,9 +28,9 @@ import {
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
-import OrganizationAPI from '@/client/api/organization'
+import { OrganizationAPI } from '@/client/api/organization'
 import { geOwnerPermission } from '@/client/api/permission'
-import UserAPI, { SortBy, SortOrder, User } from '@/client/api/user'
+import { UserAPI, UserSortBy, UserSortOrder, User } from '@/client/api/user'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
@@ -73,8 +73,8 @@ const OrganizationMembersPage = () => {
       organizationId: id,
       page,
       size,
-      sortBy: SortBy.FullName,
-      sortOrder: SortOrder.Asc,
+      sortBy: UserSortBy.FullName,
+      sortOrder: UserSortOrder.Asc,
     },
     swrConfig(),
   )

@@ -11,12 +11,12 @@ import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { Picture } from '@/client/types'
 
-export enum SortBy {
+export enum UserSortBy {
   Email = 'email',
   FullName = 'full_name',
 }
 
-export enum SortOrder {
+export enum UserSortOrder {
   Asc = 'asc',
   Desc = 'desc',
 }
@@ -29,7 +29,7 @@ export type User = {
   picture?: Picture
 }
 
-export type List = {
+export type UserList = {
   data: User[]
   totalPages: number
   totalElements: number
@@ -37,7 +37,7 @@ export type List = {
   size: number
 }
 
-export type ListOptions = {
+export type UserListOptions = {
   query?: string
   organizationId?: string
   groupId?: string
@@ -45,11 +45,11 @@ export type ListOptions = {
   excludeMe?: boolean
   size?: number
   page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
+  sortBy?: UserSortBy
+  sortOrder?: UserSortOrder
 }
 
-type ListQueryParams = {
+type UserListQueryParams = {
   page?: string
   size?: string
   sort_by?: string
@@ -61,25 +61,25 @@ type ListQueryParams = {
   exclude_me?: string
 }
 
-export default class UserAPI {
-  static list(options?: ListOptions) {
+export class UserAPI {
+  static list(options?: UserListOptions) {
     return apiFetcher({
       url: `/users?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<List>
+    }) as Promise<UserList>
   }
 
-  static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
+  static useList(options?: UserListOptions, swrOptions?: SWRConfiguration) {
     const url = `/users?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
+    return useSWR<UserList>(
       url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<UserList>,
       swrOptions,
     )
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
+  static paramsFromListOptions(options?: UserListOptions): URLSearchParams {
+    const params: UserListQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }

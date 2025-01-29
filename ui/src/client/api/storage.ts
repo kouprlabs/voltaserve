@@ -16,7 +16,7 @@ export type StorageUsage = {
   percentage: number
 }
 
-export default class StorageAPI {
+export class StorageAPI {
   static useGetAccountUsage(swrOptions?: SWRConfiguration) {
     const url = `/storage/account_usage`
     return useSWR<StorageUsage>(

@@ -31,7 +31,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import OrganizationAPI, { Organization } from '@/client/api/organization'
+import { OrganizationAPI, Organization } from '@/client/api/organization'
 import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 import { useAppSelector } from '@/store/hook'
 

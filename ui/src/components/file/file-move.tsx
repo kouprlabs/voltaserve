@@ -20,7 +20,7 @@ import {
   Button,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
+import { FileAPI } from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   loadingAdded,

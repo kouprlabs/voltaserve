@@ -11,38 +11,38 @@ import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { Snapshot } from './snapshot'
 
-export type Tile = {
+export type MosaicTile = {
   width: number
   height: number
   lastColWidth: number
   lastRowHeight: number
 }
 
-export type ZoomLevel = {
+export type MosaicZoomLevel = {
   index: number
   width: number
   height: number
   rows: number
   cols: number
   scaleDownPercentage: number
-  tile: Tile
+  tile: MosaicTile
 }
 
-export type Info = {
+export type MosaicInfo = {
   isAvailable: boolean
   isOutdated: boolean
   snapshot?: Snapshot
-  metadata?: Metadata
+  metadata?: MosaicMetadata
 }
 
-export type Metadata = {
+export type MosaicMetadata = {
   width: number
   height: number
   extension: string
-  zoomLevels: ZoomLevel[]
+  zoomLevels: MosaicZoomLevel[]
 }
 
-export default class MosaicAPI {
+export class MosaicAPI {
   static create(id: string, showError = true) {
     return apiFetcher({
       url: `/mosaics/${id}`,
@@ -63,14 +63,14 @@ export default class MosaicAPI {
     swrOptions?: SWRConfiguration,
   ) {
     const url = `/mosaics/${id}/info`
-    return useSWR<Info>(
+    return useSWR<MosaicInfo>(
       id ? url : null,
       () =>
         apiFetcher({
           url,
           method: 'GET',
           showError: false,
-        }) as Promise<Info>,
+        }) as Promise<MosaicInfo>,
       swrOptions,
     )
   }
@@ -79,6 +79,6 @@ export default class MosaicAPI {
     return apiFetcher({
       url: `/mosaics/${id}/info`,
       method: 'GET',
-    }) as Promise<Info>
+    }) as Promise<MosaicInfo>
   }
 }

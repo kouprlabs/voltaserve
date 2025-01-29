@@ -22,7 +22,7 @@ import {
 } from '@chakra-ui/react'
 import { IconCheckCircle, IconClose, IconError, IconHourglass } from '@koupr/ui'
 import cx from 'classnames'
-import TaskAPI, { Status, Task } from '@/client/api/task'
+import { TaskAPI, TaskStatus, Task } from '@/client/api/task'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
 import { useAppSelector } from '@/store/hook'
 
@@ -49,8 +49,8 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
       <CardBody>
         <div className={cx('flex', 'flex-col', 'gap-1')}>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
-            {task.status === Status.Waiting ? <IconHourglass /> : null}
-            {task.status === Status.Running ? (
+            {task.status === TaskStatus.Waiting ? <IconHourglass /> : null}
+            {task.status === TaskStatus.Running ? (
               <CircularProgress
                 value={task.percentage}
                 max={100}
@@ -59,13 +59,13 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
                 size="20px"
               />
             ) : null}
-            {task.status === Status.Success ? (
+            {task.status === TaskStatus.Success ? (
               <IconCheckCircle
                 className={cx('shrink-0', 'text-green-500')}
                 filled={true}
               />
             ) : null}
-            {task.status === Status.Error ? (
+            {task.status === TaskStatus.Error ? (
               <IconError filled={true} className={cx('text-red-500')} />
             ) : null}
             <div className={cx('flex', 'flex-col', 'grow')}>
@@ -74,7 +74,7 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
                   {truncateMiddle(task.payload.object, 40)}
                 </span>
               ) : null}
-              {task.status !== Status.Error ? (
+              {task.status !== TaskStatus.Error ? (
                 <Text noOfLines={3}>{task.name}</Text>
               ) : null}
             </div>

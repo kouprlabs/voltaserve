@@ -12,8 +12,8 @@ import { useNavigate } from 'react-router-dom'
 import { Heading } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
+import { clearToken } from '@/client/token'
 import LayoutFull from '@/components/layout/layout-full'
-import { clearToken } from '@/infra/token'
 
 function SignOutPage() {
   const navigate = useNavigate()

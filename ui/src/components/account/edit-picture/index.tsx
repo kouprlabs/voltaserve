@@ -30,14 +30,14 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import UserAPI, { User } from '@/client/idp/user'
+import { AuthUserAPI, AuthUser } from '@/client/idp/user'
 import { getPictureUrl } from '@/lib/helpers/picture'
 import { useAppSelector } from '@/store/hook'
 import AccountUploadPicture from './account-upload-picture'
 
 export type AccountEditPictureProps = {
   open: boolean
-  user: User
+  user: AuthUser
   onClose?: () => void
 }
 
@@ -94,7 +94,7 @@ const AccountEditPicture = ({
     ) => {
       setSubmitting(true)
       try {
-        const result = await UserAPI.updatePicture(picture)
+        const result = await AuthUserAPI.updatePicture(picture)
         await mutate?.(result)
         setSubmitting(false)
         onClose?.()
@@ -108,7 +108,7 @@ const AccountEditPicture = ({
   const handleDelete = useCallback(async () => {
     try {
       setDeletionInProgress(true)
-      const result = await UserAPI.deletePicture()
+      const result = await AuthUserAPI.deletePicture()
       await mutate?.(result)
       onClose?.()
     } finally {

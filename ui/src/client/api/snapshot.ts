@@ -14,29 +14,29 @@ import { File } from './file'
 export type Snapshot = {
   id: string
   version: number
-  status: Status
-  original: Download
-  preview?: Download
-  ocr?: Download
-  text?: Download
-  entities?: Download
-  mosaic?: Download
-  thumbnail?: Download
+  status: SnapshotStatus
+  original: SnapshotDownload
+  preview?: SnapshotDownload
+  ocr?: SnapshotDownload
+  text?: SnapshotDownload
+  entities?: SnapshotDownload
+  mosaic?: SnapshotDownload
+  thumbnail?: SnapshotDownload
   language?: string
   isActive: boolean
-  task?: TaskInfo
+  task?: SnapshotTaskInfo
   createTime: string
   updateTime?: string
 }
 
-export enum Status {
+export enum SnapshotStatus {
   Waiting = 'waiting',
   Processing = 'processing',
   Ready = 'ready',
   Error = 'error',
 }
 
-export type List = {
+export type SnapshotList = {
   data: Snapshot[]
   totalPages: number
   totalElements: number
@@ -44,77 +44,77 @@ export type List = {
   size: number
 }
 
-export type ListOptions = {
+export type SnapshotListOptions = {
   fileId: string
   query?: string
   organizationId?: string
   size?: number
   page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
+  sortBy?: SnapshotSortBy
+  sortOrder?: SnapshotSortOrder
 }
 
-export enum SortBy {
+export enum SnapshotSortBy {
   Version = 'version',
   DateCreated = 'date_created',
   DateModified = 'date_modified',
 }
 
-export enum SortOrder {
+export enum SnapshotSortOrder {
   Asc = 'asc',
   Desc = 'desc',
 }
 
-export type TaskInfo = {
+export type SnapshotTaskInfo = {
   id: string
   isPending: boolean
 }
 
-export type Download = {
+export type SnapshotDownload = {
   extension?: string
   size?: number
-  image?: ImageProps
-  document?: DocumentProps
+  image?: SnapshotImageProps
+  document?: SnapshotDocumentProps
 }
 
-export type ImageProps = {
+export type SnapshotImageProps = {
   width: number
   height: number
-  zoomLevels?: ZoomLevel[]
+  zoomLevels?: SnapshotZoomLevel[]
 }
 
-export type DocumentProps = {
-  pages?: PagesProps
-  thumbnails?: ThumbnailsProps
+export type SnapshotDocumentProps = {
+  pages?: SnapshotPagesProps
+  thumbnails?: SnapshotThumbnailsProps
 }
 
-export type PagesProps = {
+export type SnapshotPagesProps = {
   count: number
   extension: string
 }
 
-export type ThumbnailsProps = {
+export type SnapshotThumbnailsProps = {
   extension: string
 }
 
-export type Tile = {
+export type SnapshotTile = {
   width: number
   height: number
   lastColWidth: number
   lastRowHeight: number
 }
 
-export type ZoomLevel = {
+export type SnapshotZoomLevel = {
   index: number
   width: number
   height: number
   rows: number
   cols: number
   scaleDownPercentage: number
-  tile: Tile
+  tile: SnapshotTile
 }
 
-export type ListQueryParams = {
+export type SnapshotListQueryParams = {
   file_id: string
   page?: string
   size?: string
@@ -123,25 +123,25 @@ export type ListQueryParams = {
   query?: string
 }
 
-export default class SnapshotAPI {
-  static list(options: ListOptions) {
+export class SnapshotAPI {
+  static list(options: SnapshotListOptions) {
     return apiFetcher({
       url: `/snapshots?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<List>
+    }) as Promise<SnapshotList>
   }
 
-  static useList(options: ListOptions, swrOptions?: SWRConfiguration) {
+  static useList(options: SnapshotListOptions, swrOptions?: SWRConfiguration) {
     const url = `/snapshots?${this.paramsFromListOptions(options)}`
-    return useSWR<List | undefined>(
+    return useSWR<SnapshotList | undefined>(
       url,
       () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
-  static paramsFromListOptions(options: ListOptions): URLSearchParams {
-    const params: ListQueryParams = { file_id: options.fileId }
+  static paramsFromListOptions(options: SnapshotListOptions): URLSearchParams {
+    const params: SnapshotListQueryParams = { file_id: options.fileId }
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }

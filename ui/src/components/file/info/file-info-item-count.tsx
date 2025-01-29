@@ -1,6 +1,6 @@
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI, { File, FileType } from '@/client/api/file'
+import { FileAPI, File, FileType } from '@/client/api/file'
 
 export type FileInfoItemCountProps = {
   file: File

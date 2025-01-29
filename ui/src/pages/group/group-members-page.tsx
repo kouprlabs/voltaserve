@@ -28,11 +28,11 @@ import {
   usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
-import GroupAPI from '@/client/api/group'
+import { GroupAPI } from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
-import UserAPI, { SortBy, SortOrder } from '@/client/api/user'
+import { UserAPI, UserSortBy, UserSortOrder } from '@/client/api/user'
 import { errorToString } from '@/client/error'
-import { User as IdPUser } from '@/client/idp/user'
+import { AuthUser } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import GroupAddMember from '@/components/group/group-add-member'
 import GroupRemoveMember from '@/components/group/group-remove-member'
@@ -72,12 +72,12 @@ const GroupMembersPage = () => {
       groupId: id,
       page,
       size,
-      sortBy: SortBy.FullName,
-      sortOrder: SortOrder.Asc,
+      sortBy: UserSortBy.FullName,
+      sortOrder: UserSortOrder.Asc,
     },
     swrConfig(),
   )
-  const [userToRemove, setUserToRemove] = useState<IdPUser>()
+  const [userToRemove, setUserToRemove] = useState<AuthUser>()
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   // prettier-ignore
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState<boolean>(false)

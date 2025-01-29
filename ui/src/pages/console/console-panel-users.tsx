@@ -33,7 +33,7 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { errorToString } from '@/client/error'
-import UserAPI from '@/client/idp/user'
+import { AuthUserAPI } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import ConsoleConfirmationModal, {
   ConsoleConfirmationModalRequest,
@@ -65,7 +65,7 @@ const ConsolePanelUsers = () => {
     error: listError,
     isLoading: listIsLoading,
     mutate,
-  } = UserAPI.useList(
+  } = AuthUserAPI.useList(
     { query: decodeQuery(searchParams.get('q') as string), page, size },
     swrConfig(),
   )
@@ -191,7 +191,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.suspend(user.id, { suspend: true })
+                    await AuthUserAPI.suspend(user.id, { suspend: true })
                     await mutate()
                   })
                   setIsConfirmationDestructive(true)
@@ -214,7 +214,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.suspend(user.id, { suspend: false })
+                    await AuthUserAPI.suspend(user.id, { suspend: false })
                     await mutate()
                   })
                   setIsConfirmationDestructive(false)
@@ -237,7 +237,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.makeAdmin(user.id, { makeAdmin: true })
+                    await AuthUserAPI.makeAdmin(user.id, { makeAdmin: true })
                     await mutate()
                   })
                   setIsConfirmationDestructive(false)
@@ -261,7 +261,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.makeAdmin(user.id, { makeAdmin: false })
+                    await AuthUserAPI.makeAdmin(user.id, { makeAdmin: false })
                     await mutate()
                     if (getUserId() === user.id) {
                       navigate('/sign-out')

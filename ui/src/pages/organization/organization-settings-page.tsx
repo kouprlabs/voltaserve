@@ -19,7 +19,7 @@ import {
   Form,
   SectionError,
 } from '@koupr/ui'
-import OrganizationAPI from '@/client/api/organization'
+import { OrganizationAPI } from '@/client/api/organization'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'

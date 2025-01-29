@@ -9,10 +9,10 @@
 // AGPL-3.0-only in the root of this repository.
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { List } from '@/client/api/group'
+import { GroupList } from '@/client/api/group'
 
 type GroupsState = {
-  mutate?: KeyedMutator<List>
+  mutate?: KeyedMutator<GroupList>
 }
 
 const initialState: GroupsState = {}
@@ -21,7 +21,7 @@ const slice = createSlice({
   name: 'groups',
   initialState,
   reducers: {
-    mutateUpdated: (state, action: PayloadAction<KeyedMutator<List>>) => {
+    mutateUpdated: (state, action: PayloadAction<KeyedMutator<GroupList>>) => {
       state.mutate = action.payload
     },
   },

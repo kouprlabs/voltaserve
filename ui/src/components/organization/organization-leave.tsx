@@ -20,7 +20,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import OrganizationAPI from '@/client/api/organization'
+import { OrganizationAPI } from '@/client/api/organization'
 
 export type OrganizationLeaveProps = {
   open: boolean

@@ -32,7 +32,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
+import { WorkspaceAPI, Workspace } from '@/client/api/workspace'
 import { useAppSelector } from '@/store/hook'
 
 export type WorkspaceDeleteProps = {

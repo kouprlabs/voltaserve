@@ -8,55 +8,24 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { decodeJwt } from 'jose'
-import TokenAPI, { Token } from '@/client/idp/token'
+import { TokenAPI, Token } from '@/client/idp/token'
 import {
-  loadAccessToken,
+  ACCESS_TOKEN_COOKIE,
+  getAccessToken,
   loadRefreshToken,
   loadTokenExpiry,
-  removeAccessToken,
-  removeRefreshToken,
-  removeTokenExpiry,
   saveAccessToken,
   saveRefreshToken,
   saveTokenExpiry,
-} from '@/local-storage'
-
-export const COOKIE = 'voltaserve_access_token'
+} from '@/client/token'
 
 export async function saveToken(token: Token) {
-  document.cookie = `${COOKIE}=${token.access_token}; Path=/; Max-Age=${token.expires_in}`
+  document.cookie = `${ACCESS_TOKEN_COOKIE}=${token.access_token}; Path=/; Max-Age=${token.expires_in}`
   saveAccessToken(token.access_token)
   saveRefreshToken(token.refresh_token)
   const tokenExpiry = new Date()
   tokenExpiry.setSeconds(tokenExpiry.getSeconds() + token.expires_in)
   saveTokenExpiry(tokenExpiry.toISOString())
-}
-
-export async function clearToken() {
-  document.cookie = `${COOKIE}=; Max-Age=-99999999;`
-  removeAccessToken()
-  removeRefreshToken()
-  removeTokenExpiry()
-}
-
-export function getAccessTokenOrRedirect(): string {
-  const accessToken = getAccessToken()
-  if (accessToken) {
-    return accessToken
-  } else {
-    window.location.href = '/sign-in'
-    return ''
-  }
-}
-
-export function getAccessToken() {
-  const accessToken = loadAccessToken()
-  const tokenExpiry = loadTokenExpiry()
-  if (accessToken && tokenExpiry && new Date() < new Date(tokenExpiry)) {
-    return accessToken
-  } else {
-    clearToken().then()
-  }
 }
 
 export function getAdminStatus(): boolean {

@@ -29,7 +29,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AccountAPI from '@/client/idp/account'
+import { AccountAPI } from '@/client/idp/account'
 import LayoutFull from '@/components/layout/layout-full'
 
 type FormValues = {

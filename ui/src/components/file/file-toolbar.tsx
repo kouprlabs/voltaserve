@@ -42,7 +42,7 @@ import {
   IconCloudUpload,
 } from '@koupr/ui'
 import cx from 'classnames'
-import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
+import { FileAPI, FileList, FileSortBy, FileSortOrder } from '@/client/api/file'
 import { ltEditorPermission } from '@/client/api/permission'
 import mapFileList from '@/lib/helpers/map-file-list'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
@@ -65,7 +65,7 @@ import { FileViewType } from '@/types/file'
 import FileMenu from './file-menu'
 
 export type FileToolbarProps = {
-  list?: List
+  list?: FileList
 }
 
 const FileToolbar = ({ list }: FileToolbarProps) => {
@@ -160,7 +160,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   }, [fileId, dispatch, mutateList])
 
   const handleSortByChange = useCallback(
-    (value: SortBy) => {
+    (value: FileSortBy) => {
       dispatch(sortByUpdated(value))
     },
     [dispatch],
@@ -182,7 +182,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   }, [dispatch])
 
   const getSortIcon = useCallback(
-    (value: SortBy): ReactElement => {
+    (value: FileSortBy): ReactElement => {
       if (value === sortBy) {
         return <IconCheck />
       } else {
@@ -204,9 +204,9 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   )
 
   const getSortOrderIcon = useCallback(() => {
-    if (sortOrder === SortOrder.Asc) {
+    if (sortOrder === FileSortOrder.Asc) {
       return <IconArrowUpward />
-    } else if (sortOrder === SortOrder.Desc) {
+    } else if (sortOrder === FileSortOrder.Desc) {
       return <IconArrowDownward />
     }
   }, [sortOrder])
@@ -319,32 +319,32 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               <Portal>
                 <MenuList zIndex="dropdown">
                   <MenuItem
-                    icon={getSortIcon(SortBy.Name)}
-                    onClick={() => handleSortByChange(SortBy.Name)}
+                    icon={getSortIcon(FileSortBy.Name)}
+                    onClick={() => handleSortByChange(FileSortBy.Name)}
                   >
                     Sort By Name
                   </MenuItem>
                   <MenuItem
-                    icon={getSortIcon(SortBy.Kind)}
-                    onClick={() => handleSortByChange(SortBy.Kind)}
+                    icon={getSortIcon(FileSortBy.Kind)}
+                    onClick={() => handleSortByChange(FileSortBy.Kind)}
                   >
                     Sort By Kind
                   </MenuItem>
                   <MenuItem
-                    icon={getSortIcon(SortBy.Size)}
-                    onClick={() => handleSortByChange(SortBy.Size)}
+                    icon={getSortIcon(FileSortBy.Size)}
+                    onClick={() => handleSortByChange(FileSortBy.Size)}
                   >
                     Sort By Size
                   </MenuItem>
                   <MenuItem
-                    icon={getSortIcon(SortBy.DateCreated)}
-                    onClick={() => handleSortByChange(SortBy.DateCreated)}
+                    icon={getSortIcon(FileSortBy.DateCreated)}
+                    onClick={() => handleSortByChange(FileSortBy.DateCreated)}
                   >
                     Sort By Date Created
                   </MenuItem>
                   <MenuItem
-                    icon={getSortIcon(SortBy.DateModified)}
-                    onClick={() => handleSortByChange(SortBy.DateModified)}
+                    icon={getSortIcon(FileSortBy.DateModified)}
+                    onClick={() => handleSortByChange(FileSortBy.DateModified)}
                   >
                     Sort By Date Modified
                   </MenuItem>

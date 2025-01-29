@@ -30,3 +30,5 @@ export const Voltaserve = ({ extensions }: VoltaserveProps) => (
     </ChakraProvider>
   </Provider>
 )
+
+export * from './client'

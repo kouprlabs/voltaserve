@@ -11,8 +11,8 @@ import { Link } from 'react-router-dom'
 import { MenuItem } from '@chakra-ui/react'
 import { AccountMenu as KouprAccountMenu, NumberTag } from '@koupr/ui'
 import cx from 'classnames'
-import InvitationAPI from '@/client/api/invitation'
-import UserAPI from '@/client/idp/user'
+import { InvitationAPI } from '@/client/api/invitation'
+import { AuthUserAPI } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { getPictureUrl } from '@/lib/helpers/picture'
 import { AccountExtensions } from '@/types/extensibility'
@@ -22,7 +22,7 @@ export type AccountMenuProps = {
 }
 
 const AccountMenu = ({ extensions }: AccountMenuProps) => {
-  const { data: user } = UserAPI.useGet(swrConfig())
+  const { data: user } = AuthUserAPI.useGet(swrConfig())
   // prettier-ignore
   const { data: invitationCount } = InvitationAPI.useGetIncomingCount(swrConfig())
 

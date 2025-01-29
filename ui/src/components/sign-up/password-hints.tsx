@@ -1,10 +1,10 @@
 import { IconCheck } from '@koupr/ui'
 import cx from 'classnames'
-import { PasswordRequirements } from '@/client/idp/account'
+import { AccountPasswordRequirements } from '@/client/idp/account'
 
 export type PasswordHintsProps = {
   value: string
-  requirements: PasswordRequirements
+  requirements: AccountPasswordRequirements
 }
 
 const PasswordHints = ({ value, requirements }: PasswordHintsProps) => {

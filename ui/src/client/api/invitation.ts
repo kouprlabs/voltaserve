@@ -9,16 +9,16 @@
 // AGPL-3.0-only in the root of this repository.
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
-import { User } from '@/client/idp/user'
+import { AuthUser } from '@/client/idp/user'
 import { Organization } from './organization'
 
-export enum SortBy {
+export enum InvitationSortBy {
   Email = 'email',
   DateCreated = 'date_created',
   DateModified = 'date_modified',
 }
 
-export enum SortOrder {
+export enum InvitationSortOrder {
   Asc = 'asc',
   Desc = 'desc',
 }
@@ -27,7 +27,7 @@ export type InvitationStatus = 'pending' | 'accepted' | 'declined'
 
 export type Invitation = {
   id: string
-  owner?: User
+  owner?: AuthUser
   email: string
   organization?: Organization
   status: InvitationStatus
@@ -35,7 +35,7 @@ export type Invitation = {
   updateTime?: string
 }
 
-export type List = {
+export type InvitationList = {
   data: Invitation[]
   totalPages: number
   totalElements: number
@@ -43,20 +43,20 @@ export type List = {
   size: number
 }
 
-export type CreateOptions = {
+export type InvitationCreateOptions = {
   organizationId: string
   emails: string[]
 }
 
-export type ListOptions = {
+export type InvitationListOptions = {
   organizationId?: string
   size?: number
   page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
+  sortBy?: InvitationSortBy
+  sortOrder?: InvitationSortOrder
 }
 
-type ListQueryParams = {
+type InvitationListQueryParams = {
   page?: string
   size?: string
   sort_by?: string
@@ -65,8 +65,8 @@ type ListQueryParams = {
   organization_id?: string
 }
 
-export default class InvitationAPI {
-  static async create(options: CreateOptions) {
+export class InvitationAPI {
+  static async create(options: InvitationCreateOptions) {
     return apiFetcher({
       url: `/invitations`,
       method: 'POST',
@@ -74,11 +74,14 @@ export default class InvitationAPI {
     })
   }
 
-  static useGetIncoming(options?: ListOptions, swrOptions?: SWRConfiguration) {
+  static useGetIncoming(
+    options?: InvitationListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = `/invitations/incoming?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
+    return useSWR<InvitationList>(
       url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<InvitationList>,
       swrOptions,
     )
   }
@@ -92,17 +95,22 @@ export default class InvitationAPI {
     )
   }
 
-  static useGetOutgoing(options?: ListOptions, swrOptions?: SWRConfiguration) {
+  static useGetOutgoing(
+    options?: InvitationListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = `/invitations/outgoing?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
+    return useSWR<InvitationList>(
       options?.organizationId ? url : null,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<InvitationList>,
       swrOptions,
     )
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
+  static paramsFromListOptions(
+    options?: InvitationListOptions,
+  ): URLSearchParams {
+    const params: InvitationListQueryParams = {}
     if (options?.organizationId) {
       params.organization_id = options.organizationId.toString()
     }

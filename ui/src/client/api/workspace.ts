@@ -12,13 +12,13 @@ import { apiFetcher } from '@/client/fetcher'
 import { Organization } from './organization'
 import { PermissionType } from './permission'
 
-export enum SortBy {
+export enum WorkspaceSortBy {
   Name = 'name',
   DateCreated = 'date_created',
   DateModified = 'date_modified',
 }
 
-export enum SortOrder {
+export enum WorkspaceSortOrder {
   Asc = 'asc',
   Desc = 'desc',
 }
@@ -34,7 +34,7 @@ export type Workspace = {
   updateTime?: string
 }
 
-export type List = {
+export type WorkspaceList = {
   data: Workspace[]
   totalPages: number
   totalElements: number
@@ -42,30 +42,30 @@ export type List = {
   size: number
 }
 
-export interface CreateOptions {
+export interface WorkspaceCreateOptions {
   name: string
   image?: string
   organizationId: string
   storageCapacity: number
 }
 
-export type ListOptions = {
+export type WorkspaceListOptions = {
   query?: string
   size?: number
   page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
+  sortBy?: WorkspaceSortBy
+  sortOrder?: WorkspaceSortOrder
 }
 
-export interface PatchNameOptions {
+export interface WorkspacePatchNameOptions {
   name: string
 }
 
-export interface PatchStorageCapacityOptions {
+export interface WorkspacePatchStorageCapacityOptions {
   storageCapacity: number
 }
 
-type ListQueryParams = {
+type WorkspaceListQueryParams = {
   page?: string
   size?: string
   sort_by?: string
@@ -73,7 +73,7 @@ type ListQueryParams = {
   query?: string
 }
 
-export default class WorkspaceAPI {
+export class WorkspaceAPI {
   static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/workspaces/${id}`
     return useSWR<Workspace>(
@@ -83,24 +83,29 @@ export default class WorkspaceAPI {
     )
   }
 
-  static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
+  static useList(
+    options?: WorkspaceListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = `/workspaces?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
+    return useSWR<WorkspaceList>(
       url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<WorkspaceList>,
       swrOptions,
     )
   }
 
-  static list(options?: ListOptions) {
+  static list(options?: WorkspaceListOptions) {
     return apiFetcher({
       url: `/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<List>
+    }) as Promise<WorkspaceList>
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
+  static paramsFromListOptions(
+    options?: WorkspaceListOptions,
+  ): URLSearchParams {
+    const params: WorkspaceListQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }
@@ -119,7 +124,7 @@ export default class WorkspaceAPI {
     return new URLSearchParams(params)
   }
 
-  static create(options: CreateOptions) {
+  static create(options: WorkspaceCreateOptions) {
     return apiFetcher({
       url: '/workspaces',
       method: 'POST',
@@ -127,7 +132,7 @@ export default class WorkspaceAPI {
     }) as Promise<Workspace>
   }
 
-  static patchName(id: string, options: PatchNameOptions) {
+  static patchName(id: string, options: WorkspacePatchNameOptions) {
     return apiFetcher({
       url: `/workspaces/${id}/name`,
       method: 'PATCH',
@@ -137,7 +142,7 @@ export default class WorkspaceAPI {
 
   static patchStorageCapacity(
     id: string,
-    options: PatchStorageCapacityOptions,
+    options: WorkspacePatchStorageCapacityOptions,
   ) {
     return apiFetcher({
       url: `/workspaces/${id}/storage_capacity`,

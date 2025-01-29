@@ -10,7 +10,7 @@
 import { baseFetcher } from '@/client/fetcher'
 import { getConfig } from '@/config/config'
 
-export type GrantType = 'password' | 'refresh_token'
+export type TokenGrantType = 'password' | 'refresh_token'
 
 export type Token = {
   access_token: string
@@ -20,16 +20,16 @@ export type Token = {
   is_admin: boolean
 }
 
-export type ExchangeOptions = {
-  grant_type: GrantType
+export type TokenExchangeOptions = {
+  grant_type: TokenGrantType
   username?: string
   password?: string
   refresh_token?: string
   locale?: string
 }
 
-export default class TokenAPI {
-  static async exchange(options: ExchangeOptions): Promise<Token> {
+export class TokenAPI {
+  static async exchange(options: TokenExchangeOptions): Promise<Token> {
     const formBody = []
     formBody.push(`grant_type=${options.grant_type}`)
     if (options.grant_type === 'password') {

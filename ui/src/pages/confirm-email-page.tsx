@@ -13,7 +13,7 @@ import { Link as ChakraLink, Heading } from '@chakra-ui/react'
 import { Logo, Spinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AccountAPI from '@/client/idp/account'
+import { AccountAPI } from '@/client/idp/account'
 import LayoutFull from '@/components/layout/layout-full'
 
 const ConfirmEmailPage = () => {
