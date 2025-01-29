@@ -20,7 +20,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import SnapshotAPI from '@/client/api/snapshot'
+import { SnapshotAPI } from '@/client/api/snapshot'
 import { useAppSelector } from '@/store/hook'
 import { detachModalDidClose, selectionUpdated } from '@/store/ui/snapshots'
 

@@ -34,7 +34,12 @@ import {
   usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
-import SnapshotAPI, { Snapshot, SortBy, SortOrder } from '@/client/api/snapshot'
+import {
+  SnapshotAPI,
+  Snapshot,
+  SnapshotSortBy,
+  SnapshotSortOrder,
+} from '@/client/api/snapshot'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
@@ -67,8 +72,8 @@ const SnapshotList = () => {
       fileId,
       page,
       size,
-      sortBy: SortBy.Version,
-      sortOrder: SortOrder.Desc,
+      sortBy: SnapshotSortBy.Version,
+      sortOrder: SnapshotSortOrder.Desc,
     },
     swrConfig(),
   )

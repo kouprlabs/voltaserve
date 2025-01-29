@@ -21,7 +21,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
+import { FileAPI } from '@/client/api/file'
 import { useAppSelector } from '@/store/hook'
 import {
   deleteModalDidClose,

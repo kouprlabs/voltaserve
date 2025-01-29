@@ -34,7 +34,7 @@ import {
   usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
-import GroupAPI, { Group, SortOrder } from '@/client/api/group'
+import { GroupAPI, Group, GroupSortOrder } from '@/client/api/group'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 
@@ -60,7 +60,7 @@ const GroupSelector = ({
     isLoading: listIsLoading,
     mutate,
   } = GroupAPI.useList(
-    { query, organizationId, page, size, sortOrder: SortOrder.Desc },
+    { query, organizationId, page, size, sortOrder: GroupSortOrder.Desc },
     swrConfig(),
   )
   const { hasPageSwitcher } = usePageMonitor({

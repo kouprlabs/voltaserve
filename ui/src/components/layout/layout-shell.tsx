@@ -15,8 +15,13 @@ import { cx } from '@emotion/css'
 import AppBar from '@/components/app-bar'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
+import { Extensions } from '@/types/extensibility'
 
-const LayoutShell = () => {
+export type LayoutShellProps = {
+  extensions?: Extensions
+}
+
+const LayoutShell = ({ extensions }: LayoutShellProps) => {
   const location = useLocation()
   const navigate = useNavigate()
   const toast = useToast()
@@ -42,7 +47,7 @@ const LayoutShell = () => {
           <Logo type="voltaserve" size="sm" />
         </div>
       }
-      topBar={<AppBar />}
+      topBar={<AppBar extensions={extensions} />}
       items={[
         {
           href: '/workspace',

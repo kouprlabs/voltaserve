@@ -32,7 +32,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import GroupAPI, { Group } from '@/client/api/group'
+import { GroupAPI, Group } from '@/client/api/group'
 import { useAppSelector } from '@/store/hook'
 
 export type GroupDeleteProps = {

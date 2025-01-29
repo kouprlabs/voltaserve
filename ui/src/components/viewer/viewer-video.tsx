@@ -10,7 +10,7 @@
 import { useMemo } from 'react'
 import { variables } from '@koupr/ui'
 import { File } from '@/client/api/file'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { getAccessTokenOrRedirect } from '@/client/token'
 
 export type ViewerVideoProps = {
   file: File

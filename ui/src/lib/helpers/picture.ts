@@ -7,8 +7,8 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
+import { getAccessTokenOrRedirect } from '@/client/token'
 import { Picture } from '@/client/types'
-import { getAccessTokenOrRedirect } from '@/infra/token'
 
 export function getPictureUrl(picture: Picture) {
   return `/proxy/idp/v3/users/me/picture${picture.extension}?${new URLSearchParams(

@@ -23,8 +23,12 @@ import {
   SectionError,
   SectionPlaceholder,
 } from '@koupr/ui'
-import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
-import OrganizationAPI from '@/client/api/organization'
+import {
+  InvitationAPI,
+  InvitationSortBy,
+  InvitationSortOrder,
+} from '@/client/api/invitation'
+import { OrganizationAPI } from '@/client/api/organization'
 import { geOwnerPermission } from '@/client/api/permission'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
@@ -61,8 +65,8 @@ const OrganizationInvitationsPage = () => {
       organizationId: id,
       page,
       size,
-      sortBy: SortBy.DateCreated,
-      sortOrder: SortOrder.Desc,
+      sortBy: InvitationSortBy.DateCreated,
+      sortOrder: InvitationSortOrder.Desc,
     },
     swrConfig(),
   )

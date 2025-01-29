@@ -19,13 +19,13 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { cx } from '@emotion/css'
-import GroupAPI, { Group } from '@/client/api/group'
-import { User } from '@/client/idp/user'
+import { GroupAPI, Group } from '@/client/api/group'
+import { AuthUser } from '@/client/idp/user'
 import userToString from '@/lib/helpers/user-to-string'
 
 export type GroupRemoveMemberProps = {
   group: Group
-  user: User
+  user: AuthUser
   isOpen: boolean
   onClose?: () => void
   onCompleted?: () => void

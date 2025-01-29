@@ -17,7 +17,7 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import cx from 'classnames'
-import FileAPI, { FileType } from '@/client/api/file'
+import { FileAPI, FileType } from '@/client/api/file'
 import store from '@/store/configure-store'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { hiddenUpdated, selectionUpdated } from '@/store/ui/files'

@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { File } from '@/client/api/file'
-import { Status } from '@/client/api/snapshot'
+import { SnapshotStatus } from '@/client/api/snapshot'
 import IconBadgeError from './icon-badge-error'
 import IconBadgeInsights from './icon-badge-insights'
 import IconBadgeMosaic from './icon-badge-mosaic'
@@ -26,13 +26,15 @@ const IconBadge = ({ file, isLoading }: IconBadgeProps) => {
     <>
       {file.type === 'file' ? (
         <>
-          {file.snapshot?.status === Status.Waiting ? (
+          {file.snapshot?.status === SnapshotStatus.Waiting ? (
             <IconBadgeWaiting />
           ) : null}
-          {file.snapshot?.status === Status.Processing || isLoading ? (
+          {file.snapshot?.status === SnapshotStatus.Processing || isLoading ? (
             <IconBadgeProcessing />
           ) : null}
-          {file.snapshot?.status === Status.Error ? <IconBadgeError /> : null}
+          {file.snapshot?.status === SnapshotStatus.Error ? (
+            <IconBadgeError />
+          ) : null}
           {file.isShared ? <IconBadgeShared /> : null}
           {file.snapshot?.entities ? <IconBadgeInsights /> : null}
           {file.snapshot?.mosaic ? <IconBadgeMosaic /> : null}

@@ -9,7 +9,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
+import { FileAPI } from '@/client/api/file'
 import FileInfoEmbed from '@/components/file/info/file-info-embed'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { infoModalDidClose } from '@/store/ui/files'

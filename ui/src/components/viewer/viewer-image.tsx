@@ -11,7 +11,7 @@ import { useMemo, useState } from 'react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { getAccessTokenOrRedirect } from '@/client/token'
 
 export type ViewerImageProps = {
   file: File

@@ -22,7 +22,7 @@ import {
   Tag,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
+import { FileAPI } from '@/client/api/file'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'

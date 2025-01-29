@@ -9,11 +9,11 @@
 // AGPL-3.0-only in the root of this repository.
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { Info } from '@/client/api/mosaic'
+import { MosaicInfo } from '@/client/api/mosaic'
 
 type MosaicState = {
   isModalOpen: boolean
-  mutateInfo?: KeyedMutator<Info>
+  mutateInfo?: KeyedMutator<MosaicInfo>
 }
 
 const initialState: MosaicState = {
@@ -33,7 +33,10 @@ const slice = createSlice({
     allModalsDidClose: (state) => {
       state.isModalOpen = false
     },
-    mutateInfoUpdated: (state, action: PayloadAction<KeyedMutator<Info>>) => {
+    mutateInfoUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<MosaicInfo>>,
+    ) => {
       state.mutateInfo = action.payload
     },
   },

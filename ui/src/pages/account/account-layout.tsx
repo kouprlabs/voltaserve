@@ -21,17 +21,22 @@ import {
 import { IconEdit, NumberTag, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import InvitationAPI from '@/client/api/invitation'
+import { InvitationAPI } from '@/client/api/invitation'
 import { errorToString } from '@/client/error'
-import UserAPI from '@/client/idp/user'
+import { AuthUserAPI } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
 import { getPictureUrl } from '@/lib/helpers/picture'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/account'
+import { AccountExtensions } from '@/types/extensibility'
 
-const AccountLayout = () => {
+export type AccountLayoutProps = {
+  extensions?: AccountExtensions
+}
+
+const AccountLayout = ({ extensions }: AccountLayoutProps) => {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
@@ -41,7 +46,7 @@ const AccountLayout = () => {
     isLoading: userIsLoading,
     error: userError,
     mutate,
-  } = UserAPI.useGet(swrConfig())
+  } = AuthUserAPI.useGet(swrConfig())
   const { data: invitationCount } =
     InvitationAPI.useGetIncomingCount(swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
@@ -54,6 +59,13 @@ const AccountLayout = () => {
       setTabIndex(0)
     } else if (segment === 'invitation') {
       setTabIndex(1)
+    } else {
+      const index = extensions?.pages
+        ?.filter((page) => page.tab)
+        .findIndex((page) => page.path === location.pathname)
+      if (index !== undefined && index !== -1) {
+        setTabIndex(index + 2)
+      }
     }
   }, [location])
 
@@ -152,6 +164,13 @@ const AccountLayout = () => {
                       ) : null}
                     </div>
                   </Tab>
+                  {extensions?.pages
+                    ?.filter((page) => page.tab)
+                    .map((page, index) => (
+                      <Tab key={index} onClick={() => navigate(page.path)}>
+                        {page.tab!.label}
+                      </Tab>
+                    ))}
                 </TabList>
               </Tabs>
               <Outlet />

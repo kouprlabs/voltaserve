@@ -28,7 +28,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import WorkspaceAPI from '@/client/api/workspace'
+import { WorkspaceAPI } from '@/client/api/workspace'
 import OrganizationSelector from '@/components/common/organization-selector'
 import StorageInput from '@/components/common/storage-input'
 import { gigabyteToByte } from '@/lib/helpers/convert-storage'

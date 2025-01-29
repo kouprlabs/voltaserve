@@ -19,9 +19,9 @@ import { Select } from '@koupr/ui'
 import { OptionBase, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import MosaicAPI, { Metadata, ZoomLevel } from '@/client/api/mosaic'
+import { MosaicAPI, MosaicMetadata, MosaicZoomLevel } from '@/client/api/mosaic'
+import { getAccessTokenOrRedirect } from '@/client/token'
 import { getConfig } from '@/config/config'
-import { getAccessTokenOrRedirect } from '@/infra/token'
 
 export type ViewerImageProps = {
   file: File
@@ -44,7 +44,7 @@ type MouseCoordinate = {
 
 const ViewerMosaic = ({ file }: ViewerImageProps) => {
   const accessToken = useMemo(() => getAccessTokenOrRedirect(), [])
-  const [metadata, setMetadata] = useState<Metadata | null>(null)
+  const [metadata, setMetadata] = useState<MosaicMetadata | null>(null)
   const [zoomLevel, setZoomLevel] = useState<number>(0)
   const [dragging, setDragging] = useState<boolean>(false)
   const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -105,7 +105,7 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
     (
       context: CanvasRenderingContext2D,
       image: HTMLImageElement,
-      zoomLevel: ZoomLevel,
+      zoomLevel: MosaicZoomLevel,
       row: number,
       column: number,
     ) => {
@@ -130,7 +130,7 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
 
   const getVisibleTileCoordinates = useCallback(
     (
-      zoomLevel: ZoomLevel,
+      zoomLevel: MosaicZoomLevel,
       viewportWidth: number,
       viewportHeight: number,
       offset: MouseCoordinate,

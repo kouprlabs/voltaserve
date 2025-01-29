@@ -35,7 +35,7 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import semver from 'semver'
-import ConsoleAPI, { ComponentVersion } from '@/client/console/console'
+import { ConsoleAPI, ConsoleComponentVersion } from '@/client/console/console'
 
 const spinnerHeight = '40px'
 const uiCurrentVersion = { version: '3.0.0' }
@@ -50,14 +50,16 @@ const internalComponents = [
   { id: 'conversion' },
 ]
 // prettier-ignore
-const compareFn = (a: ComponentVersion, b: ComponentVersion) => a.name > b.name ? 1 : 0
+const compareFn = (a: ConsoleComponentVersion, b: ConsoleComponentVersion) => a.name > b.name ? 1 : 0
 
 const ConsolePanelOverview = () => {
   const [userCount, setUserCount] = useState<number>()
   const [groupCount, setGroupCount] = useState<number>()
   const [organizationCount, setOrganizationCount] = useState<number>()
   const [workspaceCount, setWorkspaceCount] = useState<number>()
-  const [componentsData, setComponentsData] = useState<ComponentVersion[]>([])
+  const [componentsData, setComponentsData] = useState<
+    ConsoleComponentVersion[]
+  >([])
 
   useEffect(() => {
     ConsoleAPI.countObject('user').then((value) => {

@@ -11,7 +11,11 @@ import { useColorMode, useToken } from '@chakra-ui/react'
 import { SectionError, SectionPlaceholder, SectionSpinner } from '@koupr/ui'
 import { ResponsivePie } from '@nivo/pie'
 import cx from 'classnames'
-import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
+import {
+  InsightsAPI,
+  InsightsSortBy,
+  InsightsSortOrder,
+} from '@/client/api/insights'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
@@ -31,7 +35,12 @@ const InsightsOverviewChart = () => {
     isLoading: listIsLoading,
   } = InsightsAPI.useListEntities(
     id,
-    { page: 1, size: 5, sortBy: SortBy.Frequency, sortOrder: SortOrder.Desc },
+    {
+      page: 1,
+      size: 5,
+      sortBy: InsightsSortBy.Frequency,
+      sortOrder: InsightsSortOrder.Desc,
+    },
     swrConfig(),
   )
   const listIsEmpty = list && !listError && list.totalElements < 5

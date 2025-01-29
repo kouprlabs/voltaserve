@@ -32,9 +32,9 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI from '@/client/console/console'
+import { ConsoleAPI } from '@/client/console/console'
 import { errorToString } from '@/client/error'
-import UserAPI from '@/client/idp/user'
+import { AuthUserAPI } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 
@@ -47,7 +47,7 @@ const ConsolePanelUser = () => {
     data: user,
     error: userError,
     isLoading: userIsLoading,
-  } = UserAPI.useGetById(id)
+  } = AuthUserAPI.useGetById(id)
   const {
     data: groupList,
     error: groupListError,

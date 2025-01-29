@@ -9,23 +9,10 @@
 // AGPL-3.0-only in the root of this repository.
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { RouterProvider } from 'react-router-dom'
-import { Provider } from 'react-redux'
-import { ChakraProvider } from '@chakra-ui/react'
-import { theme } from '@koupr/ui'
-import { HelmetProvider } from 'react-helmet-async'
-import store from '@/store/configure-store'
-import router from './router'
-import './styles.css'
+import { Voltaserve } from '.'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <Provider store={store}>
-      <ChakraProvider theme={theme}>
-        <HelmetProvider>
-          <RouterProvider router={router} />
-        </HelmetProvider>
-      </ChakraProvider>
-    </Provider>
+    <Voltaserve />
   </React.StrictMode>,
 )

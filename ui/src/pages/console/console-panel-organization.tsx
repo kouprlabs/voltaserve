@@ -33,7 +33,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI from '@/client/console/console'
+import { ConsoleAPI } from '@/client/console/console'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 

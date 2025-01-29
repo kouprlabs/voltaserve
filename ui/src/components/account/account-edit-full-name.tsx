@@ -31,13 +31,13 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import UserAPI, { User } from '@/client/idp/user'
+import { AuthUserAPI, AuthUser } from '@/client/idp/user'
 import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 import { useAppSelector } from '@/store/hook'
 
 export type AccountEditFullNameProps = {
   open: boolean
-  user: User
+  user: AuthUser
   onClose?: () => void
 }
 
@@ -69,7 +69,7 @@ const AccountEditFullName = ({
     ) => {
       setSubmitting(true)
       try {
-        const result = await UserAPI.updateFullName({
+        const result = await AuthUserAPI.updateFullName({
           fullName,
         })
         await mutate?.(result)

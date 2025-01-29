@@ -18,7 +18,7 @@ import {
   Form,
   SectionError,
 } from '@koupr/ui'
-import GroupAPI from '@/client/api/group'
+import { GroupAPI } from '@/client/api/group'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'

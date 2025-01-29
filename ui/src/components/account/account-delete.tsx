@@ -32,7 +32,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import UserAPI from '@/client/idp/user'
+import { AuthUserAPI } from '@/client/idp/user'
 
 export type AccountDeleteProps = {
   open: boolean
@@ -61,7 +61,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
     ) => {
       setSubmitting(true)
       try {
-        await UserAPI.delete({ password })
+        await AuthUserAPI.delete({ password })
         navigate('/sign-in')
         onClose?.()
       } finally {

@@ -27,7 +27,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import OrganizationAPI from '@/client/api/organization'
+import { OrganizationAPI } from '@/client/api/organization'
 import { useAppSelector } from '@/store/hook'
 
 type FormValues = {

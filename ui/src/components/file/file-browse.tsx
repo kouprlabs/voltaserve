@@ -20,8 +20,8 @@ import {
   Pagination,
 } from '@koupr/ui'
 import cx from 'classnames'
-import FileAPI, { FileType } from '@/client/api/file'
-import WorkspaceAPI from '@/client/api/workspace'
+import { FileAPI, FileType } from '@/client/api/file'
+import { WorkspaceAPI } from '@/client/api/workspace'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import Path from '@/components/common/path'

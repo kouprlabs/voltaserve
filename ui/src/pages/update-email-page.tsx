@@ -13,7 +13,7 @@ import { Link as ChakraLink, Heading } from '@chakra-ui/react'
 import { Logo, Spinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import UserAPI from '@/client/idp/user'
+import { AuthUserAPI } from '@/client/idp/user'
 import LayoutFull from '@/components/layout/layout-full'
 
 const UpdateEmailPage = () => {
@@ -30,7 +30,7 @@ const UpdateEmailPage = () => {
     if (token) {
       ;(async function (token: string) {
         try {
-          await UserAPI.updateEmailConfirmation({ token: token })
+          await AuthUserAPI.updateEmailConfirmation({ token: token })
           setIsCompleted(true)
         } catch {
           setIsFailed(true)

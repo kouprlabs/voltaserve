@@ -30,7 +30,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { ConsoleWorkspace } from '@/client/console/console'
+import { ConsoleAPI, ConsoleWorkspace } from '@/client/console/console'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import ConsoleConfirmationModal, {

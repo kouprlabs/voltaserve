@@ -9,10 +9,10 @@
 // AGPL-3.0-only in the root of this repository.
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { List } from '@/client/api/invitation'
+import { InvitationList } from '@/client/api/invitation'
 
 type OutgoingInvitationsState = {
-  mutate?: KeyedMutator<List>
+  mutate?: KeyedMutator<InvitationList>
 }
 
 const initialState: OutgoingInvitationsState = {}
@@ -21,7 +21,10 @@ const slice = createSlice({
   name: 'outgoing-invitations',
   initialState,
   reducers: {
-    mutateUpdated: (state, action: PayloadAction<KeyedMutator<List>>) => {
+    mutateUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<InvitationList>>,
+    ) => {
       state.mutate = action.payload
     },
   },

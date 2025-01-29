@@ -18,7 +18,11 @@ import {
   usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
-import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
+import {
+  InsightsAPI,
+  InsightsSortBy,
+  InsightsSortOrder,
+} from '@/client/api/insights'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
@@ -44,8 +48,8 @@ const InsightsOverviewEntities = () => {
       query,
       page,
       size,
-      sortBy: SortBy.Frequency,
-      sortOrder: SortOrder.Desc,
+      sortBy: InsightsSortBy.Frequency,
+      sortOrder: InsightsSortOrder.Desc,
     },
     swrConfig(),
   )

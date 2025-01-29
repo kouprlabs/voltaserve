@@ -11,13 +11,18 @@ import { Link } from 'react-router-dom'
 import { MenuItem } from '@chakra-ui/react'
 import { AccountMenu as KouprAccountMenu, NumberTag } from '@koupr/ui'
 import cx from 'classnames'
-import InvitationAPI from '@/client/api/invitation'
-import UserAPI from '@/client/idp/user'
+import { InvitationAPI } from '@/client/api/invitation'
+import { AuthUserAPI } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { getPictureUrl } from '@/lib/helpers/picture'
+import { AccountExtensions } from '@/types/extensibility'
 
-const AccountMenu = () => {
-  const { data: user } = UserAPI.useGet(swrConfig())
+export type AccountMenuProps = {
+  extensions?: AccountExtensions
+}
+
+const AccountMenu = ({ extensions }: AccountMenuProps) => {
+  const { data: user } = AuthUserAPI.useGet(swrConfig())
   // prettier-ignore
   const { data: invitationCount } = InvitationAPI.useGetIncomingCount(swrConfig())
 
@@ -41,6 +46,13 @@ const AccountMenu = () => {
               ) : null}
             </div>
           </MenuItem>
+          {extensions?.pages
+            ?.filter((page) => page.menu)
+            .map((page, index) => (
+              <MenuItem key={index} as={Link} to={page.path}>
+                {page.menu!.label}
+              </MenuItem>
+            ))}
           <MenuItem as={Link} to="/sign-out" className={cx('text-red-500')}>
             Sign Out
           </MenuItem>

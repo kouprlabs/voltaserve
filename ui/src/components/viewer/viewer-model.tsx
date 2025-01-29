@@ -10,7 +10,7 @@
 import { useMemo } from 'react'
 import '@google/model-viewer'
 import { File } from '@/client/api/file'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { getAccessTokenOrRedirect } from '@/client/token'
 
 export type ViewerModelProps = {
   file: File

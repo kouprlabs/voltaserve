@@ -9,9 +9,9 @@
 // AGPL-3.0-only in the root of this repository.
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
-import { User } from '@/client/idp/user'
+import { AuthUser } from '@/client/idp/user'
+import { getAccessTokenOrRedirect } from '@/client/token'
 import { getConfig } from '@/config/config'
-import { getAccessTokenOrRedirect } from '@/infra/token'
 import { encodeQuery } from '@/lib/helpers/query'
 import { Group } from './group'
 import { PermissionType } from './permission'
@@ -22,7 +22,7 @@ export enum FileType {
   Folder = 'folder',
 }
 
-export enum SortBy {
+export enum FileSortBy {
   Name = 'name',
   Kind = 'kind',
   Size = 'size',
@@ -30,7 +30,7 @@ export enum SortBy {
   DateModified = 'date_modified',
 }
 
-export enum SortOrder {
+export enum FileSortOrder {
   Asc = 'asc',
   Desc = 'desc',
 }
@@ -48,28 +48,28 @@ export type File = {
   updateTime?: string
 }
 
-export type List = {
+export type FileList = {
   data: File[]
   totalPages: number
   totalElements: number
   page: number
   size: number
-  query?: Query
+  query?: FileQuery
 }
 
-export type UserPermission = {
+export type FileUserPermission = {
   id: string
-  user: User
+  user: AuthUser
   permission: PermissionType
 }
 
-export type GroupPermission = {
+export type FileGroupPermission = {
   id: string
   group: Group
   permission: PermissionType
 }
 
-export type Query = {
+export type FileQuery = {
   text?: string
   type?: FileType
   createTimeAfter?: number
@@ -78,71 +78,71 @@ export type Query = {
   updateTimeBefore?: number
 }
 
-export type ListOptions = {
+export type FileListOptions = {
   size?: number
   page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
-  query?: Query
+  sortBy?: FileSortBy
+  sortOrder?: FileSortOrder
+  query?: FileQuery
 }
 
-export type MoveManyOptions = {
+export type FileMoveManyOptions = {
   sourceIds: string[]
   targetId: string
 }
 
-export type MoveManyResult = {
+export type FileMoveManyResult = {
   succeeded: string[]
   failed: string[]
 }
 
-export type CopyManyOptions = {
+export type FileCopyManyOptions = {
   sourceIds: string[]
   targetId: string
 }
 
-export type CopyManyResult = {
+export type FileCopyManyResult = {
   new: string[]
   succeeded: string[]
   failed: string[]
 }
 
-export type DeleteManyOptions = {
+export type FileDeleteManyOptions = {
   ids: string
 }
 
-export type DeleteManyResult = {
+export type FileDeleteManyResult = {
   succeeded: string[]
   failed: string[]
 }
 
-export type PatchNameOptions = {
+export type FileFilePatchNameOptions = {
   name: string
 }
 
-export type GrantUserPermissionOptions = {
+export type FileGrantUserPermissionOptions = {
   ids: string[]
   userId: string
   permission: string
 }
 
-export type RevokeUserPermissionOptions = {
+export type FileRevokeUserPermissionOptions = {
   ids: string[]
   userId: string
 }
 
-export type GrantGroupPermissionOptions = {
+export type FileGrantGroupPermissionOptions = {
   ids: string[]
   groupId: string
   permission: string
 }
 
-export type RevokeGroupPermissionOptions = {
+export type FileRevokeGroupPermissionOptions = {
   ids: string[]
   groupId: string
 }
 
-export type CreateOptions = {
+export type FileCreateOptions = {
   type: FileType
   workspaceId: string
   parentId?: string
@@ -152,14 +152,14 @@ export type CreateOptions = {
   onProgress?: (value: number) => void
 }
 
-export type PatchOptions = {
+export type FilePatchOptions = {
   id: string
   request: XMLHttpRequest
   blob: Blob
   onProgress?: (value: number) => void
 }
 
-type ListQueryParams = {
+type FileListQueryParams = {
   page?: string
   size?: string
   sort_by?: string
@@ -168,7 +168,7 @@ type ListQueryParams = {
   query?: string
 }
 
-export default class FileAPI {
+export class FileAPI {
   static create({
     type,
     workspaceId,
@@ -177,7 +177,7 @@ export default class FileAPI {
     request,
     blob,
     onProgress,
-  }: CreateOptions): Promise<File> {
+  }: FileCreateOptions): Promise<File> {
     const params = new URLSearchParams({ type, workspace_id: workspaceId })
     if (parentId) {
       params.append('parent_id', parentId)
@@ -207,7 +207,7 @@ export default class FileAPI {
     request,
     blob,
     onProgress,
-  }: PatchOptions): Promise<File> {
+  }: FilePatchOptions): Promise<File> {
     return this.upload(
       `${getConfig().apiURL}/files/${id}`,
       'PATCH',
@@ -254,28 +254,28 @@ export default class FileAPI {
     })
   }
 
-  static list(id: string, options: ListOptions) {
+  static list(id: string, options: FileListOptions) {
     return apiFetcher({
       url: `/files/${id}/list?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<List>
+    }) as Promise<FileList>
   }
 
   static useList(
     id: string | undefined,
-    options: ListOptions,
+    options: FileListOptions,
     swrOptions?: SWRConfiguration,
   ) {
     const url = `/files/${id}/list?${this.paramsFromListOptions(options)}`
-    return useSWR<List | undefined>(
+    return useSWR<FileList | undefined>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
+  static paramsFromListOptions(options?: FileListOptions): URLSearchParams {
+    const params: FileListQueryParams = {}
     if (options?.page) {
       params.page = options.page.toString()
     }
@@ -306,7 +306,7 @@ export default class FileAPI {
     )
   }
 
-  static patchName(id: string, options: PatchNameOptions) {
+  static patchName(id: string, options: FileFilePatchNameOptions) {
     return apiFetcher({
       url: `/files/${id}/name`,
       method: 'PATCH',
@@ -321,12 +321,12 @@ export default class FileAPI {
     })
   }
 
-  static deleteMany(options: DeleteManyOptions) {
+  static deleteMany(options: FileDeleteManyOptions) {
     return apiFetcher({
       url: `/files`,
       method: 'DELETE',
       body: JSON.stringify(options),
-    }) as Promise<DeleteManyResult>
+    }) as Promise<FileDeleteManyResult>
   }
 
   static async moveOne(id: string, targetId: string) {
@@ -336,12 +336,12 @@ export default class FileAPI {
     })
   }
 
-  static moveMany(options: MoveManyOptions) {
+  static moveMany(options: FileMoveManyOptions) {
     return apiFetcher({
       url: `/files/move`,
       method: 'POST',
       body: JSON.stringify(options),
-    }) as Promise<MoveManyResult>
+    }) as Promise<FileMoveManyResult>
   }
 
   static copyOne(id: string, targetId: string) {
@@ -351,12 +351,12 @@ export default class FileAPI {
     }) as Promise<File>
   }
 
-  static copyMany(options: CopyManyOptions) {
+  static copyMany(options: FileCopyManyOptions) {
     return apiFetcher({
       url: `/files/copy`,
       method: 'POST',
       body: JSON.stringify(options),
-    }) as Promise<CopyManyResult>
+    }) as Promise<FileCopyManyResult>
   }
 
   static useGet(
@@ -391,7 +391,7 @@ export default class FileAPI {
     )
   }
 
-  static async grantUserPermission(options: GrantUserPermissionOptions) {
+  static async grantUserPermission(options: FileGrantUserPermissionOptions) {
     return apiFetcher({
       url: `/files/grant_user_permission`,
       method: 'POST',
@@ -399,7 +399,7 @@ export default class FileAPI {
     })
   }
 
-  static async revokeUserPermission(options: RevokeUserPermissionOptions) {
+  static async revokeUserPermission(options: FileRevokeUserPermissionOptions) {
     return apiFetcher({
       url: `/files/revoke_user_permission`,
       method: 'POST',
@@ -407,7 +407,7 @@ export default class FileAPI {
     })
   }
 
-  static async grantGroupPermission(options: GrantGroupPermissionOptions) {
+  static async grantGroupPermission(options: FileGrantGroupPermissionOptions) {
     return apiFetcher({
       url: `/files/grant_group_permission`,
       method: 'POST',
@@ -415,7 +415,9 @@ export default class FileAPI {
     })
   }
 
-  static async revokeGroupPermission(options: RevokeGroupPermissionOptions) {
+  static async revokeGroupPermission(
+    options: FileRevokeGroupPermissionOptions,
+  ) {
     return apiFetcher({
       url: `/files/revoke_group_permission`,
       method: 'POST',
@@ -428,9 +430,9 @@ export default class FileAPI {
     swrOptions?: SWRConfiguration,
   ) {
     const url = `/files/${id}/user_permissions`
-    return useSWR<UserPermission[]>(
+    return useSWR<FileUserPermission[]>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<UserPermission[]>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<FileUserPermission[]>,
       swrOptions,
     )
   }
@@ -440,9 +442,10 @@ export default class FileAPI {
     swrOptions?: SWRConfiguration,
   ) {
     const url = `/files/${id}/group_permissions`
-    return useSWR<GroupPermission[]>(
+    return useSWR<FileGroupPermission[]>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<GroupPermission[]>,
+      () =>
+        apiFetcher({ url, method: 'GET' }) as Promise<FileGroupPermission[]>,
       swrOptions,
     )
   }

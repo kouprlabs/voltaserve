@@ -27,7 +27,7 @@ import {
   Text,
 } from '@koupr/ui'
 import cx from 'classnames'
-import FileAPI, { GroupPermission } from '@/client/api/file'
+import { FileAPI, FileGroupPermission } from '@/client/api/file'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
@@ -48,7 +48,7 @@ const SharingGroupPermissions = () => {
   const permissionsIsReady = permissions && !permissionsError && permissions.length > 0
 
   const handleRevokePermission = useCallback(
-    async (permission: GroupPermission) => {
+    async (permission: FileGroupPermission) => {
       try {
         setRevokedPermission(permission.id)
         await FileAPI.revokeGroupPermission({

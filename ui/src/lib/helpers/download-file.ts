@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { File } from '@/client/api/file'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { getAccessTokenOrRedirect } from '@/client/token'
 
 export default async function downloadFile(file: File) {
   if (!file.snapshot?.original || file.type !== 'file') {

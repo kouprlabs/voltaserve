@@ -12,13 +12,13 @@ import { PermissionType } from '@/client/api/permission'
 import { apiFetcher } from '@/client/fetcher'
 import { Organization } from './organization'
 
-export enum SortBy {
+export enum GroupSortBy {
   Name = 'name',
   DateCreated = 'date_created',
   DateModified = 'date_modified',
 }
 
-export enum SortOrder {
+export enum GroupSortOrder {
   Asc = 'asc',
   Desc = 'desc',
 }
@@ -32,7 +32,7 @@ export type Group = {
   updateTime?: string
 }
 
-export type List = {
+export type GroupList = {
   data: Group[]
   totalPages: number
   totalElements: number
@@ -40,34 +40,34 @@ export type List = {
   size: number
 }
 
-export type ListOptions = {
+export type GroupListOptions = {
   query?: string
   organizationId?: string
   size?: number
   page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
+  sortBy?: GroupSortBy
+  sortOrder?: GroupSortOrder
 }
 
-export type CreateOptions = {
+export type GroupCreateOptions = {
   name: string
   image?: string
   organizationId: string
 }
 
-export type PatchNameOptions = {
+export type GroupPatchNameOptions = {
   name: string
 }
 
-export type AddMemberOptions = {
+export type GroupAddMemberOptions = {
   userId: string
 }
 
-export type RemoveMemberOptions = {
+export type GroupRemoveMemberOptions = {
   userId: string
 }
 
-type ListQueryParams = {
+type GroupListQueryParams = {
   page?: string
   size?: string
   sort_by?: string
@@ -76,8 +76,8 @@ type ListQueryParams = {
   organization_id?: string
 }
 
-export default class GroupAPI {
-  static create(options: CreateOptions) {
+export class GroupAPI {
+  static create(options: GroupCreateOptions) {
     return apiFetcher({
       url: `/groups`,
       method: 'POST',
@@ -85,7 +85,7 @@ export default class GroupAPI {
     }) as Promise<Group>
   }
 
-  static patchName(id: string, options: PatchNameOptions) {
+  static patchName(id: string, options: GroupPatchNameOptions) {
     return apiFetcher({
       url: `/groups/${id}/name`,
       method: 'PATCH',
@@ -102,17 +102,17 @@ export default class GroupAPI {
     )
   }
 
-  static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
+  static useList(options?: GroupListOptions, swrOptions?: SWRConfiguration) {
     const url = `/groups?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
+    return useSWR<GroupList>(
       url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<GroupList>,
       swrOptions,
     )
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
+  static paramsFromListOptions(options?: GroupListOptions): URLSearchParams {
+    const params: GroupListQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }
@@ -141,7 +141,7 @@ export default class GroupAPI {
     })
   }
 
-  static addMember(id: string, options: AddMemberOptions) {
+  static addMember(id: string, options: GroupAddMemberOptions) {
     return apiFetcher({
       url: `/groups/${id}/members`,
       method: 'POST',
@@ -149,7 +149,7 @@ export default class GroupAPI {
     })
   }
 
-  static removeMember(id: string, options: RemoveMemberOptions) {
+  static removeMember(id: string, options: GroupRemoveMemberOptions) {
     return apiFetcher({
       url: `/groups/${id}/members`,
       method: 'DELETE',

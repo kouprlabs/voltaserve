@@ -9,11 +9,11 @@
 // AGPL-3.0-only in the root of this repository.
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { List } from '@/client/api/organization'
+import { OrganizationList } from '@/client/api/organization'
 
 type OrganizationsState = {
   isInviteModalOpen: boolean
-  mutate?: KeyedMutator<List>
+  mutate?: KeyedMutator<OrganizationList>
 }
 
 const initialState: OrganizationsState = {
@@ -33,7 +33,10 @@ const slice = createSlice({
     allModalsDidClose: (state) => {
       state.isInviteModalOpen = false
     },
-    mutateUpdated: (state, action: PayloadAction<KeyedMutator<List>>) => {
+    mutateUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<OrganizationList>>,
+    ) => {
       state.mutate = action.payload
     },
   },

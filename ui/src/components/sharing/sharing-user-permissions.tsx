@@ -28,10 +28,10 @@ import {
   Text,
 } from '@koupr/ui'
 import cx from 'classnames'
-import FileAPI, { UserPermission } from '@/client/api/file'
-import WorkspaceAPI from '@/client/api/workspace'
+import { FileAPI, FileUserPermission } from '@/client/api/file'
+import { WorkspaceAPI } from '@/client/api/workspace'
 import { errorToString } from '@/client/error'
-import IdPUserAPI from '@/client/idp/user'
+import { AuthUserAPI } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { useAppSelector } from '@/store/hook'
@@ -42,7 +42,7 @@ const SharingUserPermissions = () => {
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const [revokedPermission, setRevokedPermission] = useState<string>()
   const { data: workspace } = WorkspaceAPI.useGet(workspaceId, swrConfig())
-  const { data: me } = IdPUserAPI.useGet()
+  const { data: me } = AuthUserAPI.useGet()
   const {
     data: permissions,
     error: permissionsError,
@@ -55,7 +55,7 @@ const SharingUserPermissions = () => {
   const permissionsIsReady = permissions && !permissionsError && permissions.length > 0
 
   const handleRevokePermission = useCallback(
-    async (permission: UserPermission) => {
+    async (permission: FileUserPermission) => {
       try {
         setRevokedPermission(permission.id)
         await FileAPI.revokeUserPermission({

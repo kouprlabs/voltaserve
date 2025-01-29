@@ -35,7 +35,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import GroupAPI, { SortOrder } from '@/client/api/group'
+import { GroupAPI, GroupSortOrder } from '@/client/api/group'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { groupPaginationStorage } from '@/infra/pagination'
@@ -60,7 +60,7 @@ const GroupListPage = () => {
     isLoading: listIsLoading,
     mutate,
   } = GroupAPI.useList(
-    { query, page, size, sortOrder: SortOrder.Desc },
+    { query, page, size, sortOrder: GroupSortOrder.Desc },
     swrConfig(),
   )
   const { hasPagination } = usePageMonitor({

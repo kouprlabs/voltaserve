@@ -23,7 +23,7 @@ import {
 } from '@chakra-ui/react'
 import { SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
-import MosaicAPI from '@/client/api/mosaic'
+import { MosaicAPI } from '@/client/api/mosaic'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'

@@ -35,7 +35,10 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import OrganizationAPI, { SortOrder } from '@/client/api/organization'
+import {
+  OrganizationAPI,
+  OrganizationSortOrder,
+} from '@/client/api/organization'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { organizationPaginationStorage } from '@/infra/pagination'
@@ -60,7 +63,7 @@ const OrganizationListPage = () => {
     isLoading: listIsLoading,
     mutate,
   } = OrganizationAPI.useList(
-    { query, page, size, sortOrder: SortOrder.Desc },
+    { query, page, size, sortOrder: OrganizationSortOrder.Desc },
     swrConfig(),
   )
   const { hasPagination } = usePageMonitor({

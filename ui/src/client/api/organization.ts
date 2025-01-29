@@ -11,13 +11,13 @@ import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { PermissionType } from './permission'
 
-export enum SortBy {
+export enum OrganizationSortBy {
   Name = 'name',
   DateCreated = 'date_created',
   DateModified = 'date_modified',
 }
 
-export enum SortOrder {
+export enum OrganizationSortOrder {
   Asc = 'asc',
   Desc = 'desc',
 }
@@ -30,7 +30,7 @@ export type Organization = {
   updateTime?: string
 }
 
-export type List = {
+export type OrganizationList = {
   data: Organization[]
   totalPages: number
   totalElements: number
@@ -38,28 +38,28 @@ export type List = {
   size: number
 }
 
-export type ListOptions = {
+export type OrganizationListOptions = {
   query?: string
   size?: number
   page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
+  sortBy?: OrganizationSortBy
+  sortOrder?: OrganizationSortOrder
 }
 
-export type CreateOptions = {
+export type OrganizationCreateOptions = {
   name: string
   image?: string
 }
 
-export type PatchNameOptions = {
+export type OrganizationPatchNameOptions = {
   name: string
 }
 
-export type RemoveMemberOptions = {
+export type OrganizationRemoveMemberOptions = {
   userId: string
 }
 
-type ListQueryParams = {
+type OrganizationListQueryParams = {
   page?: string
   size?: string
   sort_by?: string
@@ -67,7 +67,7 @@ type ListQueryParams = {
   query?: string
 }
 
-export default class OrganizationAPI {
+export class OrganizationAPI {
   static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/organizations/${id}`
     return useSWR<Organization>(
@@ -77,24 +77,29 @@ export default class OrganizationAPI {
     )
   }
 
-  static list(options?: ListOptions) {
+  static list(options?: OrganizationListOptions) {
     return apiFetcher({
       url: `/organizations?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<List>
+    }) as Promise<OrganizationList>
   }
 
-  static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
+  static useList(
+    options?: OrganizationListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = `/organizations?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
+    return useSWR<OrganizationList>(
       url,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<OrganizationList>,
       swrOptions,
     )
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
+  static paramsFromListOptions(
+    options?: OrganizationListOptions,
+  ): URLSearchParams {
+    const params: OrganizationListQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }
@@ -113,7 +118,7 @@ export default class OrganizationAPI {
     return new URLSearchParams(params)
   }
 
-  static create(options: CreateOptions) {
+  static create(options: OrganizationCreateOptions) {
     return apiFetcher({
       url: `/organizations`,
       method: 'POST',
@@ -121,7 +126,7 @@ export default class OrganizationAPI {
     }) as Promise<Organization>
   }
 
-  static patchName(id: string, options: PatchNameOptions) {
+  static patchName(id: string, options: OrganizationPatchNameOptions) {
     return apiFetcher({
       url: `/organizations/${id}/name`,
       method: 'PATCH',
@@ -143,7 +148,10 @@ export default class OrganizationAPI {
     })
   }
 
-  static async removeMember(id: string, options: RemoveMemberOptions) {
+  static async removeMember(
+    id: string,
+    options: OrganizationRemoveMemberOptions,
+  ) {
     return apiFetcher({
       url: `/organizations/${id}/members`,
       method: 'DELETE',
