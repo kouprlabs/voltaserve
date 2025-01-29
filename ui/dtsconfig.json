@@ -1,0 +1,15 @@
+{
+  "compilationOptions": {
+    "preferredConfigPath": "./tsconfig.rollup.json"
+  },
+  "entries": [
+    {
+      "filePath": "./dist/index.d.ts",
+      "outFile": "./dist/types.d.ts",
+      "output": {
+        "exportReferencedTypes": false
+      },
+      "noCheck": true
+    }
+  ]
+}
