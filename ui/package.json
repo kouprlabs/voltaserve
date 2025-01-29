@@ -1,6 +1,6 @@
 {
   "name": "@voltaserve/ui",
-  "version": "3.0.0-dev.6",
+  "version": "3.0.0-dev.7",
   "license": "BUSL-1.1",
   "type": "module",
   "source": "src/index.tsx",
@@ -14,7 +14,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
-    "build:rollup": "rollup -c --bundleConfigAsCjs && bun ./scripts/post-build.ts",
+    "build:rollup": "rollup -c --bundleConfigAsCjs && dts-bundle-generator --config dtsconfig.json && bun ./scripts/post-build.ts",
     "tsc": "tsc",
     "preview": "vite preview",
     "format": "prettier --write .",
@@ -110,6 +110,7 @@
     "@types/uuid": "10.0.0",
     "@vitejs/plugin-react-swc": "3.7.2",
     "autoprefixer": "10.4.20",
+    "dts-bundle-generator": "9.5.1",
     "eslint": "9.14.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.2.1",
@@ -119,7 +120,6 @@
     "prettier": "3.3.3",
     "rimraf": "6.0.1",
     "rollup": "4.24.4",
-    "rollup-plugin-dts": "6.1.1",
     "rollup-plugin-peer-deps-external": "2.2.4",
     "rollup-plugin-postcss": "4.0.2",
     "rollup-plugin-svg": "2.0.0",

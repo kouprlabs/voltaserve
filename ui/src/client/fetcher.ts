@@ -8,9 +8,9 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { getConfig } from '@/config/config'
-// import store from '@/store/configure-store'
-// import { errorOccurred } from '@/store/ui/error'
-// import { errorToString } from './error'
+import store from '@/store/configure-store'
+import { errorOccurred } from '@/store/ui/error'
+import { errorToString } from './error'
 import { getAccessToken, getAccessTokenOrRedirect } from './token'
 
 export type FetcherOptions = {
@@ -91,7 +91,7 @@ export async function baseFetcher(
   } catch {
     if (showError) {
       const message = 'Unexpected error occurred.'
-      // store.dispatch(errorOccurred(message))
+      store.dispatch(errorOccurred(message))
       throw new Error(message)
     }
   }
@@ -115,7 +115,7 @@ async function handleResponse(
       error = 'Oops! something went wrong.'
     }
     if (showError) {
-      // store.dispatch(errorOccurred(errorToString(error)))
+      store.dispatch(errorOccurred(errorToString(error)))
     }
     throw error
   }

@@ -7,7 +7,6 @@ import typescript from '@rollup/plugin-typescript'
 import { createFilter } from '@rollup/pluginutils'
 import { createRequire } from 'module'
 import path from 'path'
-import { dts } from 'rollup-plugin-dts'
 import peerDepsExternal from 'rollup-plugin-peer-deps-external'
 import postcss from 'rollup-plugin-postcss'
 
@@ -102,15 +101,5 @@ export default [
       injectCssImportPlugin(),
       strip(),
     ],
-  },
-  {
-    input: 'dist/index.d.ts',
-    output: [{ file: 'dist/types.d.ts', format: 'es' }],
-    plugins: [
-      dts({
-        tsconfig: 'tsconfig.rollup.json',
-      }),
-    ],
-    external: [/\.css$/],
   },
 ]
