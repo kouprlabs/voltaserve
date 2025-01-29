@@ -21,7 +21,7 @@ bun run build
 Run for production:
 
 ```shell
-bun run .
+go run .
 ```
 
 Lint TypeScript code:
