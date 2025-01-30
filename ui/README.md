@@ -1,5 +1,34 @@
 # Voltaserve UI
 
+Web app and extensible React component.
+
+## Use as a React Component
+
+Installation:
+
+```shell
+npm i @voltaserve/ui
+```
+
+Usage:
+
+```tsx
+import { Voltaserve } from '@voltaserve/ui'
+import { createRoot } from 'react-dom/client'
+
+createRoot(document.getElementById('root') as HTMLElement).render(
+  <Voltaserve extensions={...} />
+)
+```
+
+Build:
+
+```shell
+bun run build:rollup
+```
+
+## Use as a Web App
+
 Install dependencies:
 
 ```shell
@@ -16,12 +45,6 @@ Build for production:
 
 ```shell
 bun run build
-```
-
-Build as a library:
-
-```shell
-bun run build:rollup
 ```
 
 Run for production:
