@@ -18,16 +18,16 @@ import (
 )
 
 type FilePermissionService struct {
-	fileCache      *cache.FileCache
+	fileCache      cache.FileCache
 	fileRepo       repo.FileRepo
-	fileGuard      *guard.FileGuard
+	fileGuard      guard.FileGuard
 	fileCoreSvc    *fileCoreService
 	userRepo       repo.UserRepo
 	userMapper     *userMapper
 	workspaceRepo  repo.WorkspaceRepo
-	workspaceCache *cache.WorkspaceCache
-	groupCache     *cache.GroupCache
-	groupGuard     *guard.GroupGuard
+	workspaceCache cache.WorkspaceCache
+	groupCache     cache.GroupCache
+	groupGuard     guard.GroupGuard
 	groupMapper    *groupMapper
 	permissionRepo repo.PermissionRepo
 }

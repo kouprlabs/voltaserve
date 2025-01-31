@@ -21,5 +21,14 @@ type Workspace interface {
 	GetBucket() string
 	GetCreateTime() string
 	GetUpdateTime() *string
+	SetID(string)
 	SetName(string)
+	SetStorageCapacity(int64)
+	SetRootID(string)
+	SetOrganizationID(string)
+	SetUserPermissions([]CoreUserPermission)
+	SetGroupPermissions([]CoreGroupPermission)
+	SetBucket(string)
+	SetCreateTime(string)
+	SetUpdateTime(*string)
 }

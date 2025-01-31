@@ -31,13 +31,13 @@ import (
 
 type WorkspaceService struct {
 	workspaceRepo   repo.WorkspaceRepo
-	workspaceCache  *cache.WorkspaceCache
-	workspaceGuard  *guard.WorkspaceGuard
-	workspaceSearch *search.WorkspaceSearch
+	workspaceCache  cache.WorkspaceCache
+	workspaceGuard  guard.WorkspaceGuard
+	workspaceSearch search.WorkspaceSearch
 	workspaceMapper *workspaceMapper
 	fileRepo        repo.FileRepo
-	fileCache       *cache.FileCache
-	fileGuard       *guard.FileGuard
+	fileCache       cache.FileCache
+	fileGuard       guard.FileGuard
 	fileMapper      *fileMapper
 	s3              *infra.S3Manager
 	config          *config.Config

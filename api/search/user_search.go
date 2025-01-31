@@ -18,19 +18,27 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type UserSearch struct {
+type UserSearch interface {
+	Query(query string, opts infra.QueryOptions) ([]model.User, error)
+}
+
+func NewUserSearch() UserSearch {
+	return newUserSearch()
+}
+
+type userSearch struct {
 	index  string
 	search *infra.SearchManager
 }
 
-func NewUserSearch() *UserSearch {
-	return &UserSearch{
+func newUserSearch() *userSearch {
+	return &userSearch{
 		index:  infra.UserSearchIndex,
 		search: infra.NewSearchManager(),
 	}
 }
 
-func (s *UserSearch) Query(query string, opts infra.QueryOptions) ([]model.User, error) {
+func (s *userSearch) Query(query string, opts infra.QueryOptions) ([]model.User, error) {
 	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err

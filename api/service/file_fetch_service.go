@@ -25,17 +25,17 @@ import (
 )
 
 type FileFetchService struct {
-	fileCache      *cache.FileCache
+	fileCache      cache.FileCache
 	fileRepo       repo.FileRepo
-	fileSearch     *search.FileSearch
-	fileGuard      *guard.FileGuard
+	fileSearch     search.FileSearch
+	fileGuard      guard.FileGuard
 	fileMapper     *fileMapper
 	fileCoreSvc    *fileCoreService
 	fileIdent      *infra.FileIdentifier
 	userRepo       repo.UserRepo
 	workspaceRepo  repo.WorkspaceRepo
 	workspaceSvc   *WorkspaceService
-	workspaceGuard *guard.WorkspaceGuard
+	workspaceGuard guard.WorkspaceGuard
 }
 
 func NewFileFetchService() *FileFetchService {

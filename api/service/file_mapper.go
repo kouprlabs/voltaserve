@@ -14,18 +14,16 @@ import (
 	"errors"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 type fileMapper struct {
-	groupCache     *cache.GroupCache
+	groupCache     cache.GroupCache
 	snapshotMapper *snapshotMapper
-	snapshotCache  *cache.SnapshotCache
+	snapshotCache  cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
-	config         *config.Config
 }
 
 func newFileMapper() *fileMapper {
@@ -34,7 +32,6 @@ func newFileMapper() *fileMapper {
 		snapshotMapper: newSnapshotMapper(),
 		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
-		config:         config.GetConfig(),
 	}
 }
 

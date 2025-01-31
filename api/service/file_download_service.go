@@ -23,9 +23,9 @@ import (
 )
 
 type FileDownloadService struct {
-	fileCache     *cache.FileCache
-	fileGuard     *guard.FileGuard
-	snapshotCache *cache.SnapshotCache
+	fileCache     cache.FileCache
+	fileGuard     guard.FileGuard
+	snapshotCache cache.SnapshotCache
 	s3            *infra.S3Manager
 }
 

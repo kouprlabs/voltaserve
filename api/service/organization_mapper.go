@@ -19,7 +19,7 @@ import (
 )
 
 type organizationMapper struct {
-	groupCache *cache.GroupCache
+	groupCache cache.GroupCache
 }
 
 func newOrganizationMapper() *organizationMapper {

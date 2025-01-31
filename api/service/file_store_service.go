@@ -26,12 +26,12 @@ import (
 )
 
 type FileStoreService struct {
-	fileCache      *cache.FileCache
+	fileCache      cache.FileCache
 	fileCoreSvc    *fileCoreService
 	fileMapper     *fileMapper
-	workspaceCache *cache.WorkspaceCache
+	workspaceCache cache.WorkspaceCache
 	snapshotRepo   repo.SnapshotRepo
-	snapshotCache  *cache.SnapshotCache
+	snapshotCache  cache.SnapshotCache
 	snapshotSvc    *SnapshotService
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier

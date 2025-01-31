@@ -19,9 +19,9 @@ import (
 )
 
 type FilePatchService struct {
-	fileCache   *cache.FileCache
+	fileCache   cache.FileCache
 	fileRepo    repo.FileRepo
-	fileGuard   *guard.FileGuard
+	fileGuard   guard.FileGuard
 	fileCoreSvc *fileCoreService
 	fileMapper  *fileMapper
 }

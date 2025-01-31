@@ -28,15 +28,15 @@ import (
 )
 
 type FileListService struct {
-	fileCache      *cache.FileCache
+	fileCache      cache.FileCache
 	fileRepo       repo.FileRepo
-	fileSearch     *search.FileSearch
-	fileGuard      *guard.FileGuard
+	fileSearch     search.FileSearch
+	fileGuard      guard.FileGuard
 	fileCoreSvc    *fileCoreService
 	fileMapper     *fileMapper
 	fileIdent      *infra.FileIdentifier
 	workspaceRepo  repo.WorkspaceRepo
-	workspaceGuard *guard.WorkspaceGuard
+	workspaceGuard guard.WorkspaceGuard
 }
 
 func NewFileListService() *FileListService {
@@ -92,6 +92,9 @@ func (svc *FileListService) Probe(id string, opts FileListOptions, userID string
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
+	if file.GetType() != model.FileTypeFolder {
+		return nil, errorpkg.NewFileIsNotAFolderError(file)
+	}
 	totalElements, err := svc.fileRepo.CountChildren(id)
 	if err != nil {
 		return nil, err
@@ -103,11 +106,17 @@ func (svc *FileListService) Probe(id string, opts FileListOptions, userID string
 }
 
 func (svc *FileListService) List(id string, opts FileListOptions, userID string) (*FileList, error) {
-	parent, err := svc.fileCache.Get(id)
+	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceRepo.Find(parent.GetWorkspaceID())
+	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	if file.GetType() != model.FileTypeFolder {
+		return nil, errorpkg.NewFileIsNotAFolderError(file)
+	}
+	workspace, err := svc.workspaceRepo.Find(file.GetWorkspaceID())
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +135,7 @@ func (svc *FileListService) List(id string, opts FileListOptions, userID string)
 			return nil, err
 		}
 	}
-	return svc.list(data, parent, opts, userID)
+	return svc.list(data, file, opts, userID)
 }
 
 func (svc *FileListService) search(query *FileQuery, workspace model.Workspace) ([]model.File, error) {

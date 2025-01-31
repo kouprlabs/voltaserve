@@ -17,7 +17,7 @@ import (
 )
 
 type invitationMapper struct {
-	orgCache   *cache.OrganizationCache
+	orgCache   cache.OrganizationCache
 	userRepo   repo.UserRepo
 	userMapper *userMapper
 	orgMapper  *organizationMapper

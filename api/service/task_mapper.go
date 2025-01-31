@@ -19,7 +19,7 @@ import (
 )
 
 type taskMapper struct {
-	groupCache *cache.TaskCache
+	groupCache cache.TaskCache
 }
 
 func newTaskMapper() *taskMapper {

@@ -18,21 +18,32 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type SnapshotCache struct {
+type SnapshotCache interface {
+	Set(file model.Snapshot) error
+	Get(id string) (model.Snapshot, error)
+	Refresh(id string) (model.Snapshot, error)
+	Delete(id string) error
+}
+
+func NewSnapshotCache() SnapshotCache {
+	return newSnapshotCache()
+}
+
+type snapshotCache struct {
 	redis        *infra.RedisManager
 	snapshotRepo repo.SnapshotRepo
 	keyPrefix    string
 }
 
-func NewSnapshotCache() *SnapshotCache {
-	return &SnapshotCache{
+func newSnapshotCache() *snapshotCache {
+	return &snapshotCache{
 		snapshotRepo: repo.NewSnapshotRepo(),
 		redis:        infra.NewRedisManager(),
 		keyPrefix:    "snapshot:",
 	}
 }
 
-func (c *SnapshotCache) Set(file model.Snapshot) error {
+func (c *snapshotCache) Set(file model.Snapshot) error {
 	b, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -44,7 +55,7 @@ func (c *SnapshotCache) Set(file model.Snapshot) error {
 	return nil
 }
 
-func (c *SnapshotCache) Get(id string) (model.Snapshot, error) {
+func (c *snapshotCache) Get(id string) (model.Snapshot, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
@@ -56,7 +67,7 @@ func (c *SnapshotCache) Get(id string) (model.Snapshot, error) {
 	return res, nil
 }
 
-func (c *SnapshotCache) Refresh(id string) (model.Snapshot, error) {
+func (c *snapshotCache) Refresh(id string) (model.Snapshot, error) {
 	res, err := c.snapshotRepo.Find(id)
 	if err != nil {
 		return nil, err
@@ -67,7 +78,7 @@ func (c *SnapshotCache) Refresh(id string) (model.Snapshot, error) {
 	return res, nil
 }
 
-func (c *SnapshotCache) Delete(id string) error {
+func (c *snapshotCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
 		return nil
 	}

@@ -29,18 +29,18 @@ import (
 
 type OrganizationService struct {
 	orgRepo        repo.OrganizationRepo
-	orgCache       *cache.OrganizationCache
-	orgGuard       *guard.OrganizationGuard
+	orgCache       cache.OrganizationCache
+	orgGuard       guard.OrganizationGuard
 	orgMapper      *organizationMapper
-	orgSearch      *search.OrganizationSearch
-	userSearch     *search.UserSearch
+	orgSearch      search.OrganizationSearch
+	userSearch     search.UserSearch
 	userMapper     *userMapper
 	userRepo       repo.UserRepo
-	groupCache     *cache.GroupCache
+	groupCache     cache.GroupCache
 	groupRepo      repo.GroupRepo
 	groupService   *GroupService
 	groupMapper    *groupMapper
-	workspaceCache *cache.WorkspaceCache
+	workspaceCache cache.WorkspaceCache
 	workspaceRepo  repo.WorkspaceRepo
 	config         *config.Config
 }

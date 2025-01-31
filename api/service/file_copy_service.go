@@ -25,9 +25,9 @@ import (
 
 type FileCopyService struct {
 	fileRepo     repo.FileRepo
-	fileSearch   *search.FileSearch
-	fileCache    *cache.FileCache
-	fileGuard    *guard.FileGuard
+	fileSearch   search.FileSearch
+	fileCache    cache.FileCache
+	fileGuard    guard.FileGuard
 	fileMapper   *fileMapper
 	fileCoreSvc  *fileCoreService
 	taskSvc      *TaskService

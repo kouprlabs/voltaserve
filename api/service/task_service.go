@@ -28,13 +28,13 @@ import (
 
 type TaskService struct {
 	taskMapper    *taskMapper
-	taskCache     *cache.TaskCache
-	taskSearch    *search.TaskSearch
+	taskCache     cache.TaskCache
+	taskSearch    search.TaskSearch
 	taskRepo      repo.TaskRepo
 	snapshotRepo  repo.SnapshotRepo
-	snapshotCache *cache.SnapshotCache
+	snapshotCache cache.SnapshotCache
 	fileRepo      repo.FileRepo
-	fileCache     *cache.FileCache
+	fileCache     cache.FileCache
 }
 
 func NewTaskService() *TaskService {
@@ -428,7 +428,7 @@ func (svc *TaskService) deleteAndSync(id string) error {
 			log.GetLogger().Error(err)
 		}
 		var filesIDs []string
-		filesIDs, err = svc.fileRepo.FindIDsBySnapshot(snapshot.ID)
+		filesIDs, err = svc.fileRepo.FindIDsBySnapshot(snapshot.GetID())
 		if err == nil {
 			for _, fileID := range filesIDs {
 				if _, err = svc.fileCache.Refresh(fileID); err != nil {

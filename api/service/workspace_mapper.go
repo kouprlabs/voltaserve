@@ -19,9 +19,9 @@ import (
 )
 
 type workspaceMapper struct {
-	orgCache   *cache.OrganizationCache
+	orgCache   cache.OrganizationCache
 	orgMapper  *organizationMapper
-	groupCache *cache.GroupCache
+	groupCache cache.GroupCache
 }
 
 func newWorkspaceMapper() *workspaceMapper {

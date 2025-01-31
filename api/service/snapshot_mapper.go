@@ -19,7 +19,7 @@ import (
 )
 
 type snapshotMapper struct {
-	taskCache *cache.TaskCache
+	taskCache cache.TaskCache
 }
 
 func newSnapshotMapper() *snapshotMapper {

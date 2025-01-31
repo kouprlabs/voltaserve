@@ -23,9 +23,9 @@ import (
 
 type fileCoreService struct {
 	fileRepo   repo.FileRepo
-	fileSearch *search.FileSearch
-	fileCache  *cache.FileCache
-	fileGuard  *guard.FileGuard
+	fileSearch search.FileSearch
+	fileCache  cache.FileCache
+	fileGuard  guard.FileGuard
 }
 
 func newFileCoreService() *fileCoreService {
