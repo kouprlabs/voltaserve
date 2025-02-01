@@ -76,27 +76,31 @@ func TestFileListService_List(t *testing.T) {
 		workspaceGuard: workspaceGuard,
 	}
 
-	folder := repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder", Type: model.FileTypeFolder})
-	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file", Type: model.FileTypeFile})
+	workspace := repo.NewWorkspaceWithOptions(repo.NewWorkspaceOptions{ID: "workspace"})
+	folder := repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder", Type: model.FileTypeFolder, WorkspaceID: workspace.GetID()})
+	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file", Type: model.FileTypeFile, WorkspaceID: workspace.GetID()})
 
 	fileCache.EXPECT().Get(folder.GetID()).Return(folder, nil).Times(1)
 	fileCache.EXPECT().Get(file.GetID()).Return(file, nil).Times(1)
 	fileRepo.EXPECT().FindChildrenIDs(folder.GetID()).Return([]string{file.GetID()}, nil)
-	fileGuard.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return(nil)
-	fileCoreSvc.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return([]model.File{file}, nil)
-	mapper.EXPECT().MapMany(gomock.Any(), gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
-	workspaceRepo.EXPECT().Find(gomock.Any()).Return(repo.NewWorkspace(), nil)
-	workspaceGuard.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return(nil)
+	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
+	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
+	mapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
+	workspaceRepo.EXPECT().Find(workspace.GetID()).Return(workspace, nil)
+	workspaceGuard.EXPECT().Authorize(gomock.Any(), workspace, model.PermissionViewer).Return(nil)
 
 	list, err := svc.List(folder.GetID(), FileListOptions{Page: 1, Size: 10}, "")
 	if assert.NoError(t, err) {
 		assert.Len(t, list.Data, 1)
+		assert.Equal(t, list.Data[0].ID, file.GetID())
 		assert.Equal(t, uint64(1), list.TotalPages)
 		assert.Equal(t, uint64(1), list.TotalElements)
+		assert.Equal(t, uint64(1), list.Page)
+		assert.Equal(t, uint64(10), list.Size)
 	}
 }
 
-func TestFileListService_List_WithQuery(t *testing.T) {
+func TestFileListService_ListWithQuery(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -121,24 +125,110 @@ func TestFileListService_List_WithQuery(t *testing.T) {
 		workspaceGuard: workspaceGuard,
 	}
 
-	folder := repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder", Type: model.FileTypeFolder})
-	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file", Type: model.FileTypeFile})
+	workspace := repo.NewWorkspaceWithOptions(repo.NewWorkspaceOptions{ID: "workspace"})
+	folder := repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder", Type: model.FileTypeFolder, WorkspaceID: workspace.GetID()})
+	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file", Type: model.FileTypeFile, WorkspaceID: workspace.GetID()})
+	query := FileQuery{Text: helper.ToPtr("search term")}
 
 	fileCache.EXPECT().Get(folder.GetID()).Return(folder, nil)
 	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
 	fileRepo.EXPECT().IsGrandChildOf(file.GetID(), folder.GetID()).Return(true, nil)
-	fileSearch.EXPECT().Query(gomock.Any(), gomock.Any()).Return([]model.File{file}, nil)
-	fileGuard.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return(nil)
-	fileCoreSvc.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return([]model.File{file}, nil)
-	mapper.EXPECT().MapMany(gomock.Any(), gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
-	workspaceRepo.EXPECT().Find(gomock.Any()).Return(repo.NewWorkspace(), nil)
-	workspaceGuard.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return(nil)
+	fileSearch.EXPECT().Query(*query.Text, gomock.Any()).Return([]model.File{file}, nil)
+	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
+	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
+	mapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
+	workspaceRepo.EXPECT().Find(workspace.GetID()).Return(workspace, nil)
+	workspaceGuard.EXPECT().Authorize(gomock.Any(), workspace, model.PermissionViewer).Return(nil)
 
-	list, err := svc.List(folder.GetID(), FileListOptions{Page: 1, Size: 10, Query: &FileQuery{Text: helper.ToPtr("search term")}}, "")
+	list, err := svc.List(folder.GetID(), FileListOptions{Page: 1, Size: 10, Query: &query}, "")
 	if assert.NoError(t, err) {
 		assert.Len(t, list.Data, 1)
+		assert.Equal(t, list.Data[0].ID, file.GetID())
 		assert.Equal(t, uint64(1), list.TotalPages)
 		assert.Equal(t, uint64(1), list.TotalElements)
+		assert.Equal(t, uint64(1), list.Page)
+		assert.Equal(t, uint64(10), list.Size)
+	}
+}
+
+func TestFileListService_list(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	fileCoreSvc := NewMockFileCoreService(ctrl)
+	fileMapper := NewMockFileMapper(ctrl)
+
+	svc := &FileListService{fileCoreSvc: fileCoreSvc, fileMapper: fileMapper}
+
+	parent := repo.NewFileWithOptions(repo.NewFileOptions{ID: "parent", Type: model.FileTypeFolder})
+	files := []model.File{
+		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_a", Type: model.FileTypeFile}),
+		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_b", Type: model.FileTypeFile}),
+	}
+
+	fileCoreSvc.EXPECT().Authorize(gomock.Any(), files, model.PermissionViewer).Return(files, nil)
+	fileMapper.EXPECT().MapMany([]model.File{files[0], files[1]}, gomock.Any()).Return([]*File{{ID: files[0].GetID()}, {ID: files[1].GetID()}}, nil)
+
+	list, err := svc.list(files, parent, FileListOptions{Page: 1, Size: 10, SortBy: SortByName, SortOrder: SortOrderAsc}, "")
+	if assert.NoError(t, err) {
+		assert.Len(t, list.Data, 2)
+		assert.Equal(t, files[0].GetID(), list.Data[0].ID)
+		assert.Equal(t, files[1].GetID(), list.Data[1].ID)
+		assert.Equal(t, uint64(2), list.TotalElements)
+		assert.Equal(t, uint64(1), list.TotalPages)
+		assert.Equal(t, uint64(1), list.Page)
+		assert.Equal(t, uint64(10), list.Size)
+	}
+}
+
+func TestFileListService_listWithQuery(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	fileRepo := repo.NewMockFileRepo(ctrl)
+	fileCoreSvc := NewMockFileCoreService(ctrl)
+	fileMapper := NewMockFileMapper(ctrl)
+
+	svc := &FileListService{fileRepo: fileRepo, fileCoreSvc: fileCoreSvc, fileMapper: fileMapper}
+
+	parent := repo.NewFileWithOptions(repo.NewFileOptions{ID: "parent", Type: model.FileTypeFolder})
+	files := []model.File{
+		repo.NewFileWithOptions(repo.NewFileOptions{
+			ID:         "file_a",
+			Type:       model.FileTypeFile,
+			CreateTime: "2022-12-01T00:00:00Z",
+			UpdateTime: helper.ToPtr("2022-12-02T00:00:00Z"),
+		}),
+		repo.NewFileWithOptions(repo.NewFileOptions{
+			ID:         "file_b",
+			Type:       model.FileTypeFile,
+			CreateTime: "2023-01-01T00:00:00Z",
+			UpdateTime: helper.ToPtr("2023-01-01T00:00:00Z"),
+		}),
+	}
+	query := FileQuery{
+		Type:             helper.ToPtr(model.FileTypeFile),
+		CreateTimeAfter:  helper.ToPtr(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()),
+		CreateTimeBefore: helper.ToPtr(time.Date(2023, 1, 2, 0, 0, 0, 0, time.UTC).UnixMilli()),
+		UpdateTimeAfter:  helper.ToPtr(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()),
+		UpdateTimeBefore: helper.ToPtr(time.Date(2023, 1, 2, 0, 0, 0, 0, time.UTC).UnixMilli()),
+	}
+
+	fileRepo.EXPECT().IsGrandChildOf(files[0].GetID(), parent.GetID()).Return(true, nil)
+	fileRepo.EXPECT().IsGrandChildOf(files[1].GetID(), parent.GetID()).Return(true, nil)
+	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{files[1]}, model.PermissionViewer).Return([]model.File{files[1]}, nil)
+	fileMapper.EXPECT().MapMany([]model.File{files[1]}, gomock.Any()).Return([]*File{{ID: files[1].GetID()}}, nil)
+
+	list, err := svc.list(files, parent, FileListOptions{Page: 1, Size: 10, Query: &query}, "")
+	if assert.NoError(t, err) {
+		assert.Len(t, list.Data, 1)
+		assert.Equal(t, files[1].GetID(), list.Data[0].ID)
+		assert.Equal(t, uint64(1), list.TotalElements)
+		assert.Equal(t, uint64(1), list.TotalPages)
+		assert.Equal(t, uint64(1), list.Page)
+		assert.Equal(t, uint64(10), list.Size)
 	}
 }
 
@@ -326,15 +416,13 @@ func TestFileListService_filterWithQuery(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	fileCache := cache.NewMockFileCache(ctrl)
 	fileRepo := repo.NewMockFileRepo(ctrl)
 
-	svc := &FileListService{fileCache: fileCache, fileRepo: fileRepo}
+	svc := &FileListService{fileRepo: fileRepo}
 
 	parent := repo.NewFileWithOptions(repo.NewFileOptions{ID: "parent", Type: model.FileTypeFolder})
 	file := repo.NewFileWithOptions(repo.NewFileOptions{
 		ID:         "file",
-		ParentID:   helper.ToPtr(parent.GetID()),
 		Type:       model.FileTypeFile,
 		CreateTime: "2023-01-01T00:00:00Z",
 		UpdateTime: helper.ToPtr("2023-01-01T00:00:00Z"),
