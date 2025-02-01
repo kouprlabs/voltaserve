@@ -96,53 +96,7 @@ func TestFileListService_List(t *testing.T) {
 	}
 }
 
-func TestFileListService_Search(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	fileCache := cache.NewMockFileCache(ctrl)
-	fileSearch := search.NewMockFileSearch(ctrl)
-
-	svc := &FileListService{fileCache: fileCache, fileSearch: fileSearch}
-
-	query := &FileQuery{Text: helper.ToPtr("search term"), Type: helper.ToPtr(model.FileTypeFile)}
-	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), Type: model.FileTypeFile})
-
-	fileSearch.EXPECT().Query(*query.Text, gomock.Any()).Return([]model.File{file}, nil)
-	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
-
-	files, err := svc.search(query, repo.NewWorkspace())
-	if assert.NoError(t, err) {
-		assert.Len(t, files, 1)
-		assert.Equal(t, file.GetID(), files[0].GetID())
-	}
-}
-
-func TestFileListService_GetChildren(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	fileCache := cache.NewMockFileCache(ctrl)
-	fileRepo := repo.NewMockFileRepo(ctrl)
-
-	svc := &FileListService{fileCache: fileCache, fileRepo: fileRepo}
-
-	parent := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID()})
-	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), ParentID: helper.ToPtr(parent.GetID())})
-
-	fileRepo.EXPECT().FindChildrenIDs(parent.GetID()).Return([]string{file.GetID()}, nil)
-	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
-
-	children, err := svc.getChildren(parent.GetID())
-	if assert.NoError(t, err) {
-		assert.Len(t, children, 1)
-		assert.Equal(t, file.GetID(), children[0].GetID())
-	}
-}
-
-func TestFileListService_ListWithQuery(t *testing.T) {
+func TestFileListService_List_WithQuery(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -188,7 +142,53 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 	}
 }
 
-func TestFileListService_SortByName(t *testing.T) {
+func TestFileListService_search(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	fileCache := cache.NewMockFileCache(ctrl)
+	fileSearch := search.NewMockFileSearch(ctrl)
+
+	svc := &FileListService{fileCache: fileCache, fileSearch: fileSearch}
+
+	query := &FileQuery{Text: helper.ToPtr("search term"), Type: helper.ToPtr(model.FileTypeFile)}
+	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), Type: model.FileTypeFile})
+
+	fileSearch.EXPECT().Query(*query.Text, gomock.Any()).Return([]model.File{file}, nil)
+	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
+
+	files, err := svc.search(query, repo.NewWorkspace())
+	if assert.NoError(t, err) {
+		assert.Len(t, files, 1)
+		assert.Equal(t, file.GetID(), files[0].GetID())
+	}
+}
+
+func TestFileListService_getChildren(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	fileCache := cache.NewMockFileCache(ctrl)
+	fileRepo := repo.NewMockFileRepo(ctrl)
+
+	svc := &FileListService{fileCache: fileCache, fileRepo: fileRepo}
+
+	parent := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID()})
+	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), ParentID: helper.ToPtr(parent.GetID())})
+
+	fileRepo.EXPECT().FindChildrenIDs(parent.GetID()).Return([]string{file.GetID()}, nil)
+	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
+
+	children, err := svc.getChildren(parent.GetID())
+	if assert.NoError(t, err) {
+		assert.Len(t, children, 1)
+		assert.Equal(t, file.GetID(), children[0].GetID())
+	}
+}
+
+func TestFileListService_sortByName(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -212,7 +212,7 @@ func TestFileListService_SortByName(t *testing.T) {
 	assert.Equal(t, "a", sorted[2].GetName())
 }
 
-func TestFileListService_SortBySize(t *testing.T) {
+func TestFileListService_sortBySize(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -243,7 +243,7 @@ func TestFileListService_SortBySize(t *testing.T) {
 	assert.Equal(t, "file_c", sorted[2].GetID())
 }
 
-func TestFileListService_SortByDateCreated(t *testing.T) {
+func TestFileListService_sortByDateCreated(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -267,7 +267,7 @@ func TestFileListService_SortByDateCreated(t *testing.T) {
 	assert.Equal(t, "file_b", sorted[2].GetID())
 }
 
-func TestFileListService_SortByDateModified(t *testing.T) {
+func TestFileListService_sortByDateModified(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -291,7 +291,7 @@ func TestFileListService_SortByDateModified(t *testing.T) {
 	assert.Equal(t, "file_b", sorted[2].GetID())
 }
 
-func TestFileListService_SortByKind(t *testing.T) {
+func TestFileListService_sortByKind(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -321,7 +321,7 @@ func TestFileListService_SortByKind(t *testing.T) {
 	assert.Equal(t, "file_c", sorted[5].GetID())
 }
 
-func TestFileListService_FilterWithQuery(t *testing.T) {
+func TestFileListService_filterWithQuery(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -356,7 +356,7 @@ func TestFileListService_FilterWithQuery(t *testing.T) {
 	}
 }
 
-func TestFileListService_Paginate(t *testing.T) {
+func TestFileListService_paginate(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
