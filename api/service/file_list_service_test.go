@@ -104,15 +104,14 @@ func TestFileListService_Search(t *testing.T) {
 	fileSearch := search.NewMockFileSearch(ctrl)
 
 	svc := &FileListService{fileCache: fileCache, fileSearch: fileSearch}
-
-	workspace := repo.NewWorkspaceWithOptions(repo.NewWorkspaceOptions{ID: helper.NewID()})
+	
 	query := &FileQuery{Text: helper.ToPtr("search term"), Type: helper.ToPtr(model.FileTypeFile)}
-	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), WorkspaceID: workspace.GetID(), Type: model.FileTypeFile})
+	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), Type: model.FileTypeFile})
 
 	fileSearch.EXPECT().Query(*query.Text, gomock.Any()).Return([]model.File{file}, nil)
 	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
 
-	files, err := svc.search(query, workspace)
+	files, err := svc.search(query, repo.NewWorkspace())
 	if assert.NoError(t, err) {
 		assert.Len(t, files, 1)
 		assert.Equal(t, file.GetID(), files[0].GetID())
@@ -221,14 +220,15 @@ func TestFileListService_SortBySize(t *testing.T) {
 		fileMapper: mapper,
 	}
 
-	fileA := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_a"})
-	fileB := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_b"})
-	fileC := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c"})
-	files := []model.File{fileA, fileB, fileC}
+	files := []model.File{
+		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_a"}),
+		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_b"}),
+		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c"}),
+	}
 
-	mapper.EXPECT().MapOne(fileA, gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(100))}}}, nil).AnyTimes()
-	mapper.EXPECT().MapOne(fileB, gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(200))}}}, nil).AnyTimes()
-	mapper.EXPECT().MapOne(fileC, gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(50))}}}, nil).AnyTimes()
+	mapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(100))}}}, nil).AnyTimes()
+	mapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(200))}}}, nil).AnyTimes()
+	mapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(50))}}}, nil).AnyTimes()
 
 	sorted := svc.sortBySize(files, SortOrderAsc, "")
 	assert.Equal(t, "file_c", sorted[0].GetID())
