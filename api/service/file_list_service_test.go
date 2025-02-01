@@ -266,7 +266,7 @@ func TestFileListService_getChildren(t *testing.T) {
 	svc := &FileListService{fileCache: fileCache, fileRepo: fileRepo}
 
 	parent := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID()})
-	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), ParentID: helper.ToPtr(parent.GetID())})
+	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID()})
 
 	fileRepo.EXPECT().FindChildrenIDs(parent.GetID()).Return([]string{file.GetID()}, nil)
 	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
