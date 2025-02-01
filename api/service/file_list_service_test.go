@@ -11,18 +11,18 @@
 package service
 
 import (
-	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/search"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 func TestFileListService_Probe(t *testing.T) {
