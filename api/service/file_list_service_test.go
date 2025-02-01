@@ -11,18 +11,20 @@
 package service
 
 import (
-	"github.com/golang/mock/gomock"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/mocks"
 	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 func TestFileListService_Probe(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -50,6 +52,7 @@ func TestFileListService_Probe(t *testing.T) {
 }
 
 func TestFileListService_List(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -84,13 +87,14 @@ func TestFileListService_List(t *testing.T) {
 
 	list, err := svc.List(folder.GetID(), FileListOptions{Page: 1, Size: 10}, "")
 	if assert.NoError(t, err) {
-		assert.Equal(t, 1, len(list.Data))
+		assert.Len(t, list.Data, 1)
 		assert.Equal(t, uint64(1), list.TotalPages)
 		assert.Equal(t, uint64(1), list.TotalElements)
 	}
 }
 
 func TestFileListService_Search(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -106,14 +110,15 @@ func TestFileListService_Search(t *testing.T) {
 	fileSearch.EXPECT().Query(*query.Text, gomock.Any()).Return([]model.File{file}, nil)
 	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
 
-	result, err := svc.search(query, workspace)
+	files, err := svc.search(query, workspace)
 	if assert.NoError(t, err) {
-		assert.Equal(t, 1, len(result))
-		assert.Equal(t, file.GetID(), result[0].GetID())
+		assert.Len(t, files, 1)
+		assert.Equal(t, file.GetID(), files[0].GetID())
 	}
 }
 
 func TestFileListService_GetChildren(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -130,12 +135,13 @@ func TestFileListService_GetChildren(t *testing.T) {
 
 	children, err := svc.getChildren(parent.GetID())
 	if assert.NoError(t, err) {
-		assert.Equal(t, 1, len(children))
+		assert.Len(t, children, 1)
 		assert.Equal(t, file.GetID(), children[0].GetID())
 	}
 }
 
 func TestFileListService_ListWithQuery(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -173,13 +179,14 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 
 	list, err := svc.List(folder.GetID(), FileListOptions{Page: 1, Size: 10, Query: &FileQuery{Text: helper.ToPtr("search term")}}, "")
 	if assert.NoError(t, err) {
-		assert.Equal(t, 1, len(list.Data))
+		assert.Len(t, list.Data, 1)
 		assert.Equal(t, uint64(1), list.TotalPages)
 		assert.Equal(t, uint64(1), list.TotalElements)
 	}
 }
 
 func TestFileListService_SortByName(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -203,6 +210,7 @@ func TestFileListService_SortByName(t *testing.T) {
 }
 
 func TestFileListService_SortBySize(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -232,6 +240,7 @@ func TestFileListService_SortBySize(t *testing.T) {
 }
 
 func TestFileListService_SortByDateCreated(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -255,6 +264,7 @@ func TestFileListService_SortByDateCreated(t *testing.T) {
 }
 
 func TestFileListService_SortByDateModified(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -278,6 +288,7 @@ func TestFileListService_SortByDateModified(t *testing.T) {
 }
 
 func TestFileListService_SortByKind(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -307,6 +318,7 @@ func TestFileListService_SortByKind(t *testing.T) {
 }
 
 func TestFileListService_FilterWithQuery(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -335,12 +347,13 @@ func TestFileListService_FilterWithQuery(t *testing.T) {
 
 	filtered, err := svc.filterWithQuery([]model.File{file}, query, parent)
 	if assert.NoError(t, err) {
-		assert.Equal(t, 1, len(filtered))
+		assert.Len(t, filtered, 1)
 		assert.Equal(t, file.GetID(), filtered[0].GetID())
 	}
 }
 
 func TestFileListService_Paginate(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -353,7 +366,7 @@ func TestFileListService_Paginate(t *testing.T) {
 	}
 
 	paged, totalElements, totalPages := svc.paginate(files, 1, 2)
-	assert.Equal(t, 2, len(paged))
+	assert.Len(t, paged, 2)
 	assert.Equal(t, uint64(3), totalElements)
 	assert.Equal(t, uint64(2), totalPages)
 }

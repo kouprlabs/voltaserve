@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+
 	model "github.com/kouprlabs/voltaserve/api/model"
 	repo "github.com/kouprlabs/voltaserve/api/repo"
 )
