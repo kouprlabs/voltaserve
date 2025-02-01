@@ -11,6 +11,9 @@
 package service
 
 import (
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/search"
 	"testing"
 	"time"
 
@@ -18,7 +21,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/mocks"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
@@ -28,9 +30,9 @@ func TestFileListService_Probe(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	fileCache := mocks.NewMockFileCache(ctrl)
-	fileRepo := mocks.NewMockFileRepo(ctrl)
-	fileGuard := mocks.NewMockFileGuard(ctrl)
+	fileCache := cache.NewMockFileCache(ctrl)
+	fileRepo := repo.NewMockFileRepo(ctrl)
+	fileGuard := guard.NewMockFileGuard(ctrl)
 
 	svc := &FileListService{
 		fileCache: fileCache,
@@ -56,12 +58,12 @@ func TestFileListService_List(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	fileCache := mocks.NewMockFileCache(ctrl)
-	fileRepo := mocks.NewMockFileRepo(ctrl)
-	fileGuard := mocks.NewMockFileGuard(ctrl)
+	fileCache := cache.NewMockFileCache(ctrl)
+	fileRepo := repo.NewMockFileRepo(ctrl)
+	fileGuard := guard.NewMockFileGuard(ctrl)
 	mapper := NewMockFileMapper(ctrl)
-	workspaceRepo := mocks.NewMockWorkspaceRepo(ctrl)
-	workspaceGuard := mocks.NewMockWorkspaceGuard(ctrl)
+	workspaceRepo := repo.NewMockWorkspaceRepo(ctrl)
+	workspaceGuard := guard.NewMockWorkspaceGuard(ctrl)
 
 	svc := &FileListService{
 		fileCache:      fileCache,
@@ -98,8 +100,8 @@ func TestFileListService_Search(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	fileCache := mocks.NewMockFileCache(ctrl)
-	fileSearch := mocks.NewMockFileSearch(ctrl)
+	fileCache := cache.NewMockFileCache(ctrl)
+	fileSearch := search.NewMockFileSearch(ctrl)
 
 	svc := &FileListService{fileCache: fileCache, fileSearch: fileSearch}
 
@@ -122,8 +124,8 @@ func TestFileListService_GetChildren(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	fileCache := mocks.NewMockFileCache(ctrl)
-	fileRepo := mocks.NewMockFileRepo(ctrl)
+	fileCache := cache.NewMockFileCache(ctrl)
+	fileRepo := repo.NewMockFileRepo(ctrl)
 
 	svc := &FileListService{fileCache: fileCache, fileRepo: fileRepo}
 
@@ -145,13 +147,13 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	fileCache := mocks.NewMockFileCache(ctrl)
-	fileRepo := mocks.NewMockFileRepo(ctrl)
-	fileSearch := mocks.NewMockFileSearch(ctrl)
-	fileGuard := mocks.NewMockFileGuard(ctrl)
+	fileCache := cache.NewMockFileCache(ctrl)
+	fileRepo := repo.NewMockFileRepo(ctrl)
+	fileSearch := search.NewMockFileSearch(ctrl)
+	fileGuard := guard.NewMockFileGuard(ctrl)
 	mapper := NewMockFileMapper(ctrl)
-	workspaceRepo := mocks.NewMockWorkspaceRepo(ctrl)
-	workspaceGuard := mocks.NewMockWorkspaceGuard(ctrl)
+	workspaceRepo := repo.NewMockWorkspaceRepo(ctrl)
+	workspaceGuard := guard.NewMockWorkspaceGuard(ctrl)
 
 	svc := &FileListService{
 		fileCache:      fileCache,
@@ -322,8 +324,8 @@ func TestFileListService_FilterWithQuery(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	fileCache := mocks.NewMockFileCache(ctrl)
-	fileRepo := mocks.NewMockFileRepo(ctrl)
+	fileCache := cache.NewMockFileCache(ctrl)
+	fileRepo := repo.NewMockFileRepo(ctrl)
 
 	svc := &FileListService{fileCache: fileCache, fileRepo: fileRepo}
 
