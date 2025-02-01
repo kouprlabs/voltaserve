@@ -30,7 +30,7 @@ type SnapshotRepo interface {
 	FindByVersion(version int64) (model.Snapshot, error)
 	FindAllForFile(fileID string) ([]model.Snapshot, error)
 	FindExclusiveForFile(fileID string) ([]model.Snapshot, error)
-	FindAllForTask(taskID string) ([]*snapshotEntity, error)
+	FindAllForTask(taskID string) ([]model.Snapshot, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
 	FindIDsByFile(fileID string) ([]string, error)
@@ -578,13 +578,17 @@ func (repo *snapshotRepo) FindExclusiveForFile(fileID string) ([]model.Snapshot,
 	return res, nil
 }
 
-func (repo *snapshotRepo) FindAllForTask(taskID string) ([]*snapshotEntity, error) {
-	var res []*snapshotEntity
+func (repo *snapshotRepo) FindAllForTask(taskID string) ([]model.Snapshot, error) {
+	var entities []*snapshotEntity
 	db := repo.db.
 		Raw(`SELECT * FROM snapshot WHERE task_id = ?`, taskID).
-		Scan(&res)
+		Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
+	}
+	var res []model.Snapshot
+	for _, s := range entities {
+		res = append(res, s)
 	}
 	return res, nil
 }

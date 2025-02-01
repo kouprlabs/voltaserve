@@ -58,6 +58,37 @@ func NewFile() model.File {
 	return &fileEntity{}
 }
 
+type NewFileOptions struct {
+	ID               string
+	WorkspaceID      string
+	ParentID         *string
+	Type             string
+	Name             string
+	Text             *string
+	SnapshotID       *string
+	UserPermissions  []model.CoreUserPermission
+	GroupPermissions []model.CoreGroupPermission
+	CreateTime       string
+	UpdateTime       *string
+}
+
+func NewFileWithOptions(opts NewFileOptions) model.File {
+	res := &fileEntity{
+		ID:          opts.ID,
+		WorkspaceID: opts.WorkspaceID,
+		ParentID:    opts.ParentID,
+		Type:        opts.Type,
+		Name:        opts.Name,
+		Text:        opts.Text,
+		SnapshotID:  opts.SnapshotID,
+		CreateTime:  opts.CreateTime,
+		UpdateTime:  opts.UpdateTime,
+	}
+	res.SetUserPermissions(opts.UserPermissions)
+	res.SetGroupPermissions(opts.GroupPermissions)
+	return res
+}
+
 type fileEntity struct {
 	ID               string                  `gorm:"column:id"           json:"id"`
 	WorkspaceID      string                  `gorm:"column:workspace_id" json:"workspaceId"`

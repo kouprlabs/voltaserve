@@ -23,10 +23,10 @@ import (
 
 type FileDeleteService struct {
 	fileRepo       repo.FileRepo
-	fileSearch     *search.FileSearch
-	fileGuard      *guard.FileGuard
-	fileCache      *cache.FileCache
-	workspaceCache *cache.WorkspaceCache
+	fileSearch     search.FileSearch
+	fileGuard      guard.FileGuard
+	fileCache      cache.FileCache
+	workspaceCache cache.WorkspaceCache
 	taskSvc        *TaskService
 	snapshotRepo   repo.SnapshotRepo
 	snapshotSvc    *SnapshotService

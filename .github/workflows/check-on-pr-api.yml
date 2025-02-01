@@ -35,12 +35,29 @@ jobs:
       pull-requests: read
       checks: write
 
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22
+
+      - name: Run Tests
+        working-directory: api
+        run: |
+          go test ./... -v
+
   build:
     runs-on: ubuntu-latest
     needs: lint
     strategy:
       matrix:
-        platform: [ "arm64", "amd64" ]
+        platform: ["arm64", "amd64"]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

@@ -17,16 +17,16 @@ const (
 
 type File interface {
 	GetID() string
+	GetParentID() *string
 	GetWorkspaceID() string
 	GetName() string
 	GetType() string
-	GetParentID() *string
-	GetCreateTime() string
-	GetUpdateTime() *string
 	GetUserPermissions() []CoreUserPermission
 	GetGroupPermissions() []CoreGroupPermission
 	GetText() *string
 	GetSnapshotID() *string
+	GetCreateTime() string
+	GetUpdateTime() *string
 	SetID(string)
 	SetParentID(*string)
 	SetWorkspaceID(string)

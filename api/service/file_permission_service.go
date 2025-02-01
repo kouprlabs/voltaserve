@@ -18,16 +18,16 @@ import (
 )
 
 type FilePermissionService struct {
-	fileCache      *cache.FileCache
+	fileCache      cache.FileCache
 	fileRepo       repo.FileRepo
-	fileGuard      *guard.FileGuard
-	fileCoreSvc    *fileCoreService
+	fileGuard      guard.FileGuard
+	fileCoreSvc    FileCoreService
 	userRepo       repo.UserRepo
 	userMapper     *userMapper
 	workspaceRepo  repo.WorkspaceRepo
-	workspaceCache *cache.WorkspaceCache
-	groupCache     *cache.GroupCache
-	groupGuard     *guard.GroupGuard
+	workspaceCache cache.WorkspaceCache
+	groupCache     cache.GroupCache
+	groupGuard     guard.GroupGuard
 	groupMapper    *groupMapper
 	permissionRepo repo.PermissionRepo
 }
@@ -37,7 +37,7 @@ func NewFilePermissionService() *FilePermissionService {
 		fileCache:      cache.NewFileCache(),
 		fileRepo:       repo.NewFileRepo(),
 		fileGuard:      guard.NewFileGuard(),
-		fileCoreSvc:    newFileCoreService(),
+		fileCoreSvc:    NewFileCoreService(),
 		userRepo:       repo.NewUserRepo(),
 		userMapper:     newUserMapper(),
 		workspaceRepo:  repo.NewWorkspaceRepo(),
@@ -79,7 +79,7 @@ func (svc *FilePermissionService) GrantUserPermission(ids []string, assigneeID s
 			return err
 		}
 		for _, f := range path {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
+			if err := svc.fileCoreSvc.Sync(f); err != nil {
 				return err
 			}
 		}
@@ -88,7 +88,7 @@ func (svc *FilePermissionService) GrantUserPermission(ids []string, assigneeID s
 			return err
 		}
 		for _, f := range tree {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
+			if err := svc.fileCoreSvc.Sync(f); err != nil {
 				return err
 			}
 		}
@@ -161,7 +161,7 @@ func (svc *FilePermissionService) GrantGroupPermission(ids []string, groupID str
 			return err
 		}
 		for _, f := range path {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
+			if err := svc.fileCoreSvc.Sync(f); err != nil {
 				return err
 			}
 		}
@@ -170,7 +170,7 @@ func (svc *FilePermissionService) GrantGroupPermission(ids []string, groupID str
 			return err
 		}
 		for _, f := range tree {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
+			if err := svc.fileCoreSvc.Sync(f); err != nil {
 				return err
 			}
 		}

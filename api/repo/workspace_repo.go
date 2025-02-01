@@ -39,8 +39,38 @@ func NewWorkspaceRepo() WorkspaceRepo {
 	return newWorkspaceRepo()
 }
 
+type NewWorkspaceOptions struct {
+	ID               string
+	Name             string
+	StorageCapacity  int64
+	Image            *string
+	OrganizationID   string
+	RootID           *string
+	Bucket           string
+	UserPermissions  []model.CoreUserPermission
+	GroupPermissions []model.CoreGroupPermission
+	CreateTime       string
+	UpdateTime       *string
+}
+
 func NewWorkspace() model.Workspace {
 	return &workspaceEntity{}
+}
+
+func NewWorkspaceWithOptions(opts NewWorkspaceOptions) model.Workspace {
+	res := &workspaceEntity{
+		ID:              opts.ID,
+		Name:            opts.Name,
+		StorageCapacity: opts.StorageCapacity,
+		RootID:          opts.RootID,
+		OrganizationID:  opts.OrganizationID,
+		Bucket:          opts.Bucket,
+		CreateTime:      opts.CreateTime,
+		UpdateTime:      opts.UpdateTime,
+	}
+	res.SetUserPermissions(opts.UserPermissions)
+	res.SetGroupPermissions(opts.GroupPermissions)
+	return res
 }
 
 type workspaceEntity struct {
@@ -123,8 +153,50 @@ func (w *workspaceEntity) GetUpdateTime() *string {
 	return w.UpdateTime
 }
 
+func (w *workspaceEntity) SetID(id string) {
+	w.ID = id
+}
+
 func (w *workspaceEntity) SetName(name string) {
 	w.Name = name
+}
+
+func (w *workspaceEntity) SetStorageCapacity(storageCapacity int64) {
+	w.StorageCapacity = storageCapacity
+}
+
+func (w *workspaceEntity) SetRootID(rootID string) {
+	w.RootID = &rootID
+}
+
+func (w *workspaceEntity) SetOrganizationID(organizationID string) {
+	w.OrganizationID = organizationID
+}
+
+func (w *workspaceEntity) SetUserPermissions(permissions []model.CoreUserPermission) {
+	w.UserPermissions = make([]*UserPermissionValue, len(permissions))
+	for i, p := range permissions {
+		w.UserPermissions[i] = p.(*UserPermissionValue)
+	}
+}
+
+func (w *workspaceEntity) SetGroupPermissions(permissions []model.CoreGroupPermission) {
+	w.GroupPermissions = make([]*GroupPermissionValue, len(permissions))
+	for i, p := range permissions {
+		w.GroupPermissions[i] = p.(*GroupPermissionValue)
+	}
+}
+
+func (w *workspaceEntity) SetBucket(bucket string) {
+	w.Bucket = bucket
+}
+
+func (w *workspaceEntity) SetCreateTime(createTime string) {
+	w.CreateTime = createTime
+}
+
+func (w *workspaceEntity) SetUpdateTime(updateTime *string) {
+	w.UpdateTime = updateTime
 }
 
 type workspaceRepo struct {

@@ -14,18 +14,25 @@ import (
 	"errors"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
+type FileMapper interface {
+	MapOne(model.File, string) (*File, error)
+	MapMany([]model.File, string) ([]*File, error)
+}
+
+func NewFileMapper() FileMapper {
+	return newFileMapper()
+}
+
 type fileMapper struct {
-	groupCache     *cache.GroupCache
+	groupCache     cache.GroupCache
 	snapshotMapper *snapshotMapper
-	snapshotCache  *cache.SnapshotCache
+	snapshotCache  cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
-	config         *config.Config
 }
 
 func newFileMapper() *fileMapper {
@@ -34,11 +41,10 @@ func newFileMapper() *fileMapper {
 		snapshotMapper: newSnapshotMapper(),
 		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
-		config:         config.GetConfig(),
 	}
 }
 
-func (mp *fileMapper) mapOne(m model.File, userID string) (*File, error) {
+func (mp *fileMapper) MapOne(m model.File, userID string) (*File, error) {
 	res := &File{
 		ID:          m.GetID(),
 		WorkspaceID: m.GetWorkspaceID(),
@@ -91,10 +97,10 @@ func (mp *fileMapper) mapOne(m model.File, userID string) (*File, error) {
 	return res, nil
 }
 
-func (mp *fileMapper) mapMany(data []model.File, userID string) ([]*File, error) {
+func (mp *fileMapper) MapMany(data []model.File, userID string) ([]*File, error) {
 	res := make([]*File, 0)
 	for _, file := range data {
-		f, err := mp.mapOne(file, userID)
+		f, err := mp.MapOne(file, userID)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
 			if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {

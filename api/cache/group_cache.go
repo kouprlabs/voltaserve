@@ -18,21 +18,32 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type GroupCache struct {
+type GroupCache interface {
+	Set(workspace model.Group) error
+	Get(id string) (model.Group, error)
+	Refresh(id string) (model.Group, error)
+	Delete(id string) error
+}
+
+func NewGroupCache() GroupCache {
+	return newGroupCache()
+}
+
+type groupCache struct {
 	redis     *infra.RedisManager
 	groupRepo repo.GroupRepo
 	keyPrefix string
 }
 
-func NewGroupCache() *GroupCache {
-	return &GroupCache{
+func newGroupCache() *groupCache {
+	return &groupCache{
 		redis:     infra.NewRedisManager(),
 		groupRepo: repo.NewGroupRepo(),
 		keyPrefix: "group:",
 	}
 }
 
-func (c *GroupCache) Set(workspace model.Group) error {
+func (c *groupCache) Set(workspace model.Group) error {
 	b, err := json.Marshal(workspace)
 	if err != nil {
 		return err
@@ -44,7 +55,7 @@ func (c *GroupCache) Set(workspace model.Group) error {
 	return nil
 }
 
-func (c *GroupCache) Get(id string) (model.Group, error) {
+func (c *groupCache) Get(id string) (model.Group, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
@@ -56,7 +67,7 @@ func (c *GroupCache) Get(id string) (model.Group, error) {
 	return res, nil
 }
 
-func (c *GroupCache) Refresh(id string) (model.Group, error) {
+func (c *groupCache) Refresh(id string) (model.Group, error) {
 	res, err := c.groupRepo.Find(id)
 	if err != nil {
 		return nil, err
@@ -67,7 +78,7 @@ func (c *GroupCache) Refresh(id string) (model.Group, error) {
 	return res, nil
 }
 
-func (c *GroupCache) Delete(id string) error {
+func (c *groupCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
 		return err
 	}

@@ -25,11 +25,11 @@ import (
 
 type FileMoveService struct {
 	fileRepo    repo.FileRepo
-	fileSearch  *search.FileSearch
-	fileCache   *cache.FileCache
-	fileGuard   *guard.FileGuard
-	fileMapper  *fileMapper
-	fileCoreSvc *fileCoreService
+	fileSearch  search.FileSearch
+	fileCache   cache.FileCache
+	fileGuard   guard.FileGuard
+	fileMapper  FileMapper
+	fileCoreSvc FileCoreService
 	taskSvc     *TaskService
 }
 
@@ -39,8 +39,8 @@ func NewFileMoveService() *FileMoveService {
 		fileSearch:  search.NewFileSearch(),
 		fileCache:   cache.NewFileCache(),
 		fileGuard:   guard.NewFileGuard(),
-		fileMapper:  newFileMapper(),
-		fileCoreSvc: newFileCoreService(),
+		fileMapper:  NewFileMapper(),
+		fileCoreSvc: NewFileCoreService(),
 		taskSvc:     NewTaskService(),
 	}
 }
@@ -81,7 +81,7 @@ func (svc *FileMoveService) move(source model.File, target model.File, userID st
 	if err := svc.refreshUpdateAndCreateTime(source, target); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(source, userID)
+	res, err := svc.fileMapper.MapOne(source, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (svc *FileMoveService) createTask(file model.File, userID string) (model.Ta
 
 func (svc *FileMoveService) check(source model.File, target model.File, userID string) error {
 	if source.GetParentID() != nil {
-		existing, err := svc.fileCoreSvc.getChildWithName(target.GetID(), source.GetName())
+		existing, err := svc.fileCoreSvc.GetChildWithName(target.GetID(), source.GetName())
 		if err != nil {
 			return err
 		}
@@ -144,14 +144,14 @@ func (svc *FileMoveService) refreshUpdateAndCreateTime(source model.File, target
 	if err := svc.fileRepo.Save(source); err != nil {
 		return err
 	}
-	if err := svc.fileCoreSvc.sync(source); err != nil {
+	if err := svc.fileCoreSvc.Sync(source); err != nil {
 		return err
 	}
 	target.SetUpdateTime(&now)
 	if err := svc.fileRepo.Save(target); err != nil {
 		return err
 	}
-	if err := svc.fileCoreSvc.sync(target); err != nil {
+	if err := svc.fileCoreSvc.Sync(target); err != nil {
 		return err
 	}
 	return nil

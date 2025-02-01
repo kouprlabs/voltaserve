@@ -25,11 +25,11 @@ import (
 
 type FileCopyService struct {
 	fileRepo     repo.FileRepo
-	fileSearch   *search.FileSearch
-	fileCache    *cache.FileCache
-	fileGuard    *guard.FileGuard
-	fileMapper   *fileMapper
-	fileCoreSvc  *fileCoreService
+	fileSearch   search.FileSearch
+	fileCache    cache.FileCache
+	fileGuard    guard.FileGuard
+	fileMapper   FileMapper
+	fileCoreSvc  FileCoreService
 	taskSvc      *TaskService
 	snapshotRepo repo.SnapshotRepo
 }
@@ -40,8 +40,8 @@ func NewFileCopyService() *FileCopyService {
 		fileSearch:   search.NewFileSearch(),
 		fileCache:    cache.NewFileCache(),
 		fileGuard:    guard.NewFileGuard(),
-		fileMapper:   newFileMapper(),
-		fileCoreSvc:  newFileCoreService(),
+		fileMapper:   NewFileMapper(),
+		fileCoreSvc:  NewFileCoreService(),
 		taskSvc:      NewTaskService(),
 		snapshotRepo: repo.NewSnapshotRepo(),
 	}
@@ -91,7 +91,7 @@ func (svc *FileCopyService) copy(source model.File, target model.File, userID st
 	if err := svc.refreshUpdateTime(target); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(root, userID)
+	res, err := svc.fileMapper.MapOne(root, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (svc *FileCopyService) cloneTree(source model.File, target model.File, tree
 		clones[index].SetParentID(&id)
 	}
 	root.SetParentID(helper.ToPtr(target.GetID()))
-	existing, err := svc.fileCoreSvc.getChildWithName(target.GetID(), root.GetName())
+	existing, err := svc.fileCoreSvc.GetChildWithName(target.GetID(), root.GetName())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -254,7 +254,7 @@ func (svc *FileCopyService) refreshUpdateTime(target model.File) error {
 	if err := svc.fileRepo.Save(target); err != nil {
 		return err
 	}
-	if err := svc.fileCoreSvc.sync(target); err != nil {
+	if err := svc.fileCoreSvc.Sync(target); err != nil {
 		return err
 	}
 	return nil

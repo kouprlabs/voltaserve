@@ -23,12 +23,12 @@ import (
 )
 
 type FileReprocessService struct {
-	fileCache      *cache.FileCache
+	fileCache      cache.FileCache
 	fileRepo       repo.FileRepo
-	fileGuard      *guard.FileGuard
-	snapshotCache  *cache.SnapshotCache
+	fileGuard      guard.FileGuard
+	snapshotCache  cache.SnapshotCache
 	snapshotSvc    *SnapshotService
-	taskCache      *cache.TaskCache
+	taskCache      cache.TaskCache
 	taskSvc        *TaskService
 	pipelineClient *conversion_client.PipelineClient
 }

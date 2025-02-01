@@ -18,7 +18,18 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type OrganizationSearch struct {
+type OrganizationSearch interface {
+	Index(orgs []model.Organization) error
+	Update(orgs []model.Organization) error
+	Delete(ids []string) error
+	Query(query string, opts infra.QueryOptions) ([]model.Organization, error)
+}
+
+func NewOrganizationSearch() OrganizationSearch {
+	return newOrganizationSearch()
+}
+
+type organizationSearch struct {
 	index   string
 	search  *infra.SearchManager
 	orgRepo repo.OrganizationRepo
@@ -36,15 +47,15 @@ func (o organizationEntity) GetID() string {
 	return o.ID
 }
 
-func NewOrganizationSearch() *OrganizationSearch {
-	return &OrganizationSearch{
+func newOrganizationSearch() *organizationSearch {
+	return &organizationSearch{
 		index:   infra.OrganizationSearchIndex,
 		search:  infra.NewSearchManager(),
 		orgRepo: repo.NewOrganizationRepo(),
 	}
 }
 
-func (s *OrganizationSearch) Index(orgs []model.Organization) error {
+func (s *organizationSearch) Index(orgs []model.Organization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
@@ -58,7 +69,7 @@ func (s *OrganizationSearch) Index(orgs []model.Organization) error {
 	return nil
 }
 
-func (s *OrganizationSearch) Update(orgs []model.Organization) error {
+func (s *organizationSearch) Update(orgs []model.Organization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
@@ -72,7 +83,7 @@ func (s *OrganizationSearch) Update(orgs []model.Organization) error {
 	return nil
 }
 
-func (s *OrganizationSearch) Delete(ids []string) error {
+func (s *organizationSearch) Delete(ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
@@ -82,7 +93,7 @@ func (s *OrganizationSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (s *OrganizationSearch) Query(query string, opts infra.QueryOptions) ([]model.Organization, error) {
+func (s *organizationSearch) Query(query string, opts infra.QueryOptions) ([]model.Organization, error) {
 	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err
@@ -103,7 +114,7 @@ func (s *OrganizationSearch) Query(query string, opts infra.QueryOptions) ([]mod
 	return res, nil
 }
 
-func (s *OrganizationSearch) mapEntity(org model.Organization) *organizationEntity {
+func (s *organizationSearch) mapEntity(org model.Organization) *organizationEntity {
 	return &organizationEntity{
 		ID:         org.GetID(),
 		Name:       org.GetName(),

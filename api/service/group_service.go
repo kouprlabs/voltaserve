@@ -28,21 +28,21 @@ import (
 
 type GroupService struct {
 	groupRepo      repo.GroupRepo
-	groupGuard     *guard.GroupGuard
-	groupSearch    *search.GroupSearch
+	groupGuard     guard.GroupGuard
+	groupSearch    search.GroupSearch
 	groupMapper    *groupMapper
-	groupCache     *cache.GroupCache
+	groupCache     cache.GroupCache
 	userRepo       repo.UserRepo
-	userSearch     *search.UserSearch
+	userSearch     search.UserSearch
 	userMapper     *userMapper
 	workspaceRepo  repo.WorkspaceRepo
-	workspaceCache *cache.WorkspaceCache
+	workspaceCache cache.WorkspaceCache
 	fileRepo       repo.FileRepo
-	fileCache      *cache.FileCache
-	fileGuard      *guard.FileGuard
+	fileCache      cache.FileCache
+	fileGuard      guard.FileGuard
 	orgRepo        repo.OrganizationRepo
-	orgCache       *cache.OrganizationCache
-	orgGuard       *guard.OrganizationGuard
+	orgCache       cache.OrganizationCache
+	orgGuard       guard.OrganizationGuard
 	config         *config.Config
 }
 

@@ -22,11 +22,11 @@ import (
 
 type FileCreateService struct {
 	fileRepo    repo.FileRepo
-	fileSearch  *search.FileSearch
-	fileCache   *cache.FileCache
-	fileGuard   *guard.FileGuard
-	fileMapper  *fileMapper
-	fileCoreSvc *fileCoreService
+	fileSearch  search.FileSearch
+	fileCache   cache.FileCache
+	fileGuard   guard.FileGuard
+	fileMapper  FileMapper
+	fileCoreSvc FileCoreService
 }
 
 func NewFileCreateService() *FileCreateService {
@@ -35,8 +35,8 @@ func NewFileCreateService() *FileCreateService {
 		fileSearch:  search.NewFileSearch(),
 		fileCache:   cache.NewFileCache(),
 		fileGuard:   guard.NewFileGuard(),
-		fileMapper:  newFileMapper(),
-		fileCoreSvc: newFileCoreService(),
+		fileMapper:  NewFileMapper(),
+		fileCoreSvc: NewFileCoreService(),
 	}
 }
 
@@ -67,7 +67,7 @@ func (svc *FileCreateService) Create(opts FileCreateOptions, userID string) (*Fi
 
 func (svc *FileCreateService) createDirectoriesForPath(path []string, parentID string, workspaceID string, userID string) (*string, error) {
 	for _, component := range path[:len(path)-1] {
-		existing, err := svc.fileCoreSvc.getChildWithName(parentID, component)
+		existing, err := svc.fileCoreSvc.GetChildWithName(parentID, component)
 		if err != nil {
 			return nil, err
 		}
@@ -94,12 +94,12 @@ func (svc *FileCreateService) create(opts FileCreateOptions, userID string) (*Fi
 		if err := svc.validateParent(opts.ParentID, userID); err != nil {
 			return nil, err
 		}
-		existing, err := svc.fileCoreSvc.getChildWithName(opts.ParentID, opts.Name)
+		existing, err := svc.fileCoreSvc.GetChildWithName(opts.ParentID, opts.Name)
 		if err != nil {
 			return nil, err
 		}
 		if existing != nil {
-			res, err := svc.fileMapper.mapOne(existing, userID)
+			res, err := svc.fileMapper.MapOne(existing, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -125,7 +125,7 @@ func (svc *FileCreateService) create(opts FileCreateOptions, userID string) (*Fi
 	if err = svc.fileSearch.Index([]model.File{file}); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}

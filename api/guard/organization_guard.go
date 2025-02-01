@@ -17,17 +17,26 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type OrganizationGuard struct {
-	groupCache *cache.GroupCache
+type OrganizationGuard interface {
+	IsAuthorized(userID string, org model.Organization, permission string) bool
+	Authorize(userID string, org model.Organization, permission string) error
 }
 
-func NewOrganizationGuard() *OrganizationGuard {
-	return &OrganizationGuard{
+func NewOrganizationGuard() OrganizationGuard {
+	return newOrganizationGuard()
+}
+
+type organizationGuard struct {
+	groupCache cache.GroupCache
+}
+
+func newOrganizationGuard() *organizationGuard {
+	return &organizationGuard{
 		groupCache: cache.NewGroupCache(),
 	}
 }
 
-func (g *OrganizationGuard) IsAuthorized(userID string, org model.Organization, permission string) bool {
+func (g *organizationGuard) IsAuthorized(userID string, org model.Organization, permission string) bool {
 	for _, p := range org.GetUserPermissions() {
 		if p.GetUserID() == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
@@ -48,7 +57,7 @@ func (g *OrganizationGuard) IsAuthorized(userID string, org model.Organization, 
 	return false
 }
 
-func (g *OrganizationGuard) Authorize(userID string, org model.Organization, permission string) error {
+func (g *organizationGuard) Authorize(userID string, org model.Organization, permission string) error {
 	if !g.IsAuthorized(userID, org, permission) {
 		err := errorpkg.NewOrganizationPermissionError(userID, org, permission)
 		if g.IsAuthorized(userID, org, model.PermissionViewer) {

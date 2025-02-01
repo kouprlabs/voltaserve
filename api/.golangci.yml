@@ -46,6 +46,7 @@ linters:
     - gocyclo
     - dupl
     - maintidx
+    - testpackage
 
 severity:
   default-severity: major
@@ -131,3 +132,6 @@ linters-settings:
   wsl:
     force-err-cuddling: true
 
+  run:
+    exclude:
+      - '.*_mock\.go$'

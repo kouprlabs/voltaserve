@@ -19,11 +19,11 @@ import (
 
 type StorageService struct {
 	workspaceRepo  repo.WorkspaceRepo
-	workspaceCache *cache.WorkspaceCache
-	workspaceGuard *guard.WorkspaceGuard
+	workspaceCache cache.WorkspaceCache
+	workspaceGuard guard.WorkspaceGuard
 	fileRepo       repo.FileRepo
-	fileCache      *cache.FileCache
-	fileGuard      *guard.FileGuard
+	fileCache      cache.FileCache
+	fileGuard      guard.FileGuard
 	storageMapper  *storageMapper
 }
 

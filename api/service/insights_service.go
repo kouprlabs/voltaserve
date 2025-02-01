@@ -33,11 +33,11 @@ import (
 
 type InsightsService struct {
 	languages      []*InsightsLanguage
-	snapshotCache  *cache.SnapshotCache
+	snapshotCache  cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
 	snapshotSvc    *SnapshotService
-	fileCache      *cache.FileCache
-	fileGuard      *guard.FileGuard
+	fileCache      cache.FileCache
+	fileGuard      guard.FileGuard
 	taskSvc        *TaskService
 	taskMapper     *taskMapper
 	s3             *infra.S3Manager

@@ -29,8 +29,8 @@ type InvitationService struct {
 	orgMapper        *organizationMapper
 	invitationRepo   repo.InvitationRepo
 	invitationMapper *invitationMapper
-	orgCache         *cache.OrganizationCache
-	orgGuard         *guard.OrganizationGuard
+	orgCache         cache.OrganizationCache
+	orgGuard         guard.OrganizationGuard
 	userRepo         repo.UserRepo
 	mailTmpl         *infra.MailTemplate
 	config           *config.Config

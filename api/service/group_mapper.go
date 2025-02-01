@@ -19,9 +19,9 @@ import (
 )
 
 type groupMapper struct {
-	orgCache   *cache.OrganizationCache
+	orgCache   cache.OrganizationCache
 	orgMapper  *organizationMapper
-	groupCache *cache.GroupCache
+	groupCache cache.GroupCache
 }
 
 func newGroupMapper() *groupMapper {
