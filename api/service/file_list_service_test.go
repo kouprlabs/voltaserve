@@ -12,7 +12,6 @@ package service
 
 import (
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -62,6 +61,7 @@ func TestFileListService_List(t *testing.T) {
 	fileRepo := repo.NewMockFileRepo(ctrl)
 	fileGuard := guard.NewMockFileGuard(ctrl)
 	fileCoreSvc := NewMockFileCoreService(ctrl)
+	fileSortSvc := NewMockFileSortService(ctrl)
 	fileMapper := NewMockFileMapper(ctrl)
 	workspaceRepo := repo.NewMockWorkspaceRepo(ctrl)
 	workspaceGuard := guard.NewMockWorkspaceGuard(ctrl)
@@ -71,6 +71,7 @@ func TestFileListService_List(t *testing.T) {
 		fileRepo:       fileRepo,
 		fileGuard:      fileGuard,
 		fileCoreSvc:    fileCoreSvc,
+		fileSortSvc:    fileSortSvc,
 		fileMapper:     fileMapper,
 		workspaceRepo:  workspaceRepo,
 		workspaceGuard: workspaceGuard,
@@ -85,6 +86,7 @@ func TestFileListService_List(t *testing.T) {
 	fileRepo.EXPECT().FindChildrenIDs(folder.GetID()).Return([]string{file.GetID()}, nil)
 	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
 	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
+	fileSortSvc.EXPECT().Sort([]model.File{file}, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.File{file})
 	fileMapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
 	workspaceRepo.EXPECT().Find(workspace.GetID()).Return(workspace, nil)
 	workspaceGuard.EXPECT().Authorize(gomock.Any(), workspace, model.PermissionViewer).Return(nil)
@@ -106,21 +108,23 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 	defer ctrl.Finish()
 
 	fileCache := cache.NewMockFileCache(ctrl)
-	fileRepo := repo.NewMockFileRepo(ctrl)
 	fileSearch := search.NewMockFileSearch(ctrl)
 	fileGuard := guard.NewMockFileGuard(ctrl)
 	fileCoreSvc := NewMockFileCoreService(ctrl)
+	fileFilterSvc := NewMockFileFilterService(ctrl)
+	fileSortSvc := NewMockFileSortService(ctrl)
 	fileMapper := NewMockFileMapper(ctrl)
 	workspaceRepo := repo.NewMockWorkspaceRepo(ctrl)
 	workspaceGuard := guard.NewMockWorkspaceGuard(ctrl)
 
 	svc := &FileListService{
 		fileCache:      fileCache,
-		fileRepo:       fileRepo,
 		fileSearch:     fileSearch,
 		fileGuard:      fileGuard,
 		fileMapper:     fileMapper,
 		fileCoreSvc:    fileCoreSvc,
+		fileFilterSvc:  fileFilterSvc,
+		fileSortSvc:    fileSortSvc,
 		workspaceRepo:  workspaceRepo,
 		workspaceGuard: workspaceGuard,
 	}
@@ -132,10 +136,11 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 
 	fileCache.EXPECT().Get(folder.GetID()).Return(folder, nil)
 	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
-	fileRepo.EXPECT().IsGrandChildOf(file.GetID(), folder.GetID()).Return(true, nil)
 	fileSearch.EXPECT().Query(*query.Text, gomock.Any()).Return([]model.File{file}, nil)
 	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
 	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
+	fileFilterSvc.EXPECT().FilterWithQuery([]model.File{file}, FileQuery{Text: query.Text}, folder).Return([]model.File{file}, nil)
+	fileSortSvc.EXPECT().Sort([]model.File{file}, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.File{file})
 	fileMapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
 	workspaceRepo.EXPECT().Find(workspace.GetID()).Return(workspace, nil)
 	workspaceGuard.EXPECT().Authorize(gomock.Any(), workspace, model.PermissionViewer).Return(nil)
@@ -151,15 +156,16 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 	}
 }
 
-func TestFileListService_list(t *testing.T) {
+func TestFileListService_createList(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	fileCoreSvc := NewMockFileCoreService(ctrl)
+	fileSortSvc := NewMockFileSortService(ctrl)
 	fileMapper := NewMockFileMapper(ctrl)
 
-	svc := &FileListService{fileCoreSvc: fileCoreSvc, fileMapper: fileMapper}
+	svc := &FileListService{fileCoreSvc: fileCoreSvc, fileSortSvc: fileSortSvc, fileMapper: fileMapper}
 
 	parent := repo.NewFileWithOptions(repo.NewFileOptions{ID: "parent", Type: model.FileTypeFolder})
 	files := []model.File{
@@ -168,9 +174,10 @@ func TestFileListService_list(t *testing.T) {
 	}
 
 	fileCoreSvc.EXPECT().Authorize(gomock.Any(), files, model.PermissionViewer).Return(files, nil)
+	fileSortSvc.EXPECT().Sort(files, gomock.Any(), gomock.Any(), gomock.Any()).Return(files)
 	fileMapper.EXPECT().MapMany([]model.File{files[0], files[1]}, gomock.Any()).Return([]*File{{ID: files[0].GetID()}, {ID: files[1].GetID()}}, nil)
 
-	list, err := svc.list(files, parent, FileListOptions{Page: 1, Size: 10, SortBy: SortByName, SortOrder: SortOrderAsc}, "")
+	list, err := svc.createList(files, parent, FileListOptions{Page: 1, Size: 10, SortBy: SortByName, SortOrder: SortOrderAsc}, "")
 	if assert.NoError(t, err) {
 		assert.Len(t, list.Data, 2)
 		assert.Equal(t, files[0].GetID(), list.Data[0].ID)
@@ -182,46 +189,36 @@ func TestFileListService_list(t *testing.T) {
 	}
 }
 
-func TestFileListService_listWithQuery(t *testing.T) {
+func TestFileListService_createListWithQuery(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	fileRepo := repo.NewMockFileRepo(ctrl)
 	fileCoreSvc := NewMockFileCoreService(ctrl)
+	fileSortSvc := NewMockFileSortService(ctrl)
+	fileFilterSvc := NewMockFileFilterService(ctrl)
 	fileMapper := NewMockFileMapper(ctrl)
 
-	svc := &FileListService{fileRepo: fileRepo, fileCoreSvc: fileCoreSvc, fileMapper: fileMapper}
+	svc := &FileListService{
+		fileCoreSvc:   fileCoreSvc,
+		fileSortSvc:   fileSortSvc,
+		fileFilterSvc: fileFilterSvc,
+		fileMapper:    fileMapper,
+	}
 
 	parent := repo.NewFileWithOptions(repo.NewFileOptions{ID: "parent", Type: model.FileTypeFolder})
 	files := []model.File{
-		repo.NewFileWithOptions(repo.NewFileOptions{
-			ID:         "file_a",
-			Type:       model.FileTypeFile,
-			CreateTime: "2022-12-01T00:00:00Z",
-			UpdateTime: helper.ToPtr("2022-12-02T00:00:00Z"),
-		}),
-		repo.NewFileWithOptions(repo.NewFileOptions{
-			ID:         "file_b",
-			Type:       model.FileTypeFile,
-			CreateTime: "2023-01-01T00:00:00Z",
-			UpdateTime: helper.ToPtr("2023-01-01T00:00:00Z"),
-		}),
+		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_a", Type: model.FileTypeFile}),
+		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_b", Type: model.FileTypeFile}),
 	}
-	query := FileQuery{
-		Type:             helper.ToPtr(model.FileTypeFile),
-		CreateTimeAfter:  helper.ToPtr(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()),
-		CreateTimeBefore: helper.ToPtr(time.Date(2023, 1, 2, 0, 0, 0, 0, time.UTC).UnixMilli()),
-		UpdateTimeAfter:  helper.ToPtr(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()),
-		UpdateTimeBefore: helper.ToPtr(time.Date(2023, 1, 2, 0, 0, 0, 0, time.UTC).UnixMilli()),
-	}
+	query := FileQuery{}
 
-	fileRepo.EXPECT().IsGrandChildOf(files[0].GetID(), parent.GetID()).Return(true, nil)
-	fileRepo.EXPECT().IsGrandChildOf(files[1].GetID(), parent.GetID()).Return(true, nil)
 	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{files[1]}, model.PermissionViewer).Return([]model.File{files[1]}, nil)
+	fileSortSvc.EXPECT().Sort([]model.File{files[1]}, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.File{files[1]})
+	fileFilterSvc.EXPECT().FilterWithQuery(files, query, parent).Return([]model.File{files[1]}, nil)
 	fileMapper.EXPECT().MapMany([]model.File{files[1]}, gomock.Any()).Return([]*File{{ID: files[1].GetID()}}, nil)
 
-	list, err := svc.list(files, parent, FileListOptions{Page: 1, Size: 10, Query: &query}, "")
+	list, err := svc.createList(files, parent, FileListOptions{Page: 1, Size: 10, Query: &query}, "")
 	if assert.NoError(t, err) {
 		assert.Len(t, list.Data, 1)
 		assert.Equal(t, files[1].GetID(), list.Data[0].ID)
@@ -275,172 +272,6 @@ func TestFileListService_getChildren(t *testing.T) {
 	if assert.NoError(t, err) {
 		assert.Len(t, children, 1)
 		assert.Equal(t, file.GetID(), children[0].GetID())
-	}
-}
-
-func TestFileListService_sortByName(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	svc := &FileListService{}
-
-	files := []model.File{
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), Name: "b"}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), Name: "a"}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), Name: "c"}),
-	}
-
-	sorted := svc.sortByName(files, SortOrderAsc)
-	assert.Equal(t, "a", sorted[0].GetName())
-	assert.Equal(t, "b", sorted[1].GetName())
-	assert.Equal(t, "c", sorted[2].GetName())
-
-	sorted = svc.sortByName(files, SortOrderDesc)
-	assert.Equal(t, "c", sorted[0].GetName())
-	assert.Equal(t, "b", sorted[1].GetName())
-	assert.Equal(t, "a", sorted[2].GetName())
-}
-
-func TestFileListService_sortBySize(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	fileMapper := NewMockFileMapper(ctrl)
-	svc := &FileListService{
-		fileMapper: fileMapper,
-	}
-
-	files := []model.File{
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_a"}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_b"}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c"}),
-	}
-
-	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(100))}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(200))}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(50))}}}, nil).AnyTimes()
-
-	sorted := svc.sortBySize(files, SortOrderAsc, "")
-	assert.Equal(t, "file_c", sorted[0].GetID())
-	assert.Equal(t, "file_a", sorted[1].GetID())
-	assert.Equal(t, "file_b", sorted[2].GetID())
-
-	sorted = svc.sortBySize(files, SortOrderDesc, "")
-	assert.Equal(t, "file_b", sorted[0].GetID())
-	assert.Equal(t, "file_a", sorted[1].GetID())
-	assert.Equal(t, "file_c", sorted[2].GetID())
-}
-
-func TestFileListService_sortByDateCreated(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	svc := &FileListService{}
-
-	files := []model.File{
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_a", CreateTime: "2023-01-02T00:00:00Z"}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_b", CreateTime: "2023-01-01T00:00:00Z"}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c", CreateTime: "2023-01-03T00:00:00Z"}),
-	}
-
-	sorted := svc.sortByDateCreated(files, SortOrderAsc)
-	assert.Equal(t, "file_b", sorted[0].GetID())
-	assert.Equal(t, "file_a", sorted[1].GetID())
-	assert.Equal(t, "file_c", sorted[2].GetID())
-
-	sorted = svc.sortByDateCreated(files, SortOrderDesc)
-	assert.Equal(t, "file_c", sorted[0].GetID())
-	assert.Equal(t, "file_a", sorted[1].GetID())
-	assert.Equal(t, "file_b", sorted[2].GetID())
-}
-
-func TestFileListService_sortByDateModified(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	svc := &FileListService{}
-
-	files := []model.File{
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_a", UpdateTime: helper.ToPtr("2023-01-02T00:00:00Z")}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_b", UpdateTime: helper.ToPtr("2023-01-01T00:00:00Z")}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c", UpdateTime: helper.ToPtr("2023-01-03T00:00:00Z")}),
-	}
-
-	sorted := svc.sortByDateModified(files, SortOrderAsc)
-	assert.Equal(t, "file_b", sorted[0].GetID())
-	assert.Equal(t, "file_a", sorted[1].GetID())
-	assert.Equal(t, "file_c", sorted[2].GetID())
-
-	sorted = svc.sortByDateModified(files, SortOrderDesc)
-	assert.Equal(t, "file_c", sorted[0].GetID())
-	assert.Equal(t, "file_a", sorted[1].GetID())
-	assert.Equal(t, "file_b", sorted[2].GetID())
-}
-
-func TestFileListService_sortByKind(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	fileMapper := NewMockFileMapper(ctrl)
-	svc := &FileListService{fileMapper: fileMapper}
-
-	files := []model.File{
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_a", Type: model.FileTypeFile}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder_a", Type: model.FileTypeFolder}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_b", Type: model.FileTypeFile}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder_b", Type: model.FileTypeFolder}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c", Type: model.FileTypeFile}),
-		repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder_c", Type: model.FileTypeFolder}),
-	}
-
-	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
-
-	sorted := svc.sortByKind(files, "")
-	assert.Equal(t, "folder_a", sorted[0].GetID())
-	assert.Equal(t, "folder_b", sorted[1].GetID())
-	assert.Equal(t, "folder_c", sorted[2].GetID())
-	assert.Equal(t, "file_a", sorted[3].GetID())
-	assert.Equal(t, "file_b", sorted[4].GetID())
-	assert.Equal(t, "file_c", sorted[5].GetID())
-}
-
-func TestFileListService_filterWithQuery(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	fileRepo := repo.NewMockFileRepo(ctrl)
-
-	svc := &FileListService{fileRepo: fileRepo}
-
-	parent := repo.NewFileWithOptions(repo.NewFileOptions{ID: "parent", Type: model.FileTypeFolder})
-	file := repo.NewFileWithOptions(repo.NewFileOptions{
-		ID:         "file",
-		Type:       model.FileTypeFile,
-		CreateTime: "2023-01-01T00:00:00Z",
-		UpdateTime: helper.ToPtr("2023-01-01T00:00:00Z"),
-	})
-	query := FileQuery{
-		Type:             helper.ToPtr(model.FileTypeFile),
-		CreateTimeAfter:  helper.ToPtr(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()),
-		CreateTimeBefore: helper.ToPtr(time.Date(2023, 1, 2, 0, 0, 0, 0, time.UTC).UnixMilli()),
-		UpdateTimeAfter:  helper.ToPtr(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()),
-		UpdateTimeBefore: helper.ToPtr(time.Date(2023, 1, 2, 0, 0, 0, 0, time.UTC).UnixMilli()),
-	}
-
-	fileRepo.EXPECT().IsGrandChildOf(file.GetID(), parent.GetID()).Return(true, nil)
-
-	filtered, err := svc.filterWithQuery([]model.File{file}, query, parent)
-	if assert.NoError(t, err) {
-		assert.Len(t, filtered, 1)
-		assert.Equal(t, file.GetID(), filtered[0].GetID())
 	}
 }
 

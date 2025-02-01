@@ -29,8 +29,8 @@ type FileFetchService struct {
 	fileRepo       repo.FileRepo
 	fileSearch     search.FileSearch
 	fileGuard      guard.FileGuard
-	fileMapper     *fileMapper
-	fileCoreSvc    *fileCoreService
+	fileMapper     FileMapper
+	fileCoreSvc    FileCoreService
 	fileIdent      *infra.FileIdentifier
 	userRepo       repo.UserRepo
 	workspaceRepo  repo.WorkspaceRepo
@@ -44,8 +44,8 @@ func NewFileFetchService() *FileFetchService {
 		fileRepo:       repo.NewFileRepo(),
 		fileSearch:     search.NewFileSearch(),
 		fileGuard:      guard.NewFileGuard(),
-		fileMapper:     newFileMapper(),
-		fileCoreSvc:    newFileCoreService(),
+		fileMapper:     NewFileMapper(),
+		fileCoreSvc:    NewFileCoreService(),
 		fileIdent:      infra.NewFileIdentifier(),
 		userRepo:       repo.NewUserRepo(),
 		workspaceRepo:  repo.NewWorkspaceRepo(),

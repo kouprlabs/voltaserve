@@ -21,7 +21,7 @@ type FilePermissionService struct {
 	fileCache      cache.FileCache
 	fileRepo       repo.FileRepo
 	fileGuard      guard.FileGuard
-	fileCoreSvc    *fileCoreService
+	fileCoreSvc    FileCoreService
 	userRepo       repo.UserRepo
 	userMapper     *userMapper
 	workspaceRepo  repo.WorkspaceRepo
@@ -37,7 +37,7 @@ func NewFilePermissionService() *FilePermissionService {
 		fileCache:      cache.NewFileCache(),
 		fileRepo:       repo.NewFileRepo(),
 		fileGuard:      guard.NewFileGuard(),
-		fileCoreSvc:    newFileCoreService(),
+		fileCoreSvc:    NewFileCoreService(),
 		userRepo:       repo.NewUserRepo(),
 		userMapper:     newUserMapper(),
 		workspaceRepo:  repo.NewWorkspaceRepo(),

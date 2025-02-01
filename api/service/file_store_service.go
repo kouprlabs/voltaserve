@@ -27,8 +27,8 @@ import (
 
 type FileStoreService struct {
 	fileCache      cache.FileCache
-	fileCoreSvc    *fileCoreService
-	fileMapper     *fileMapper
+	fileCoreSvc    FileCoreService
+	fileMapper     FileMapper
 	workspaceCache cache.WorkspaceCache
 	snapshotRepo   repo.SnapshotRepo
 	snapshotCache  cache.SnapshotCache
@@ -42,8 +42,8 @@ type FileStoreService struct {
 func NewFileStoreService() *FileStoreService {
 	return &FileStoreService{
 		fileCache:      cache.NewFileCache(),
-		fileCoreSvc:    newFileCoreService(),
-		fileMapper:     newFileMapper(),
+		fileCoreSvc:    NewFileCoreService(),
+		fileMapper:     NewFileMapper(),
 		workspaceCache: cache.NewWorkspaceCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
 		snapshotCache:  cache.NewSnapshotCache(),

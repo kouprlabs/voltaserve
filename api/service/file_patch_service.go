@@ -22,8 +22,8 @@ type FilePatchService struct {
 	fileCache   cache.FileCache
 	fileRepo    repo.FileRepo
 	fileGuard   guard.FileGuard
-	fileCoreSvc *fileCoreService
-	fileMapper  *fileMapper
+	fileCoreSvc FileCoreService
+	fileMapper  FileMapper
 }
 
 func NewFilePatchService() *FilePatchService {
@@ -31,8 +31,8 @@ func NewFilePatchService() *FilePatchService {
 		fileCache:   cache.NewFileCache(),
 		fileRepo:    repo.NewFileRepo(),
 		fileGuard:   guard.NewFileGuard(),
-		fileCoreSvc: newFileCoreService(),
-		fileMapper:  newFileMapper(),
+		fileCoreSvc: NewFileCoreService(),
+		fileMapper:  NewFileMapper(),
 	}
 }
 

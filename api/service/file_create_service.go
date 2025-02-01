@@ -25,8 +25,8 @@ type FileCreateService struct {
 	fileSearch  search.FileSearch
 	fileCache   cache.FileCache
 	fileGuard   guard.FileGuard
-	fileMapper  *fileMapper
-	fileCoreSvc *fileCoreService
+	fileMapper  FileMapper
+	fileCoreSvc FileCoreService
 }
 
 func NewFileCreateService() *FileCreateService {
@@ -35,8 +35,8 @@ func NewFileCreateService() *FileCreateService {
 		fileSearch:  search.NewFileSearch(),
 		fileCache:   cache.NewFileCache(),
 		fileGuard:   guard.NewFileGuard(),
-		fileMapper:  newFileMapper(),
-		fileCoreSvc: newFileCoreService(),
+		fileMapper:  NewFileMapper(),
+		fileCoreSvc: NewFileCoreService(),
 	}
 }
 

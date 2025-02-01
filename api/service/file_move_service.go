@@ -28,8 +28,8 @@ type FileMoveService struct {
 	fileSearch  search.FileSearch
 	fileCache   cache.FileCache
 	fileGuard   guard.FileGuard
-	fileMapper  *fileMapper
-	fileCoreSvc *fileCoreService
+	fileMapper  FileMapper
+	fileCoreSvc FileCoreService
 	taskSvc     *TaskService
 }
 
@@ -39,8 +39,8 @@ func NewFileMoveService() *FileMoveService {
 		fileSearch:  search.NewFileSearch(),
 		fileCache:   cache.NewFileCache(),
 		fileGuard:   guard.NewFileGuard(),
-		fileMapper:  newFileMapper(),
-		fileCoreSvc: newFileCoreService(),
+		fileMapper:  NewFileMapper(),
+		fileCoreSvc: NewFileCoreService(),
 		taskSvc:     NewTaskService(),
 	}
 }
