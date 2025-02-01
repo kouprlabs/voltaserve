@@ -79,7 +79,7 @@ func (svc *FilePermissionService) GrantUserPermission(ids []string, assigneeID s
 			return err
 		}
 		for _, f := range path {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
+			if err := svc.fileCoreSvc.Sync(f); err != nil {
 				return err
 			}
 		}
@@ -88,7 +88,7 @@ func (svc *FilePermissionService) GrantUserPermission(ids []string, assigneeID s
 			return err
 		}
 		for _, f := range tree {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
+			if err := svc.fileCoreSvc.Sync(f); err != nil {
 				return err
 			}
 		}
@@ -161,7 +161,7 @@ func (svc *FilePermissionService) GrantGroupPermission(ids []string, groupID str
 			return err
 		}
 		for _, f := range path {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
+			if err := svc.fileCoreSvc.Sync(f); err != nil {
 				return err
 			}
 		}
@@ -170,7 +170,7 @@ func (svc *FilePermissionService) GrantGroupPermission(ids []string, groupID str
 			return err
 		}
 		for _, f := range tree {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
+			if err := svc.fileCoreSvc.Sync(f); err != nil {
 				return err
 			}
 		}

@@ -32,7 +32,7 @@ type FileListService struct {
 	fileRepo       repo.FileRepo
 	fileSearch     search.FileSearch
 	fileGuard      guard.FileGuard
-	fileCoreSvc    *fileCoreService
+	fileCoreSvc    FileCoreService
 	fileMapper     FileMapper
 	fileIdent      *infra.FileIdentifier
 	workspaceRepo  repo.WorkspaceRepo
@@ -193,7 +193,7 @@ func (svc *FileListService) list(data []model.File, parent model.File, opts File
 	} else {
 		filtered = data
 	}
-	authorized, err := svc.fileCoreSvc.authorize(filtered, userID)
+	authorized, err := svc.fileCoreSvc.Authorize(userID, filtered, model.PermissionViewer)
 	if err != nil {
 		return nil, err
 	}

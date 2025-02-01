@@ -105,7 +105,7 @@ func (svc *FileMoveService) createTask(file model.File, userID string) (model.Ta
 
 func (svc *FileMoveService) check(source model.File, target model.File, userID string) error {
 	if source.GetParentID() != nil {
-		existing, err := svc.fileCoreSvc.getChildWithName(target.GetID(), source.GetName())
+		existing, err := svc.fileCoreSvc.GetChildWithName(target.GetID(), source.GetName())
 		if err != nil {
 			return err
 		}
@@ -144,14 +144,14 @@ func (svc *FileMoveService) refreshUpdateAndCreateTime(source model.File, target
 	if err := svc.fileRepo.Save(source); err != nil {
 		return err
 	}
-	if err := svc.fileCoreSvc.sync(source); err != nil {
+	if err := svc.fileCoreSvc.Sync(source); err != nil {
 		return err
 	}
 	target.SetUpdateTime(&now)
 	if err := svc.fileRepo.Save(target); err != nil {
 		return err
 	}
-	if err := svc.fileCoreSvc.sync(target); err != nil {
+	if err := svc.fileCoreSvc.Sync(target); err != nil {
 		return err
 	}
 	return nil

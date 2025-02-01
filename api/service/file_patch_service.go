@@ -42,7 +42,7 @@ func (svc *FilePatchService) PatchName(id string, name string, userID string) (*
 		return nil, err
 	}
 	if file.GetParentID() != nil {
-		existing, err := svc.fileCoreSvc.getChildWithName(*file.GetParentID(), name)
+		existing, err := svc.fileCoreSvc.GetChildWithName(*file.GetParentID(), name)
 		if err != nil {
 			return nil, err
 		}
@@ -57,7 +57,7 @@ func (svc *FilePatchService) PatchName(id string, name string, userID string) (*
 	if err = svc.fileRepo.Save(file); err != nil {
 		return nil, err
 	}
-	if err := svc.fileCoreSvc.sync(file); err != nil {
+	if err := svc.fileCoreSvc.Sync(file); err != nil {
 		return nil, err
 	}
 	res, err := svc.fileMapper.MapOne(file, userID)

@@ -220,7 +220,7 @@ func (svc *FileFetchService) getAuthorizedChildren(id string, userID string) ([]
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.fileCoreSvc.authorizeIDs(childrenIDs, userID)
+	authorized, err := svc.fileCoreSvc.AuthorizeIDs(userID, childrenIDs, model.PermissionViewer)
 	if err != nil {
 		return nil, err
 	}

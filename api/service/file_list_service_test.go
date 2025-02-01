@@ -61,6 +61,7 @@ func TestFileListService_List(t *testing.T) {
 	fileCache := cache.NewMockFileCache(ctrl)
 	fileRepo := repo.NewMockFileRepo(ctrl)
 	fileGuard := guard.NewMockFileGuard(ctrl)
+	fileCoreSvc := NewMockFileCoreService(ctrl)
 	mapper := NewMockFileMapper(ctrl)
 	workspaceRepo := repo.NewMockWorkspaceRepo(ctrl)
 	workspaceGuard := guard.NewMockWorkspaceGuard(ctrl)
@@ -69,7 +70,7 @@ func TestFileListService_List(t *testing.T) {
 		fileCache:      fileCache,
 		fileRepo:       fileRepo,
 		fileGuard:      fileGuard,
-		fileCoreSvc:    &fileCoreService{fileRepo: fileRepo, fileCache: fileCache, fileGuard: fileGuard},
+		fileCoreSvc:    fileCoreSvc,
 		fileMapper:     mapper,
 		workspaceRepo:  workspaceRepo,
 		workspaceGuard: workspaceGuard,
@@ -81,8 +82,8 @@ func TestFileListService_List(t *testing.T) {
 	fileCache.EXPECT().Get(folder.GetID()).Return(folder, nil).Times(1)
 	fileCache.EXPECT().Get(file.GetID()).Return(file, nil).Times(1)
 	fileRepo.EXPECT().FindChildrenIDs(folder.GetID()).Return([]string{file.GetID()}, nil)
-	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
-	fileGuard.EXPECT().IsAuthorized(gomock.Any(), file, model.PermissionViewer).Return(true)
+	fileGuard.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return(nil)
+	fileCoreSvc.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return([]model.File{file}, nil)
 	mapper.EXPECT().MapMany(gomock.Any(), gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
 	workspaceRepo.EXPECT().Find(gomock.Any()).Return(repo.NewWorkspace(), nil)
 	workspaceGuard.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return(nil)
@@ -150,6 +151,7 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 	fileRepo := repo.NewMockFileRepo(ctrl)
 	fileSearch := search.NewMockFileSearch(ctrl)
 	fileGuard := guard.NewMockFileGuard(ctrl)
+	fileCoreSvc := NewMockFileCoreService(ctrl)
 	mapper := NewMockFileMapper(ctrl)
 	workspaceRepo := repo.NewMockWorkspaceRepo(ctrl)
 	workspaceGuard := guard.NewMockWorkspaceGuard(ctrl)
@@ -160,7 +162,7 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 		fileSearch:     fileSearch,
 		fileGuard:      fileGuard,
 		fileMapper:     mapper,
-		fileCoreSvc:    &fileCoreService{fileRepo: fileRepo, fileCache: fileCache, fileGuard: fileGuard},
+		fileCoreSvc:    fileCoreSvc,
 		workspaceRepo:  workspaceRepo,
 		workspaceGuard: workspaceGuard,
 	}
@@ -172,8 +174,8 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
 	fileRepo.EXPECT().IsGrandChildOf(file.GetID(), folder.GetID()).Return(true, nil)
 	fileSearch.EXPECT().Query(gomock.Any(), gomock.Any()).Return([]model.File{file}, nil)
-	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
-	fileGuard.EXPECT().IsAuthorized(gomock.Any(), file, model.PermissionViewer).Return(true)
+	fileGuard.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return(nil)
+	fileCoreSvc.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return([]model.File{file}, nil)
 	mapper.EXPECT().MapMany(gomock.Any(), gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
 	workspaceRepo.EXPECT().Find(gomock.Any()).Return(repo.NewWorkspace(), nil)
 	workspaceGuard.EXPECT().Authorize(gomock.Any(), gomock.Any(), model.PermissionViewer).Return(nil)

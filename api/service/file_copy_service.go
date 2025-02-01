@@ -173,7 +173,7 @@ func (svc *FileCopyService) cloneTree(source model.File, target model.File, tree
 		clones[index].SetParentID(&id)
 	}
 	root.SetParentID(helper.ToPtr(target.GetID()))
-	existing, err := svc.fileCoreSvc.getChildWithName(target.GetID(), root.GetName())
+	existing, err := svc.fileCoreSvc.GetChildWithName(target.GetID(), root.GetName())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -254,7 +254,7 @@ func (svc *FileCopyService) refreshUpdateTime(target model.File) error {
 	if err := svc.fileRepo.Save(target); err != nil {
 		return err
 	}
-	if err := svc.fileCoreSvc.sync(target); err != nil {
+	if err := svc.fileCoreSvc.Sync(target); err != nil {
 		return err
 	}
 	return nil

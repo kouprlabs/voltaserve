@@ -186,7 +186,7 @@ func (svc *FileStoreService) createSnapshot(file model.File, props fileStoreProp
 
 func (svc *FileStoreService) assignSnapshotToFile(file model.File, snapshot model.Snapshot) error {
 	file.SetSnapshotID(helper.ToPtr(snapshot.GetID()))
-	if err := svc.fileCoreSvc.saveAndSync(file); err != nil {
+	if err := svc.fileCoreSvc.SaveAndSync(file); err != nil {
 		return err
 	}
 	if err := svc.snapshotRepo.MapWithFile(snapshot.GetID(), file.GetID()); err != nil {
