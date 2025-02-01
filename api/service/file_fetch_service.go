@@ -64,7 +64,7 @@ func (svc *FileFetchService) Find(ids []string, userID string) ([]*File, error) 
 		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 			return nil, err
 		}
-		mapped, err := svc.fileMapper.mapOne(file, userID)
+		mapped, err := svc.fileMapper.MapOne(file, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func (svc *FileFetchService) FindByPath(path string, userID string) (*File, erro
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (svc *FileFetchService) ListByPath(path string, userID string) ([]*File, er
 		if err != nil {
 			return nil, err
 		}
-		res, err := svc.fileMapper.mapMany(children, userID)
+		res, err := svc.fileMapper.MapMany(children, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -254,7 +254,7 @@ func (svc *FileFetchService) FindPath(id string, userID string) ([]*File, error)
 	}
 	res := make([]*File, 0)
 	for _, file := range path {
-		f, err := svc.fileMapper.mapOne(file, userID)
+		f, err := svc.fileMapper.MapOne(file, userID)
 		if err != nil {
 			return nil, err
 		}

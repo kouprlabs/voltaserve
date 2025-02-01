@@ -86,7 +86,7 @@ func (svc *FileStoreService) Store(id string, opts FileStoreOptions, userID stri
 			return nil, err
 		}
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}

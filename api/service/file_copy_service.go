@@ -91,7 +91,7 @@ func (svc *FileCopyService) copy(source model.File, target model.File, userID st
 	if err := svc.refreshUpdateTime(target); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(root, userID)
+	res, err := svc.fileMapper.MapOne(root, userID)
 	if err != nil {
 		return nil, err
 	}

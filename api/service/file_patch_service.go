@@ -60,7 +60,7 @@ func (svc *FilePatchService) PatchName(id string, name string, userID string) (*
 	if err := svc.fileCoreSvc.sync(file); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}

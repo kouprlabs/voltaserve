@@ -33,7 +33,7 @@ type FileListService struct {
 	fileSearch     search.FileSearch
 	fileGuard      guard.FileGuard
 	fileCoreSvc    *fileCoreService
-	fileMapper     *fileMapper
+	fileMapper     FileMapper
 	fileIdent      *infra.FileIdentifier
 	workspaceRepo  repo.WorkspaceRepo
 	workspaceGuard guard.WorkspaceGuard
@@ -199,7 +199,7 @@ func (svc *FileListService) list(data []model.File, parent model.File, opts File
 	}
 	sorted := svc.sort(authorized, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mappedData, err := svc.fileMapper.mapMany(paged, userID)
+	mappedData, err := svc.fileMapper.MapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -242,11 +242,11 @@ func (svc *FileListService) sortByName(data []model.File, sortOrder string) []mo
 
 func (svc *FileListService) sortBySize(data []model.File, sortOrder string, userID string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
-		fileA, err := svc.fileMapper.mapOne(data[i], userID)
+		fileA, err := svc.fileMapper.MapOne(data[i], userID)
 		if err != nil {
 			return false
 		}
-		fileB, err := svc.fileMapper.mapOne(data[j], userID)
+		fileB, err := svc.fileMapper.MapOne(data[j], userID)
 		if err != nil {
 			return false
 		}
@@ -299,27 +299,16 @@ func (svc *FileListService) sortByDateModified(data []model.File, sortOrder stri
 
 func (svc *FileListService) sortByKind(data []model.File, userID string) []model.File {
 	var res []model.File
-	res = append(res, svc.filterFolders(data)...)
-	res = append(res, svc.filterFiles(data)...)
-	res = append(res, svc.filterImages(data, userID)...)
-	res = append(res, svc.filterPDFs(data, userID)...)
-	res = append(res, svc.filterDocuments(data, userID)...)
-	res = append(res, svc.filterVideos(data, userID)...)
-	res = append(res, svc.filterTexts(data, userID)...)
-	res = append(res, svc.filterOthers(data, userID)...)
-	return res
-}
-
-func (svc *FileListService) getFromCache(data []interface{}) []model.File {
-	var res []model.File
-	for _, v := range data {
-		var file model.File
-		file, err := svc.fileCache.Get(v.(model.File).GetID())
-		if err != nil {
-			continue
-		}
-		res = append(res, file)
-	}
+	folders := svc.filterFolders(data)
+	files := svc.filterFiles(data)
+	res = append(res, folders...)
+	res = append(res, files...)
+	res = append(res, svc.filterImages(files, userID)...)
+	res = append(res, svc.filterPDFs(files, userID)...)
+	res = append(res, svc.filterDocuments(files, userID)...)
+	res = append(res, svc.filterVideos(files, userID)...)
+	res = append(res, svc.filterTexts(files, userID)...)
+	res = append(res, svc.filterOthers(files, userID)...)
 	return res
 }
 
@@ -329,7 +318,11 @@ func (svc *FileListService) filterFolders(data []model.File) []model.File {
 			return v.(model.File).GetType() == model.FileTypeFolder
 		}).
 		ToSlice(0)
-	return svc.getFromCache(folders)
+	var res []model.File
+	for _, v := range folders {
+		res = append(res, v.(model.File))
+	}
+	return res
 }
 
 func (svc *FileListService) filterFiles(data []model.File) []model.File {
@@ -338,13 +331,17 @@ func (svc *FileListService) filterFiles(data []model.File) []model.File {
 			return v.(model.File).GetType() == model.FileTypeFile
 		}).
 		ToSlice(0)
-	return svc.getFromCache(files)
+	var res []model.File
+	for _, v := range files {
+		res = append(res, v.(model.File))
+	}
+	return res
 }
 
 func (svc *FileListService) filterImages(data []model.File, userID string) []model.File {
 	images, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -357,13 +354,17 @@ func (svc *FileListService) filterImages(data []model.File, userID string) []mod
 			return false
 		}).
 		ToSlice(0)
-	return svc.getFromCache(images)
+	var res []model.File
+	for _, v := range images {
+		res = append(res, v.(model.File))
+	}
+	return res
 }
 
 func (svc *FileListService) filterPDFs(data []model.File, userID string) []model.File {
 	pdfs, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -376,13 +377,17 @@ func (svc *FileListService) filterPDFs(data []model.File, userID string) []model
 			return false
 		}).
 		ToSlice(0)
-	return svc.getFromCache(pdfs)
+	var res []model.File
+	for _, v := range pdfs {
+		res = append(res, v.(model.File))
+	}
+	return res
 }
 
 func (svc *FileListService) filterDocuments(data []model.File, userID string) []model.File {
 	documents, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -395,13 +400,17 @@ func (svc *FileListService) filterDocuments(data []model.File, userID string) []
 			return false
 		}).
 		ToSlice(0)
-	return svc.getFromCache(documents)
+	var res []model.File
+	for _, v := range documents {
+		res = append(res, v.(model.File))
+	}
+	return res
 }
 
 func (svc *FileListService) filterVideos(data []model.File, userID string) []model.File {
 	videos, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -414,13 +423,17 @@ func (svc *FileListService) filterVideos(data []model.File, userID string) []mod
 			return false
 		}).
 		ToSlice(0)
-	return svc.getFromCache(videos)
+	var res []model.File
+	for _, v := range videos {
+		res = append(res, v.(model.File))
+	}
+	return res
 }
 
 func (svc *FileListService) filterTexts(data []model.File, userID string) []model.File {
 	texts, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -433,13 +446,17 @@ func (svc *FileListService) filterTexts(data []model.File, userID string) []mode
 			return false
 		}).
 		ToSlice(0)
-	return svc.getFromCache(texts)
+	var res []model.File
+	for _, v := range texts {
+		res = append(res, v.(model.File))
+	}
+	return res
 }
 
 func (svc *FileListService) filterOthers(data []model.File, userID string) []model.File {
 	others, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -457,7 +474,11 @@ func (svc *FileListService) filterOthers(data []model.File, userID string) []mod
 			return false
 		}).
 		ToSlice(0)
-	return svc.getFromCache(others)
+	var res []model.File
+	for _, v := range others {
+		res = append(res, v.(model.File))
+	}
+	return res
 }
 
 func (svc *FileListService) paginate(data []model.File, page, size uint64) (pageData []model.File, totalElements uint64, totalPages uint64) {
@@ -531,12 +552,7 @@ func (svc *FileListService) filterWithQuery(data []model.File, opts FileQuery, p
 		ToSlice(0)
 	var res []model.File
 	for _, v := range filtered {
-		var file model.File
-		file, err := svc.fileCache.Get(v.(model.File).GetID())
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, file)
+		res = append(res, v.(model.File))
 	}
 	return res, nil
 }

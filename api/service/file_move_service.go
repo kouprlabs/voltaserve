@@ -81,7 +81,7 @@ func (svc *FileMoveService) move(source model.File, target model.File, userID st
 	if err := svc.refreshUpdateAndCreateTime(source, target); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(source, userID)
+	res, err := svc.fileMapper.MapOne(source, userID)
 	if err != nil {
 		return nil, err
 	}

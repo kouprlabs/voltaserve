@@ -99,7 +99,7 @@ func (svc *FileCreateService) create(opts FileCreateOptions, userID string) (*Fi
 			return nil, err
 		}
 		if existing != nil {
-			res, err := svc.fileMapper.mapOne(existing, userID)
+			res, err := svc.fileMapper.MapOne(existing, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -125,7 +125,7 @@ func (svc *FileCreateService) create(opts FileCreateOptions, userID string) (*Fi
 	if err = svc.fileSearch.Index([]model.File{file}); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}
