@@ -2,7 +2,7 @@
 // Source: guard/organization_guard.go
 
 // Package mocks is a generated GoMock package.
-package mocks
+package guard
 
 import (
 	reflect "reflect"

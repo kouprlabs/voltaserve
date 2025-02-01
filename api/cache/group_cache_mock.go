@@ -2,7 +2,7 @@
 // Source: cache/group_cache.go
 
 // Package mocks is a generated GoMock package.
-package mocks
+package cache
 
 import (
 	reflect "reflect"

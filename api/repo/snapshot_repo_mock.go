@@ -2,7 +2,7 @@
 // Source: repo/snapshot_repo.go
 
 // Package mocks is a generated GoMock package.
-package mocks
+package repo
 
 import (
 	reflect "reflect"
@@ -10,7 +10,6 @@ import (
 	gomock "github.com/golang/mock/gomock"
 
 	model "github.com/kouprlabs/voltaserve/api/model"
-	repo "github.com/kouprlabs/voltaserve/api/repo"
 )
 
 // MockSnapshotRepo is a mock of SnapshotRepo interface.
@@ -51,7 +50,7 @@ func (mr *MockSnapshotRepoMockRecorder) Attach(sourceFileID, targetFileID interf
 }
 
 // BulkMapWithFile mocks base method.
-func (m *MockSnapshotRepo) BulkMapWithFile(entities []*repo.SnapshotFileEntity, chunkSize int) error {
+func (m *MockSnapshotRepo) BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BulkMapWithFile", entities, chunkSize)
 	ret0, _ := ret[0].(error)
@@ -342,7 +341,7 @@ func (mr *MockSnapshotRepoMockRecorder) Save(snapshot interface{}) *gomock.Call 
 }
 
 // Update mocks base method.
-func (m *MockSnapshotRepo) Update(id string, opts repo.SnapshotUpdateOptions) error {
+func (m *MockSnapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", id, opts)
 	ret0, _ := ret[0].(error)

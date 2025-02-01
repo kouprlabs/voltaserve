@@ -2,7 +2,7 @@
 // Source: repo/file_repo.go
 
 // Package mocks is a generated GoMock package.
-package mocks
+package repo
 
 import (
 	reflect "reflect"
@@ -10,7 +10,6 @@ import (
 	gomock "github.com/golang/mock/gomock"
 
 	model "github.com/kouprlabs/voltaserve/api/model"
-	repo "github.com/kouprlabs/voltaserve/api/repo"
 )
 
 // MockFileRepo is a mock of FileRepo interface.
@@ -315,7 +314,7 @@ func (mr *MockFileRepoMockRecorder) GrantUserPermission(id, userID, permission i
 }
 
 // Insert mocks base method.
-func (m *MockFileRepo) Insert(opts repo.FileInsertOptions) (model.File, error) {
+func (m *MockFileRepo) Insert(opts FileInsertOptions) (model.File, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Insert", opts)
 	ret0, _ := ret[0].(model.File)
