@@ -104,7 +104,7 @@ func TestFileListService_Search(t *testing.T) {
 	fileSearch := search.NewMockFileSearch(ctrl)
 
 	svc := &FileListService{fileCache: fileCache, fileSearch: fileSearch}
-	
+
 	query := &FileQuery{Text: helper.ToPtr("search term"), Type: helper.ToPtr(model.FileTypeFile)}
 	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), Type: model.FileTypeFile})
 
