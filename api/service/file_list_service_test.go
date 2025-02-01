@@ -62,7 +62,7 @@ func TestFileListService_List(t *testing.T) {
 	fileRepo := repo.NewMockFileRepo(ctrl)
 	fileGuard := guard.NewMockFileGuard(ctrl)
 	fileCoreSvc := NewMockFileCoreService(ctrl)
-	mapper := NewMockFileMapper(ctrl)
+	fileMapper := NewMockFileMapper(ctrl)
 	workspaceRepo := repo.NewMockWorkspaceRepo(ctrl)
 	workspaceGuard := guard.NewMockWorkspaceGuard(ctrl)
 
@@ -71,7 +71,7 @@ func TestFileListService_List(t *testing.T) {
 		fileRepo:       fileRepo,
 		fileGuard:      fileGuard,
 		fileCoreSvc:    fileCoreSvc,
-		fileMapper:     mapper,
+		fileMapper:     fileMapper,
 		workspaceRepo:  workspaceRepo,
 		workspaceGuard: workspaceGuard,
 	}
@@ -85,7 +85,7 @@ func TestFileListService_List(t *testing.T) {
 	fileRepo.EXPECT().FindChildrenIDs(folder.GetID()).Return([]string{file.GetID()}, nil)
 	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
 	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
-	mapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
+	fileMapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
 	workspaceRepo.EXPECT().Find(workspace.GetID()).Return(workspace, nil)
 	workspaceGuard.EXPECT().Authorize(gomock.Any(), workspace, model.PermissionViewer).Return(nil)
 
@@ -110,7 +110,7 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 	fileSearch := search.NewMockFileSearch(ctrl)
 	fileGuard := guard.NewMockFileGuard(ctrl)
 	fileCoreSvc := NewMockFileCoreService(ctrl)
-	mapper := NewMockFileMapper(ctrl)
+	fileMapper := NewMockFileMapper(ctrl)
 	workspaceRepo := repo.NewMockWorkspaceRepo(ctrl)
 	workspaceGuard := guard.NewMockWorkspaceGuard(ctrl)
 
@@ -119,7 +119,7 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 		fileRepo:       fileRepo,
 		fileSearch:     fileSearch,
 		fileGuard:      fileGuard,
-		fileMapper:     mapper,
+		fileMapper:     fileMapper,
 		fileCoreSvc:    fileCoreSvc,
 		workspaceRepo:  workspaceRepo,
 		workspaceGuard: workspaceGuard,
@@ -136,7 +136,7 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 	fileSearch.EXPECT().Query(*query.Text, gomock.Any()).Return([]model.File{file}, nil)
 	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
 	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
-	mapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
+	fileMapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
 	workspaceRepo.EXPECT().Find(workspace.GetID()).Return(workspace, nil)
 	workspaceGuard.EXPECT().Authorize(gomock.Any(), workspace, model.PermissionViewer).Return(nil)
 
@@ -307,9 +307,9 @@ func TestFileListService_sortBySize(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mapper := NewMockFileMapper(ctrl)
+	fileMapper := NewMockFileMapper(ctrl)
 	svc := &FileListService{
-		fileMapper: mapper,
+		fileMapper: fileMapper,
 	}
 
 	files := []model.File{
@@ -318,9 +318,9 @@ func TestFileListService_sortBySize(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c"}),
 	}
 
-	mapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(100))}}}, nil).AnyTimes()
-	mapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(200))}}}, nil).AnyTimes()
-	mapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(50))}}}, nil).AnyTimes()
+	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(100))}}}, nil).AnyTimes()
+	fileMapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(200))}}}, nil).AnyTimes()
+	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(50))}}}, nil).AnyTimes()
 
 	sorted := svc.sortBySize(files, SortOrderAsc, "")
 	assert.Equal(t, "file_c", sorted[0].GetID())
@@ -386,8 +386,8 @@ func TestFileListService_sortByKind(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mapper := NewMockFileMapper(ctrl)
-	svc := &FileListService{fileMapper: mapper}
+	fileMapper := NewMockFileMapper(ctrl)
+	svc := &FileListService{fileMapper: fileMapper}
 
 	files := []model.File{
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_a", Type: model.FileTypeFile}),
@@ -398,9 +398,9 @@ func TestFileListService_sortByKind(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder_c", Type: model.FileTypeFolder}),
 	}
 
-	mapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
-	mapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
-	mapper.EXPECT().MapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().MapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
 
 	sorted := svc.sortByKind(files, "")
 	assert.Equal(t, "folder_a", sorted[0].GetID())
