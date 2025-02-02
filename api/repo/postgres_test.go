@@ -17,7 +17,7 @@ import (
 func TestPostgres(t *testing.T) {
 	t.Setenv("PORT", "0")
 	t.Setenv("POSTGRES_URL", "postgres://postgres:postgres@localhost:15432/postgres?sslmode=disable")
-	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(15432))
+	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(15432).Logger(nil))
 	if err := postgres.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -30,7 +30,7 @@ func TestPostgres(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+	if err := m.Up(); err != nil {
 		t.Fatal(err)
 	}
 	orgRepo := repo.NewOrganizationRepo()
