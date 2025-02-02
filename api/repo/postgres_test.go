@@ -43,11 +43,9 @@ func TestPostgres(t *testing.T) {
 	}
 	workspaceRepo := repo.NewWorkspaceRepo()
 	workspace, err := workspaceRepo.Insert(repo.WorkspaceInsertOptions{
-		ID:              helper.NewID(),
-		Name:            "wokrspace",
-		StorageCapacity: 100000,
-		OrganizationID:  org.GetID(),
-		Bucket:          "bucket",
+		ID:             helper.NewID(),
+		Name:           "wokrspace",
+		OrganizationID: org.GetID(),
 	})
 	if err != nil {
 		t.Fatal(err)
