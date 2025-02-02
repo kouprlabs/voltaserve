@@ -40,7 +40,7 @@ func TestFileComputeService_ComputeSize(t *testing.T) {
 	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file"})
 	expectedSize := int64(1024)
 
-	fileCache.EXPECT().Get(file.GetID()).Return(file, nil).Times(1)
+	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
 	fileGuard.EXPECT().Authorize(gomock.Any(), file, model.PermissionViewer).Return(nil)
 	fileRepo.EXPECT().ComputeSize(file.GetID()).Return(expectedSize, nil)
 
@@ -68,9 +68,9 @@ func TestFileComputeService_Count(t *testing.T) {
 	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file"})
 	expectedCount := int64(10)
 
-	fileCache.EXPECT().Get(file.GetID()).Return(file, nil).Times(1)
-	fileGuard.EXPECT().Authorize("", file, model.PermissionViewer).Return(nil).Times(1)
-	fileRepo.EXPECT().CountItems(file.GetID()).Return(expectedCount, nil).Times(1)
+	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
+	fileGuard.EXPECT().Authorize("", file, model.PermissionViewer).Return(nil)
+	fileRepo.EXPECT().CountItems(file.GetID()).Return(expectedCount, nil)
 
 	count, err := svc.Count(file.GetID(), "")
 	if assert.NoError(t, err) {

@@ -24,7 +24,7 @@ type StorageService struct {
 	fileRepo       repo.FileRepo
 	fileCache      cache.FileCache
 	fileGuard      guard.FileGuard
-	storageMapper  *storageMapper
+	storageMapper  StorageMapper
 }
 
 func NewStorageService() *StorageService {

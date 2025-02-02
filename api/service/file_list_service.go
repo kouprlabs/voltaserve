@@ -42,10 +42,10 @@ func NewFileListService() *FileListService {
 		fileRepo:       repo.NewFileRepo(),
 		fileSearch:     search.NewFileSearch(),
 		fileGuard:      guard.NewFileGuard(),
-		fileCoreSvc:    NewFileCoreService(),
-		fileFilterSvc:  NewFileFilterService(),
-		fileSortSvc:    NewFileSortService(),
-		fileMapper:     NewFileMapper(),
+		fileCoreSvc:    newFileCoreService(),
+		fileFilterSvc:  newFileFilterService(),
+		fileSortSvc:    newFileSortService(),
+		fileMapper:     newFileMapper(),
 		workspaceRepo:  repo.NewWorkspaceRepo(),
 		workspaceGuard: guard.NewWorkspaceGuard(),
 	}
@@ -184,20 +184,20 @@ func (svc *FileListService) createList(data []model.File, parent model.File, opt
 	var filtered []model.File
 	var err error
 	if opts.Query != nil {
-		filtered, err = svc.fileFilterSvc.FilterWithQuery(data, *opts.Query, parent)
+		filtered, err = svc.fileFilterSvc.filterWithQuery(data, *opts.Query, parent)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		filtered = data
 	}
-	authorized, err := svc.fileCoreSvc.Authorize(userID, filtered, model.PermissionViewer)
+	authorized, err := svc.fileCoreSvc.authorize(userID, filtered, model.PermissionViewer)
 	if err != nil {
 		return nil, err
 	}
-	sorted := svc.fileSortSvc.Sort(authorized, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.fileSortSvc.sort(authorized, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mappedData, err := svc.fileMapper.MapMany(paged, userID)
+	mappedData, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}

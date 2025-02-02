@@ -25,6 +25,9 @@ type Task interface {
 	GetStatus() string
 	GetPayload() map[string]string
 	HasError() bool
+	GetCreateTime() string
+	GetUpdateTime() *string
+	SetID(string)
 	SetName(string)
 	SetError(*string)
 	SetPercentage(*int)
@@ -32,6 +35,6 @@ type Task interface {
 	SetUserID(string)
 	SetStatus(string)
 	SetPayload(map[string]string)
-	GetCreateTime() string
-	GetUpdateTime() *string
+	SetCreateTime(string)
+	SetUpdateTime(*string)
 }

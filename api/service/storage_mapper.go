@@ -10,9 +10,13 @@
 
 package service
 
+type StorageMapper interface {
+	mapStorageUsage(byteCount int64, maxBytes int64) *StorageUsage
+}
+
 type storageMapper struct{}
 
-func newStorageMapper() *storageMapper {
+func newStorageMapper() StorageMapper {
 	return &storageMapper{}
 }
 

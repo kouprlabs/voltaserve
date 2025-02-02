@@ -30,11 +30,11 @@ type GroupService struct {
 	groupRepo      repo.GroupRepo
 	groupGuard     guard.GroupGuard
 	groupSearch    search.GroupSearch
-	groupMapper    *groupMapper
+	groupMapper    GroupMapper
 	groupCache     cache.GroupCache
 	userRepo       repo.UserRepo
 	userSearch     search.UserSearch
-	userMapper     *userMapper
+	userMapper     UserMapper
 	workspaceRepo  repo.WorkspaceRepo
 	workspaceCache cache.WorkspaceCache
 	fileRepo       repo.FileRepo
@@ -170,84 +170,6 @@ func (svc *GroupService) Probe(opts GroupListOptions, userID string) (*GroupProb
 	}, nil
 }
 
-func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.Group, error) {
-	var res []model.Group
-	var err error
-	if opts.Query == "" {
-		res, err = svc.load(opts, userID)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		res, err = svc.search(opts, userID)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (svc *GroupService) load(opts GroupListOptions, userID string) ([]model.Group, error) {
-	var res []model.Group
-	if opts.OrganizationID == "" {
-		ids, err := svc.groupRepo.FindIDs()
-		if err != nil {
-			return nil, err
-		}
-		res, err = svc.authorizeIDs(ids, userID)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		groups, err := svc.orgRepo.FindGroups(opts.OrganizationID)
-		if err != nil {
-			return nil, err
-		}
-		res, err = svc.authorize(groups, userID)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (svc *GroupService) search(opts GroupListOptions, userID string) ([]model.Group, error) {
-	var res []model.Group
-	hits, err := svc.groupSearch.Query(opts.Query, infra.QueryOptions{})
-	if err != nil {
-		return nil, err
-	}
-	var groups []model.Group
-	for _, hit := range hits {
-		group, err := svc.groupCache.Get(hit.GetID())
-		if err != nil {
-			var e *errorpkg.ErrorResponse
-			// We don't want to break if the search engine contains groups that shouldn't be there
-			if errors.As(err, &e) && e.Code == errorpkg.NewGroupNotFoundError(nil).Code {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-		groups = append(groups, group)
-	}
-	var filtered []model.Group
-	if opts.OrganizationID == "" {
-		filtered = groups
-	} else {
-		for _, g := range groups {
-			if g.GetOrganizationID() == opts.OrganizationID {
-				filtered = append(filtered, g)
-			}
-		}
-	}
-	res, err = svc.authorize(filtered, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func (svc *GroupService) PatchName(id string, name string, userID string) (*Group, error) {
 	group, err := svc.groupCache.Get(id)
 	if err != nil {
@@ -343,6 +265,84 @@ func (svc *GroupService) RemoveMember(id string, memberID string, userID string)
 		return err
 	}
 	return nil
+}
+
+func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.Group, error) {
+	var res []model.Group
+	var err error
+	if opts.Query == "" {
+		res, err = svc.load(opts, userID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		res, err = svc.search(opts, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (svc *GroupService) load(opts GroupListOptions, userID string) ([]model.Group, error) {
+	var res []model.Group
+	if opts.OrganizationID == "" {
+		ids, err := svc.groupRepo.FindIDs()
+		if err != nil {
+			return nil, err
+		}
+		res, err = svc.authorizeIDs(ids, userID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		groups, err := svc.orgRepo.FindGroups(opts.OrganizationID)
+		if err != nil {
+			return nil, err
+		}
+		res, err = svc.authorize(groups, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (svc *GroupService) search(opts GroupListOptions, userID string) ([]model.Group, error) {
+	var res []model.Group
+	hits, err := svc.groupSearch.Query(opts.Query, infra.QueryOptions{})
+	if err != nil {
+		return nil, err
+	}
+	var groups []model.Group
+	for _, hit := range hits {
+		group, err := svc.groupCache.Get(hit.GetID())
+		if err != nil {
+			var e *errorpkg.ErrorResponse
+			// We don't want to break if the search engine contains groups that shouldn't be there
+			if errors.As(err, &e) && e.Code == errorpkg.NewGroupNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+		groups = append(groups, group)
+	}
+	var filtered []model.Group
+	if opts.OrganizationID == "" {
+		filtered = groups
+	} else {
+		for _, g := range groups {
+			if g.GetOrganizationID() == opts.OrganizationID {
+				filtered = append(filtered, g)
+			}
+		}
+	}
+	res, err = svc.authorize(filtered, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (svc *GroupService) authorize(data []model.Group, userID string) ([]model.Group, error) {

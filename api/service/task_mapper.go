@@ -18,11 +18,16 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
+type TaskMapper interface {
+	mapOne(model.Task) (*Task, error)
+	mapMany([]model.Task) ([]*Task, error)
+}
+
 type taskMapper struct {
 	groupCache cache.TaskCache
 }
 
-func newTaskMapper() *taskMapper {
+func newTaskMapper() TaskMapper {
 	return &taskMapper{
 		groupCache: cache.NewTaskCache(),
 	}

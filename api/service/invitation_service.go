@@ -26,9 +26,9 @@ import (
 
 type InvitationService struct {
 	orgRepo          repo.OrganizationRepo
-	orgMapper        *organizationMapper
+	orgMapper        OrganizationMapper
 	invitationRepo   repo.InvitationRepo
-	invitationMapper *invitationMapper
+	invitationMapper InvitationMapper
 	orgCache         cache.OrganizationCache
 	orgGuard         guard.OrganizationGuard
 	userRepo         repo.UserRepo
@@ -91,54 +91,6 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 		return nil, err
 	}
 	return res, nil
-}
-
-func (svc *InvitationService) getEmailsFromNonMembersAndOutgoing(emails []string, orgMembers []model.User, outgoing []model.Invitation) []string {
-	var res []string
-	for _, email := range emails {
-		existing := false
-		for _, u := range orgMembers {
-			if email == u.GetEmail() {
-				existing = true
-				break
-			}
-		}
-		for _, i := range outgoing {
-			if email == i.GetEmail() && i.GetStatus() == model.InvitationStatusPending {
-				existing = true
-				break
-			}
-		}
-		if !existing {
-			res = append(res, email)
-		}
-	}
-	return res
-}
-
-func (svc *InvitationService) sendEmails(invitations []model.Invitation, org model.Organization, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
-	for _, i := range invitations {
-		variables := map[string]string{
-			"USER_FULL_NAME":    user.GetFullName(),
-			"ORGANIZATION_NAME": org.GetName(),
-			"UI_URL":            svc.config.PublicUIURL,
-		}
-		_, err := svc.userRepo.FindByEmail(i.GetEmail())
-		var templateName string
-		if err == nil {
-			templateName = "join-organization"
-		} else {
-			templateName = "signup-and-join-organization"
-		}
-		if err := svc.mailTmpl.Send(templateName, i.GetEmail(), variables); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 type InvitationListOptions struct {
@@ -350,6 +302,54 @@ func (svc *InvitationService) Delete(id string, userID string) error {
 	}
 	if err := svc.invitationRepo.Delete(invitation.GetID()); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (svc *InvitationService) getEmailsFromNonMembersAndOutgoing(emails []string, orgMembers []model.User, outgoing []model.Invitation) []string {
+	var res []string
+	for _, email := range emails {
+		existing := false
+		for _, u := range orgMembers {
+			if email == u.GetEmail() {
+				existing = true
+				break
+			}
+		}
+		for _, i := range outgoing {
+			if email == i.GetEmail() && i.GetStatus() == model.InvitationStatusPending {
+				existing = true
+				break
+			}
+		}
+		if !existing {
+			res = append(res, email)
+		}
+	}
+	return res
+}
+
+func (svc *InvitationService) sendEmails(invitations []model.Invitation, org model.Organization, userID string) error {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return err
+	}
+	for _, i := range invitations {
+		variables := map[string]string{
+			"USER_FULL_NAME":    user.GetFullName(),
+			"ORGANIZATION_NAME": org.GetName(),
+			"UI_URL":            svc.config.PublicUIURL,
+		}
+		_, err := svc.userRepo.FindByEmail(i.GetEmail())
+		var templateName string
+		if err == nil {
+			templateName = "join-organization"
+		} else {
+			templateName = "signup-and-join-organization"
+		}
+		if err := svc.mailTmpl.Send(templateName, i.GetEmail(), variables); err != nil {
+			return err
+		}
 	}
 	return nil
 }

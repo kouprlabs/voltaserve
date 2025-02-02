@@ -24,7 +24,7 @@ import (
 )
 
 type TaskRouter struct {
-	taskSvc *service.TaskService
+	taskSvc service.TaskService
 	config  *config.Config
 }
 

@@ -34,11 +34,11 @@ type WorkspaceService struct {
 	workspaceCache  cache.WorkspaceCache
 	workspaceGuard  guard.WorkspaceGuard
 	workspaceSearch search.WorkspaceSearch
-	workspaceMapper *workspaceMapper
+	workspaceMapper WorkspaceMapper
 	fileRepo        repo.FileRepo
 	fileCache       cache.FileCache
 	fileGuard       guard.FileGuard
-	fileMapper      *fileMapper
+	fileMapper      FileMapper
 	s3              *infra.S3Manager
 	config          *config.Config
 }

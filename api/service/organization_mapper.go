@@ -18,11 +18,16 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
+type OrganizationMapper interface {
+	mapOne(model.Organization, string) (*Organization, error)
+	mapMany([]model.Organization, string) ([]*Organization, error)
+}
+
 type organizationMapper struct {
 	groupCache cache.GroupCache
 }
 
-func newOrganizationMapper() *organizationMapper {
+func newOrganizationMapper() OrganizationMapper {
 	return &organizationMapper{
 		groupCache: cache.NewGroupCache(),
 	}

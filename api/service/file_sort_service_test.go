@@ -34,12 +34,12 @@ func TestFileSortService_SortByName(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: helper.NewID(), Name: "c"}),
 	}
 
-	sorted := svc.SortByName(files, SortOrderAsc)
+	sorted := svc.sortByName(files, SortOrderAsc)
 	assert.Equal(t, "a", sorted[0].GetName())
 	assert.Equal(t, "b", sorted[1].GetName())
 	assert.Equal(t, "c", sorted[2].GetName())
 
-	sorted = svc.SortByName(files, SortOrderDesc)
+	sorted = svc.sortByName(files, SortOrderDesc)
 	assert.Equal(t, "c", sorted[0].GetName())
 	assert.Equal(t, "b", sorted[1].GetName())
 	assert.Equal(t, "a", sorted[2].GetName())
@@ -59,16 +59,16 @@ func TestFileSortService_SortBySize(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c"}),
 	}
 
-	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(100))}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(200))}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(50))}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(100))}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(200))}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Size: helper.ToPtr(int64(50))}}}, nil).AnyTimes()
 
-	sorted := svc.SortBySize(files, SortOrderAsc, "")
+	sorted := svc.sortBySize(files, SortOrderAsc, "")
 	assert.Equal(t, "file_c", sorted[0].GetID())
 	assert.Equal(t, "file_a", sorted[1].GetID())
 	assert.Equal(t, "file_b", sorted[2].GetID())
 
-	sorted = svc.SortBySize(files, SortOrderDesc, "")
+	sorted = svc.sortBySize(files, SortOrderDesc, "")
 	assert.Equal(t, "file_b", sorted[0].GetID())
 	assert.Equal(t, "file_a", sorted[1].GetID())
 	assert.Equal(t, "file_c", sorted[2].GetID())
@@ -87,12 +87,12 @@ func TestFileSortService_SortByDateCreated(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c", CreateTime: "2023-01-03T00:00:00Z"}),
 	}
 
-	sorted := svc.SortByDateCreated(files, SortOrderAsc)
+	sorted := svc.sortByDateCreated(files, SortOrderAsc)
 	assert.Equal(t, "file_b", sorted[0].GetID())
 	assert.Equal(t, "file_a", sorted[1].GetID())
 	assert.Equal(t, "file_c", sorted[2].GetID())
 
-	sorted = svc.SortByDateCreated(files, SortOrderDesc)
+	sorted = svc.sortByDateCreated(files, SortOrderDesc)
 	assert.Equal(t, "file_c", sorted[0].GetID())
 	assert.Equal(t, "file_a", sorted[1].GetID())
 	assert.Equal(t, "file_b", sorted[2].GetID())
@@ -111,12 +111,12 @@ func TestFileSortService_SortByDateModified(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_c", UpdateTime: helper.ToPtr("2023-01-03T00:00:00Z")}),
 	}
 
-	sorted := svc.SortByDateModified(files, SortOrderAsc)
+	sorted := svc.sortByDateModified(files, SortOrderAsc)
 	assert.Equal(t, "file_b", sorted[0].GetID())
 	assert.Equal(t, "file_a", sorted[1].GetID())
 	assert.Equal(t, "file_c", sorted[2].GetID())
 
-	sorted = svc.SortByDateModified(files, SortOrderDesc)
+	sorted = svc.sortByDateModified(files, SortOrderDesc)
 	assert.Equal(t, "file_c", sorted[0].GetID())
 	assert.Equal(t, "file_a", sorted[1].GetID())
 	assert.Equal(t, "file_b", sorted[2].GetID())
@@ -139,16 +139,16 @@ func TestFileSortService_SortByKind(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder_c", Type: model.FileTypeFolder}),
 	}
 
-	fileFilterSvc.EXPECT().FilterFolders(files).Return([]model.File{files[1], files[3], files[5]})
-	fileFilterSvc.EXPECT().FilterFiles(files).Return([]model.File{files[0], files[2], files[4]})
-	fileFilterSvc.EXPECT().FilterImages(gomock.Any(), gomock.Any()).Return([]model.File{})
-	fileFilterSvc.EXPECT().FilterPDFs(gomock.Any(), gomock.Any()).Return([]model.File{})
-	fileFilterSvc.EXPECT().FilterDocuments(gomock.Any(), gomock.Any()).Return([]model.File{})
-	fileFilterSvc.EXPECT().FilterVideos(gomock.Any(), gomock.Any()).Return([]model.File{})
-	fileFilterSvc.EXPECT().FilterTexts(gomock.Any(), gomock.Any()).Return([]model.File{})
-	fileFilterSvc.EXPECT().FilterOthers(gomock.Any(), gomock.Any()).Return([]model.File{})
+	fileFilterSvc.EXPECT().filterFolders(files).Return([]model.File{files[1], files[3], files[5]})
+	fileFilterSvc.EXPECT().filterFiles(files).Return([]model.File{files[0], files[2], files[4]})
+	fileFilterSvc.EXPECT().filterImages(gomock.Any(), gomock.Any()).Return([]model.File{})
+	fileFilterSvc.EXPECT().filterPDFs(gomock.Any(), gomock.Any()).Return([]model.File{})
+	fileFilterSvc.EXPECT().filterDocuments(gomock.Any(), gomock.Any()).Return([]model.File{})
+	fileFilterSvc.EXPECT().filterVideos(gomock.Any(), gomock.Any()).Return([]model.File{})
+	fileFilterSvc.EXPECT().filterTexts(gomock.Any(), gomock.Any()).Return([]model.File{})
+	fileFilterSvc.EXPECT().filterOthers(gomock.Any(), gomock.Any()).Return([]model.File{})
 
-	sorted := svc.SortByKind(files, "")
+	sorted := svc.sortByKind(files, "")
 	assert.Equal(t, "folder_a", sorted[0].GetID())
 	assert.Equal(t, "folder_b", sorted[1].GetID())
 	assert.Equal(t, "folder_c", sorted[2].GetID())

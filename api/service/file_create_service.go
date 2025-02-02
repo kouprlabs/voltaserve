@@ -35,8 +35,8 @@ func NewFileCreateService() *FileCreateService {
 		fileSearch:  search.NewFileSearch(),
 		fileCache:   cache.NewFileCache(),
 		fileGuard:   guard.NewFileGuard(),
-		fileMapper:  NewFileMapper(),
-		fileCoreSvc: NewFileCoreService(),
+		fileMapper:  newFileMapper(),
+		fileCoreSvc: newFileCoreService(),
 	}
 }
 
@@ -57,7 +57,7 @@ func (svc *FileCreateService) Create(opts FileCreateOptions, userID string) (*Fi
 		}
 		parentID = *newParentID
 	}
-	return svc.create(FileCreateOptions{
+	return svc.performCreate(FileCreateOptions{
 		WorkspaceID: opts.WorkspaceID,
 		Name:        helper.FilenameFromPath(path),
 		Type:        opts.Type,
@@ -67,14 +67,14 @@ func (svc *FileCreateService) Create(opts FileCreateOptions, userID string) (*Fi
 
 func (svc *FileCreateService) createDirectoriesForPath(path []string, parentID string, workspaceID string, userID string) (*string, error) {
 	for _, component := range path[:len(path)-1] {
-		existing, err := svc.fileCoreSvc.GetChildWithName(parentID, component)
+		existing, err := svc.fileCoreSvc.getChildWithName(parentID, component)
 		if err != nil {
 			return nil, err
 		}
 		if existing != nil {
 			parentID = existing.GetID()
 		} else {
-			folder, err := svc.create(FileCreateOptions{
+			folder, err := svc.performCreate(FileCreateOptions{
 				Name:        component,
 				Type:        model.FileTypeFolder,
 				ParentID:    parentID,
@@ -89,17 +89,17 @@ func (svc *FileCreateService) createDirectoriesForPath(path []string, parentID s
 	return &parentID, nil
 }
 
-func (svc *FileCreateService) create(opts FileCreateOptions, userID string) (*File, error) {
+func (svc *FileCreateService) performCreate(opts FileCreateOptions, userID string) (*File, error) {
 	if len(opts.ParentID) > 0 {
 		if err := svc.validateParent(opts.ParentID, userID); err != nil {
 			return nil, err
 		}
-		existing, err := svc.fileCoreSvc.GetChildWithName(opts.ParentID, opts.Name)
+		existing, err := svc.fileCoreSvc.getChildWithName(opts.ParentID, opts.Name)
 		if err != nil {
 			return nil, err
 		}
 		if existing != nil {
-			res, err := svc.fileMapper.MapOne(existing, userID)
+			res, err := svc.fileMapper.mapOne(existing, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -125,7 +125,7 @@ func (svc *FileCreateService) create(opts FileCreateOptions, userID string) (*Fi
 	if err = svc.fileSearch.Index([]model.File{file}); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(file, userID)
+	res, err := svc.fileMapper.mapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}

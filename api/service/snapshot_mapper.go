@@ -18,11 +18,16 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
+type SnapshotMapper interface {
+	mapOne(model.Snapshot) *Snapshot
+	mapMany([]model.Snapshot, string) []*Snapshot
+}
+
 type snapshotMapper struct {
 	taskCache cache.TaskCache
 }
 
-func newSnapshotMapper() *snapshotMapper {
+func newSnapshotMapper() SnapshotMapper {
 	return &snapshotMapper{
 		taskCache: cache.NewTaskCache(),
 	}

@@ -81,13 +81,13 @@ func TestFileListService_List(t *testing.T) {
 	folder := repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder", Type: model.FileTypeFolder, WorkspaceID: workspace.GetID()})
 	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file", Type: model.FileTypeFile, WorkspaceID: workspace.GetID()})
 
-	fileCache.EXPECT().Get(folder.GetID()).Return(folder, nil).Times(1)
-	fileCache.EXPECT().Get(file.GetID()).Return(file, nil).Times(1)
+	fileCache.EXPECT().Get(folder.GetID()).Return(folder, nil)
+	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
 	fileRepo.EXPECT().FindChildrenIDs(folder.GetID()).Return([]string{file.GetID()}, nil)
 	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
-	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
-	fileSortSvc.EXPECT().Sort([]model.File{file}, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.File{file})
-	fileMapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
+	fileCoreSvc.EXPECT().authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
+	fileSortSvc.EXPECT().sort([]model.File{file}, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.File{file})
+	fileMapper.EXPECT().mapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
 	workspaceRepo.EXPECT().Find(workspace.GetID()).Return(workspace, nil)
 	workspaceGuard.EXPECT().Authorize(gomock.Any(), workspace, model.PermissionViewer).Return(nil)
 
@@ -138,10 +138,10 @@ func TestFileListService_ListWithQuery(t *testing.T) {
 	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
 	fileSearch.EXPECT().Query(*query.Text, gomock.Any()).Return([]model.File{file}, nil)
 	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
-	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
-	fileFilterSvc.EXPECT().FilterWithQuery([]model.File{file}, FileQuery{Text: query.Text}, folder).Return([]model.File{file}, nil)
-	fileSortSvc.EXPECT().Sort([]model.File{file}, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.File{file})
-	fileMapper.EXPECT().MapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
+	fileCoreSvc.EXPECT().authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
+	fileFilterSvc.EXPECT().filterWithQuery([]model.File{file}, FileQuery{Text: query.Text}, folder).Return([]model.File{file}, nil)
+	fileSortSvc.EXPECT().sort([]model.File{file}, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.File{file})
+	fileMapper.EXPECT().mapMany([]model.File{file}, gomock.Any()).Return([]*File{{ID: file.GetID()}}, nil)
 	workspaceRepo.EXPECT().Find(workspace.GetID()).Return(workspace, nil)
 	workspaceGuard.EXPECT().Authorize(gomock.Any(), workspace, model.PermissionViewer).Return(nil)
 
@@ -173,9 +173,9 @@ func TestFileListService_createList(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "file_b", Type: model.FileTypeFile}),
 	}
 
-	fileCoreSvc.EXPECT().Authorize(gomock.Any(), files, model.PermissionViewer).Return(files, nil)
-	fileSortSvc.EXPECT().Sort(files, gomock.Any(), gomock.Any(), gomock.Any()).Return(files)
-	fileMapper.EXPECT().MapMany([]model.File{files[0], files[1]}, gomock.Any()).Return([]*File{{ID: files[0].GetID()}, {ID: files[1].GetID()}}, nil)
+	fileCoreSvc.EXPECT().authorize(gomock.Any(), files, model.PermissionViewer).Return(files, nil)
+	fileSortSvc.EXPECT().sort(files, gomock.Any(), gomock.Any(), gomock.Any()).Return(files)
+	fileMapper.EXPECT().mapMany([]model.File{files[0], files[1]}, gomock.Any()).Return([]*File{{ID: files[0].GetID()}, {ID: files[1].GetID()}}, nil)
 
 	list, err := svc.createList(files, parent, FileListOptions{Page: 1, Size: 10, SortBy: SortByName, SortOrder: SortOrderAsc}, "")
 	if assert.NoError(t, err) {
@@ -213,10 +213,10 @@ func TestFileListService_createListWithQuery(t *testing.T) {
 	}
 	query := FileQuery{}
 
-	fileCoreSvc.EXPECT().Authorize(gomock.Any(), []model.File{files[1]}, model.PermissionViewer).Return([]model.File{files[1]}, nil)
-	fileSortSvc.EXPECT().Sort([]model.File{files[1]}, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.File{files[1]})
-	fileFilterSvc.EXPECT().FilterWithQuery(files, query, parent).Return([]model.File{files[1]}, nil)
-	fileMapper.EXPECT().MapMany([]model.File{files[1]}, gomock.Any()).Return([]*File{{ID: files[1].GetID()}}, nil)
+	fileCoreSvc.EXPECT().authorize(gomock.Any(), []model.File{files[1]}, model.PermissionViewer).Return([]model.File{files[1]}, nil)
+	fileSortSvc.EXPECT().sort([]model.File{files[1]}, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.File{files[1]})
+	fileFilterSvc.EXPECT().filterWithQuery(files, query, parent).Return([]model.File{files[1]}, nil)
+	fileMapper.EXPECT().mapMany([]model.File{files[1]}, gomock.Any()).Return([]*File{{ID: files[1].GetID()}}, nil)
 
 	list, err := svc.createList(files, parent, FileListOptions{Page: 1, Size: 10, Query: &query}, "")
 	if assert.NoError(t, err) {

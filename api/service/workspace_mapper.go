@@ -18,13 +18,18 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
+type WorkspaceMapper interface {
+	mapOne(model.Workspace, string) (*Workspace, error)
+	mapMany([]model.Workspace, string) ([]*Workspace, error)
+}
+
 type workspaceMapper struct {
 	orgCache   cache.OrganizationCache
-	orgMapper  *organizationMapper
+	orgMapper  OrganizationMapper
 	groupCache cache.GroupCache
 }
 
-func newWorkspaceMapper() *workspaceMapper {
+func newWorkspaceMapper() WorkspaceMapper {
 	return &workspaceMapper{
 		orgCache:   cache.NewOrganizationCache(),
 		orgMapper:  newOrganizationMapper(),
