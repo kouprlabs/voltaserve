@@ -81,8 +81,8 @@ func TestFileListService_List(t *testing.T) {
 	folder := repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder", Type: model.FileTypeFolder, WorkspaceID: workspace.GetID()})
 	file := repo.NewFileWithOptions(repo.NewFileOptions{ID: "file", Type: model.FileTypeFile, WorkspaceID: workspace.GetID()})
 
-	fileCache.EXPECT().Get(folder.GetID()).Return(folder, nil).Times(1)
-	fileCache.EXPECT().Get(file.GetID()).Return(file, nil).Times(1)
+	fileCache.EXPECT().Get(folder.GetID()).Return(folder, nil)
+	fileCache.EXPECT().Get(file.GetID()).Return(file, nil)
 	fileRepo.EXPECT().FindChildrenIDs(folder.GetID()).Return([]string{file.GetID()}, nil)
 	fileGuard.EXPECT().Authorize(gomock.Any(), folder, model.PermissionViewer).Return(nil)
 	fileCoreSvc.EXPECT().authorize(gomock.Any(), []model.File{file}, model.PermissionViewer).Return([]model.File{file}, nil)
