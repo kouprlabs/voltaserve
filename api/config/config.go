@@ -99,13 +99,8 @@ var config *Config
 
 func GetConfig() *Config {
 	if config == nil {
-		port, err := strconv.Atoi(os.Getenv("PORT"))
-		if err != nil {
-			panic(err)
-		}
-		config = &Config{
-			Port: port,
-		}
+		config = &Config{}
+		readPort(config)
 		readURLs(config)
 		readSecurity(config)
 		readS3(config)
@@ -124,6 +119,15 @@ func (l *LimitsConfig) GetFileProcessingMB(fileType string) int {
 		return l.FileProcessingMB[FileTypeEverythingElse]
 	}
 	return v
+}
+
+func readPort(config *Config) {
+	if len(os.Getenv("PORT")) > 0 {
+		port, err := strconv.Atoi(os.Getenv("PORT"))
+		if err == nil {
+			config.Port = port
+		}
+	}
 }
 
 func readURLs(config *Config) {

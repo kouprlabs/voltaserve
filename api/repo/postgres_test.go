@@ -9,13 +9,13 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 func TestPostgres(t *testing.T) {
-	t.Setenv("PORT", "0")
 	t.Setenv("POSTGRES_URL", "postgres://postgres:postgres@localhost:15432/postgres?sslmode=disable")
 	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(15432).Logger(nil))
 	if err := postgres.Start(); err != nil {
@@ -26,7 +26,7 @@ func TestPostgres(t *testing.T) {
 			t.Fatal(err)
 		}
 	}()
-	m, err := migrate.New("file://./migrations", "postgres://postgres:postgres@localhost:15432/postgres?sslmode=disable")
+	m, err := migrate.New("file://./migrations", config.GetConfig().DatabaseURL)
 	if err != nil {
 		t.Fatal(err)
 	}
