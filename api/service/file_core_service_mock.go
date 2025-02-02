@@ -35,75 +35,75 @@ func (m *MockFileCoreService) EXPECT() *MockFileCoreServiceMockRecorder {
 	return m.recorder
 }
 
-// Authorize mocks base method.
-func (m *MockFileCoreService) Authorize(userID string, files []model.File, permission string) ([]model.File, error) {
+// authorize mocks base method.
+func (m *MockFileCoreService) authorize(userID string, files []model.File, permission string) ([]model.File, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Authorize", userID, files, permission)
+	ret := m.ctrl.Call(m, "authorize", userID, files, permission)
 	ret0, _ := ret[0].([]model.File)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Authorize indicates an expected call of Authorize.
-func (mr *MockFileCoreServiceMockRecorder) Authorize(userID, files, permission interface{}) *gomock.Call {
+// authorize indicates an expected call of authorize.
+func (mr *MockFileCoreServiceMockRecorder) authorize(userID, files, permission interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authorize", reflect.TypeOf((*MockFileCoreService)(nil).Authorize), userID, files, permission)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "authorize", reflect.TypeOf((*MockFileCoreService)(nil).authorize), userID, files, permission)
 }
 
-// AuthorizeIDs mocks base method.
-func (m *MockFileCoreService) AuthorizeIDs(userID string, ids []string, permission string) ([]model.File, error) {
+// authorizeIDs mocks base method.
+func (m *MockFileCoreService) authorizeIDs(userID string, ids []string, permission string) ([]model.File, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AuthorizeIDs", userID, ids, permission)
+	ret := m.ctrl.Call(m, "authorizeIDs", userID, ids, permission)
 	ret0, _ := ret[0].([]model.File)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// AuthorizeIDs indicates an expected call of AuthorizeIDs.
-func (mr *MockFileCoreServiceMockRecorder) AuthorizeIDs(userID, ids, permission interface{}) *gomock.Call {
+// authorizeIDs indicates an expected call of authorizeIDs.
+func (mr *MockFileCoreServiceMockRecorder) authorizeIDs(userID, ids, permission interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeIDs", reflect.TypeOf((*MockFileCoreService)(nil).AuthorizeIDs), userID, ids, permission)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "authorizeIDs", reflect.TypeOf((*MockFileCoreService)(nil).authorizeIDs), userID, ids, permission)
 }
 
-// GetChildWithName mocks base method.
-func (m *MockFileCoreService) GetChildWithName(id, name string) (model.File, error) {
+// getChildWithName mocks base method.
+func (m *MockFileCoreService) getChildWithName(id, name string) (model.File, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChildWithName", id, name)
+	ret := m.ctrl.Call(m, "getChildWithName", id, name)
 	ret0, _ := ret[0].(model.File)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetChildWithName indicates an expected call of GetChildWithName.
-func (mr *MockFileCoreServiceMockRecorder) GetChildWithName(id, name interface{}) *gomock.Call {
+// getChildWithName indicates an expected call of getChildWithName.
+func (mr *MockFileCoreServiceMockRecorder) getChildWithName(id, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChildWithName", reflect.TypeOf((*MockFileCoreService)(nil).GetChildWithName), id, name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "getChildWithName", reflect.TypeOf((*MockFileCoreService)(nil).getChildWithName), id, name)
 }
 
-// SaveAndSync mocks base method.
-func (m *MockFileCoreService) SaveAndSync(file model.File) error {
+// saveAndSync mocks base method.
+func (m *MockFileCoreService) saveAndSync(file model.File) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SaveAndSync", file)
+	ret := m.ctrl.Call(m, "saveAndSync", file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SaveAndSync indicates an expected call of SaveAndSync.
-func (mr *MockFileCoreServiceMockRecorder) SaveAndSync(file interface{}) *gomock.Call {
+// saveAndSync indicates an expected call of saveAndSync.
+func (mr *MockFileCoreServiceMockRecorder) saveAndSync(file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveAndSync", reflect.TypeOf((*MockFileCoreService)(nil).SaveAndSync), file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "saveAndSync", reflect.TypeOf((*MockFileCoreService)(nil).saveAndSync), file)
 }
 
-// Sync mocks base method.
-func (m *MockFileCoreService) Sync(file model.File) error {
+// sync mocks base method.
+func (m *MockFileCoreService) sync(file model.File) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Sync", file)
+	ret := m.ctrl.Call(m, "sync", file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Sync indicates an expected call of Sync.
-func (mr *MockFileCoreServiceMockRecorder) Sync(file interface{}) *gomock.Call {
+// sync indicates an expected call of sync.
+func (mr *MockFileCoreServiceMockRecorder) sync(file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sync", reflect.TypeOf((*MockFileCoreService)(nil).Sync), file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "sync", reflect.TypeOf((*MockFileCoreService)(nil).sync), file)
 }

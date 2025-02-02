@@ -44,8 +44,8 @@ func NewFileFetchService() *FileFetchService {
 		fileRepo:       repo.NewFileRepo(),
 		fileSearch:     search.NewFileSearch(),
 		fileGuard:      guard.NewFileGuard(),
-		fileMapper:     NewFileMapper(),
-		fileCoreSvc:    NewFileCoreService(),
+		fileMapper:     newFileMapper(),
+		fileCoreSvc:    newFileCoreService(),
 		fileIdent:      infra.NewFileIdentifier(),
 		userRepo:       repo.NewUserRepo(),
 		workspaceRepo:  repo.NewWorkspaceRepo(),
@@ -64,7 +64,7 @@ func (svc *FileFetchService) Find(ids []string, userID string) ([]*File, error) 
 		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 			return nil, err
 		}
-		mapped, err := svc.fileMapper.MapOne(file, userID)
+		mapped, err := svc.fileMapper.mapOne(file, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func (svc *FileFetchService) FindByPath(path string, userID string) (*File, erro
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(file, userID)
+	res, err := svc.fileMapper.mapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (svc *FileFetchService) ListByPath(path string, userID string) ([]*File, er
 		if err != nil {
 			return nil, err
 		}
-		res, err := svc.fileMapper.MapMany(children, userID)
+		res, err := svc.fileMapper.mapMany(children, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -135,6 +135,29 @@ func (svc *FileFetchService) ListByPath(path string, userID string) ([]*File, er
 		// This should never happen
 		return nil, errorpkg.NewInternalServerError(fmt.Errorf("invalid file type %s", file.GetType()))
 	}
+}
+
+func (svc *FileFetchService) FindPath(id string, userID string) ([]*File, error) {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	path, err := svc.fileRepo.FindPath(id)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]*File, 0)
+	for _, file := range path {
+		f, err := svc.fileMapper.mapOne(file, userID)
+		if err != nil {
+			return nil, err
+		}
+		res = append([]*File{f}, res...)
+	}
+	return res, nil
 }
 
 func (svc *FileFetchService) getWorkspacesAsFiles(userID string) ([]*File, error) {
@@ -220,7 +243,7 @@ func (svc *FileFetchService) getAuthorizedChildren(id string, userID string) ([]
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.fileCoreSvc.AuthorizeIDs(userID, childrenIDs, model.PermissionViewer)
+	authorized, err := svc.fileCoreSvc.authorizeIDs(userID, childrenIDs, model.PermissionViewer)
 	if err != nil {
 		return nil, err
 	}
@@ -238,27 +261,4 @@ func (svc *FileFetchService) getComponentsFromPath(path string) ([]string, error
 		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
 	return components, nil
-}
-
-func (svc *FileFetchService) FindPath(id string, userID string) ([]*File, error) {
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	path, err := svc.fileRepo.FindPath(id)
-	if err != nil {
-		return nil, err
-	}
-	res := make([]*File, 0)
-	for _, file := range path {
-		f, err := svc.fileMapper.MapOne(file, userID)
-		if err != nil {
-			return nil, err
-		}
-		res = append([]*File{f}, res...)
-	}
-	return res, nil
 }

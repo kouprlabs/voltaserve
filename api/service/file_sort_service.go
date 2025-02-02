@@ -18,15 +18,12 @@ import (
 )
 
 type FileSortService interface {
-	Sort(data []model.File, sortBy string, sortOrder string, userID string) []model.File
-	SortBySize(data []model.File, sortOrder string, userID string) []model.File
-	SortByDateCreated(data []model.File, sortOrder string) []model.File
-	SortByDateModified(data []model.File, sortOrder string) []model.File
-	SortByKind(data []model.File, userID string) []model.File
-}
-
-func NewFileSortService() FileSortService {
-	return newFileSortService()
+	sort(data []model.File, sortBy string, sortOrder string, userID string) []model.File
+	sortByName(data []model.File, sortOrder string) []model.File
+	sortBySize(data []model.File, sortOrder string, userID string) []model.File
+	sortByDateCreated(data []model.File, sortOrder string) []model.File
+	sortByDateModified(data []model.File, sortOrder string) []model.File
+	sortByKind(data []model.File, userID string) []model.File
 }
 
 type fileSortService struct {
@@ -34,29 +31,29 @@ type fileSortService struct {
 	fileFilterSvc FileFilterService
 }
 
-func newFileSortService() *fileSortService {
+func newFileSortService() FileSortService {
 	return &fileSortService{
-		fileMapper:    NewFileMapper(),
-		fileFilterSvc: NewFileFilterService(),
+		fileMapper:    newFileMapper(),
+		fileFilterSvc: newFileFilterService(),
 	}
 }
 
-func (svc *fileSortService) Sort(data []model.File, sortBy string, sortOrder string, userID string) []model.File {
+func (svc *fileSortService) sort(data []model.File, sortBy string, sortOrder string, userID string) []model.File {
 	if sortBy == SortByName {
-		return svc.SortByName(data, sortOrder)
+		return svc.sortByName(data, sortOrder)
 	} else if sortBy == SortBySize {
-		return svc.SortBySize(data, sortOrder, userID)
+		return svc.sortBySize(data, sortOrder, userID)
 	} else if sortBy == SortByDateCreated {
-		return svc.SortByDateCreated(data, sortOrder)
+		return svc.sortByDateCreated(data, sortOrder)
 	} else if sortBy == SortByDateModified {
-		return svc.SortByDateModified(data, sortOrder)
+		return svc.sortByDateModified(data, sortOrder)
 	} else if sortBy == SortByKind {
-		return svc.SortByKind(data, userID)
+		return svc.sortByKind(data, userID)
 	}
 	return data
 }
 
-func (svc *fileSortService) SortByName(data []model.File, sortOrder string) []model.File {
+func (svc *fileSortService) sortByName(data []model.File, sortOrder string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
 		if sortOrder == SortOrderDesc {
 			return data[i].GetName() > data[j].GetName()
@@ -67,13 +64,13 @@ func (svc *fileSortService) SortByName(data []model.File, sortOrder string) []mo
 	return data
 }
 
-func (svc *fileSortService) SortBySize(data []model.File, sortOrder string, userID string) []model.File {
+func (svc *fileSortService) sortBySize(data []model.File, sortOrder string, userID string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
-		fileA, err := svc.fileMapper.MapOne(data[i], userID)
+		fileA, err := svc.fileMapper.mapOne(data[i], userID)
 		if err != nil {
 			return false
 		}
-		fileB, err := svc.fileMapper.MapOne(data[j], userID)
+		fileB, err := svc.fileMapper.mapOne(data[j], userID)
 		if err != nil {
 			return false
 		}
@@ -94,7 +91,7 @@ func (svc *fileSortService) SortBySize(data []model.File, sortOrder string, user
 	return data
 }
 
-func (svc *fileSortService) SortByDateCreated(data []model.File, sortOrder string) []model.File {
+func (svc *fileSortService) sortByDateCreated(data []model.File, sortOrder string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
 		a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
 		b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
@@ -107,7 +104,7 @@ func (svc *fileSortService) SortByDateCreated(data []model.File, sortOrder strin
 	return data
 }
 
-func (svc *fileSortService) SortByDateModified(data []model.File, sortOrder string) []model.File {
+func (svc *fileSortService) sortByDateModified(data []model.File, sortOrder string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
 		if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 			a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
@@ -124,17 +121,17 @@ func (svc *fileSortService) SortByDateModified(data []model.File, sortOrder stri
 	return data
 }
 
-func (svc *fileSortService) SortByKind(data []model.File, userID string) []model.File {
+func (svc *fileSortService) sortByKind(data []model.File, userID string) []model.File {
 	var res []model.File
-	folders := svc.fileFilterSvc.FilterFolders(data)
-	files := svc.fileFilterSvc.FilterFiles(data)
+	folders := svc.fileFilterSvc.filterFolders(data)
+	files := svc.fileFilterSvc.filterFiles(data)
 	res = append(res, folders...)
 	res = append(res, files...)
-	res = append(res, svc.fileFilterSvc.FilterImages(files, userID)...)
-	res = append(res, svc.fileFilterSvc.FilterPDFs(files, userID)...)
-	res = append(res, svc.fileFilterSvc.FilterDocuments(files, userID)...)
-	res = append(res, svc.fileFilterSvc.FilterVideos(files, userID)...)
-	res = append(res, svc.fileFilterSvc.FilterTexts(files, userID)...)
-	res = append(res, svc.fileFilterSvc.FilterOthers(files, userID)...)
+	res = append(res, svc.fileFilterSvc.filterImages(files, userID)...)
+	res = append(res, svc.fileFilterSvc.filterPDFs(files, userID)...)
+	res = append(res, svc.fileFilterSvc.filterDocuments(files, userID)...)
+	res = append(res, svc.fileFilterSvc.filterVideos(files, userID)...)
+	res = append(res, svc.fileFilterSvc.filterTexts(files, userID)...)
+	res = append(res, svc.fileFilterSvc.filterOthers(files, userID)...)
 	return res
 }

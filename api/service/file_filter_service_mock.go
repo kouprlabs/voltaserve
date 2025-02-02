@@ -35,129 +35,129 @@ func (m *MockFileFilterService) EXPECT() *MockFileFilterServiceMockRecorder {
 	return m.recorder
 }
 
-// FilterDocuments mocks base method.
-func (m *MockFileFilterService) FilterDocuments(data []model.File, userID string) []model.File {
+// filterDocuments mocks base method.
+func (m *MockFileFilterService) filterDocuments(data []model.File, userID string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FilterDocuments", data, userID)
+	ret := m.ctrl.Call(m, "filterDocuments", data, userID)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// FilterDocuments indicates an expected call of FilterDocuments.
-func (mr *MockFileFilterServiceMockRecorder) FilterDocuments(data, userID interface{}) *gomock.Call {
+// filterDocuments indicates an expected call of filterDocuments.
+func (mr *MockFileFilterServiceMockRecorder) filterDocuments(data, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterDocuments", reflect.TypeOf((*MockFileFilterService)(nil).FilterDocuments), data, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "filterDocuments", reflect.TypeOf((*MockFileFilterService)(nil).filterDocuments), data, userID)
 }
 
-// FilterFiles mocks base method.
-func (m *MockFileFilterService) FilterFiles(data []model.File) []model.File {
+// filterFiles mocks base method.
+func (m *MockFileFilterService) filterFiles(data []model.File) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FilterFiles", data)
+	ret := m.ctrl.Call(m, "filterFiles", data)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// FilterFiles indicates an expected call of FilterFiles.
-func (mr *MockFileFilterServiceMockRecorder) FilterFiles(data interface{}) *gomock.Call {
+// filterFiles indicates an expected call of filterFiles.
+func (mr *MockFileFilterServiceMockRecorder) filterFiles(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterFiles", reflect.TypeOf((*MockFileFilterService)(nil).FilterFiles), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "filterFiles", reflect.TypeOf((*MockFileFilterService)(nil).filterFiles), data)
 }
 
-// FilterFolders mocks base method.
-func (m *MockFileFilterService) FilterFolders(data []model.File) []model.File {
+// filterFolders mocks base method.
+func (m *MockFileFilterService) filterFolders(data []model.File) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FilterFolders", data)
+	ret := m.ctrl.Call(m, "filterFolders", data)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// FilterFolders indicates an expected call of FilterFolders.
-func (mr *MockFileFilterServiceMockRecorder) FilterFolders(data interface{}) *gomock.Call {
+// filterFolders indicates an expected call of filterFolders.
+func (mr *MockFileFilterServiceMockRecorder) filterFolders(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterFolders", reflect.TypeOf((*MockFileFilterService)(nil).FilterFolders), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "filterFolders", reflect.TypeOf((*MockFileFilterService)(nil).filterFolders), data)
 }
 
-// FilterImages mocks base method.
-func (m *MockFileFilterService) FilterImages(data []model.File, userID string) []model.File {
+// filterImages mocks base method.
+func (m *MockFileFilterService) filterImages(data []model.File, userID string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FilterImages", data, userID)
+	ret := m.ctrl.Call(m, "filterImages", data, userID)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// FilterImages indicates an expected call of FilterImages.
-func (mr *MockFileFilterServiceMockRecorder) FilterImages(data, userID interface{}) *gomock.Call {
+// filterImages indicates an expected call of filterImages.
+func (mr *MockFileFilterServiceMockRecorder) filterImages(data, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterImages", reflect.TypeOf((*MockFileFilterService)(nil).FilterImages), data, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "filterImages", reflect.TypeOf((*MockFileFilterService)(nil).filterImages), data, userID)
 }
 
-// FilterOthers mocks base method.
-func (m *MockFileFilterService) FilterOthers(data []model.File, userID string) []model.File {
+// filterOthers mocks base method.
+func (m *MockFileFilterService) filterOthers(data []model.File, userID string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FilterOthers", data, userID)
+	ret := m.ctrl.Call(m, "filterOthers", data, userID)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// FilterOthers indicates an expected call of FilterOthers.
-func (mr *MockFileFilterServiceMockRecorder) FilterOthers(data, userID interface{}) *gomock.Call {
+// filterOthers indicates an expected call of filterOthers.
+func (mr *MockFileFilterServiceMockRecorder) filterOthers(data, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterOthers", reflect.TypeOf((*MockFileFilterService)(nil).FilterOthers), data, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "filterOthers", reflect.TypeOf((*MockFileFilterService)(nil).filterOthers), data, userID)
 }
 
-// FilterPDFs mocks base method.
-func (m *MockFileFilterService) FilterPDFs(data []model.File, userID string) []model.File {
+// filterPDFs mocks base method.
+func (m *MockFileFilterService) filterPDFs(data []model.File, userID string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FilterPDFs", data, userID)
+	ret := m.ctrl.Call(m, "filterPDFs", data, userID)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// FilterPDFs indicates an expected call of FilterPDFs.
-func (mr *MockFileFilterServiceMockRecorder) FilterPDFs(data, userID interface{}) *gomock.Call {
+// filterPDFs indicates an expected call of filterPDFs.
+func (mr *MockFileFilterServiceMockRecorder) filterPDFs(data, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterPDFs", reflect.TypeOf((*MockFileFilterService)(nil).FilterPDFs), data, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "filterPDFs", reflect.TypeOf((*MockFileFilterService)(nil).filterPDFs), data, userID)
 }
 
-// FilterTexts mocks base method.
-func (m *MockFileFilterService) FilterTexts(data []model.File, userID string) []model.File {
+// filterTexts mocks base method.
+func (m *MockFileFilterService) filterTexts(data []model.File, userID string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FilterTexts", data, userID)
+	ret := m.ctrl.Call(m, "filterTexts", data, userID)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// FilterTexts indicates an expected call of FilterTexts.
-func (mr *MockFileFilterServiceMockRecorder) FilterTexts(data, userID interface{}) *gomock.Call {
+// filterTexts indicates an expected call of filterTexts.
+func (mr *MockFileFilterServiceMockRecorder) filterTexts(data, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterTexts", reflect.TypeOf((*MockFileFilterService)(nil).FilterTexts), data, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "filterTexts", reflect.TypeOf((*MockFileFilterService)(nil).filterTexts), data, userID)
 }
 
-// FilterVideos mocks base method.
-func (m *MockFileFilterService) FilterVideos(data []model.File, userID string) []model.File {
+// filterVideos mocks base method.
+func (m *MockFileFilterService) filterVideos(data []model.File, userID string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FilterVideos", data, userID)
+	ret := m.ctrl.Call(m, "filterVideos", data, userID)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// FilterVideos indicates an expected call of FilterVideos.
-func (mr *MockFileFilterServiceMockRecorder) FilterVideos(data, userID interface{}) *gomock.Call {
+// filterVideos indicates an expected call of filterVideos.
+func (mr *MockFileFilterServiceMockRecorder) filterVideos(data, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterVideos", reflect.TypeOf((*MockFileFilterService)(nil).FilterVideos), data, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "filterVideos", reflect.TypeOf((*MockFileFilterService)(nil).filterVideos), data, userID)
 }
 
-// FilterWithQuery mocks base method.
-func (m *MockFileFilterService) FilterWithQuery(data []model.File, opts FileQuery, parent model.File) ([]model.File, error) {
+// filterWithQuery mocks base method.
+func (m *MockFileFilterService) filterWithQuery(data []model.File, opts FileQuery, parent model.File) ([]model.File, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FilterWithQuery", data, opts, parent)
+	ret := m.ctrl.Call(m, "filterWithQuery", data, opts, parent)
 	ret0, _ := ret[0].([]model.File)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FilterWithQuery indicates an expected call of FilterWithQuery.
-func (mr *MockFileFilterServiceMockRecorder) FilterWithQuery(data, opts, parent interface{}) *gomock.Call {
+// filterWithQuery indicates an expected call of filterWithQuery.
+func (mr *MockFileFilterServiceMockRecorder) filterWithQuery(data, opts, parent interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterWithQuery", reflect.TypeOf((*MockFileFilterService)(nil).FilterWithQuery), data, opts, parent)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "filterWithQuery", reflect.TypeOf((*MockFileFilterService)(nil).filterWithQuery), data, opts, parent)
 }

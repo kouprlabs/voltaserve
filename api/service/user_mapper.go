@@ -15,9 +15,14 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
+type UserMapper interface {
+	mapOne(user model.User) *User
+	mapMany(users []model.User) ([]*User, error)
+}
+
 type userMapper struct{}
 
-func newUserMapper() *userMapper {
+func newUserMapper() UserMapper {
 	return &userMapper{}
 }
 

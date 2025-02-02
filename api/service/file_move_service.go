@@ -30,7 +30,7 @@ type FileMoveService struct {
 	fileGuard   guard.FileGuard
 	fileMapper  FileMapper
 	fileCoreSvc FileCoreService
-	taskSvc     *TaskService
+	taskSvc     TaskService
 }
 
 func NewFileMoveService() *FileMoveService {
@@ -39,13 +39,13 @@ func NewFileMoveService() *FileMoveService {
 		fileSearch:  search.NewFileSearch(),
 		fileCache:   cache.NewFileCache(),
 		fileGuard:   guard.NewFileGuard(),
-		fileMapper:  NewFileMapper(),
-		fileCoreSvc: NewFileCoreService(),
+		fileMapper:  newFileMapper(),
+		fileCoreSvc: newFileCoreService(),
 		taskSvc:     NewTaskService(),
 	}
 }
 
-func (svc *FileMoveService) MoveOne(sourceID string, targetID string, userID string) (*File, error) {
+func (svc *FileMoveService) Move(sourceID string, targetID string, userID string) (*File, error) {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return nil, err
@@ -66,10 +66,35 @@ func (svc *FileMoveService) MoveOne(sourceID string, targetID string, userID str
 	if err := svc.check(source, target, userID); err != nil {
 		return nil, err
 	}
-	return svc.move(source, target, userID)
+	return svc.performMove(source, target, userID)
 }
 
-func (svc *FileMoveService) move(source model.File, target model.File, userID string) (*File, error) {
+type FileMoveManyOptions struct {
+	SourceIDs []string `json:"sourceIds" validate:"required"`
+	TargetID  string   `json:"targetId"  validate:"required"`
+}
+
+type FileMoveManyResult struct {
+	Succeeded []string `json:"succeeded"`
+	Failed    []string `json:"failed"`
+}
+
+func (svc *FileMoveService) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
+	res := &FileMoveManyResult{
+		Failed:    make([]string, 0),
+		Succeeded: make([]string, 0),
+	}
+	for _, id := range opts.SourceIDs {
+		if _, err := svc.Move(id, opts.TargetID, userID); err != nil {
+			res.Failed = append(res.Failed, id)
+		} else {
+			res.Succeeded = append(res.Succeeded, id)
+		}
+	}
+	return res, nil
+}
+
+func (svc *FileMoveService) performMove(source model.File, target model.File, userID string) (*File, error) {
 	if err := svc.fileRepo.MoveSourceIntoTarget(target.GetID(), source.GetID()); err != nil {
 		return nil, err
 	}
@@ -81,7 +106,7 @@ func (svc *FileMoveService) move(source model.File, target model.File, userID st
 	if err := svc.refreshUpdateAndCreateTime(source, target); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(source, userID)
+	res, err := svc.fileMapper.mapOne(source, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +130,7 @@ func (svc *FileMoveService) createTask(file model.File, userID string) (model.Ta
 
 func (svc *FileMoveService) check(source model.File, target model.File, userID string) error {
 	if source.GetParentID() != nil {
-		existing, err := svc.fileCoreSvc.GetChildWithName(target.GetID(), source.GetName())
+		existing, err := svc.fileCoreSvc.getChildWithName(target.GetID(), source.GetName())
 		if err != nil {
 			return err
 		}
@@ -144,40 +169,15 @@ func (svc *FileMoveService) refreshUpdateAndCreateTime(source model.File, target
 	if err := svc.fileRepo.Save(source); err != nil {
 		return err
 	}
-	if err := svc.fileCoreSvc.Sync(source); err != nil {
+	if err := svc.fileCoreSvc.sync(source); err != nil {
 		return err
 	}
 	target.SetUpdateTime(&now)
 	if err := svc.fileRepo.Save(target); err != nil {
 		return err
 	}
-	if err := svc.fileCoreSvc.Sync(target); err != nil {
+	if err := svc.fileCoreSvc.sync(target); err != nil {
 		return err
 	}
 	return nil
-}
-
-type FileMoveManyOptions struct {
-	SourceIDs []string `json:"sourceIds" validate:"required"`
-	TargetID  string   `json:"targetId"  validate:"required"`
-}
-
-type FileMoveManyResult struct {
-	Succeeded []string `json:"succeeded"`
-	Failed    []string `json:"failed"`
-}
-
-func (svc *FileMoveService) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
-	res := &FileMoveManyResult{
-		Failed:    make([]string, 0),
-		Succeeded: make([]string, 0),
-	}
-	for _, id := range opts.SourceIDs {
-		if _, err := svc.MoveOne(id, opts.TargetID, userID); err != nil {
-			res.Failed = append(res.Failed, id)
-		} else {
-			res.Succeeded = append(res.Succeeded, id)
-		}
-	}
-	return res, nil
 }

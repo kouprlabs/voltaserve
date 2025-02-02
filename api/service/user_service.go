@@ -26,7 +26,7 @@ import (
 )
 
 type UserService struct {
-	userMapper     *userMapper
+	userMapper     UserMapper
 	userRepo       repo.UserRepo
 	userSearch     search.UserSearch
 	orgRepo        repo.OrganizationRepo
@@ -103,6 +103,29 @@ func (svc *UserService) Probe(opts UserListOptions, userID string) (*UserProbe, 
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
+}
+
+type ExtractPictureJustification struct {
+	OrganizationID *string
+	GroupID        *string
+	InvitationID   *string
+}
+
+func (svc *UserService) ExtractPicture(id string, justification ExtractPictureJustification, userID string, isAdmin bool) ([]byte, *string, *string, error) {
+	user, err := svc.findUserForPicture(id, justification, userID, isAdmin)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if user.GetPicture() == nil {
+		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
+	}
+	mime := helper.Base64ToMIME(*user.GetPicture())
+	ext := helper.Base64ToExtension(*user.GetPicture())
+	b, err := helper.Base64ToBytes(*user.GetPicture())
+	if err != nil {
+		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
+	}
+	return b, &ext, &mime, nil
 }
 
 func (svc *UserService) findAll(opts UserListOptions, userID string) ([]model.User, error) {
@@ -259,29 +282,6 @@ func (svc *UserService) paginate(data []model.User, page, size uint64) ([]model.
 		endIndex = totalElements
 	}
 	return data[startIndex:endIndex], totalElements, totalPages
-}
-
-type ExtractPictureJustification struct {
-	OrganizationID *string
-	GroupID        *string
-	InvitationID   *string
-}
-
-func (svc *UserService) ExtractPicture(id string, justification ExtractPictureJustification, userID string, isAdmin bool) ([]byte, *string, *string, error) {
-	user, err := svc.findUserForPicture(id, justification, userID, isAdmin)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if user.GetPicture() == nil {
-		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
-	}
-	mime := helper.Base64ToMIME(*user.GetPicture())
-	ext := helper.Base64ToExtension(*user.GetPicture())
-	b, err := helper.Base64ToBytes(*user.GetPicture())
-	if err != nil {
-		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
-	}
-	return b, &ext, &mime, nil
 }
 
 func (svc *UserService) findUserForPicture(id string, justification ExtractPictureJustification, userID string, isAdmin bool) (model.User, error) {

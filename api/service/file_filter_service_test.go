@@ -56,7 +56,7 @@ func TestFileFilterService_FilterWithQuery(t *testing.T) {
 
 	fileRepo.EXPECT().IsGrandChildOf(files[0].GetID(), parent.GetID()).Return(true, nil)
 
-	filtered, err := svc.FilterWithQuery(files, query, parent)
+	filtered, err := svc.filterWithQuery(files, query, parent)
 	if assert.NoError(t, err) {
 		assert.Len(t, filtered, 1)
 		assert.Equal(t, files[0].GetID(), filtered[0].GetID())
@@ -77,7 +77,7 @@ func TestFileFilterService_FilterFolders(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder", Type: model.FileTypeFolder}),
 	}
 
-	filtered := svc.FilterFolders(files)
+	filtered := svc.filterFolders(files)
 	assert.Len(t, filtered, 1)
 	assert.Equal(t, files[1].GetID(), filtered[0].GetID())
 }
@@ -96,7 +96,7 @@ func TestFileFilterService_FilterFiles(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "folder", Type: model.FileTypeFolder}),
 	}
 
-	filtered := svc.FilterFiles(files)
+	filtered := svc.filterFiles(files)
 	assert.Len(t, filtered, 1)
 	assert.Equal(t, files[0].GetID(), filtered[0].GetID())
 }
@@ -120,14 +120,14 @@ func TestFileFilterService_FilterImages(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "other", Type: model.FileTypeFile}),
 	}
 
-	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
 
-	filtered := svc.FilterImages(files, "")
+	filtered := svc.filterImages(files, "")
 	assert.Len(t, filtered, 1)
 	assert.Equal(t, files[0].GetID(), filtered[0].GetID())
 }
@@ -151,14 +151,14 @@ func TestFileFilterService_FilterPDFs(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "other", Type: model.FileTypeFile}),
 	}
 
-	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
 
-	filtered := svc.FilterPDFs(files, "")
+	filtered := svc.filterPDFs(files, "")
 	assert.Len(t, filtered, 1)
 	assert.Equal(t, files[1].GetID(), filtered[0].GetID())
 }
@@ -182,14 +182,14 @@ func TestFileFilterService_FilterDocuments(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "other", Type: model.FileTypeFile}),
 	}
 
-	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
 
-	filtered := svc.FilterDocuments(files, "")
+	filtered := svc.filterDocuments(files, "")
 	assert.Len(t, filtered, 1)
 	assert.Equal(t, files[3].GetID(), filtered[0].GetID())
 }
@@ -213,14 +213,14 @@ func TestFileFilterService_FilterVideos(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "other", Type: model.FileTypeFile}),
 	}
 
-	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
 
-	filtered := svc.FilterVideos(files, "")
+	filtered := svc.filterVideos(files, "")
 	assert.Len(t, filtered, 1)
 	assert.Equal(t, files[4].GetID(), filtered[0].GetID())
 }
@@ -244,14 +244,14 @@ func TestFileFilterService_FilterOthers(t *testing.T) {
 		repo.NewFileWithOptions(repo.NewFileOptions{ID: "other", Type: model.FileTypeFile}),
 	}
 
-	fileMapper.EXPECT().MapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
-	fileMapper.EXPECT().MapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[0], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".jpg"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[1], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".pdf"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[2], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".txt"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[3], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".docx"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[4], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".mp4"}}}, nil).AnyTimes()
+	fileMapper.EXPECT().mapOne(files[5], gomock.Any()).Return(&File{Snapshot: &Snapshot{Original: &Download{Extension: ".zip"}}}, nil).AnyTimes()
 
-	filtered := svc.FilterOthers(files, "")
+	filtered := svc.filterOthers(files, "")
 	assert.Len(t, filtered, 1)
 	assert.Equal(t, files[5].GetID(), filtered[0].GetID())
 }

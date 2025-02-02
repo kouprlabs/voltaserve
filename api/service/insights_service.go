@@ -38,8 +38,8 @@ type InsightsService struct {
 	snapshotSvc    *SnapshotService
 	fileCache      cache.FileCache
 	fileGuard      guard.FileGuard
-	taskSvc        *TaskService
-	taskMapper     *taskMapper
+	taskSvc        TaskService
+	taskMapper     TaskMapper
 	s3             *infra.S3Manager
 	languageClient *language_client.LanguageClient
 	pipelineClient *conversion_client.PipelineClient
@@ -186,39 +186,6 @@ func (svc *InsightsService) Patch(id string, userID string) (*Task, error) {
 	return res, nil
 }
 
-func (svc *InsightsService) runPipeline(snapshot model.Snapshot, task model.Task) error {
-	key := snapshot.GetOriginal().Key
-	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
-		key = snapshot.GetPreview().Key
-	}
-	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
-		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
-		TaskID:     task.GetID(),
-		SnapshotID: snapshot.GetID(),
-		Bucket:     snapshot.GetPreview().Bucket,
-		Key:        key,
-		Payload:    map[string]string{"language": *snapshot.GetLanguage()},
-	}); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (svc *InsightsService) createWaitingTask(file model.File, userID string) (model.Task, error) {
-	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
-		Name:            "Waiting.",
-		UserID:          userID,
-		IsIndeterminate: true,
-		Status:          model.TaskStatusWaiting,
-		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func (svc *InsightsService) Delete(id string, userID string) (*Task, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
@@ -303,36 +270,6 @@ func (svc *InsightsService) Delete(id string, userID string) (*Task, error) {
 	return res, nil
 }
 
-func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
-	if !snapshot.HasText() {
-		return nil
-	}
-	s3Object := snapshot.GetText()
-	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket, minio.RemoveObjectOptions{}); err != nil {
-		return err
-	}
-	snapshot.SetText(nil)
-	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
-	if !snapshot.HasEntities() {
-		return nil
-	}
-	s3Object := snapshot.GetEntities()
-	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket, minio.RemoveObjectOptions{}); err != nil {
-		return err
-	}
-	snapshot.SetEntities(nil)
-	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
-		return err
-	}
-	return nil
-}
-
 type InsightsListEntitiesOptions struct {
 	Query     string `json:"query"`
 	Page      uint64 `json:"page"`
@@ -382,94 +319,6 @@ func (svc *InsightsService) ProbeEntities(id string, opts InsightsListEntitiesOp
 		TotalElements: uint64(len(all)),
 		TotalPages:    (uint64(len(all)) + opts.Size - 1) / opts.Size,
 	}, nil
-}
-
-func (svc *InsightsService) findEntities(id string, opts InsightsListEntitiesOptions, userID string) ([]*language_client.InsightsEntity, error) {
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, errorpkg.NewFileIsNotAFileError(file)
-	}
-	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
-	if err != nil {
-		return nil, err
-	}
-	if !snapshot.HasEntities() {
-		previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
-		if err != nil {
-			return nil, err
-		}
-		if previous == nil {
-			return nil, errorpkg.NewInsightsNotFoundError(nil)
-		} else {
-			snapshot = previous
-		}
-	}
-	text, err := svc.s3.GetText(snapshot.GetEntities().Key, snapshot.GetEntities().Bucket, minio.GetObjectOptions{})
-	if err != nil {
-		return nil, err
-	}
-	var entities []*language_client.InsightsEntity
-	if err := json.Unmarshal([]byte(text), &entities); err != nil {
-		return nil, err
-	}
-	return svc.doFiltering(entities, opts.Query), nil
-}
-
-func (svc *InsightsService) doFiltering(data []*language_client.InsightsEntity, query string) []*language_client.InsightsEntity {
-	if query == "" {
-		return data
-	}
-	filtered := make([]*language_client.InsightsEntity, 0)
-	for _, entity := range data {
-		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
-			filtered = append(filtered, entity)
-		}
-	}
-	return filtered
-}
-
-func (svc *InsightsService) doSorting(data []*language_client.InsightsEntity, sortBy string, sortOrder string) []*language_client.InsightsEntity {
-	if sortBy == SortByName {
-		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
-				return data[i].Text > data[j].Text
-			} else {
-				return data[i].Text < data[j].Text
-			}
-		})
-		return data
-	} else if sortBy == SortByFrequency {
-		sort.Slice(data, func(i, j int) bool {
-			return data[i].Frequency > data[j].Frequency
-		})
-	}
-	return data
-}
-
-func (svc *InsightsService) doPagination(data []*language_client.InsightsEntity, page, size uint64) (pageData []*language_client.InsightsEntity, totalElements uint64, totalPages uint64) {
-	totalElements = uint64(len(data))
-	totalPages = (totalElements + size - 1) / size
-	if page > totalPages {
-		return []*language_client.InsightsEntity{}, totalElements, totalPages
-	}
-	startIndex := (page - 1) * size
-	endIndex := startIndex + size
-	if endIndex > totalElements {
-		endIndex = totalElements
-	}
-	return data[startIndex:endIndex], totalElements, totalPages
-}
-
-type InsightsInfo struct {
-	IsAvailable bool      `json:"isAvailable"`
-	IsOutdated  bool      `json:"isOutdated"`
-	Snapshot    *Snapshot `json:"snapshot,omitempty"`
 }
 
 func (svc *InsightsService) ReadInfo(id string, userID string) (*InsightsInfo, error) {
@@ -579,6 +428,157 @@ func (svc *InsightsService) DownloadOCRBuffer(id string, userID string) (*bytes.
 	} else {
 		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
+}
+
+func (svc *InsightsService) runPipeline(snapshot model.Snapshot, task model.Task) error {
+	key := snapshot.GetOriginal().Key
+	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
+		key = snapshot.GetPreview().Key
+	}
+	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
+		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
+		TaskID:     task.GetID(),
+		SnapshotID: snapshot.GetID(),
+		Bucket:     snapshot.GetPreview().Bucket,
+		Key:        key,
+		Payload:    map[string]string{"language": *snapshot.GetLanguage()},
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *InsightsService) createWaitingTask(file model.File, userID string) (model.Task, error) {
+	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Waiting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusWaiting,
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
+	if !snapshot.HasText() {
+		return nil
+	}
+	s3Object := snapshot.GetText()
+	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket, minio.RemoveObjectOptions{}); err != nil {
+		return err
+	}
+	snapshot.SetText(nil)
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
+	if !snapshot.HasEntities() {
+		return nil
+	}
+	s3Object := snapshot.GetEntities()
+	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket, minio.RemoveObjectOptions{}); err != nil {
+		return err
+	}
+	snapshot.SetEntities(nil)
+	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *InsightsService) findEntities(id string, opts InsightsListEntitiesOptions, userID string) ([]*language_client.InsightsEntity, error) {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
+	if err != nil {
+		return nil, err
+	}
+	if !snapshot.HasEntities() {
+		previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
+		if err != nil {
+			return nil, err
+		}
+		if previous == nil {
+			return nil, errorpkg.NewInsightsNotFoundError(nil)
+		} else {
+			snapshot = previous
+		}
+	}
+	text, err := svc.s3.GetText(snapshot.GetEntities().Key, snapshot.GetEntities().Bucket, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, err
+	}
+	var entities []*language_client.InsightsEntity
+	if err := json.Unmarshal([]byte(text), &entities); err != nil {
+		return nil, err
+	}
+	return svc.doFiltering(entities, opts.Query), nil
+}
+
+func (svc *InsightsService) doFiltering(data []*language_client.InsightsEntity, query string) []*language_client.InsightsEntity {
+	if query == "" {
+		return data
+	}
+	filtered := make([]*language_client.InsightsEntity, 0)
+	for _, entity := range data {
+		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
+			filtered = append(filtered, entity)
+		}
+	}
+	return filtered
+}
+
+func (svc *InsightsService) doSorting(data []*language_client.InsightsEntity, sortBy string, sortOrder string) []*language_client.InsightsEntity {
+	if sortBy == SortByName {
+		sort.Slice(data, func(i, j int) bool {
+			if sortOrder == SortOrderDesc {
+				return data[i].Text > data[j].Text
+			} else {
+				return data[i].Text < data[j].Text
+			}
+		})
+		return data
+	} else if sortBy == SortByFrequency {
+		sort.Slice(data, func(i, j int) bool {
+			return data[i].Frequency > data[j].Frequency
+		})
+	}
+	return data
+}
+
+func (svc *InsightsService) doPagination(data []*language_client.InsightsEntity, page, size uint64) (pageData []*language_client.InsightsEntity, totalElements uint64, totalPages uint64) {
+	totalElements = uint64(len(data))
+	totalPages = (totalElements + size - 1) / size
+	if page > totalPages {
+		return []*language_client.InsightsEntity{}, totalElements, totalPages
+	}
+	startIndex := (page - 1) * size
+	endIndex := startIndex + size
+	if endIndex > totalElements {
+		endIndex = totalElements
+	}
+	return data[startIndex:endIndex], totalElements, totalPages
+}
+
+type InsightsInfo struct {
+	IsAvailable bool      `json:"isAvailable"`
+	IsOutdated  bool      `json:"isOutdated"`
+	Snapshot    *Snapshot `json:"snapshot,omitempty"`
 }
 
 func (svc *InsightsService) getPreviousSnapshot(fileID string, version int64) (model.Snapshot, error) {

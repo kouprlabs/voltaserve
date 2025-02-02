@@ -22,19 +22,15 @@ import (
 )
 
 type FileFilterService interface {
-	FilterFolders(data []model.File) []model.File
-	FilterFiles(data []model.File) []model.File
-	FilterImages(data []model.File, userID string) []model.File
-	FilterPDFs(data []model.File, userID string) []model.File
-	FilterDocuments(data []model.File, userID string) []model.File
-	FilterVideos(data []model.File, userID string) []model.File
-	FilterTexts(data []model.File, userID string) []model.File
-	FilterOthers(data []model.File, userID string) []model.File
-	FilterWithQuery(data []model.File, opts FileQuery, parent model.File) ([]model.File, error)
-}
-
-func NewFileFilterService() FileFilterService {
-	return newFileFilterService()
+	filterFolders(data []model.File) []model.File
+	filterFiles(data []model.File) []model.File
+	filterImages(data []model.File, userID string) []model.File
+	filterPDFs(data []model.File, userID string) []model.File
+	filterDocuments(data []model.File, userID string) []model.File
+	filterVideos(data []model.File, userID string) []model.File
+	filterTexts(data []model.File, userID string) []model.File
+	filterOthers(data []model.File, userID string) []model.File
+	filterWithQuery(data []model.File, opts FileQuery, parent model.File) ([]model.File, error)
 }
 
 type fileFilterService struct {
@@ -44,7 +40,7 @@ type fileFilterService struct {
 	fileIdent  *infra.FileIdentifier
 }
 
-func newFileFilterService() *fileFilterService {
+func newFileFilterService() FileFilterService {
 	return &fileFilterService{
 		fileRepo:   repo.NewFileRepo(),
 		fileGuard:  guard.NewFileGuard(),
@@ -53,7 +49,7 @@ func newFileFilterService() *fileFilterService {
 	}
 }
 
-func (svc *fileFilterService) FilterFolders(data []model.File) []model.File {
+func (svc *fileFilterService) filterFolders(data []model.File) []model.File {
 	folders, _ := rxgo.Just(data)().
 		Filter(func(v interface{}) bool {
 			return v.(model.File).GetType() == model.FileTypeFolder
@@ -66,7 +62,7 @@ func (svc *fileFilterService) FilterFolders(data []model.File) []model.File {
 	return res
 }
 
-func (svc *fileFilterService) FilterFiles(data []model.File) []model.File {
+func (svc *fileFilterService) filterFiles(data []model.File) []model.File {
 	files, _ := rxgo.Just(data)().
 		Filter(func(v interface{}) bool {
 			return v.(model.File).GetType() == model.FileTypeFile
@@ -79,10 +75,10 @@ func (svc *fileFilterService) FilterFiles(data []model.File) []model.File {
 	return res
 }
 
-func (svc *fileFilterService) FilterImages(data []model.File, userID string) []model.File {
+func (svc *fileFilterService) filterImages(data []model.File, userID string) []model.File {
 	images, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -102,10 +98,10 @@ func (svc *fileFilterService) FilterImages(data []model.File, userID string) []m
 	return res
 }
 
-func (svc *fileFilterService) FilterPDFs(data []model.File, userID string) []model.File {
+func (svc *fileFilterService) filterPDFs(data []model.File, userID string) []model.File {
 	pdfs, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -125,10 +121,10 @@ func (svc *fileFilterService) FilterPDFs(data []model.File, userID string) []mod
 	return res
 }
 
-func (svc *fileFilterService) FilterDocuments(data []model.File, userID string) []model.File {
+func (svc *fileFilterService) filterDocuments(data []model.File, userID string) []model.File {
 	documents, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -148,10 +144,10 @@ func (svc *fileFilterService) FilterDocuments(data []model.File, userID string) 
 	return res
 }
 
-func (svc *fileFilterService) FilterVideos(data []model.File, userID string) []model.File {
+func (svc *fileFilterService) filterVideos(data []model.File, userID string) []model.File {
 	videos, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -171,10 +167,10 @@ func (svc *fileFilterService) FilterVideos(data []model.File, userID string) []m
 	return res
 }
 
-func (svc *fileFilterService) FilterTexts(data []model.File, userID string) []model.File {
+func (svc *fileFilterService) filterTexts(data []model.File, userID string) []model.File {
 	texts, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -194,10 +190,10 @@ func (svc *fileFilterService) FilterTexts(data []model.File, userID string) []mo
 	return res
 }
 
-func (svc *fileFilterService) FilterOthers(data []model.File, userID string) []model.File {
+func (svc *fileFilterService) filterOthers(data []model.File, userID string) []model.File {
 	others, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -222,7 +218,7 @@ func (svc *fileFilterService) FilterOthers(data []model.File, userID string) []m
 	return res
 }
 
-func (svc *fileFilterService) FilterWithQuery(data []model.File, opts FileQuery, parent model.File) ([]model.File, error) {
+func (svc *fileFilterService) filterWithQuery(data []model.File, opts FileQuery, parent model.File) ([]model.File, error) {
 	filtered, _ := rxgo.Just(data)().
 		Filter(func(v interface{}) bool {
 			return v.(model.File).GetWorkspaceID() == parent.GetWorkspaceID()

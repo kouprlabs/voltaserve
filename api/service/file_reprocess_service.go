@@ -29,7 +29,7 @@ type FileReprocessService struct {
 	snapshotCache  cache.SnapshotCache
 	snapshotSvc    *SnapshotService
 	taskCache      cache.TaskCache
-	taskSvc        *TaskService
+	taskSvc        TaskService
 	pipelineClient *conversion_client.PipelineClient
 }
 
@@ -78,7 +78,7 @@ func (svc *FileReprocessService) Reprocess(id string, userID string) (*FileRepro
 		return nil, err
 	}
 	for _, leaf := range tree {
-		if svc.reprocess(leaf, userID) {
+		if svc.performReprocess(leaf, userID) {
 			resp.AppendAccepted(leaf.GetID())
 		} else {
 			resp.AppendRejected(leaf.GetID())
@@ -87,7 +87,7 @@ func (svc *FileReprocessService) Reprocess(id string, userID string) (*FileRepro
 	return resp, nil
 }
 
-func (svc *FileReprocessService) reprocess(leaf model.File, userID string) bool {
+func (svc *FileReprocessService) performReprocess(leaf model.File, userID string) bool {
 	if leaf.GetType() != model.FileTypeFile {
 		return false
 	}

@@ -27,7 +27,7 @@ type FileDeleteService struct {
 	fileGuard      guard.FileGuard
 	fileCache      cache.FileCache
 	workspaceCache cache.WorkspaceCache
-	taskSvc        *TaskService
+	taskSvc        TaskService
 	snapshotRepo   repo.SnapshotRepo
 	snapshotSvc    *SnapshotService
 }
@@ -45,7 +45,7 @@ func NewFileDeleteService() *FileDeleteService {
 	}
 }
 
-func (svc *FileDeleteService) DeleteOne(id string, userID string) error {
+func (svc *FileDeleteService) Delete(id string, userID string) error {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
@@ -65,10 +65,34 @@ func (svc *FileDeleteService) DeleteOne(id string, userID string) error {
 	if err := svc.check(file); err != nil {
 		return err
 	}
-	return svc.delete(file)
+	return svc.performDelete(file)
 }
 
-func (svc *FileDeleteService) delete(file model.File) error {
+type FileDeleteManyOptions struct {
+	IDs []string `json:"ids" validate:"required"`
+}
+
+type FileDeleteManyResult struct {
+	Succeeded []string `json:"succeeded"`
+	Failed    []string `json:"failed"`
+}
+
+func (svc *FileDeleteService) DeleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
+	res := &FileDeleteManyResult{
+		Failed:    make([]string, 0),
+		Succeeded: make([]string, 0),
+	}
+	for _, id := range opts.IDs {
+		if err := svc.Delete(id, userID); err != nil {
+			res.Failed = append(res.Failed, id)
+		} else {
+			res.Succeeded = append(res.Succeeded, id)
+		}
+	}
+	return res, nil
+}
+
+func (svc *FileDeleteService) performDelete(file model.File) error {
 	if file.GetType() == model.FileTypeFolder {
 		return svc.deleteFolder(file.GetID())
 	} else if file.GetType() == model.FileTypeFile {
@@ -177,28 +201,4 @@ func (svc *FileDeleteService) deleteFromSearch(ids []string) {
 	if err := svc.fileSearch.Delete(ids); err != nil {
 		log.GetLogger().Error(err)
 	}
-}
-
-type FileDeleteManyOptions struct {
-	IDs []string `json:"ids" validate:"required"`
-}
-
-type FileDeleteManyResult struct {
-	Succeeded []string `json:"succeeded"`
-	Failed    []string `json:"failed"`
-}
-
-func (svc *FileDeleteService) DeleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
-	res := &FileDeleteManyResult{
-		Failed:    make([]string, 0),
-		Succeeded: make([]string, 0),
-	}
-	for _, id := range opts.IDs {
-		if err := svc.DeleteOne(id, userID); err != nil {
-			res.Failed = append(res.Failed, id)
-		} else {
-			res.Succeeded = append(res.Succeeded, id)
-		}
-	}
-	return res, nil
 }

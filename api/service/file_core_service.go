@@ -22,15 +22,20 @@ import (
 )
 
 type FileCoreService interface {
-	GetChildWithName(id string, name string) (model.File, error)
-	Sync(file model.File) error
-	SaveAndSync(file model.File) error
-	Authorize(userID string, files []model.File, permission string) ([]model.File, error)
-	AuthorizeIDs(userID string, ids []string, permission string) ([]model.File, error)
+	getChildWithName(id string, name string) (model.File, error)
+	sync(file model.File) error
+	saveAndSync(file model.File) error
+	authorize(userID string, files []model.File, permission string) ([]model.File, error)
+	authorizeIDs(userID string, ids []string, permission string) ([]model.File, error)
 }
 
-func NewFileCoreService() FileCoreService {
-	return newFileCoreService()
+func newFileCoreService() FileCoreService {
+	return &fileCoreService{
+		fileRepo:   repo.NewFileRepo(),
+		fileCache:  cache.NewFileCache(),
+		fileSearch: search.NewFileSearch(),
+		fileGuard:  guard.NewFileGuard(),
+	}
 }
 
 type fileCoreService struct {
@@ -40,16 +45,7 @@ type fileCoreService struct {
 	fileGuard  guard.FileGuard
 }
 
-func newFileCoreService() *fileCoreService {
-	return &fileCoreService{
-		fileRepo:   repo.NewFileRepo(),
-		fileCache:  cache.NewFileCache(),
-		fileSearch: search.NewFileSearch(),
-		fileGuard:  guard.NewFileGuard(),
-	}
-}
-
-func (svc *fileCoreService) GetChildWithName(id string, name string) (model.File, error) {
+func (svc *fileCoreService) getChildWithName(id string, name string) (model.File, error) {
 	children, err := svc.fileRepo.FindChildren(id)
 	if err != nil {
 		return nil, err
@@ -62,7 +58,7 @@ func (svc *fileCoreService) GetChildWithName(id string, name string) (model.File
 	return nil, nil
 }
 
-func (svc *fileCoreService) Sync(file model.File) error {
+func (svc *fileCoreService) sync(file model.File) error {
 	if err := svc.fileSearch.Update([]model.File{file}); err != nil {
 		return err
 	}
@@ -72,17 +68,17 @@ func (svc *fileCoreService) Sync(file model.File) error {
 	return nil
 }
 
-func (svc *fileCoreService) SaveAndSync(file model.File) error {
+func (svc *fileCoreService) saveAndSync(file model.File) error {
 	if err := svc.fileRepo.Save(file); err != nil {
 		return err
 	}
-	if err := svc.Sync(file); err != nil {
+	if err := svc.sync(file); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (svc *fileCoreService) Authorize(userID string, files []model.File, permission string) ([]model.File, error) {
+func (svc *fileCoreService) authorize(userID string, files []model.File, permission string) ([]model.File, error) {
 	var res []model.File
 	for _, f := range files {
 		if svc.fileGuard.IsAuthorized(userID, f, permission) {
@@ -92,7 +88,7 @@ func (svc *fileCoreService) Authorize(userID string, files []model.File, permiss
 	return res, nil
 }
 
-func (svc *fileCoreService) AuthorizeIDs(userID string, ids []string, permission string) ([]model.File, error) {
+func (svc *fileCoreService) authorizeIDs(userID string, ids []string, permission string) ([]model.File, error) {
 	var res []model.File
 	for _, id := range ids {
 		var f model.File

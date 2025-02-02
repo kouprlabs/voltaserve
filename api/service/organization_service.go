@@ -31,15 +31,15 @@ type OrganizationService struct {
 	orgRepo        repo.OrganizationRepo
 	orgCache       cache.OrganizationCache
 	orgGuard       guard.OrganizationGuard
-	orgMapper      *organizationMapper
+	orgMapper      OrganizationMapper
 	orgSearch      search.OrganizationSearch
 	userSearch     search.UserSearch
-	userMapper     *userMapper
+	userMapper     UserMapper
 	userRepo       repo.UserRepo
 	groupCache     cache.GroupCache
 	groupRepo      repo.GroupRepo
 	groupService   *GroupService
-	groupMapper    *groupMapper
+	groupMapper    GroupMapper
 	workspaceCache cache.WorkspaceCache
 	workspaceRepo  repo.WorkspaceRepo
 	config         *config.Config
@@ -156,44 +156,6 @@ func (svc *OrganizationService) Probe(opts OrganizationListOptions, userID strin
 	}, nil
 }
 
-func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
-	var res []model.Organization
-	if opts.Query == "" {
-		ids, err := svc.orgRepo.FindIDs()
-		if err != nil {
-			return nil, err
-		}
-		res, err = svc.authorizeIDs(ids, userID)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		hits, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{})
-		if err != nil {
-			return nil, err
-		}
-		var orgs []model.Organization
-		for _, hit := range hits {
-			org, err := svc.orgCache.Get(hit.GetID())
-			if err != nil {
-				var e *errorpkg.ErrorResponse
-				// We don't want to break if the search engine contains organizations that shouldn't be there
-				if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
-					continue
-				} else {
-					return nil, err
-				}
-			}
-			orgs = append(orgs, org)
-		}
-		res, err = svc.authorize(orgs, userID)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
 func (svc *OrganizationService) PatchName(id string, name string, userID string) (*Organization, error) {
 	org, err := svc.orgCache.Get(id)
 	if err != nil {
@@ -257,6 +219,44 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return err
 	}
 	return nil
+}
+
+func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
+	var res []model.Organization
+	if opts.Query == "" {
+		ids, err := svc.orgRepo.FindIDs()
+		if err != nil {
+			return nil, err
+		}
+		res, err = svc.authorizeIDs(ids, userID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		hits, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{})
+		if err != nil {
+			return nil, err
+		}
+		var orgs []model.Organization
+		for _, hit := range hits {
+			org, err := svc.orgCache.Get(hit.GetID())
+			if err != nil {
+				var e *errorpkg.ErrorResponse
+				// We don't want to break if the search engine contains organizations that shouldn't be there
+				if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
+					continue
+				} else {
+					return nil, err
+				}
+			}
+			orgs = append(orgs, org)
+		}
+		res, err = svc.authorize(orgs, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (svc *OrganizationService) checkUserCanRemoveMember(memberID string, org model.Organization, userID string) error {

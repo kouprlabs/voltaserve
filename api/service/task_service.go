@@ -26,8 +26,27 @@ import (
 	"github.com/kouprlabs/voltaserve/api/search"
 )
 
-type TaskService struct {
-	taskMapper    *taskMapper
+type TaskService interface {
+	Create(opts TaskCreateOptions) (*Task, error)
+	Patch(id string, opts TaskPatchOptions) (*Task, error)
+	Find(id string, userID string) (*Task, error)
+	List(opts TaskListOptions, userID string) (*TaskList, error)
+	Probe(opts TaskListOptions, userID string) (*TaskProbe, error)
+	Dismiss(id string, userID string) error
+	DismissAll(userID string) (*TaskDismissAllResult, error)
+	Delete(id string) error
+	Count(userID string) (*int64, error)
+	insertAndSync(opts repo.TaskInsertOptions) (model.Task, error)
+	saveAndSync(task model.Task) error
+	deleteAndSync(id string) error
+}
+
+func NewTaskService() TaskService {
+	return newTaskService()
+}
+
+type taskService struct {
+	taskMapper    TaskMapper
 	taskCache     cache.TaskCache
 	taskSearch    search.TaskSearch
 	taskRepo      repo.TaskRepo
@@ -37,8 +56,8 @@ type TaskService struct {
 	fileCache     cache.FileCache
 }
 
-func NewTaskService() *TaskService {
-	return &TaskService{
+func newTaskService() *taskService {
+	return &taskService{
 		taskMapper:    newTaskMapper(),
 		taskCache:     cache.NewTaskCache(),
 		taskSearch:    search.NewTaskSearch(),
@@ -60,7 +79,7 @@ type TaskCreateOptions struct {
 	Payload         map[string]string `json:"payload,omitempty"`
 }
 
-func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
+func (svc *taskService) Create(opts TaskCreateOptions) (*Task, error) {
 	task, err := svc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            opts.Name,
@@ -101,7 +120,7 @@ const (
 	TaskFieldPayload         = "payload"
 )
 
-func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
+func (svc *taskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -137,7 +156,7 @@ func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	return res, nil
 }
 
-func (svc *TaskService) Find(id string, userID string) (*Task, error) {
+func (svc *taskService) Find(id string, userID string) (*Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -160,7 +179,7 @@ type TaskListOptions struct {
 	SortOrder string
 }
 
-func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
+func (svc *taskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -186,7 +205,7 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 	}, nil
 }
 
-func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, error) {
+func (svc *taskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -198,7 +217,7 @@ func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, 
 	}, nil
 }
 
-func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Task, error) {
+func (svc *taskService) findAll(opts TaskListOptions, userID string) ([]model.Task, error) {
 	var res []model.Task
 	if opts.Query == "" {
 		ids, err := svc.taskRepo.FindIDs(userID)
@@ -236,7 +255,7 @@ func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Ta
 	return res, nil
 }
 
-func (svc *TaskService) Count(userID string) (*int64, error) {
+func (svc *taskService) Count(userID string) (*int64, error) {
 	var res int64
 	var err error
 	if res, err = svc.taskRepo.CountByEmail(userID); err != nil {
@@ -245,7 +264,7 @@ func (svc *TaskService) Count(userID string) (*int64, error) {
 	return &res, nil
 }
 
-func (svc *TaskService) Dismiss(id string, userID string) error {
+func (svc *taskService) Dismiss(id string, userID string) error {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return err
@@ -264,7 +283,7 @@ type TaskDismissAllResult struct {
 	Failed    []string `json:"failed"`
 }
 
-func (svc *TaskService) DismissAll(userID string) (*TaskDismissAllResult, error) {
+func (svc *taskService) DismissAll(userID string) (*TaskDismissAllResult, error) {
 	ids, err := svc.taskRepo.FindIDs(userID)
 	if err != nil {
 		return nil, err
@@ -289,11 +308,11 @@ func (svc *TaskService) DismissAll(userID string) (*TaskDismissAllResult, error)
 	return &res, nil
 }
 
-func (svc *TaskService) Delete(id string) error {
+func (svc *taskService) Delete(id string) error {
 	return svc.deleteAndSync(id)
 }
 
-func (svc *TaskService) authorize(data []model.Task, userID string) ([]model.Task, error) {
+func (svc *taskService) authorize(data []model.Task, userID string) ([]model.Task, error) {
 	var res []model.Task
 	for _, t := range data {
 		if t.GetUserID() == userID {
@@ -303,7 +322,7 @@ func (svc *TaskService) authorize(data []model.Task, userID string) ([]model.Tas
 	return res, nil
 }
 
-func (svc *TaskService) authorizeIDs(ids []string, userID string) ([]model.Task, error) {
+func (svc *taskService) authorizeIDs(ids []string, userID string) ([]model.Task, error) {
 	var res []model.Task
 	for _, id := range ids {
 		var t model.Task
@@ -323,7 +342,7 @@ func (svc *TaskService) authorizeIDs(ids []string, userID string) ([]model.Task,
 	return res, nil
 }
 
-func (svc *TaskService) sort(data []model.Task, sortBy string, sortOrder string) []model.Task {
+func (svc *taskService) sort(data []model.Task, sortBy string, sortOrder string) []model.Task {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -372,7 +391,7 @@ func (svc *TaskService) sort(data []model.Task, sortBy string, sortOrder string)
 	return data
 }
 
-func (svc *TaskService) paginate(data []model.Task, page, size uint64) (pageData []model.Task, totalElements uint64, totalPages uint64) {
+func (svc *taskService) paginate(data []model.Task, page, size uint64) (pageData []model.Task, totalElements uint64, totalPages uint64) {
 	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
@@ -386,7 +405,7 @@ func (svc *TaskService) paginate(data []model.Task, page, size uint64) (pageData
 	return data[startIndex:endIndex], totalElements, totalPages
 }
 
-func (svc *TaskService) insertAndSync(opts repo.TaskInsertOptions) (model.Task, error) {
+func (svc *taskService) insertAndSync(opts repo.TaskInsertOptions) (model.Task, error) {
 	task, err := svc.taskRepo.Insert(opts)
 	if err != nil {
 		return nil, err
@@ -400,7 +419,7 @@ func (svc *TaskService) insertAndSync(opts repo.TaskInsertOptions) (model.Task, 
 	return task, nil
 }
 
-func (svc *TaskService) saveAndSync(task model.Task) error {
+func (svc *taskService) saveAndSync(task model.Task) error {
 	if err := svc.taskRepo.Save(task); err != nil {
 		return nil
 	}
@@ -413,7 +432,7 @@ func (svc *TaskService) saveAndSync(task model.Task) error {
 	return nil
 }
 
-func (svc *TaskService) deleteAndSync(id string) error {
+func (svc *taskService) deleteAndSync(id string) error {
 	snapshots, err := svc.snapshotRepo.FindAllForTask(id)
 	if err != nil {
 		return err

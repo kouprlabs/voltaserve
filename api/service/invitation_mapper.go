@@ -16,14 +16,19 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
+type InvitationMapper interface {
+	mapOne(model.Invitation, string) (*Invitation, error)
+	mapMany([]model.Invitation, string) ([]*Invitation, error)
+}
+
 type invitationMapper struct {
 	orgCache   cache.OrganizationCache
 	userRepo   repo.UserRepo
-	userMapper *userMapper
-	orgMapper  *organizationMapper
+	userMapper UserMapper
+	orgMapper  OrganizationMapper
 }
 
-func newInvitationMapper() *invitationMapper {
+func newInvitationMapper() InvitationMapper {
 	return &invitationMapper{
 		orgCache:   cache.NewOrganizationCache(),
 		userRepo:   repo.NewUserRepo(),

@@ -35,72 +35,86 @@ func (m *MockFileSortService) EXPECT() *MockFileSortServiceMockRecorder {
 	return m.recorder
 }
 
-// Sort mocks base method.
-func (m *MockFileSortService) Sort(data []model.File, sortBy, sortOrder, userID string) []model.File {
+// sort mocks base method.
+func (m *MockFileSortService) sort(data []model.File, sortBy, sortOrder, userID string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Sort", data, sortBy, sortOrder, userID)
+	ret := m.ctrl.Call(m, "sort", data, sortBy, sortOrder, userID)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// Sort indicates an expected call of Sort.
-func (mr *MockFileSortServiceMockRecorder) Sort(data, sortBy, sortOrder, userID interface{}) *gomock.Call {
+// sort indicates an expected call of sort.
+func (mr *MockFileSortServiceMockRecorder) sort(data, sortBy, sortOrder, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sort", reflect.TypeOf((*MockFileSortService)(nil).Sort), data, sortBy, sortOrder, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "sort", reflect.TypeOf((*MockFileSortService)(nil).sort), data, sortBy, sortOrder, userID)
 }
 
-// SortByDateCreated mocks base method.
-func (m *MockFileSortService) SortByDateCreated(data []model.File, sortOrder string) []model.File {
+// sortByDateCreated mocks base method.
+func (m *MockFileSortService) sortByDateCreated(data []model.File, sortOrder string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SortByDateCreated", data, sortOrder)
+	ret := m.ctrl.Call(m, "sortByDateCreated", data, sortOrder)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// SortByDateCreated indicates an expected call of SortByDateCreated.
-func (mr *MockFileSortServiceMockRecorder) SortByDateCreated(data, sortOrder interface{}) *gomock.Call {
+// sortByDateCreated indicates an expected call of sortByDateCreated.
+func (mr *MockFileSortServiceMockRecorder) sortByDateCreated(data, sortOrder interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SortByDateCreated", reflect.TypeOf((*MockFileSortService)(nil).SortByDateCreated), data, sortOrder)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "sortByDateCreated", reflect.TypeOf((*MockFileSortService)(nil).sortByDateCreated), data, sortOrder)
 }
 
-// SortByDateModified mocks base method.
-func (m *MockFileSortService) SortByDateModified(data []model.File, sortOrder string) []model.File {
+// sortByDateModified mocks base method.
+func (m *MockFileSortService) sortByDateModified(data []model.File, sortOrder string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SortByDateModified", data, sortOrder)
+	ret := m.ctrl.Call(m, "sortByDateModified", data, sortOrder)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// SortByDateModified indicates an expected call of SortByDateModified.
-func (mr *MockFileSortServiceMockRecorder) SortByDateModified(data, sortOrder interface{}) *gomock.Call {
+// sortByDateModified indicates an expected call of sortByDateModified.
+func (mr *MockFileSortServiceMockRecorder) sortByDateModified(data, sortOrder interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SortByDateModified", reflect.TypeOf((*MockFileSortService)(nil).SortByDateModified), data, sortOrder)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "sortByDateModified", reflect.TypeOf((*MockFileSortService)(nil).sortByDateModified), data, sortOrder)
 }
 
-// SortByKind mocks base method.
-func (m *MockFileSortService) SortByKind(data []model.File, userID string) []model.File {
+// sortByKind mocks base method.
+func (m *MockFileSortService) sortByKind(data []model.File, userID string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SortByKind", data, userID)
+	ret := m.ctrl.Call(m, "sortByKind", data, userID)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// SortByKind indicates an expected call of SortByKind.
-func (mr *MockFileSortServiceMockRecorder) SortByKind(data, userID interface{}) *gomock.Call {
+// sortByKind indicates an expected call of sortByKind.
+func (mr *MockFileSortServiceMockRecorder) sortByKind(data, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SortByKind", reflect.TypeOf((*MockFileSortService)(nil).SortByKind), data, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "sortByKind", reflect.TypeOf((*MockFileSortService)(nil).sortByKind), data, userID)
 }
 
-// SortBySize mocks base method.
-func (m *MockFileSortService) SortBySize(data []model.File, sortOrder, userID string) []model.File {
+// sortByName mocks base method.
+func (m *MockFileSortService) sortByName(data []model.File, sortOrder string) []model.File {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SortBySize", data, sortOrder, userID)
+	ret := m.ctrl.Call(m, "sortByName", data, sortOrder)
 	ret0, _ := ret[0].([]model.File)
 	return ret0
 }
 
-// SortBySize indicates an expected call of SortBySize.
-func (mr *MockFileSortServiceMockRecorder) SortBySize(data, sortOrder, userID interface{}) *gomock.Call {
+// sortByName indicates an expected call of sortByName.
+func (mr *MockFileSortServiceMockRecorder) sortByName(data, sortOrder interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SortBySize", reflect.TypeOf((*MockFileSortService)(nil).SortBySize), data, sortOrder, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "sortByName", reflect.TypeOf((*MockFileSortService)(nil).sortByName), data, sortOrder)
+}
+
+// sortBySize mocks base method.
+func (m *MockFileSortService) sortBySize(data []model.File, sortOrder, userID string) []model.File {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "sortBySize", data, sortOrder, userID)
+	ret0, _ := ret[0].([]model.File)
+	return ret0
+}
+
+// sortBySize indicates an expected call of sortBySize.
+func (mr *MockFileSortServiceMockRecorder) sortBySize(data, sortOrder, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "sortBySize", reflect.TypeOf((*MockFileSortService)(nil).sortBySize), data, sortOrder, userID)
 }

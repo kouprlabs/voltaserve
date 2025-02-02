@@ -120,6 +120,10 @@ func (e *taskEntity) SetIsIndeterminate(isIndeterminate bool) {
 	e.IsIndeterminate = isIndeterminate
 }
 
+func (e *taskEntity) SetID(id string) {
+	e.ID = id
+}
+
 func (e *taskEntity) SetUserID(userID string) {
 	e.UserID = userID
 }
@@ -143,6 +147,14 @@ func (e *taskEntity) SetPayload(p map[string]string) {
 	}
 }
 
+func (e *taskEntity) SetCreateTime(createTime string) {
+	e.CreateTime = createTime
+}
+
+func (e *taskEntity) SetUpdateTime(updateTime *string) {
+	e.UpdateTime = updateTime
+}
+
 type TaskRepo interface {
 	Insert(opts TaskInsertOptions) (model.Task, error)
 	Find(id string) (model.Task, error)
@@ -159,6 +171,35 @@ func NewTaskRepo() TaskRepo {
 
 func NewTask() model.Task {
 	return &taskEntity{}
+}
+
+type NewTaskOptions struct {
+	ID              string
+	Name            string
+	Error           *string
+	Percentage      *int
+	IsIndeterminate bool
+	UserID          string
+	Status          string
+	Payload         map[string]string
+	CreateTime      string
+	UpdateTime      *string
+}
+
+func NewTaskWithOptions(opts NewTaskOptions) model.Task {
+	res := &taskEntity{
+		ID:              opts.ID,
+		Name:            opts.Name,
+		Error:           opts.Error,
+		Percentage:      opts.Percentage,
+		IsIndeterminate: opts.IsIndeterminate,
+		UserID:          opts.UserID,
+		Status:          opts.Status,
+		CreateTime:      opts.CreateTime,
+		UpdateTime:      opts.UpdateTime,
+	}
+	res.SetPayload(opts.Payload)
+	return res
 }
 
 type taskRepo struct {

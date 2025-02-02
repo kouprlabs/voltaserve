@@ -494,7 +494,7 @@ type FileCopyOptions struct {
 //	@Router			/files/{id}/copy/{targetId} [post]
 func (r *FileRouter) CopyOne(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileCopySvc.CopyOne(c.Params("id"), c.Params("targetId"), userID)
+	res, err := r.fileCopySvc.Copy(c.Params("id"), c.Params("targetId"), userID)
 	if err != nil {
 		return err
 	}
@@ -547,7 +547,7 @@ type FileMoveOptions struct {
 //	@Router			/files/{id}/move/{targetId} [post]
 func (r *FileRouter) MoveOne(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileMoveSvc.MoveOne(c.Params("id"), c.Params("targetId"), userID)
+	res, err := r.fileMoveSvc.Move(c.Params("id"), c.Params("targetId"), userID)
 	if err != nil {
 		return err
 	}
@@ -654,7 +654,7 @@ type FileDeleteOptions struct {
 //	@Router			/files/{id} [delete]
 func (r *FileRouter) DeleteOne(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	if err := r.fileDeleteSvc.DeleteOne(c.Params("id"), userID); err != nil {
+	if err := r.fileDeleteSvc.Delete(c.Params("id"), userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -938,17 +938,17 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	buf := r.bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer r.bufferPool.Put(buf)
-	file, snapshot, rangeInterval, err := r.fileDownloadSvc.DownloadOriginalBuffer(id, c.Get("Range"), buf, userID)
+	res, err := r.fileDownloadSvc.DownloadOriginalBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(snapshot.GetOriginal().Key), ".") != extension {
+	if strings.TrimPrefix(filepath.Ext(res.Snapshot.GetOriginal().Key), ".") != extension {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
-	if rangeInterval != nil {
-		rangeInterval.ApplyToFiberContext(c)
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())))
+	if res.RangeInterval != nil {
+		res.RangeInterval.ApplyToFiberContext(c)
 		c.Status(http.StatusPartialContent)
 	} else {
 		c.Set("Content-Length", fmt.Sprintf("%d", len(buf.Bytes())))
@@ -993,17 +993,17 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	buf := r.bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer r.bufferPool.Put(buf)
-	file, snapshot, rangeInterval, err := r.fileDownloadSvc.DownloadPreviewBuffer(id, c.Get("Range"), buf, userID)
+	res, err := r.fileDownloadSvc.DownloadPreviewBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(snapshot.GetPreview().Key), ".") != extension {
+	if strings.TrimPrefix(filepath.Ext(res.Snapshot.GetPreview().Key), ".") != extension {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
-	if rangeInterval != nil {
-		rangeInterval.ApplyToFiberContext(c)
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())))
+	if res.RangeInterval != nil {
+		res.RangeInterval.ApplyToFiberContext(c)
 		c.Status(http.StatusPartialContent)
 	} else {
 		c.Set("Content-Length", fmt.Sprintf("%d", len(buf.Bytes())))

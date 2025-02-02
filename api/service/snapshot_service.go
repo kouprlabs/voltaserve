@@ -31,12 +31,12 @@ import (
 type SnapshotService struct {
 	snapshotRepo   repo.SnapshotRepo
 	snapshotCache  cache.SnapshotCache
-	snapshotMapper *snapshotMapper
+	snapshotMapper SnapshotMapper
 	fileCache      cache.FileCache
 	fileGuard      guard.FileGuard
 	fileRepo       repo.FileRepo
 	fileSearch     search.FileSearch
-	fileMapper     *fileMapper
+	fileMapper     FileMapper
 	taskRepo       repo.TaskRepo
 	taskCache      cache.TaskCache
 	s3             *infra.S3Manager
@@ -94,6 +94,118 @@ func (svc *SnapshotService) Probe(fileID string, opts SnapshotListOptions, userI
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
+}
+
+func (svc *SnapshotService) Activate(id string, userID string) (*File, error) {
+	fileID, err := svc.snapshotRepo.FindFileID(id)
+	if err != nil {
+		return nil, err
+	}
+	file, err := svc.fileCache.Get(fileID)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	if _, err := svc.snapshotCache.Get(id); err != nil {
+		return nil, err
+	}
+	file.SetSnapshotID(&id)
+	if err = svc.fileRepo.Save(file); err != nil {
+		return nil, err
+	}
+	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
+		return nil, err
+	}
+	err = svc.fileCache.Set(file)
+	if err != nil {
+		return nil, err
+	}
+	res, err := svc.fileMapper.mapOne(file, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *SnapshotService) Detach(id string, userID string) error {
+	fileID, err := svc.snapshotRepo.FindFileID(id)
+	if err != nil {
+		return err
+	}
+	file, err := svc.fileCache.Get(fileID)
+	if err != nil {
+		return err
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
+		return err
+	}
+	snapshot, err := svc.snapshotCache.Get(id)
+	if err != nil {
+		return err
+	}
+	if err := svc.snapshotRepo.Detach(id, file.GetID()); err != nil {
+		return err
+	}
+	associationCount, err := svc.snapshotRepo.CountAssociations(id)
+	if err != nil {
+		return err
+	}
+	if associationCount == 0 {
+		if snapshot.GetTaskID() != nil {
+			if err := svc.taskRepo.Delete(*snapshot.GetTaskID()); err != nil {
+				return err
+			}
+			if err := svc.taskCache.Delete(*snapshot.GetTaskID()); err != nil {
+				return err
+			}
+		}
+		if err := svc.snapshotRepo.Delete(id); err != nil {
+			return err
+		}
+		if err := svc.snapshotCache.Delete(id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapshot, error) {
+	if id != opts.Options.SnapshotID {
+		return nil, errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
+	}
+	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
+		Original:  opts.Original,
+		Fields:    opts.Fields,
+		Preview:   opts.Preview,
+		Text:      opts.Text,
+		OCR:       opts.OCR,
+		Entities:  opts.Entities,
+		Mosaic:    opts.Mosaic,
+		Thumbnail: opts.Thumbnail,
+		Status:    opts.Status,
+	}); err != nil {
+		return nil, err
+	}
+	snapshot, err := svc.snapshotCache.Refresh(id)
+	if err != nil {
+		return nil, err
+	}
+	fileIDs, err := svc.fileRepo.FindIDsBySnapshot(id)
+	if err != nil {
+		return nil, err
+	}
+	for _, fileID := range fileIDs {
+		file, err := svc.fileCache.Refresh(fileID)
+		if err != nil {
+			return nil, err
+		}
+		if err = svc.fileSearch.Update([]model.File{file}); err != nil {
+			return nil, err
+		}
+	}
+	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 
 func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, userID string) ([]model.Snapshot, model.File, error) {
@@ -181,81 +293,6 @@ func (svc *SnapshotService) paginate(data []model.Snapshot, page, size uint64) (
 		endIndex = totalElements
 	}
 	return data[startIndex:endIndex], totalElements, totalPages
-}
-
-func (svc *SnapshotService) Activate(id string, userID string) (*File, error) {
-	fileID, err := svc.snapshotRepo.FindFileID(id)
-	if err != nil {
-		return nil, err
-	}
-	file, err := svc.fileCache.Get(fileID)
-	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
-		return nil, err
-	}
-	if _, err := svc.snapshotCache.Get(id); err != nil {
-		return nil, err
-	}
-	file.SetSnapshotID(&id)
-	if err = svc.fileRepo.Save(file); err != nil {
-		return nil, err
-	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-		return nil, err
-	}
-	err = svc.fileCache.Set(file)
-	if err != nil {
-		return nil, err
-	}
-	res, err := svc.fileMapper.MapOne(file, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *SnapshotService) Detach(id string, userID string) error {
-	fileID, err := svc.snapshotRepo.FindFileID(id)
-	if err != nil {
-		return err
-	}
-	file, err := svc.fileCache.Get(fileID)
-	if err != nil {
-		return err
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
-		return err
-	}
-	snapshot, err := svc.snapshotCache.Get(id)
-	if err != nil {
-		return err
-	}
-	if err := svc.snapshotRepo.Detach(id, file.GetID()); err != nil {
-		return err
-	}
-	associationCount, err := svc.snapshotRepo.CountAssociations(id)
-	if err != nil {
-		return err
-	}
-	if associationCount == 0 {
-		if snapshot.GetTaskID() != nil {
-			if err := svc.taskRepo.Delete(*snapshot.GetTaskID()); err != nil {
-				return err
-			}
-			if err := svc.taskCache.Delete(*snapshot.GetTaskID()); err != nil {
-				return err
-			}
-		}
-		if err := svc.snapshotRepo.Delete(id); err != nil {
-			return err
-		}
-		if err := svc.snapshotCache.Delete(id); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (svc *SnapshotService) deleteForFile(fileID string) error {
@@ -359,43 +396,6 @@ type SnapshotPatchOptions struct {
 	Thumbnail *model.S3Object                      `json:"thumbnail"`
 	Status    *string                              `json:"status"`
 	TaskID    *string                              `json:"taskId"`
-}
-
-func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapshot, error) {
-	if id != opts.Options.SnapshotID {
-		return nil, errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
-	}
-	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
-		Original:  opts.Original,
-		Fields:    opts.Fields,
-		Preview:   opts.Preview,
-		Text:      opts.Text,
-		OCR:       opts.OCR,
-		Entities:  opts.Entities,
-		Mosaic:    opts.Mosaic,
-		Thumbnail: opts.Thumbnail,
-		Status:    opts.Status,
-	}); err != nil {
-		return nil, err
-	}
-	snapshot, err := svc.snapshotCache.Refresh(id)
-	if err != nil {
-		return nil, err
-	}
-	fileIDs, err := svc.fileRepo.FindIDsBySnapshot(id)
-	if err != nil {
-		return nil, err
-	}
-	for _, fileID := range fileIDs {
-		file, err := svc.fileCache.Refresh(fileID)
-		if err != nil {
-			return nil, err
-		}
-		if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-			return nil, err
-		}
-	}
-	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 
 func (svc *SnapshotService) isTaskPending(snapshot model.Snapshot) (bool, error) {
