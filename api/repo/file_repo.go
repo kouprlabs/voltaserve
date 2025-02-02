@@ -54,6 +54,10 @@ func NewFileRepo() FileRepo {
 	return newFileRepo()
 }
 
+func NewFileRepoWithDB(db *gorm.DB) FileRepo {
+	return newFileRepoWithDB(db)
+}
+
 func NewFile() model.File {
 	return &fileEntity{}
 }
@@ -229,6 +233,13 @@ func newFileRepo() *fileRepo {
 	return &fileRepo{
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		permissionRepo: newPermissionRepo(),
+	}
+}
+
+func newFileRepoWithDB(db *gorm.DB) *fileRepo {
+	return &fileRepo{
+		db:             db,
+		permissionRepo: newPermissionRepoWithDB(db),
 	}
 }
 

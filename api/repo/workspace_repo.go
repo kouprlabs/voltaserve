@@ -39,6 +39,10 @@ func NewWorkspaceRepo() WorkspaceRepo {
 	return newWorkspaceRepo()
 }
 
+func NewWorkspaceRepoWithDB(db *gorm.DB) WorkspaceRepo {
+	return newWorkspaceRepoWithDB(db)
+}
+
 type NewWorkspaceOptions struct {
 	ID               string
 	Name             string
@@ -208,6 +212,13 @@ func newWorkspaceRepo() *workspaceRepo {
 	return &workspaceRepo{
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		permissionRepo: newPermissionRepo(),
+	}
+}
+
+func newWorkspaceRepoWithDB(db *gorm.DB) *workspaceRepo {
+	return &workspaceRepo{
+		db:             db,
+		permissionRepo: newPermissionRepoWithDB(db),
 	}
 }
 

@@ -40,6 +40,10 @@ func NewGroupRepo() GroupRepo {
 	return newGroupRepo()
 }
 
+func NewGroupRepoWithDB(db *gorm.DB) GroupRepo {
+	return newGroupRepoWithDB(db)
+}
+
 func NewGroup() model.Group {
 	return &groupEntity{}
 }
@@ -127,6 +131,13 @@ func newGroupRepo() *groupRepo {
 	return &groupRepo{
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		permissionRepo: newPermissionRepo(),
+	}
+}
+
+func newGroupRepoWithDB(db *gorm.DB) *groupRepo {
+	return &groupRepo{
+		db:             db,
+		permissionRepo: newPermissionRepoWithDB(db),
 	}
 }
 

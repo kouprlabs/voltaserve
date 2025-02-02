@@ -27,6 +27,10 @@ func NewPermissionRepo() PermissionRepo {
 	return newPermissionRepo()
 }
 
+func NewPermissionRepoWithDB(db *gorm.DB) PermissionRepo {
+	return newPermissionRepoWithDB(db)
+}
+
 func NewUserPermission() model.UserPermission {
 	return &userPermissionEntity{}
 }
@@ -178,6 +182,12 @@ type permissionRepo struct {
 func newPermissionRepo() *permissionRepo {
 	return &permissionRepo{
 		db: infra.NewPostgresManager().GetDBOrPanic(),
+	}
+}
+
+func newPermissionRepoWithDB(db *gorm.DB) *permissionRepo {
+	return &permissionRepo{
+		db: db,
 	}
 }
 
