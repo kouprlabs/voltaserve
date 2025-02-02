@@ -1,6 +1,4 @@
--- +goose Up
-
-CREATE TABLE public.organization (
+CREATE TABLE organization (
 	id text NOT NULL,
 	"name" text NOT NULL,
 	create_time text NOT NULL,
@@ -8,7 +6,7 @@ CREATE TABLE public.organization (
 	CONSTRAINT organization_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE public."snapshot" (
+CREATE TABLE "snapshot" (
 	id text NOT NULL,
 	"version" int8 NULL,
 	original jsonb NULL,
@@ -26,7 +24,7 @@ CREATE TABLE public."snapshot" (
 	CONSTRAINT snapshot_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE public."user" (
+CREATE TABLE "user" (
 	id text NOT NULL,
 	full_name text NOT NULL,
 	username text NOT NULL,
@@ -56,31 +54,31 @@ CREATE TABLE public."user" (
 	CONSTRAINT user_username_key UNIQUE (username)
 );
 
-CREATE TABLE public."group" (
+CREATE TABLE "group" (
 	id text NOT NULL,
 	"name" text NOT NULL,
 	organization_id text NOT NULL,
 	create_time text NOT NULL,
 	update_time text NULL,
 	CONSTRAINT group_pkey PRIMARY KEY (id),
-	CONSTRAINT group_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id) ON DELETE CASCADE
+	CONSTRAINT group_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE
 );
-CREATE INDEX group_organization_id_idx ON public."group" USING btree (organization_id);
+CREATE INDEX group_organization_id_idx ON "group" USING btree (organization_id);
 
-CREATE TABLE public.grouppermission (
+CREATE TABLE grouppermission (
 	id text NOT NULL,
 	group_id text NULL,
 	resource_id text NULL,
 	"permission" text NULL,
 	create_time text NOT NULL,
 	CONSTRAINT grouppermission_pkey PRIMARY KEY (id),
-	CONSTRAINT grouppermission_group_id_fkey FOREIGN KEY (group_id) REFERENCES public."group"(id) ON DELETE CASCADE
+	CONSTRAINT grouppermission_group_id_fkey FOREIGN KEY (group_id) REFERENCES "group"(id) ON DELETE CASCADE
 );
-CREATE INDEX grouppermission_group_id_idx ON public.grouppermission USING btree (group_id);
-CREATE UNIQUE INDEX grouppermission_group_id_resource_id_idx ON public.grouppermission USING btree (group_id, resource_id);
-CREATE INDEX grouppermission_resource_id_idx ON public.grouppermission USING btree (resource_id);
+CREATE INDEX grouppermission_group_id_idx ON grouppermission USING btree (group_id);
+CREATE UNIQUE INDEX grouppermission_group_id_resource_id_idx ON grouppermission USING btree (group_id, resource_id);
+CREATE INDEX grouppermission_resource_id_idx ON grouppermission USING btree (resource_id);
 
-CREATE TABLE public.invitation (
+CREATE TABLE invitation (
 	id text NOT NULL,
 	organization_id text NULL,
 	owner_id text NULL,
@@ -89,13 +87,13 @@ CREATE TABLE public.invitation (
 	create_time text NOT NULL,
 	update_time text NULL,
 	CONSTRAINT invitation_pkey PRIMARY KEY (id),
-	CONSTRAINT invitation_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id) ON DELETE CASCADE,
-	CONSTRAINT invitation_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public."user"(id) ON DELETE CASCADE
+	CONSTRAINT invitation_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE,
+	CONSTRAINT invitation_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
-CREATE INDEX invitation_organization_id_idx ON public.invitation USING btree (organization_id);
-CREATE INDEX invitation_user_id_idx ON public.invitation USING btree (owner_id);
+CREATE INDEX invitation_organization_id_idx ON invitation USING btree (organization_id);
+CREATE INDEX invitation_user_id_idx ON invitation USING btree (owner_id);
 
-CREATE TABLE public.task (
+CREATE TABLE task (
 	id text NOT NULL,
 	"name" text NOT NULL,
 	"error" text NULL,
@@ -108,23 +106,23 @@ CREATE TABLE public.task (
 	create_time text NOT NULL,
 	update_time text NULL,
 	CONSTRAINT task_pkey PRIMARY KEY (id),
-	CONSTRAINT task_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id) ON DELETE CASCADE
+	CONSTRAINT task_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
 
-CREATE TABLE public.userpermission (
+CREATE TABLE userpermission (
 	id text NOT NULL,
 	user_id text NULL,
 	resource_id text NULL,
 	"permission" text NULL,
 	create_time text NOT NULL,
 	CONSTRAINT userpermission_pkey PRIMARY KEY (id),
-	CONSTRAINT userpermission_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id) ON DELETE CASCADE
+	CONSTRAINT userpermission_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
-CREATE INDEX userpermission_resource_id_idx ON public.userpermission USING btree (resource_id);
-CREATE INDEX userpermission_user_id_idx ON public.userpermission USING btree (user_id);
-CREATE UNIQUE INDEX userpermission_user_id_resource_id_idx ON public.userpermission USING btree (user_id, resource_id);
+CREATE INDEX userpermission_resource_id_idx ON userpermission USING btree (resource_id);
+CREATE INDEX userpermission_user_id_idx ON userpermission USING btree (user_id);
+CREATE UNIQUE INDEX userpermission_user_id_resource_id_idx ON userpermission USING btree (user_id, resource_id);
 
-CREATE TABLE public.file (
+CREATE TABLE file (
 	id text NOT NULL,
 	"name" text NOT NULL,
 	"type" text NOT NULL,
@@ -135,19 +133,19 @@ CREATE TABLE public.file (
 	update_time text NULL,
 	CONSTRAINT file_pkey PRIMARY KEY (id)
 );
-CREATE INDEX file_parent_id_idx ON public.file USING btree (parent_id);
-CREATE INDEX file_workspace_id_idx ON public.file USING btree (workspace_id);
+CREATE INDEX file_parent_id_idx ON file USING btree (parent_id);
+CREATE INDEX file_workspace_id_idx ON file USING btree (workspace_id);
 
-CREATE TABLE public.snapshot_file (
+CREATE TABLE snapshot_file (
 	snapshot_id text NOT NULL,
 	file_id text NOT NULL,
 	create_time text NOT NULL,
 	CONSTRAINT snapshot_file_pkey PRIMARY KEY (snapshot_id, file_id)
 );
-CREATE INDEX snapshot_file_file_id_idx ON public.snapshot_file USING btree (file_id);
-CREATE INDEX snapshot_file_snapshot_id_idx ON public.snapshot_file USING btree (snapshot_id);
+CREATE INDEX snapshot_file_file_id_idx ON snapshot_file USING btree (file_id);
+CREATE INDEX snapshot_file_snapshot_id_idx ON snapshot_file USING btree (snapshot_id);
 
-CREATE TABLE public.workspace (
+CREATE TABLE workspace (
 	id text NOT NULL,
 	"name" text NOT NULL,
 	organization_id text NOT NULL,
@@ -159,16 +157,14 @@ CREATE TABLE public.workspace (
 	CONSTRAINT workspace_pkey PRIMARY KEY (id),
 	CONSTRAINT workspace_root_id_key UNIQUE (root_id)
 );
-CREATE INDEX workspace_organization_id_idx ON public.workspace USING btree (organization_id);
+CREATE INDEX workspace_organization_id_idx ON workspace USING btree (organization_id);
 
-ALTER TABLE public.file ADD CONSTRAINT file_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.file(id) ON DELETE SET NULL;
-ALTER TABLE public.file ADD CONSTRAINT file_snapshot_id_fkey FOREIGN KEY (snapshot_id) REFERENCES public."snapshot"(id);
-ALTER TABLE public.file ADD CONSTRAINT file_workspace_id_fkey FOREIGN KEY (workspace_id) REFERENCES public.workspace(id) ON DELETE CASCADE;
+ALTER TABLE file ADD CONSTRAINT file_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES file(id) ON DELETE SET NULL;
+ALTER TABLE file ADD CONSTRAINT file_snapshot_id_fkey FOREIGN KEY (snapshot_id) REFERENCES "snapshot"(id);
+ALTER TABLE file ADD CONSTRAINT file_workspace_id_fkey FOREIGN KEY (workspace_id) REFERENCES workspace(id) ON DELETE CASCADE;
 
-ALTER TABLE public.snapshot_file ADD CONSTRAINT snapshot_file_file_id_fkey FOREIGN KEY (file_id) REFERENCES public.file(id) ON DELETE CASCADE;
-ALTER TABLE public.snapshot_file ADD CONSTRAINT snapshot_file_snapshot_id_fkey FOREIGN KEY (snapshot_id) REFERENCES public."snapshot"(id);
+ALTER TABLE snapshot_file ADD CONSTRAINT snapshot_file_file_id_fkey FOREIGN KEY (file_id) REFERENCES file(id) ON DELETE CASCADE;
+ALTER TABLE snapshot_file ADD CONSTRAINT snapshot_file_snapshot_id_fkey FOREIGN KEY (snapshot_id) REFERENCES "snapshot"(id);
 
-ALTER TABLE public.workspace ADD CONSTRAINT workspace_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id) ON DELETE CASCADE;
-ALTER TABLE public.workspace ADD CONSTRAINT workspace_root_id_fkey FOREIGN KEY (root_id) REFERENCES public.file(id);
-
--- +goose Down
+ALTER TABLE workspace ADD CONSTRAINT workspace_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE;
+ALTER TABLE workspace ADD CONSTRAINT workspace_root_id_fkey FOREIGN KEY (root_id) REFERENCES file(id);

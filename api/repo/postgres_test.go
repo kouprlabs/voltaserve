@@ -1,16 +1,15 @@
 package repo_test
 
 import (
-	"fmt"
-	"os"
 	"testing"
 
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
-	"github.com/pressly/goose/v3"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
@@ -27,21 +26,14 @@ func TestPostgres(t *testing.T) {
 			t.Fatal(err)
 		}
 	}()
-	gormDB := infra.NewPostgresManager().GetDBOrPanic()
-	sqlDB, err := gormDB.DB()
+	m, err := migrate.New("file://./migrations", "postgres://postgres:postgres@localhost:15432/postgres?sslmode=disable")
 	if err != nil {
 		t.Fatal(err)
 	}
-	cwd, err := os.Getwd()
-	if err != nil {
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		t.Fatal(err)
 	}
-	fmt.Println(cwd)
-	if err := goose.Up(sqlDB, "./migrations"); err != nil {
-		t.Fatal(err)
-	}
-
-	orgRepo := repo.NewOrganizationRepoWithDB(gormDB)
+	orgRepo := repo.NewOrganizationRepo()
 	org, err := orgRepo.Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewID(),
 		Name: "organization",
@@ -49,8 +41,7 @@ func TestPostgres(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	workspaceRepo := repo.NewWorkspaceRepoWithDB(gormDB)
+	workspaceRepo := repo.NewWorkspaceRepo()
 	workspace, err := workspaceRepo.Insert(repo.WorkspaceInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "wokrspace",
@@ -61,8 +52,7 @@ func TestPostgres(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	fileRepo := repo.NewFileRepoWithDB(gormDB)
+	fileRepo := repo.NewFileRepo()
 	file, err := fileRepo.Insert(repo.FileInsertOptions{
 		Name:        "file",
 		Type:        model.FileTypeFile,
@@ -71,7 +61,6 @@ func TestPostgres(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	foundFile, err := fileRepo.Find(file.GetID())
 	if err != nil {
 		t.Fatal(err)

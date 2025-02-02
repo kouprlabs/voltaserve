@@ -39,10 +39,6 @@ func NewOrganizationRepo() OrganizationRepo {
 	return newOrganizationRepo()
 }
 
-func NewOrganizationRepoWithDB(db *gorm.DB) OrganizationRepo {
-	return newOrganizationRepoWithDB(db)
-}
-
 func NewOrganization() model.Organization {
 	return &organizationEntity{}
 }
@@ -123,14 +119,6 @@ func newOrganizationRepo() *organizationRepo {
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		groupRepo:      newGroupRepo(),
 		permissionRepo: newPermissionRepo(),
-	}
-}
-
-func newOrganizationRepoWithDB(db *gorm.DB) *organizationRepo {
-	return &organizationRepo{
-		db:             db,
-		groupRepo:      newGroupRepoWithDB(db),
-		permissionRepo: newPermissionRepoWithDB(db),
 	}
 }
 
