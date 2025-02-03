@@ -10,17 +10,10 @@ import (
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 //nolint:paralleltest
 func TestPostgres(t *testing.T) {
-	postgres := test.SetupPostgres(t)
-	defer func() {
-		if err := postgres.Stop(); err != nil {
-			t.Fatal(err)
-		}
-	}()
 	orgRepo := repo.NewOrganizationRepo()
 	org, err := orgRepo.Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewID(),

@@ -1,14 +1,16 @@
 package test
 
 import (
-	"testing"
+	"os"
 
 	"github.com/alicebob/miniredis/v2"
 )
 
-func SetupRedis(t *testing.T) *miniredis.Miniredis {
-	t.Helper()
-	redis := miniredis.RunT(t)
-	t.Setenv("REDIS_ADDRESS", redis.Addr())
-	return redis
+func SetupRedis() error {
+	s, err := miniredis.Run()
+	if err != nil {
+		return err
+	}
+	os.Setenv("REDIS_ADDRESS", s.Addr())
+	return nil
 }

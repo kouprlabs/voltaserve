@@ -11,18 +11,10 @@ import (
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 //nolint:paralleltest
 func TestRedis(t *testing.T) {
-	_ = test.SetupRedis(t)
-	postgres := test.SetupPostgres(t)
-	defer func() {
-		if err := postgres.Stop(); err != nil {
-			t.Fatal(err)
-		}
-	}()
 	fileCache := cache.NewFileCache()
 	opts := repo.NewFileOptions{
 		ID:   helper.NewID(),

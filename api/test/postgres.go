@@ -1,7 +1,8 @@
 package test
 
 import (
-	"testing"
+	"fmt"
+	"os"
 
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"github.com/golang-migrate/migrate/v4"
@@ -9,19 +10,18 @@ import (
 	"github.com/kouprlabs/voltaserve/api/config"
 )
 
-func SetupPostgres(t *testing.T) *embeddedpostgres.EmbeddedPostgres {
-	t.Helper()
-	t.Setenv("POSTGRES_URL", "postgres://postgres:postgres@localhost:15432/postgres?sslmode=disable")
-	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(15432).Logger(nil))
+func SetupPostgres(port uint32) (*embeddedpostgres.EmbeddedPostgres, error) {
+	os.Setenv("POSTGRES_URL", fmt.Sprintf("postgres://postgres:postgres@localhost:%d/postgres?sslmode=disable", port))
+	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(port).Logger(nil))
 	if err := postgres.Start(); err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
 	m, err := migrate.New("file://../test/migrations", config.GetConfig().DatabaseURL)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
 	if err := m.Up(); err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
-	return postgres
+	return postgres, nil
 }
