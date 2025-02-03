@@ -5,9 +5,9 @@ go 1.22.0
 toolchain go1.23.0
 
 require (
-	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/alicebob/miniredis/v2 v2.34.0
 	github.com/blevesearch/bleve/v2 v2.4.4-0.20250117161444-b7b67d3938fb
+	github.com/blevesearch/bleve_index_api v1.2.1
 	github.com/fergusstrange/embedded-postgres v1.30.0
 	github.com/gabriel-vasile/mimetype v1.4.4
 	github.com/go-playground/validator/v10 v10.22.0
@@ -40,7 +40,6 @@ require (
 	github.com/alicebob/gopher-json v0.0.0-20230218143504-906a9b012302 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/bits-and-blooms/bitset v1.20.0 // indirect
-	github.com/blevesearch/bleve_index_api v1.2.1 // indirect
 	github.com/blevesearch/geo v0.1.20 // indirect
 	github.com/blevesearch/go-faiss v1.0.24 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
