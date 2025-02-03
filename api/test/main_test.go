@@ -1,15 +1,13 @@
-package cache_test
+package test
 
 import (
 	"fmt"
 	"os"
 	"testing"
-
-	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 func TestMain(m *testing.M) {
-	postgres, err := test.SetupPostgres(25432)
+	postgres, err := setupPostgres(15432)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -20,7 +18,7 @@ func TestMain(m *testing.M) {
 			os.Exit(1)
 		}
 	}()
-	if err := test.SetupRedis(); err != nil {
+	if err := setupRedis(); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}

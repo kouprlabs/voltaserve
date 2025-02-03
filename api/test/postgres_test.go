@@ -1,4 +1,4 @@
-package repo_test
+package test
 
 import (
 	"testing"

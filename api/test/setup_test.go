@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/alicebob/miniredis/v2"
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"github.com/golang-migrate/migrate/v4"
 
 	"github.com/kouprlabs/voltaserve/api/config"
 )
 
-func SetupPostgres(port uint32) (*embeddedpostgres.EmbeddedPostgres, error) {
+func setupPostgres(port uint32) (*embeddedpostgres.EmbeddedPostgres, error) {
 	os.Setenv("POSTGRES_URL", fmt.Sprintf("postgres://postgres:postgres@localhost:%d/postgres?sslmode=disable", port))
 	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(port).Logger(nil))
 	if err := postgres.Start(); err != nil {
@@ -24,4 +25,13 @@ func SetupPostgres(port uint32) (*embeddedpostgres.EmbeddedPostgres, error) {
 		return nil, err
 	}
 	return postgres, nil
+}
+
+func setupRedis() error {
+	s, err := miniredis.Run()
+	if err != nil {
+		return err
+	}
+	os.Setenv("REDIS_ADDRESS", s.Addr())
+	return nil
 }
