@@ -13,17 +13,20 @@ package infra
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
-	"github.com/Knetic/govaluate"
 	"github.com/blevesearch/bleve/v2"
+	bleve_index "github.com/blevesearch/bleve_index_api"
 )
 
 type bleveSearchManager struct {
 	indexes map[string]bleve.Index
 }
 
-func NewBleveSearchManager() SearchManager {
+func newBleveSearchManager() SearchManager {
 	manager := &bleveSearchManager{
 		indexes: make(map[string]bleve.Index),
 	}
@@ -36,89 +39,133 @@ func NewBleveSearchManager() SearchManager {
 	return manager
 }
 
-func (mgr *bleveSearchManager) Query(index string, query string, opts QueryOptions) ([]interface{}, error) {
-	indexInstance, ok := mgr.indexes[index]
+func (mgr *bleveSearchManager) Query(indexName string, query string, opts QueryOptions) ([]interface{}, error) {
+	index, ok := mgr.indexes[indexName]
 	if !ok {
 		return nil, errors.New("index not found")
 	}
-	queryString, err := parseFilter(opts.Filter)
+	var bleveQuery string
+	var err error
+	if opts.Filter != nil {
+		filterQuery, err := mgr.parseFilter(opts.Filter)
+		if err != nil {
+			return nil, err
+		}
+		bleveQuery = query + " " + filterQuery
+	} else {
+		bleveQuery = query
+	}
+	searchResult, err := index.Search(
+		bleve.NewSearchRequestOptions(
+			bleve.NewQueryStringQuery(bleveQuery),
+			int(opts.Limit), 0, false),
+	)
 	if err != nil {
 		return nil, err
 	}
-	bleveQuery := bleve.NewQueryStringQuery(query + " " + queryString)
-	searchRequest := bleve.NewSearchRequestOptions(bleveQuery, int(opts.Limit), 0, false)
-	searchResult, err := indexInstance.Search(searchRequest)
-	if err != nil {
-		return nil, err
-	}
-	results := make([]interface{}, len(searchResult.Hits))
+	res := make([]interface{}, len(searchResult.Hits))
 	for i, hit := range searchResult.Hits {
-		results[i] = hit
+		doc, err := index.Document(hit.ID)
+		if err != nil {
+			return nil, err
+		}
+		docMap := make(map[string]interface{})
+		doc.VisitFields(func(field bleve_index.Field) {
+			fieldName := field.Name()
+			fieldValue := field.Value()
+			switch field.(type) {
+			case bleve_index.TextField:
+				docMap[fieldName] = string(fieldValue)
+			case bleve_index.NumericField:
+				num, err := strconv.ParseFloat(string(fieldValue), 64)
+				if err == nil {
+					docMap[fieldName] = num
+				}
+			case bleve_index.DateTimeField:
+				dateTime, err := time.Parse(time.RFC3339, string(fieldValue))
+				if err == nil {
+					docMap[fieldName] = dateTime
+				}
+			case bleve_index.BooleanField:
+				boolVal, err := strconv.ParseBool(string(fieldValue))
+				if err == nil {
+					docMap[fieldName] = boolVal
+				}
+			default:
+				docMap[fieldName] = string(fieldValue)
+			}
+		})
+		res[i] = docMap
 	}
-	return results, nil
+	return res, nil
 }
 
-func (mgr *bleveSearchManager) Index(index string, models []SearchModel) error {
-	indexInstance, ok := mgr.indexes[index]
+func (mgr *bleveSearchManager) Index(indexName string, models []SearchModel) error {
+	index, ok := mgr.indexes[indexName]
 	if !ok {
 		return errors.New("index not found")
 	}
-	batch := indexInstance.NewBatch()
+	batch := index.NewBatch()
 	for _, model := range models {
-		err := batch.Index(model.GetID(), model)
-		if err != nil {
+		if err := batch.Index(model.GetID(), model); err != nil {
 			return err
 		}
 	}
-	return indexInstance.Batch(batch)
+	return index.Batch(batch)
 }
 
-func (mgr *bleveSearchManager) Update(index string, models []SearchModel) error {
-	return mgr.Index(index, models)
+func (mgr *bleveSearchManager) Update(indexName string, models []SearchModel) error {
+	return mgr.Index(indexName, models)
 }
 
-func (mgr *bleveSearchManager) Delete(index string, ids []string) error {
-	indexInstance, ok := mgr.indexes[index]
+func (mgr *bleveSearchManager) Delete(indexName string, ids []string) error {
+	index, ok := mgr.indexes[indexName]
 	if !ok {
 		return errors.New("index not found")
 	}
-	batch := indexInstance.NewBatch()
+	batch := index.NewBatch()
 	for _, id := range ids {
 		batch.Delete(id)
 	}
-	return indexInstance.Batch(batch)
+	return index.Batch(batch)
 }
 
 func (mgr *bleveSearchManager) createIndex(indexName string) {
-	mapping := bleve.NewIndexMapping()
-	index, err := bleve.New(indexName+".bleve", mapping)
+	index, err := bleve.NewMemOnly(bleve.NewIndexMapping())
 	if err != nil {
 		panic(err)
 	}
 	mgr.indexes[indexName] = index
 }
 
-func parseFilter(filter interface{}) (string, error) {
+func (mgr *bleveSearchManager) parseFilter(filter interface{}) (string, error) {
 	filterStr, ok := filter.(string)
 	if !ok {
 		return "", errors.New("filter must be a string")
 	}
-	expression, err := govaluate.NewEvaluableExpression(filterStr)
-	if err != nil {
-		return "", err
+	re := regexp.MustCompile(`(\w+)\s*=\s*("[^"]*"|\d+)`)
+	matches := re.FindAllStringSubmatch(filterStr, -1)
+	if len(matches) == 0 {
+		return "", errors.New("invalid filter format")
 	}
-	tokens := expression.Tokens()
-	var queryParts []string
-	for _, token := range tokens {
-		//nolint:exhaustive
-		switch token.Kind {
-		case govaluate.VARIABLE:
-			queryParts = append(queryParts, token.Value.(string))
-		case govaluate.STRING, govaluate.LOGICALOP, govaluate.COMPARATOR:
-			queryParts = append(queryParts, strings.ToUpper(token.Value.(string)))
-		default:
-			queryParts = append(queryParts, fmt.Sprintf("%v", token.Value))
+	var conditions []string
+	for _, match := range matches {
+		field, value := match[1], match[2]
+		if strings.HasPrefix(value, `"`) && strings.HasSuffix(value, `"`) {
+			conditions = append(conditions, fmt.Sprintf(`%s:%s`, field, value))
+		} else {
+			conditions = append(conditions, fmt.Sprintf(`%s:%s`, field, value))
 		}
 	}
-	return strings.Join(queryParts, " "), nil
+	operators := re.ReplaceAllString(filterStr, "")
+	operatorParts := strings.Fields(operators)
+	finalConditions := make([]string, 0, len(conditions)+len(operatorParts))
+	for i, condition := range conditions {
+		finalConditions = append(finalConditions, condition)
+		if i < len(operatorParts) {
+			finalConditions = append(finalConditions, operatorParts[i])
+		}
+	}
+	queryString := strings.Join(finalConditions, " ")
+	return queryString, nil
 }

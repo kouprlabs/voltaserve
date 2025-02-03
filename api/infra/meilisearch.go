@@ -25,129 +25,29 @@ var meilisearchClient meilisearch.ServiceManager
 func newMeilisearchManager() *meilisearchManager {
 	if meilisearchClient == nil {
 		meilisearchClient = meilisearch.New(config.GetConfig().Search.URL)
-		// Configure file index
-		if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
-			Uid:        FileSearchIndex,
-			PrimaryKey: "id",
-		}); err != nil {
-			panic(err)
-		}
-		if _, err := meilisearchClient.Index(FileSearchIndex).UpdateSettings(&meilisearch.Settings{
-			SearchableAttributes: []string{"name", "text"},
-			FilterableAttributes: []string{
-				"id",
-				"workspaceId",
-				"type",
-				"parentId",
-				"snapshotId",
-				"createTime",
-				"updateTime",
-			},
-		}); err != nil {
-			panic(err)
-		}
-		// Configure group index
-		if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
-			Uid:        GroupSearchIndex,
-			PrimaryKey: "id",
-		}); err != nil {
-			panic(err)
-		}
-		if _, err := meilisearchClient.Index(GroupSearchIndex).UpdateSettings(&meilisearch.Settings{
-			SearchableAttributes: []string{"name"},
-			FilterableAttributes: []string{
-				"id",
-				"organizationId",
-				"members",
-				"createTime",
-				"updateTime",
-			},
-		}); err != nil {
-			panic(err)
-		}
-		// Configure workspace index
-		if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
-			Uid:        WorkspaceSearchIndex,
-			PrimaryKey: "id",
-		}); err != nil {
-			panic(err)
-		}
-		if _, err := meilisearchClient.Index(WorkspaceSearchIndex).UpdateSettings(&meilisearch.Settings{
-			SearchableAttributes: []string{"name"},
-			FilterableAttributes: []string{
-				"id",
-				"storageCapacity",
-				"rootId",
-				"organizationId",
-				"bucket",
-				"createTime",
-				"updateTime",
-			},
-		}); err != nil {
-			panic(err)
-		}
-		// Configure organization index
-		if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
-			Uid:        OrganizationSearchIndex,
-			PrimaryKey: "id",
-		}); err != nil {
-			panic(err)
-		}
-		if _, err := meilisearchClient.Index(OrganizationSearchIndex).UpdateSettings(&meilisearch.Settings{
-			SearchableAttributes: []string{"name"},
-			FilterableAttributes: []string{
-				"id",
-				"members",
-				"createTime",
-				"updateTime",
-			},
-		}); err != nil {
-			panic(err)
-		}
-		// Configure user index
-		if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
-			Uid:        UserSearchIndex,
-			PrimaryKey: "id",
-		}); err != nil {
-			panic(err)
-		}
-		if _, err := meilisearchClient.Index(UserSearchIndex).UpdateSettings(&meilisearch.Settings{
-			SearchableAttributes: []string{"fullName", "username", "email"},
-			FilterableAttributes: []string{
-				"id",
-				"isEmailConfirmed",
-				"createTime",
-				"updateTime",
-			},
-		}); err != nil {
-			panic(err)
-		}
-		// Configure task index
-		if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
-			Uid:        TaskSearchIndex,
-			PrimaryKey: "id",
-		}); err != nil {
-			panic(err)
-		}
-		if _, err := meilisearchClient.Index(TaskSearchIndex).UpdateSettings(&meilisearch.Settings{
-			SearchableAttributes: []string{"name"},
-			FilterableAttributes: []string{
-				"id",
-				"error",
-				"percentage",
-				"isIndeterminate",
-				"userId",
-				"status",
-				"createTime",
-				"updateTime",
-			},
-		}); err != nil {
-			panic(err)
-		}
 	}
-	return &meilisearchManager{
+	mgr := &meilisearchManager{
 		config: config.GetConfig().Search,
 	}
+	if err := mgr.createFileIndex(); err != nil {
+		panic(err)
+	}
+	if err := mgr.createGroupIndex(); err != nil {
+		panic(err)
+	}
+	if err := mgr.createWorkspaceIndex(); err != nil {
+		panic(err)
+	}
+	if err := mgr.createOrganizationIndex(); err != nil {
+		panic(err)
+	}
+	if err := mgr.createUserIndex(); err != nil {
+		panic(err)
+	}
+	if err := mgr.createTaskIndex(); err != nil {
+		panic(err)
+	}
+	return mgr
 }
 
 func (mgr *meilisearchManager) Query(index string, query string, opts QueryOptions) ([]interface{}, error) {
@@ -180,6 +80,143 @@ func (mgr *meilisearchManager) Update(index string, m []SearchModel) error {
 func (mgr *meilisearchManager) Delete(index string, ids []string) error {
 	_, err := meilisearchClient.Index(index).DeleteDocuments(ids)
 	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (mgr *meilisearchManager) createFileIndex() error {
+	if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
+		Uid:        FileSearchIndex,
+		PrimaryKey: "id",
+	}); err != nil {
+		return err
+	}
+	if _, err := meilisearchClient.Index(FileSearchIndex).UpdateSettings(&meilisearch.Settings{
+		SearchableAttributes: []string{"name", "text"},
+		FilterableAttributes: []string{
+			"id",
+			"workspaceId",
+			"type",
+			"parentId",
+			"snapshotId",
+			"createTime",
+			"updateTime",
+		},
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (mgr *meilisearchManager) createGroupIndex() error {
+	if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
+		Uid:        GroupSearchIndex,
+		PrimaryKey: "id",
+	}); err != nil {
+		return err
+	}
+	if _, err := meilisearchClient.Index(GroupSearchIndex).UpdateSettings(&meilisearch.Settings{
+		SearchableAttributes: []string{"name"},
+		FilterableAttributes: []string{
+			"id",
+			"organizationId",
+			"members",
+			"createTime",
+			"updateTime",
+		},
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (mgr *meilisearchManager) createWorkspaceIndex() error {
+	if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
+		Uid:        WorkspaceSearchIndex,
+		PrimaryKey: "id",
+	}); err != nil {
+		return err
+	}
+	if _, err := meilisearchClient.Index(WorkspaceSearchIndex).UpdateSettings(&meilisearch.Settings{
+		SearchableAttributes: []string{"name"},
+		FilterableAttributes: []string{
+			"id",
+			"storageCapacity",
+			"rootId",
+			"organizationId",
+			"bucket",
+			"createTime",
+			"updateTime",
+		},
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (mgr *meilisearchManager) createOrganizationIndex() error {
+	if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
+		Uid:        OrganizationSearchIndex,
+		PrimaryKey: "id",
+	}); err != nil {
+		return err
+	}
+	if _, err := meilisearchClient.Index(OrganizationSearchIndex).UpdateSettings(&meilisearch.Settings{
+		SearchableAttributes: []string{"name"},
+		FilterableAttributes: []string{
+			"id",
+			"members",
+			"createTime",
+			"updateTime",
+		},
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (mgr *meilisearchManager) createUserIndex() error {
+	if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
+		Uid:        UserSearchIndex,
+		PrimaryKey: "id",
+	}); err != nil {
+		return err
+	}
+	if _, err := meilisearchClient.Index(UserSearchIndex).UpdateSettings(&meilisearch.Settings{
+		SearchableAttributes: []string{"fullName", "username", "email"},
+		FilterableAttributes: []string{
+			"id",
+			"isEmailConfirmed",
+			"createTime",
+			"updateTime",
+		},
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (mgr *meilisearchManager) createTaskIndex() error {
+	if _, err := meilisearchClient.CreateIndex(&meilisearch.IndexConfig{
+		Uid:        TaskSearchIndex,
+		PrimaryKey: "id",
+	}); err != nil {
+		return err
+	}
+	if _, err := meilisearchClient.Index(TaskSearchIndex).UpdateSettings(&meilisearch.Settings{
+		SearchableAttributes: []string{"name"},
+		FilterableAttributes: []string{
+			"id",
+			"error",
+			"percentage",
+			"isIndeterminate",
+			"userId",
+			"status",
+			"createTime",
+			"updateTime",
+		},
+	}); err != nil {
 		return err
 	}
 	return nil

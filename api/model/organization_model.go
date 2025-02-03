@@ -18,5 +18,10 @@ type Organization interface {
 	GetMembers() []string
 	GetCreateTime() string
 	GetUpdateTime() *string
+	SetID(string)
 	SetName(string)
+	SetUserPermissions([]CoreUserPermission)
+	SetGroupPermissions([]CoreGroupPermission)
+	SetCreateTime(string)
+	SetUpdateTime(*string)
 }

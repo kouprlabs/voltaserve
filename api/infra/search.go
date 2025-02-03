@@ -10,6 +10,8 @@
 
 package infra
 
+import "github.com/kouprlabs/voltaserve/api/config"
+
 type SearchManager interface {
 	Query(index string, query string, opts QueryOptions) ([]interface{}, error)
 	Index(index string, models []SearchModel) error
@@ -18,7 +20,11 @@ type SearchManager interface {
 }
 
 func NewSearchManager() SearchManager {
-	return newMeilisearchManager()
+	if config.GetConfig().Search.URL != "" {
+		return newMeilisearchManager()
+	} else {
+		return newBleveSearchManager()
+	}
 }
 
 type SearchModel interface {

@@ -43,6 +43,29 @@ func NewOrganization() model.Organization {
 	return &organizationEntity{}
 }
 
+type NewOrganizationOptions struct {
+	ID               string
+	Name             string
+	UserPermissions  []model.CoreUserPermission
+	GroupPermissions []model.CoreGroupPermission
+	Members          []string
+	CreateTime       string
+	UpdateTime       *string
+}
+
+func NewOrganizationWithOptions(opts NewOrganizationOptions) model.Organization {
+	res := &organizationEntity{
+		ID:         opts.ID,
+		Name:       opts.Name,
+		Members:    opts.Members,
+		CreateTime: opts.CreateTime,
+		UpdateTime: opts.UpdateTime,
+	}
+	res.SetUserPermissions(opts.UserPermissions)
+	res.SetGroupPermissions(opts.GroupPermissions)
+	return res
+}
+
 type organizationEntity struct {
 	ID               string                  `gorm:"column:id"          json:"id"`
 	Name             string                  `gorm:"column:name"        json:"name"`
@@ -104,8 +127,34 @@ func (o *organizationEntity) GetUpdateTime() *string {
 	return o.UpdateTime
 }
 
+func (o *organizationEntity) SetID(id string) {
+	o.ID = id
+}
+
 func (o *organizationEntity) SetName(name string) {
 	o.Name = name
+}
+
+func (o *organizationEntity) SetUserPermissions(permissions []model.CoreUserPermission) {
+	o.UserPermissions = make([]*UserPermissionValue, len(permissions))
+	for i, p := range permissions {
+		o.UserPermissions[i] = p.(*UserPermissionValue)
+	}
+}
+
+func (o *organizationEntity) SetGroupPermissions(permissions []model.CoreGroupPermission) {
+	o.GroupPermissions = make([]*GroupPermissionValue, len(permissions))
+	for i, p := range permissions {
+		o.GroupPermissions[i] = p.(*GroupPermissionValue)
+	}
+}
+
+func (o *organizationEntity) SetCreateTime(createTime string) {
+	o.CreateTime = createTime
+}
+
+func (o *organizationEntity) SetUpdateTime(updateTime *string) {
+	o.UpdateTime = updateTime
 }
 
 type organizationRepo struct {
