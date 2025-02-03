@@ -1,7 +1,16 @@
+// Copyright (c) 2023 Anass Bouassaba.
+//
+// Use of this software is governed by the Business Source License
+// included in the file LICENSE in the root of this repository.
+//
+// As of the Change Date specified in that file, in accordance with
+// the Business Source License, use of this software will be governed
+// by the GNU Affero General Public License v3.0 only, included in the file
+// AGPL-3.0-only in the root of this repository.
+
 package test
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/alicebob/miniredis/v2"
@@ -11,9 +20,9 @@ import (
 	"github.com/kouprlabs/voltaserve/api/config"
 )
 
-func setupPostgres(port uint32) (*embeddedpostgres.EmbeddedPostgres, error) {
-	os.Setenv("POSTGRES_URL", fmt.Sprintf("postgres://postgres:postgres@localhost:%d/postgres?sslmode=disable", port))
-	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(port).Logger(nil))
+func setupPostgres() (*embeddedpostgres.EmbeddedPostgres, error) {
+	os.Setenv("POSTGRES_URL", "postgres://postgres:postgres@localhost:15432/postgres?sslmode=disable")
+	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(15432).Logger(nil))
 	if err := postgres.Start(); err != nil {
 		return nil, err
 	}
