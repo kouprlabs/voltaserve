@@ -11,22 +11,23 @@
 package test
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/alicebob/miniredis/v2"
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"github.com/golang-migrate/migrate/v4"
-
-	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 func setupPostgres() (*embeddedpostgres.EmbeddedPostgres, error) {
-	os.Setenv("POSTGRES_URL", "postgres://postgres:postgres@localhost:15432/postgres?sslmode=disable")
-	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(15432).Logger(nil))
+	port := 15432
+	url := fmt.Sprintf("postgres://postgres:postgres@localhost:%d/postgres?sslmode=disable", port)
+	os.Setenv("POSTGRES_URL", url)
+	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(uint32(port)).Logger(nil))
 	if err := postgres.Start(); err != nil {
 		return nil, err
 	}
-	m, err := migrate.New("file://../test/migrations", config.GetConfig().DatabaseURL)
+	m, err := migrate.New("file://../test/migrations", url)
 	if err != nil {
 		return nil, err
 	}
