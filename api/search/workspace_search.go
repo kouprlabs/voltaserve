@@ -31,7 +31,7 @@ func NewWorkspaceSearch() WorkspaceSearch {
 
 type workspaceSearch struct {
 	index         string
-	search        *infra.SearchManager
+	search        infra.SearchManager
 	workspaceRepo repo.WorkspaceRepo
 }
 

@@ -31,7 +31,7 @@ func NewOrganizationSearch() OrganizationSearch {
 
 type organizationSearch struct {
 	index   string
-	search  *infra.SearchManager
+	search  infra.SearchManager
 	orgRepo repo.OrganizationRepo
 }
 

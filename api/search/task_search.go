@@ -31,7 +31,7 @@ func NewTaskSearch() TaskSearch {
 
 type taskSearch struct {
 	index    string
-	search   *infra.SearchManager
+	search   infra.SearchManager
 	taskRepo repo.TaskRepo
 }
 
