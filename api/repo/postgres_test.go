@@ -3,36 +3,24 @@ package repo_test
 import (
 	"testing"
 
-	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/test"
 )
 
+//nolint:paralleltest
 func TestPostgres(t *testing.T) {
-	t.Setenv("POSTGRES_URL", "postgres://postgres:postgres@localhost:15432/postgres?sslmode=disable")
-	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(15432).Logger(nil))
-	if err := postgres.Start(); err != nil {
-		t.Fatal(err)
-	}
+	postgres := test.SetupPostgres(t)
 	defer func() {
 		if err := postgres.Stop(); err != nil {
 			t.Fatal(err)
 		}
 	}()
-	m, err := migrate.New("file://./migrations", config.GetConfig().DatabaseURL)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := m.Up(); err != nil {
-		t.Fatal(err)
-	}
 	orgRepo := repo.NewOrganizationRepo()
 	org, err := orgRepo.Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewID(),
