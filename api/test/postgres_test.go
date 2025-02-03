@@ -22,7 +22,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-//nolint:paralleltest
 func TestPostgres(t *testing.T) {
 	orgRepo := repo.NewOrganizationRepo()
 	org, err := orgRepo.Insert(repo.OrganizationInsertOptions{

@@ -23,7 +23,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-//nolint:paralleltest
 func TestRedis(t *testing.T) {
 	fileCache := cache.NewFileCache()
 	opts := repo.NewFileOptions{
