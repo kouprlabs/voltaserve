@@ -24,10 +24,7 @@ import (
 
 func TestBleve(t *testing.T) {
 	orgSearch := search.NewOrganizationSearch()
-	opts := repo.NewOrganizationOptions{
-		ID:   helper.NewID(),
-		Name: "foo",
-	}
+	opts := repo.NewOrganizationOptions{ID: helper.NewID(), Name: "foo"}
 	if err := orgSearch.Index([]model.Organization{repo.NewOrganizationWithOptions(opts)}); err != nil {
 		t.Fatal(err)
 	}
