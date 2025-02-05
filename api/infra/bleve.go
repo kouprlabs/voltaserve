@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -23,19 +24,47 @@ import (
 )
 
 type bleveSearchManager struct {
-	indexes map[string]bleve.Index
+	indexes              map[string]bleve.Index
+	searchableAttributes map[string][]string
+	filterableAttributes map[string][]string
 }
 
 func newBleveSearchManager() SearchManager {
 	manager := &bleveSearchManager{
-		indexes: make(map[string]bleve.Index),
+		indexes:              make(map[string]bleve.Index),
+		searchableAttributes: make(map[string][]string),
+		filterableAttributes: make(map[string][]string),
 	}
-	manager.createIndex(FileSearchIndex)
-	manager.createIndex(GroupSearchIndex)
-	manager.createIndex(WorkspaceSearchIndex)
-	manager.createIndex(OrganizationSearchIndex)
-	manager.createIndex(UserSearchIndex)
-	manager.createIndex(TaskSearchIndex)
+	manager.createIndex(
+		FileSearchIndex,
+		[]string{"name", "text"},
+		[]string{"id", "workspaceId", "type", "parentId", "snapshotId", "createTime", "updateTime"},
+	)
+	manager.createIndex(
+		GroupSearchIndex,
+		[]string{"name"},
+		[]string{"id", "organizationId", "members", "createTime", "updateTime"},
+	)
+	manager.createIndex(
+		WorkspaceSearchIndex,
+		[]string{"name"},
+		[]string{"id", "storageCapacity", "rootId", "organizationId", "bucket", "createTime", "updateTime"},
+	)
+	manager.createIndex(
+		OrganizationSearchIndex,
+		[]string{"name"},
+		[]string{"id", "members", "createTime", "updateTime"},
+	)
+	manager.createIndex(
+		UserSearchIndex,
+		[]string{"fullName", "username", "email"},
+		[]string{"id", "isEmailConfirmed", "createTime", "updateTime"},
+	)
+	manager.createIndex(
+		TaskSearchIndex,
+		[]string{"name"},
+		[]string{"id", "error", "percentage", "isIndeterminate", "userId", "status", "createTime", "updateTime"},
+	)
 	return manager
 }
 
@@ -44,22 +73,36 @@ func (mgr *bleveSearchManager) Query(indexName string, query string, opts QueryO
 	if !ok {
 		return nil, errors.New("index not found")
 	}
-	var bleveQuery string
+	var searchRequest *bleve.SearchRequest
 	var err error
-	if opts.Filter != nil {
-		filterQuery, err := mgr.parseFilter(opts.Filter)
+	if query != "" && opts.Filter != nil {
+		filterQuery, err := mgr.buildFilter(opts.Filter, mgr.filterableAttributes[indexName])
 		if err != nil {
 			return nil, err
 		}
-		bleveQuery = query + " " + filterQuery
+		searchRequest = bleve.NewSearchRequestOptions(
+			bleve.NewConjunctionQuery(
+				bleve.NewQueryStringQuery(mgr.buildQuery(query, mgr.searchableAttributes[indexName])),
+				bleve.NewQueryStringQuery(filterQuery),
+			),
+			int(opts.Limit), 0, false,
+		)
+	} else if query == "" && opts.Filter != nil {
+		filterQuery, err := mgr.buildFilter(opts.Filter, mgr.filterableAttributes[indexName])
+		if err != nil {
+			return nil, err
+		}
+		searchRequest = bleve.NewSearchRequestOptions(
+			bleve.NewQueryStringQuery(filterQuery),
+			int(opts.Limit), 0, false,
+		)
 	} else {
-		bleveQuery = query
+		searchRequest = bleve.NewSearchRequestOptions(
+			bleve.NewQueryStringQuery(mgr.buildQuery(query, mgr.searchableAttributes[indexName])),
+			int(opts.Limit), 0, false,
+		)
 	}
-	searchResult, err := index.Search(
-		bleve.NewSearchRequestOptions(
-			bleve.NewQueryStringQuery(bleveQuery),
-			int(opts.Limit), 0, false),
-	)
+	searchResult, err := index.Search(searchRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -130,15 +173,25 @@ func (mgr *bleveSearchManager) Delete(indexName string, ids []string) error {
 	return index.Batch(batch)
 }
 
-func (mgr *bleveSearchManager) createIndex(indexName string) {
+func (mgr *bleveSearchManager) createIndex(indexName string, searchableAttributes []string, filterableAttributes []string) {
 	index, err := bleve.NewMemOnly(bleve.NewIndexMapping())
 	if err != nil {
 		panic(err)
 	}
 	mgr.indexes[indexName] = index
+	mgr.searchableAttributes[indexName] = searchableAttributes
+	mgr.filterableAttributes[indexName] = filterableAttributes
 }
 
-func (mgr *bleveSearchManager) parseFilter(filter interface{}) (string, error) {
+func (mgr *bleveSearchManager) buildQuery(query string, searchableAttributes []string) string {
+	var conditions []string
+	for _, attr := range searchableAttributes {
+		conditions = append(conditions, fmt.Sprintf(`%s:"%s"`, attr, query))
+	}
+	return strings.Join(conditions, " OR ")
+}
+
+func (mgr *bleveSearchManager) buildFilter(filter interface{}, filterableAttributes []string) (string, error) {
 	filterStr, ok := filter.(string)
 	if !ok {
 		return "", errors.New("filter must be a string")
@@ -151,6 +204,9 @@ func (mgr *bleveSearchManager) parseFilter(filter interface{}) (string, error) {
 	var conditions []string
 	for _, match := range matches {
 		field, value := match[1], match[2]
+		if !slices.Contains(filterableAttributes, field) {
+			return "", errors.New(field + " is a non filterable attribute")
+		}
 		if strings.HasPrefix(value, `"`) && strings.HasSuffix(value, `"`) {
 			conditions = append(conditions, fmt.Sprintf(`%s:%s`, field, value))
 		} else {
