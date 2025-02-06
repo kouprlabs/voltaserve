@@ -12,59 +12,29 @@ package infra
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
-	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/blevesearch/bleve/v2"
+	bleve_query "github.com/blevesearch/bleve/v2/search/query"
 	bleve_index "github.com/blevesearch/bleve_index_api"
 )
 
 type bleveSearchManager struct {
-	indexes              map[string]bleve.Index
-	searchableAttributes map[string][]string
-	filterableAttributes map[string][]string
+	indexes map[string]bleve.Index
 }
 
 func newBleveSearchManager() SearchManager {
 	manager := &bleveSearchManager{
-		indexes:              make(map[string]bleve.Index),
-		searchableAttributes: make(map[string][]string),
-		filterableAttributes: make(map[string][]string),
+		indexes: make(map[string]bleve.Index),
 	}
-	manager.createIndex(
-		FileSearchIndex,
-		[]string{"name", "text"},
-		[]string{"id", "workspaceId", "type", "parentId", "snapshotId", "createTime", "updateTime"},
-	)
-	manager.createIndex(
-		GroupSearchIndex,
-		[]string{"name"},
-		[]string{"id", "organizationId", "members", "createTime", "updateTime"},
-	)
-	manager.createIndex(
-		WorkspaceSearchIndex,
-		[]string{"name"},
-		[]string{"id", "storageCapacity", "rootId", "organizationId", "bucket", "createTime", "updateTime"},
-	)
-	manager.createIndex(
-		OrganizationSearchIndex,
-		[]string{"name"},
-		[]string{"id", "members", "createTime", "updateTime"},
-	)
-	manager.createIndex(
-		UserSearchIndex,
-		[]string{"fullName", "username", "email"},
-		[]string{"id", "isEmailConfirmed", "createTime", "updateTime"},
-	)
-	manager.createIndex(
-		TaskSearchIndex,
-		[]string{"name"},
-		[]string{"id", "error", "percentage", "isIndeterminate", "userId", "status", "createTime", "updateTime"},
-	)
+	manager.createIndex(FileSearchIndex)
+	manager.createIndex(GroupSearchIndex)
+	manager.createIndex(WorkspaceSearchIndex)
+	manager.createIndex(OrganizationSearchIndex)
+	manager.createIndex(UserSearchIndex)
+	manager.createIndex(TaskSearchIndex)
 	return manager
 }
 
@@ -75,32 +45,18 @@ func (mgr *bleveSearchManager) Query(indexName string, query string, opts QueryO
 	}
 	var searchRequest *bleve.SearchRequest
 	var err error
-	if query != "" && opts.Filter != nil {
-		filterQuery, err := mgr.buildFilter(opts.Filter, mgr.filterableAttributes[indexName])
-		if err != nil {
-			return nil, err
-		}
+	if opts.Filter == nil {
 		searchRequest = bleve.NewSearchRequestOptions(
-			bleve.NewConjunctionQuery(
-				bleve.NewQueryStringQuery(mgr.buildQuery(query, mgr.searchableAttributes[indexName])),
-				bleve.NewQueryStringQuery(filterQuery),
-			),
-			int(opts.Limit), 0, false,
-		)
-	} else if query == "" && opts.Filter != nil {
-		filterQuery, err := mgr.buildFilter(opts.Filter, mgr.filterableAttributes[indexName])
-		if err != nil {
-			return nil, err
-		}
-		searchRequest = bleve.NewSearchRequestOptions(
-			bleve.NewQueryStringQuery(filterQuery),
+			bleve.NewQueryStringQuery(query),
 			int(opts.Limit), 0, false,
 		)
 	} else {
-		searchRequest = bleve.NewSearchRequestOptions(
-			bleve.NewQueryStringQuery(mgr.buildQuery(query, mgr.searchableAttributes[indexName])),
-			int(opts.Limit), 0, false,
-		)
+		filterQueries := mgr.buildFilter(opts.Filter)
+		conjunctionQuery := bleve.NewConjunctionQuery(bleve.NewQueryStringQuery(query))
+		for _, v := range filterQueries {
+			conjunctionQuery.AddQuery(v)
+		}
+		searchRequest = bleve.NewSearchRequestOptions(conjunctionQuery, int(opts.Limit), 0, false)
 	}
 	searchResult, err := index.Search(searchRequest)
 	if err != nil {
@@ -112,33 +68,28 @@ func (mgr *bleveSearchManager) Query(indexName string, query string, opts QueryO
 		if err != nil {
 			return nil, err
 		}
-		docMap := make(map[string]interface{})
+		raw := make(map[string]interface{})
 		doc.VisitFields(func(field bleve_index.Field) {
 			fieldName := field.Name()
 			fieldValue := field.Value()
 			switch field.(type) {
 			case bleve_index.TextField:
-				docMap[fieldName] = string(fieldValue)
+				raw[fieldName] = string(fieldValue)
 			case bleve_index.NumericField:
 				num, err := strconv.ParseFloat(string(fieldValue), 64)
 				if err == nil {
-					docMap[fieldName] = num
-				}
-			case bleve_index.DateTimeField:
-				dateTime, err := time.Parse(time.RFC3339, string(fieldValue))
-				if err == nil {
-					docMap[fieldName] = dateTime
+					raw[fieldName] = num
 				}
 			case bleve_index.BooleanField:
 				boolVal, err := strconv.ParseBool(string(fieldValue))
 				if err == nil {
-					docMap[fieldName] = boolVal
+					raw[fieldName] = boolVal
 				}
 			default:
-				docMap[fieldName] = string(fieldValue)
+				raw[fieldName] = string(fieldValue)
 			}
 		})
-		res[i] = docMap
+		res[i] = raw
 	}
 	return res, nil
 }
@@ -173,55 +124,27 @@ func (mgr *bleveSearchManager) Delete(indexName string, ids []string) error {
 	return index.Batch(batch)
 }
 
-func (mgr *bleveSearchManager) createIndex(indexName string, searchableAttributes []string, filterableAttributes []string) {
+func (mgr *bleveSearchManager) createIndex(indexName string) {
 	index, err := bleve.NewMemOnly(bleve.NewIndexMapping())
 	if err != nil {
 		panic(err)
 	}
 	mgr.indexes[indexName] = index
-	mgr.searchableAttributes[indexName] = searchableAttributes
-	mgr.filterableAttributes[indexName] = filterableAttributes
 }
 
-func (mgr *bleveSearchManager) buildQuery(query string, searchableAttributes []string) string {
-	var conditions []string
-	for _, attr := range searchableAttributes {
-		conditions = append(conditions, fmt.Sprintf(`%s:"%s"`, attr, query))
-	}
-	return strings.Join(conditions, " OR ")
-}
-
-func (mgr *bleveSearchManager) buildFilter(filter interface{}, filterableAttributes []string) (string, error) {
-	filterStr, ok := filter.(string)
+func (mgr *bleveSearchManager) buildFilter(filter interface{}) []*bleve_query.MatchQuery {
+	res := make([]*bleve_query.MatchQuery, 0)
+	expression, ok := filter.(string)
 	if !ok {
-		return "", errors.New("filter must be a string")
+		return nil
 	}
-	re := regexp.MustCompile(`(\w+)\s*=\s*("[^"]*"|\d+)`)
-	matches := re.FindAllStringSubmatch(filterStr, -1)
-	if len(matches) == 0 {
-		return "", errors.New("invalid filter format")
+	expression = regexp.MustCompile(`\s+`).ReplaceAllString(expression, "")
+	parts := strings.Split(expression, "AND")
+	for _, part := range parts {
+		condition := strings.Split(part, "=")
+		matchQuery := bleve.NewMatchQuery(condition[1])
+		matchQuery.SetField(condition[0])
+		res = append(res, matchQuery)
 	}
-	var conditions []string
-	for _, match := range matches {
-		field, value := match[1], match[2]
-		if !slices.Contains(filterableAttributes, field) {
-			return "", errors.New(field + " is a non filterable attribute")
-		}
-		if strings.HasPrefix(value, `"`) && strings.HasSuffix(value, `"`) {
-			conditions = append(conditions, fmt.Sprintf(`%s:%s`, field, value))
-		} else {
-			conditions = append(conditions, fmt.Sprintf(`%s:%s`, field, value))
-		}
-	}
-	operators := re.ReplaceAllString(filterStr, "")
-	operatorParts := strings.Fields(operators)
-	finalConditions := make([]string, 0, len(conditions)+len(operatorParts))
-	for i, condition := range conditions {
-		finalConditions = append(finalConditions, condition)
-		if i < len(operatorParts) {
-			finalConditions = append(finalConditions, operatorParts[i])
-		}
-	}
-	queryString := strings.Join(finalConditions, " ")
-	return queryString, nil
+	return res
 }
