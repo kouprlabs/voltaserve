@@ -68,28 +68,7 @@ func (mgr *bleveSearchManager) Query(indexName string, query string, opts QueryO
 		if err != nil {
 			return nil, err
 		}
-		raw := make(map[string]interface{})
-		doc.VisitFields(func(field bleve_index.Field) {
-			fieldName := field.Name()
-			fieldValue := field.Value()
-			switch field.(type) {
-			case bleve_index.TextField:
-				raw[fieldName] = string(fieldValue)
-			case bleve_index.NumericField:
-				num, err := strconv.ParseFloat(string(fieldValue), 64)
-				if err == nil {
-					raw[fieldName] = num
-				}
-			case bleve_index.BooleanField:
-				boolVal, err := strconv.ParseBool(string(fieldValue))
-				if err == nil {
-					raw[fieldName] = boolVal
-				}
-			default:
-				raw[fieldName] = string(fieldValue)
-			}
-		})
-		res[i] = raw
+		res[i] = mgr.documentToMap(doc)
 	}
 	return res, nil
 }
@@ -146,5 +125,30 @@ func (mgr *bleveSearchManager) buildFilter(filter interface{}) []*bleve_query.Ma
 		matchQuery.SetField(condition[0])
 		res = append(res, matchQuery)
 	}
+	return res
+}
+
+func (mgr *bleveSearchManager) documentToMap(doc bleve_index.Document) map[string]interface{} {
+	res := make(map[string]interface{})
+	doc.VisitFields(func(field bleve_index.Field) {
+		fieldName := field.Name()
+		fieldValue := field.Value()
+		switch field.(type) {
+		case bleve_index.TextField:
+			res[fieldName] = string(fieldValue)
+		case bleve_index.NumericField:
+			num, err := strconv.ParseFloat(string(fieldValue), 64)
+			if err == nil {
+				res[fieldName] = num
+			}
+		case bleve_index.BooleanField:
+			boolVal, err := strconv.ParseBool(string(fieldValue))
+			if err == nil {
+				res[fieldName] = boolVal
+			}
+		default:
+			res[fieldName] = string(fieldValue)
+		}
+	})
 	return res
 }
