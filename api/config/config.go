@@ -95,21 +95,17 @@ const (
 	FileTypeEverythingElse = "*"
 )
 
-var config *Config
-
 func GetConfig() *Config {
-	if config == nil {
-		config = &Config{}
-		readPort(config)
-		readURLs(config)
-		readSecurity(config)
-		readS3(config)
-		readSearch(config)
-		readRedis(config)
-		readSMTP(config)
-		readLimits(config)
-		readDefaults(config)
-	}
+	config := &Config{}
+	readPort(config)
+	readURLs(config)
+	readSecurity(config)
+	readS3(config)
+	readSearch(config)
+	readRedis(config)
+	readSMTP(config)
+	readLimits(config)
+	readDefaults(config)
 	return config
 }
 

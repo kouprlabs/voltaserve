@@ -33,21 +33,21 @@ type S3Config struct {
 	Secure    bool
 }
 
-var config *Config
-
 func GetConfig() *Config {
-	if config == nil {
-		port, err := strconv.Atoi(os.Getenv("PORT"))
-		if err != nil {
-			panic(err)
-		}
-		config = &Config{
-			Port: port,
-		}
-		readS3(config)
-		readLimits(config)
-	}
+	config := &Config{}
+	readPort(config)
+	readS3(config)
+	readLimits(config)
 	return config
+}
+
+func readPort(config *Config) {
+	if len(os.Getenv("PORT")) > 0 {
+		port, err := strconv.Atoi(os.Getenv("PORT"))
+		if err == nil {
+			config.Port = port
+		}
+	}
 }
 
 func readS3(config *Config) {

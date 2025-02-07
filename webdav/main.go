@@ -16,6 +16,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -117,7 +118,7 @@ func main() {
 	startTokenRefresh(idpClient)
 
 	server := &http.Server{
-		Addr:              net.JoinHostPort(cfg.Host, cfg.Port),
+		Addr:              net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
 		ReadHeaderTimeout: 30 * time.Second,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if strings.HasPrefix(r.URL.Path, "/v3/health") || strings.HasPrefix(r.URL.Path, "/version") {

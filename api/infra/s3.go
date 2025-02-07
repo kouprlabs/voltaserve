@@ -15,7 +15,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/mosaic/config"
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type S3Manager interface {
