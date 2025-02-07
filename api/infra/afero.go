@@ -97,8 +97,7 @@ func (am *aferoManager) GetObjectWithBuffer(objectName string, bucketName string
 		return nil, err
 	}
 	defer file.Close()
-	_, err = io.Copy(buf, file)
-	if err != nil {
+	if _, err = io.Copy(buf, file); err != nil {
 		return nil, err
 	}
 	size := int64(buf.Len())
