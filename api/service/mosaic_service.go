@@ -34,7 +34,7 @@ type MosaicService struct {
 	fileGuard      guard.FileGuard
 	taskSvc        TaskService
 	taskMapper     TaskMapper
-	s3             *infra.S3Manager
+	s3             infra.S3Manager
 	mosaicClient   *mosaic_client.MosaicClient
 	pipelineClient *conversion_client.PipelineClient
 	fileIdent      *infra.FileIdentifier

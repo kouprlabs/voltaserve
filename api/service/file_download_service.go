@@ -26,7 +26,7 @@ type FileDownloadService struct {
 	fileCache     cache.FileCache
 	fileGuard     guard.FileGuard
 	snapshotCache cache.SnapshotCache
-	s3            *infra.S3Manager
+	s3            infra.S3Manager
 }
 
 func NewFileDownloadService() *FileDownloadService {

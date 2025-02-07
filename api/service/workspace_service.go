@@ -39,7 +39,7 @@ type WorkspaceService struct {
 	fileCache       cache.FileCache
 	fileGuard       guard.FileGuard
 	fileMapper      FileMapper
-	s3              *infra.S3Manager
+	s3              infra.S3Manager
 	config          *config.Config
 }
 

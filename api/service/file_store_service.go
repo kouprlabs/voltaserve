@@ -35,7 +35,7 @@ type FileStoreService struct {
 	snapshotSvc    *SnapshotService
 	taskSvc        TaskService
 	fileIdent      *infra.FileIdentifier
-	s3             *infra.S3Manager
+	s3             infra.S3Manager
 	pipelineClient *conversion_client.PipelineClient
 }
 

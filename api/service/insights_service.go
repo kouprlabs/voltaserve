@@ -40,7 +40,7 @@ type InsightsService struct {
 	fileGuard      guard.FileGuard
 	taskSvc        TaskService
 	taskMapper     TaskMapper
-	s3             *infra.S3Manager
+	s3             infra.S3Manager
 	languageClient *language_client.LanguageClient
 	pipelineClient *conversion_client.PipelineClient
 	fileIdent      *infra.FileIdentifier

@@ -39,7 +39,7 @@ type SnapshotService struct {
 	fileMapper     FileMapper
 	taskRepo       repo.TaskRepo
 	taskCache      cache.TaskCache
-	s3             *infra.S3Manager
+	s3             infra.S3Manager
 	config         *config.Config
 }
 
