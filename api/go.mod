@@ -99,6 +99,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rs/xid v1.5.0 // indirect
+	github.com/spf13/afero v1.12.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/teivah/onecontext v1.3.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
@@ -111,9 +112,9 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	google.golang.org/protobuf v1.36.4 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
