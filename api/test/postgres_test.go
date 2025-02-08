@@ -22,7 +22,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-func TestPostgres(t *testing.T) {
+func TestPostgres_InsertAndFind(t *testing.T) {
 	orgRepo := repo.NewOrganizationRepo()
 	org, err := orgRepo.Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewID(),

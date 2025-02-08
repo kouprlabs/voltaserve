@@ -23,7 +23,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-func TestRedis(t *testing.T) {
+func TestRedis_SetAndGet(t *testing.T) {
 	fileCache := cache.NewFileCache()
 	opts := repo.NewFileOptions{
 		ID:   helper.NewID(),

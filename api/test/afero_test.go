@@ -29,7 +29,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
-func TestAfero(t *testing.T) {
+func TestAfero_UploadAndDownload(t *testing.T) {
 	userID, err := createUser()
 	if err != nil {
 		t.Fatal(err)
