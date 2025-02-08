@@ -20,6 +20,7 @@ import (
 )
 
 func setupPostgres() (*embeddedpostgres.EmbeddedPostgres, error) {
+	os.Setenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB", "100000")
 	port := 15432
 	url := fmt.Sprintf("postgres://postgres:postgres@localhost:%d/postgres?sslmode=disable", port)
 	os.Setenv("POSTGRES_URL", url)
@@ -27,7 +28,7 @@ func setupPostgres() (*embeddedpostgres.EmbeddedPostgres, error) {
 	if err := postgres.Start(); err != nil {
 		return nil, err
 	}
-	m, err := migrate.New("file://../test/migrations", url)
+	m, err := migrate.New("file://migrations", url)
 	if err != nil {
 		return nil, err
 	}

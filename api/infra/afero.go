@@ -20,13 +20,18 @@ import (
 	"github.com/spf13/afero"
 )
 
+var aferoFs afero.Fs
+
 type aferoManager struct {
 	fs afero.Fs
 }
 
 func newAferoManager() *aferoManager {
+	if aferoFs == nil {
+		aferoFs = afero.NewMemMapFs()
+	}
 	return &aferoManager{
-		fs: afero.NewMemMapFs(),
+		fs: aferoFs,
 	}
 }
 
@@ -35,8 +40,7 @@ func (am *aferoManager) Connect() error {
 }
 
 func (am *aferoManager) StatObject(objectName string, bucketName string, opts minio.StatObjectOptions) (minio.ObjectInfo, error) {
-	path := filepath.Join(bucketName, objectName)
-	info, err := am.fs.Stat(path)
+	info, err := am.fs.Stat(am.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return minio.ObjectInfo{}, err
 	}
@@ -47,8 +51,7 @@ func (am *aferoManager) StatObject(objectName string, bucketName string, opts mi
 }
 
 func (am *aferoManager) GetFile(objectName string, filePath string, bucketName string, opts minio.GetObjectOptions) error {
-	path := filepath.Join(bucketName, objectName)
-	file, err := am.fs.Open(path)
+	file, err := am.fs.Open(am.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return err
 	}
@@ -65,18 +68,15 @@ func (am *aferoManager) PutFile(objectName string, filePath string, contentType 
 	if err != nil {
 		return err
 	}
-	path := filepath.Join(bucketName, objectName)
-	return afero.WriteFile(am.fs, path, data, 0o644)
+	return afero.WriteFile(am.fs, am.getObjectPath(objectName, bucketName), data, 0o644)
 }
 
 func (am *aferoManager) PutText(objectName string, text string, contentType string, bucketName string, opts minio.PutObjectOptions) error {
-	path := filepath.Join(bucketName, objectName)
-	return afero.WriteFile(am.fs, path, []byte(text), 0o644)
+	return afero.WriteFile(am.fs, am.getObjectPath(objectName, bucketName), []byte(text), 0o644)
 }
 
 func (am *aferoManager) GetObject(objectName string, bucketName string, opts minio.GetObjectOptions) (*bytes.Buffer, *int64, error) {
-	path := filepath.Join(bucketName, objectName)
-	file, err := am.fs.Open(path)
+	file, err := am.fs.Open(am.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -91,8 +91,7 @@ func (am *aferoManager) GetObject(objectName string, bucketName string, opts min
 }
 
 func (am *aferoManager) GetObjectWithBuffer(objectName string, bucketName string, buf *bytes.Buffer, opts minio.GetObjectOptions) (*int64, error) {
-	path := filepath.Join(bucketName, objectName)
-	file, err := am.fs.Open(path)
+	file, err := am.fs.Open(am.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return nil, err
 	}
@@ -105,8 +104,7 @@ func (am *aferoManager) GetObjectWithBuffer(objectName string, bucketName string
 }
 
 func (am *aferoManager) GetText(objectName string, bucketName string, opts minio.GetObjectOptions) (string, error) {
-	path := filepath.Join(bucketName, objectName)
-	file, err := am.fs.Open(path)
+	file, err := am.fs.Open(am.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return "", err
 	}
@@ -119,19 +117,25 @@ func (am *aferoManager) GetText(objectName string, bucketName string, opts minio
 }
 
 func (am *aferoManager) RemoveObject(objectName string, bucketName string, opts minio.RemoveObjectOptions) error {
-	path := filepath.Join(bucketName, objectName)
-	return am.fs.Remove(path)
+	return am.fs.Remove(am.getObjectPath(objectName, bucketName))
 }
 
 func (am *aferoManager) RemoveFolder(objectName string, bucketName string, opts minio.RemoveObjectOptions) error {
-	path := filepath.Join(bucketName, objectName)
-	return am.fs.RemoveAll(path)
+	return am.fs.RemoveAll(am.getObjectPath(objectName, bucketName))
 }
 
 func (am *aferoManager) CreateBucket(bucketName string) error {
-	return am.fs.MkdirAll(bucketName, 0o755)
+	return am.fs.MkdirAll(am.getBucketPath(bucketName), 0o755)
 }
 
 func (am *aferoManager) RemoveBucket(bucketName string) error {
-	return am.fs.RemoveAll(bucketName)
+	return am.fs.RemoveAll(am.getBucketPath(bucketName))
+}
+
+func (am *aferoManager) getObjectPath(objectName string, bucketName string) string {
+	return filepath.Join(am.getBucketPath(bucketName), objectName)
+}
+
+func (am *aferoManager) getBucketPath(bucketName string) string {
+	return filepath.Join("/", bucketName)
 }
