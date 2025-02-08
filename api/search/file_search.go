@@ -32,9 +32,9 @@ func NewFileSearch() FileSearch {
 }
 
 type fileSearch struct {
-	search       *infra.SearchManager
+	search       infra.SearchManager
 	index        string
-	s3           *infra.S3Manager
+	s3           infra.S3Manager
 	snapshotRepo repo.SnapshotRepo
 }
 

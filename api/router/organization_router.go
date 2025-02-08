@@ -19,6 +19,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -31,6 +32,10 @@ func NewOrganizationRouter() *OrganizationRouter {
 		orgSvc: service.NewOrganizationService(),
 	}
 }
+
+const (
+	OrganizationDefaultPageSize = 100
+)
 
 func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
@@ -57,7 +62,7 @@ func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [post]
 func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(service.OrganizationCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -88,7 +93,7 @@ func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id} [get]
 func (r *OrganizationRouter) Find(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	res, err := r.orgSvc.Find(c.Params("id"), userID)
 	if err != nil {
 		return err
@@ -110,7 +115,7 @@ func (r *OrganizationRouter) Find(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id} [delete]
 func (r *OrganizationRouter) Delete(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	if err := r.orgSvc.Delete(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -137,7 +142,7 @@ type OrganizationPatchNameOptions struct {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id}/name [patch]
 func (r *OrganizationRouter) PatchName(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(OrganizationPatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -173,7 +178,7 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.orgSvc.List(*opts, GetUserID(c))
+	res, err := r.orgSvc.List(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -197,7 +202,7 @@ func (r *OrganizationRouter) Probe(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.orgSvc.Probe(*opts, GetUserID(c))
+	res, err := r.orgSvc.Probe(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -228,11 +233,11 @@ func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.Organi
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.orgSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.orgSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
@@ -262,7 +267,7 @@ func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.Organi
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id}/leave [post]
 func (r *OrganizationRouter) Leave(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	if err := r.orgSvc.RemoveMember(c.Params("id"), userID, userID); err != nil {
 		return err
 	}
@@ -288,7 +293,7 @@ type OrganizationRemoveMemberOptions struct {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id}/members [delete]
 func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(OrganizationRemoveMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err

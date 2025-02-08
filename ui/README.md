@@ -65,6 +65,15 @@ Format TypeScript code:
 bun run format
 ```
 
+Format Go code:
+
+```shell
+gofumpt -w . && \
+gofmt -s -w . && \
+goimports -w . && \
+golangci-lint run --fix
+```
+
 Lint Go code:
 
 ```shell

@@ -19,6 +19,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -31,6 +32,10 @@ func NewGroupRouter() *GroupRouter {
 		groupSvc: service.NewGroupService(),
 	}
 }
+
+const (
+	GroupDefaultPageSize = 100
+)
 
 func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
@@ -57,7 +62,7 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups [post]
 func (r *GroupRouter) Create(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(service.GroupCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -85,7 +90,7 @@ func (r *GroupRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [get]
 func (r *GroupRouter) Find(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	res, err := r.groupSvc.Find(c.Params("id"), userID)
 	if err != nil {
 		return err
@@ -115,7 +120,7 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.groupSvc.List(*opts, GetUserID(c))
+	res, err := r.groupSvc.List(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -139,7 +144,7 @@ func (r *GroupRouter) Probe(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.groupSvc.Probe(*opts, GetUserID(c))
+	res, err := r.groupSvc.Probe(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -170,11 +175,11 @@ func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*service.GroupListOpti
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.groupSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.groupSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
@@ -211,7 +216,7 @@ type GroupPatchNameOptions struct {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/name [patch]
 func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(GroupPatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -240,7 +245,7 @@ func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [delete]
 func (r *GroupRouter) Delete(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	if err := r.groupSvc.Delete(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -265,7 +270,7 @@ type GroupAddMemberOptions struct {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/members [post]
 func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(GroupAddMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -298,7 +303,7 @@ type GroupRemoveMemberOptions struct {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/members [delete]
 func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(GroupRemoveMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err

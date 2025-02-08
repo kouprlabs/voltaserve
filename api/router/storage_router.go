@@ -14,6 +14,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -44,7 +45,7 @@ func (r *StorageRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500
 //	@Router			/storage/account_usage [get]
 func (r *StorageRouter) ComputeAccountUsage(c *fiber.Ctx) error {
-	res, err := r.storageSvc.ComputeAccountUsage(GetUserID(c))
+	res, err := r.storageSvc.ComputeAccountUsage(helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -67,7 +68,7 @@ func (r *StorageRouter) ComputeWorkspaceUsage(c *fiber.Ctx) error {
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	res, err := r.storageSvc.ComputeWorkspaceUsage(id, GetUserID(c))
+	res, err := r.storageSvc.ComputeWorkspaceUsage(id, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -90,7 +91,7 @@ func (r *StorageRouter) ComputeFileUsage(c *fiber.Ctx) error {
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	res, err := r.storageSvc.ComputeFileUsage(id, GetUserID(c))
+	res, err := r.storageSvc.ComputeFileUsage(id, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}

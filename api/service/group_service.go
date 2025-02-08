@@ -30,11 +30,11 @@ type GroupService struct {
 	groupRepo      repo.GroupRepo
 	groupGuard     guard.GroupGuard
 	groupSearch    search.GroupSearch
-	groupMapper    GroupMapper
+	groupMapper    *groupMapper
 	groupCache     cache.GroupCache
 	userRepo       repo.UserRepo
 	userSearch     search.UserSearch
-	userMapper     UserMapper
+	userMapper     *userMapper
 	workspaceRepo  repo.WorkspaceRepo
 	workspaceCache cache.WorkspaceCache
 	fileRepo       repo.FileRepo
@@ -67,6 +67,27 @@ func NewGroupService() *GroupService {
 		config:         config.GetConfig(),
 	}
 }
+
+type Group struct {
+	ID           string       `json:"id"`
+	Name         string       `json:"name"`
+	Image        *string      `json:"image,omitempty"`
+	Organization Organization `json:"organization"`
+	Permission   string       `json:"permission"`
+	CreateTime   string       `json:"createTime,omitempty"`
+	UpdateTime   *string      `json:"updateTime"`
+}
+
+const (
+	GroupSortByName         = "name"
+	GroupSortByDateCreated  = "date_created"
+	GroupSortByDateModified = "date_modified"
+)
+
+const (
+	GroupSortOrderAsc  = "asc"
+	GroupSortOrderDesc = "desc"
+)
 
 type GroupCreateOptions struct {
 	Name           string  `json:"name"           validate:"required,max=255"`
@@ -123,6 +144,14 @@ func (svc *GroupService) Find(id string, userID string) (*Group, error) {
 	return res, nil
 }
 
+type GroupList struct {
+	Data          []*Group `json:"data"`
+	TotalPages    uint64   `json:"totalPages"`
+	TotalElements uint64   `json:"totalElements"`
+	Page          uint64   `json:"page"`
+	Size          uint64   `json:"size"`
+}
+
 type GroupListOptions struct {
 	Query          string
 	OrganizationID string
@@ -138,10 +167,10 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
+		opts.SortBy = GroupSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
+		opts.SortOrder = GroupSortOrderAsc
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -156,6 +185,11 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 		Page:          opts.Page,
 		Size:          uint64(len(mapped)),
 	}, nil
+}
+
+type GroupProbe struct {
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *GroupService) Probe(opts GroupListOptions, userID string) (*GroupProbe, error) {
@@ -267,6 +301,17 @@ func (svc *GroupService) RemoveMember(id string, memberID string, userID string)
 	return nil
 }
 
+func (svc *GroupService) IsValidSortBy(value string) bool {
+	return value == "" ||
+		value == GroupSortByName ||
+		value == GroupSortByDateCreated ||
+		value == GroupSortByDateModified
+}
+
+func (svc *GroupService) IsValidSortOrder(value string) bool {
+	return value == "" || value == GroupSortOrderAsc || value == GroupSortOrderDesc
+}
+
 func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.Group, error) {
 	var res []model.Group
 	var err error
@@ -376,32 +421,32 @@ func (svc *GroupService) authorizeIDs(ids []string, userID string) ([]model.Grou
 }
 
 func (svc *GroupService) sort(data []model.Group, sortBy string, sortOrder string) []model.Group {
-	if sortBy == SortByName {
+	if sortBy == GroupSortByName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
+			if sortOrder == GroupSortOrderDesc {
 				return data[i].GetName() > data[j].GetName()
 			} else {
 				return data[i].GetName() < data[j].GetName()
 			}
 		})
 		return data
-	} else if sortBy == SortByDateCreated {
+	} else if sortBy == GroupSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
 			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
-			if sortOrder == SortOrderDesc {
+			if sortOrder == GroupSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == SortByDateModified {
+	} else if sortBy == GroupSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
 				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
-				if sortOrder == SortOrderDesc {
+				if sortOrder == GroupSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -437,4 +482,71 @@ func (svc *GroupService) sync(group model.Group) error {
 		return err
 	}
 	return nil
+}
+
+type groupMapper struct {
+	orgCache   cache.OrganizationCache
+	orgMapper  *organizationMapper
+	groupCache cache.GroupCache
+}
+
+func newGroupMapper() *groupMapper {
+	return &groupMapper{
+		orgCache:   cache.NewOrganizationCache(),
+		orgMapper:  newOrganizationMapper(),
+		groupCache: cache.NewGroupCache(),
+	}
+}
+
+func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
+	org, err := mp.orgCache.Get(m.GetOrganizationID())
+	if err != nil {
+		return nil, err
+	}
+	o, err := mp.orgMapper.mapOne(org, userID)
+	if err != nil {
+		return nil, err
+	}
+	res := &Group{
+		ID:           m.GetID(),
+		Name:         m.GetName(),
+		Organization: *o,
+		CreateTime:   m.GetCreateTime(),
+		UpdateTime:   m.GetUpdateTime(),
+	}
+	res.Permission = model.PermissionNone
+	for _, p := range m.GetUserPermissions() {
+		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+			res.Permission = p.GetValue()
+		}
+	}
+	for _, p := range m.GetGroupPermissions() {
+		g, err := mp.groupCache.Get(p.GetGroupID())
+		if err != nil {
+			return nil, err
+		}
+		for _, u := range g.GetMembers() {
+			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+				res.Permission = p.GetValue()
+			}
+		}
+	}
+	return res, nil
+}
+
+func (mp *groupMapper) mapMany(groups []model.Group, userID string) ([]*Group, error) {
+	res := make([]*Group, 0)
+	for _, group := range groups {
+		g, err := mp.mapOne(group, userID)
+		if err != nil {
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewGroupNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+		res = append(res, g)
+	}
+	return res, nil
 }

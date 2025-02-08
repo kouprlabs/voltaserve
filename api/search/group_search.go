@@ -31,7 +31,7 @@ func NewGroupSearch() GroupSearch {
 
 type groupSearch struct {
 	index     string
-	search    *infra.SearchManager
+	search    infra.SearchManager
 	groupRepo repo.GroupRepo
 }
 

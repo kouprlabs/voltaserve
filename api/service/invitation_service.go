@@ -26,9 +26,9 @@ import (
 
 type InvitationService struct {
 	orgRepo          repo.OrganizationRepo
-	orgMapper        OrganizationMapper
+	orgMapper        *organizationMapper
 	invitationRepo   repo.InvitationRepo
-	invitationMapper InvitationMapper
+	invitationMapper *invitationMapper
 	orgCache         cache.OrganizationCache
 	orgGuard         guard.OrganizationGuard
 	userRepo         repo.UserRepo
@@ -49,6 +49,27 @@ func NewInvitationService() *InvitationService {
 		config:           config.GetConfig(),
 	}
 }
+
+type Invitation struct {
+	ID           string        `json:"id"`
+	Owner        *User         `json:"owner,omitempty"`
+	Email        string        `json:"email"`
+	Organization *Organization `json:"organization,omitempty"`
+	Status       string        `json:"status"`
+	CreateTime   string        `json:"createTime"`
+	UpdateTime   *string       `json:"updateTime"`
+}
+
+const (
+	InvitationSortByEmail        = "email"
+	InvitationSortByDateCreated  = "date_created"
+	InvitationSortByDateModified = "date_modified"
+)
+
+const (
+	InvitationSortOrderAsc  = "asc"
+	InvitationSortOrderDesc = "desc"
+)
 
 type InvitationCreateOptions struct {
 	OrganizationID string   `json:"organizationId" validate:"required"`
@@ -93,6 +114,14 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 	return res, nil
 }
 
+type InvitationList struct {
+	Data          []*Invitation `json:"data"`
+	TotalPages    uint64        `json:"totalPages"`
+	TotalElements uint64        `json:"totalElements"`
+	Page          uint64        `json:"page"`
+	Size          uint64        `json:"size"`
+}
+
 type InvitationListOptions struct {
 	Page      uint64
 	Size      uint64
@@ -110,10 +139,10 @@ func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID st
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
+		opts.SortBy = InvitationSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
+		opts.SortOrder = InvitationSortOrderAsc
 	}
 	sorted := svc.sort(invitations, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -128,6 +157,11 @@ func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID st
 		Page:          opts.Page,
 		Size:          uint64(len(mapped)),
 	}, nil
+}
+
+type InvitationProbe struct {
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *InvitationService) ProbeIncoming(opts InvitationListOptions, userID string) (*InvitationProbe, error) {
@@ -163,10 +197,10 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOpti
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
+		opts.SortBy = InvitationSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
+		opts.SortOrder = InvitationSortOrderAsc
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -306,6 +340,17 @@ func (svc *InvitationService) Delete(id string, userID string) error {
 	return nil
 }
 
+func (svc *InvitationService) IsValidSortBy(value string) bool {
+	return value == "" ||
+		value == InvitationSortByEmail ||
+		value == InvitationSortByDateCreated ||
+		value == InvitationSortByDateModified
+}
+
+func (svc *InvitationService) IsValidSortOrder(value string) bool {
+	return value == "" || value == InvitationSortOrderAsc || value == InvitationSortOrderDesc
+}
+
 func (svc *InvitationService) getEmailsFromNonMembersAndOutgoing(emails []string, orgMembers []model.User, outgoing []model.Invitation) []string {
 	var res []string
 	for _, email := range emails {
@@ -355,32 +400,32 @@ func (svc *InvitationService) sendEmails(invitations []model.Invitation, org mod
 }
 
 func (svc *InvitationService) sort(data []model.Invitation, sortBy string, sortOrder string) []model.Invitation {
-	if sortBy == SortByEmail {
+	if sortBy == InvitationSortByEmail {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
+			if sortOrder == InvitationSortOrderDesc {
 				return data[i].GetEmail() > data[j].GetEmail()
 			} else {
 				return data[i].GetEmail() < data[j].GetEmail()
 			}
 		})
 		return data
-	} else if sortBy == SortByDateCreated {
+	} else if sortBy == InvitationSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
 			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
-			if sortOrder == SortOrderDesc {
+			if sortOrder == InvitationSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == SortByDateModified {
+	} else if sortBy == InvitationSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
 				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
-				if sortOrder == SortOrderDesc {
+				if sortOrder == InvitationSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -406,4 +451,56 @@ func (svc *InvitationService) paginate(data []model.Invitation, page, size uint6
 		endIndex = totalElements
 	}
 	return data[startIndex:endIndex], totalElements, totalPages
+}
+
+type invitationMapper struct {
+	orgCache   cache.OrganizationCache
+	userRepo   repo.UserRepo
+	userMapper *userMapper
+	orgMapper  *organizationMapper
+}
+
+func newInvitationMapper() *invitationMapper {
+	return &invitationMapper{
+		orgCache:   cache.NewOrganizationCache(),
+		userRepo:   repo.NewUserRepo(),
+		userMapper: newUserMapper(),
+		orgMapper:  newOrganizationMapper(),
+	}
+}
+
+func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*Invitation, error) {
+	owner, err := mp.userRepo.Find(m.GetOwnerID())
+	if err != nil {
+		return nil, err
+	}
+	org, err := mp.orgCache.Get(m.GetOrganizationID())
+	if err != nil {
+		return nil, err
+	}
+	o, err := mp.orgMapper.mapOne(org, userID)
+	if err != nil {
+		return nil, err
+	}
+	return &Invitation{
+		ID:           m.GetID(),
+		Owner:        mp.userMapper.mapOne(owner),
+		Email:        m.GetEmail(),
+		Organization: o,
+		Status:       m.GetStatus(),
+		CreateTime:   m.GetCreateTime(),
+		UpdateTime:   m.GetUpdateTime(),
+	}, nil
+}
+
+func (mp *invitationMapper) mapMany(invitations []model.Invitation, userID string) ([]*Invitation, error) {
+	res := make([]*Invitation, 0)
+	for _, invitation := range invitations {
+		i, err := mp.mapOne(invitation, userID)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, i)
+	}
+	return res, nil
 }

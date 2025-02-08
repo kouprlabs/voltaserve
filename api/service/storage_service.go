@@ -24,7 +24,7 @@ type StorageService struct {
 	fileRepo       repo.FileRepo
 	fileCache      cache.FileCache
 	fileGuard      guard.FileGuard
-	storageMapper  StorageMapper
+	storageMapper  *storageMapper
 }
 
 func NewStorageService() *StorageService {
@@ -37,6 +37,12 @@ func NewStorageService() *StorageService {
 		fileGuard:      guard.NewFileGuard(),
 		storageMapper:  newStorageMapper(),
 	}
+}
+
+type StorageUsage struct {
+	Bytes      int64 `json:"bytes"`
+	MaxBytes   int64 `json:"maxBytes"`
+	Percentage int   `json:"percentage"`
 }
 
 func (svc *StorageService) ComputeAccountUsage(userID string) (*StorageUsage, error) {
@@ -111,4 +117,21 @@ func (svc *StorageService) ComputeFileUsage(fileID string, userID string) (*Stor
 		return nil, err
 	}
 	return svc.storageMapper.mapStorageUsage(size, workspace.GetStorageCapacity()), nil
+}
+
+type storageMapper struct{}
+
+func newStorageMapper() *storageMapper {
+	return &storageMapper{}
+}
+
+func (mp *storageMapper) mapStorageUsage(byteCount int64, maxBytes int64) *StorageUsage {
+	res := StorageUsage{
+		Bytes:    byteCount,
+		MaxBytes: maxBytes,
+	}
+	if maxBytes != 0 {
+		res.Percentage = int(byteCount * 100 / maxBytes)
+	}
+	return &res
 }

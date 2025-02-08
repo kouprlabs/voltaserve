@@ -17,7 +17,7 @@ import (
 
 type Config struct {
 	Host     string
-	Port     string
+	Port     int
 	APIURL   string
 	IdPURL   string
 	S3       S3Config
@@ -43,19 +43,23 @@ type SecurityConfig struct {
 	APIKey string
 }
 
-var config *Config
-
 func GetConfig() *Config {
-	if config == nil {
-		config = &Config{
-			Port: os.Getenv("PORT"),
-		}
-		readURLs(config)
-		readS3(config)
-		readRedis(config)
-		readSecurity(config)
-	}
+	config := &Config{}
+	readPort(config)
+	readURLs(config)
+	readS3(config)
+	readRedis(config)
+	readSecurity(config)
 	return config
+}
+
+func readPort(config *Config) {
+	if len(os.Getenv("PORT")) > 0 {
+		port, err := strconv.Atoi(os.Getenv("PORT"))
+		if err == nil {
+			config.Port = port
+		}
+	}
 }
 
 func readURLs(config *Config) {

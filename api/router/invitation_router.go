@@ -18,6 +18,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -30,6 +31,10 @@ func NewInvitationRouter() *InvitationRouter {
 		invitationSvc: service.NewInvitationService(),
 	}
 }
+
+const (
+	InvitationDefaultPageSize = 100
+)
 
 func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
@@ -60,7 +65,7 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/invitations [post]
 func (r *InvitationRouter) Create(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(service.InvitationCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -94,7 +99,7 @@ func (r *InvitationRouter) ListIncoming(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.invitationSvc.ListIncoming(*opts, GetUserID(c))
+	res, err := r.invitationSvc.ListIncoming(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -117,7 +122,7 @@ func (r *InvitationRouter) ProbeIncoming(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.invitationSvc.ProbeIncoming(*opts, GetUserID(c))
+	res, err := r.invitationSvc.ProbeIncoming(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -148,11 +153,11 @@ func (r *InvitationRouter) parseIncomingListQueryParams(c *fiber.Ctx) (*service.
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.invitationSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.invitationSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	return &service.InvitationListOptions{
@@ -174,7 +179,7 @@ func (r *InvitationRouter) parseIncomingListQueryParams(c *fiber.Ctx) (*service.
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming/count [get]
 func (r *InvitationRouter) CountIncoming(c *fiber.Ctx) error {
-	res, err := r.invitationSvc.CountIncoming(GetUserID(c))
+	res, err := r.invitationSvc.CountIncoming(helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -201,7 +206,7 @@ func (r *InvitationRouter) ListOutgoing(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.invitationSvc.ListOutgoing(c.Query("organization_id"), *opts, GetUserID(c))
+	res, err := r.invitationSvc.ListOutgoing(c.Query("organization_id"), *opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -225,7 +230,7 @@ func (r *InvitationRouter) ProbeOutgoing(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.invitationSvc.ProbeOutgoing(c.Query("organization_id"), *opts, GetUserID(c))
+	res, err := r.invitationSvc.ProbeOutgoing(c.Query("organization_id"), *opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -260,11 +265,11 @@ func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*service.
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.invitationSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.invitationSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	return &service.InvitationListOptions{
@@ -289,7 +294,7 @@ func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*service.
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/{id} [delete]
 func (r *InvitationRouter) Delete(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	if err := r.invitationSvc.Delete(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -310,7 +315,7 @@ func (r *InvitationRouter) Delete(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/{id}/resend [post]
 func (r *InvitationRouter) Resend(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	if err := r.invitationSvc.Resend(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -331,7 +336,7 @@ func (r *InvitationRouter) Resend(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/{id}/accept [post]
 func (r *InvitationRouter) Accept(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	if err := r.invitationSvc.Accept(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -352,7 +357,7 @@ func (r *InvitationRouter) Accept(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/{id}/decline [post]
 func (r *InvitationRouter) Decline(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	if err := r.invitationSvc.Decline(c.Params("id"), userID); err != nil {
 		return err
 	}

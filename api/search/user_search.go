@@ -28,7 +28,7 @@ func NewUserSearch() UserSearch {
 
 type userSearch struct {
 	index  string
-	search *infra.SearchManager
+	search infra.SearchManager
 }
 
 func newUserSearch() *userSearch {

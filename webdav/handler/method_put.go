@@ -85,7 +85,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 	}
 	snapshotID := helper.NewID()
 	key := snapshotID + "/original" + strings.ToLower(filepath.Ext(name))
-	if err = h.s3.PutFile(key, outputPath, infra.DetectMimeFromPath(outputPath), workspace.Bucket, minio.PutObjectOptions{}); err != nil {
+	if err = h.s3.PutFile(key, outputPath, infra.DetectMIMEFromPath(outputPath), workspace.Bucket, minio.PutObjectOptions{}); err != nil {
 		infra.HandleError(err, w)
 		return
 	}
@@ -99,7 +99,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		Key:         key,
 		SnapshotID:  snapshotID,
 		Size:        stat.Size(),
-		ContentType: infra.DetectMimeFromPath(outputPath),
+		ContentType: infra.DetectMIMEFromPath(outputPath),
 	}
 	existingFile, err := cl.GetByPath(r.URL.Path)
 	if err == nil {

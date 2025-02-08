@@ -38,6 +38,10 @@ func NewUserRouter() *UserRouter {
 	}
 }
 
+const (
+	UserDefaultPageSize = 100
+)
+
 func (r *UserRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Get("/probe", r.Probe)
@@ -72,7 +76,7 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.userSvc.List(*opts, GetUserID(c))
+	res, err := r.userSvc.List(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -96,7 +100,7 @@ func (r *UserRouter) Probe(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.userSvc.Probe(*opts, GetUserID(c))
+	res, err := r.userSvc.Probe(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -127,11 +131,11 @@ func (r *UserRouter) parseListQueryParams(c *fiber.Ctx) (*service.UserListOption
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.userSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.userSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	var excludeGroupMembers bool

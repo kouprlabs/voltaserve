@@ -8,14 +8,28 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package infra
+package test
 
-import "github.com/gabriel-vasile/mimetype"
+import (
+	"fmt"
+	"os"
+	"testing"
+)
 
-func DetectMIMEFromPath(path string) string {
-	mime, err := mimetype.DetectFile(path)
-	if err != nil {
-		return "application/octet-stream"
+func TestMain(m *testing.M) {
+	if err := setupRedis(); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
-	return mime.String()
+	postgres, err := setupPostgres()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	code := m.Run()
+	if err := postgres.Stop(); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	os.Exit(code)
 }

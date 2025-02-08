@@ -20,11 +20,12 @@ import (
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 type TaskRouter struct {
-	taskSvc service.TaskService
+	taskSvc *service.TaskService
 	config  *config.Config
 }
 
@@ -63,7 +64,7 @@ func (r *TaskRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id} [get]
 func (r *TaskRouter) Get(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	res, err := r.taskSvc.Find(c.Params("id"), userID)
 	if err != nil {
 		return err
@@ -92,7 +93,7 @@ func (r *TaskRouter) List(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.taskSvc.List(*opts, GetUserID(c))
+	res, err := r.taskSvc.List(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -116,7 +117,7 @@ func (r *TaskRouter) Probe(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.taskSvc.Probe(*opts, GetUserID(c))
+	res, err := r.taskSvc.Probe(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -147,11 +148,11 @@ func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*service.TaskListOption
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.taskSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.taskSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
@@ -178,7 +179,7 @@ func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*service.TaskListOption
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/count [get]
 func (r *TaskRouter) Count(c *fiber.Ctx) error {
-	res, err := r.taskSvc.Count(GetUserID(c))
+	res, err := r.taskSvc.Count(helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -199,7 +200,7 @@ func (r *TaskRouter) Count(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id}/dismiss [post]
 func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	if err := r.taskSvc.Dismiss(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -218,7 +219,7 @@ func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/dismiss [post]
 func (r *TaskRouter) DismissAll(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	res, err := r.taskSvc.DismissAll(userID)
 	if err != nil {
 		return err

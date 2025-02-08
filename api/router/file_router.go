@@ -38,18 +38,7 @@ import (
 )
 
 type FileRouter struct {
-	fileCreateSvc         *service.FileCreateService
-	fileStoreSvc          *service.FileStoreService
-	fileDeleteSvc         *service.FileDeleteService
-	fileMoveSvc           *service.FileMoveService
-	fileCopySvc           *service.FileCopyService
-	fileDownloadSvc       *service.FileDownloadService
-	fileFetchSvc          *service.FileFetchService
-	fileListSvc           *service.FileListService
-	fileReprocessSvc      *service.FileReprocessService
-	filePermissionSvc     *service.FilePermissionService
-	fileComputeSvc        *service.FileComputeService
-	filePatchSvc          *service.FilePatchService
+	fileSvc               *service.FileService
 	workspaceSvc          *service.WorkspaceService
 	config                *config.Config
 	bufferPool            sync.Pool
@@ -58,20 +47,9 @@ type FileRouter struct {
 
 func NewFileRouter() *FileRouter {
 	return &FileRouter{
-		fileCreateSvc:     service.NewFileCreateService(),
-		fileStoreSvc:      service.NewFileStoreService(),
-		fileDeleteSvc:     service.NewFileDeleteService(),
-		fileMoveSvc:       service.NewFileMoveService(),
-		fileCopySvc:       service.NewFileCopyService(),
-		fileDownloadSvc:   service.NewFileDownloadService(),
-		fileFetchSvc:      service.NewFileFetchService(),
-		fileListSvc:       service.NewFileListService(),
-		fileReprocessSvc:  service.NewFileReprocessService(),
-		filePermissionSvc: service.NewFilePermissionService(),
-		fileComputeSvc:    service.NewFileComputeService(),
-		filePatchSvc:      service.NewFilePatchService(),
-		workspaceSvc:      service.NewWorkspaceService(),
-		config:            config.GetConfig(),
+		fileSvc:      service.NewFileService(),
+		workspaceSvc: service.NewWorkspaceService(),
+		config:       config.GetConfig(),
 		bufferPool: sync.Pool{
 			New: func() interface{} {
 				return new(bytes.Buffer)
@@ -80,6 +58,10 @@ func NewFileRouter() *FileRouter {
 		accessTokenCookieName: "voltaserve_access_token",
 	}
 }
+
+const (
+	FileDefaultPageSize = 100
+)
 
 func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
@@ -134,7 +116,7 @@ func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files [post]
 func (r *FileRouter) Create(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	workspaceID := c.Query("workspace_id")
 	if workspaceID == "" {
 		return errorpkg.NewMissingQueryParamError("workspace_id")
@@ -167,7 +149,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		if name == "" {
 			name = fh.Filename
 		}
-		file, err := r.fileCreateSvc.Create(service.FileCreateOptions{
+		file, err := r.fileSvc.Create(service.FileCreateOptions{
 			Name:        name,
 			Type:        model.FileTypeFile,
 			ParentID:    parentID,
@@ -187,7 +169,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 				log.GetLogger().Error(err)
 			}
 		}(tmpPath)
-		file, err = r.fileStoreSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
+		file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
 		if err != nil {
 			return err
 		}
@@ -196,7 +178,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		if name == "" {
 			return errorpkg.NewMissingQueryParamError("name")
 		}
-		res, err := r.fileCreateSvc.Create(service.FileCreateOptions{
+		res, err := r.fileSvc.Create(service.FileCreateOptions{
 			Name:        name,
 			Type:        model.FileTypeFolder,
 			ParentID:    parentID,
@@ -225,8 +207,8 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id} [patch]
 func (r *FileRouter) Patch(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	files, err := r.fileFetchSvc.Find([]string{c.Params("id")}, userID)
+	userID := helper.GetUserID(c)
+	files, err := r.fileSvc.Find([]string{c.Params("id")}, userID)
 	if err != nil {
 		return err
 	}
@@ -253,7 +235,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 			log.GetLogger().Error(err)
 		}
 	}(tmpPath)
-	file, err = r.fileStoreSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
+	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
 	if err != nil {
 		return err
 	}
@@ -279,8 +261,8 @@ type FileCreateFolderOptions struct {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id} [get]
 func (r *FileRouter) Find(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.fileFetchSvc.Find([]string{c.Params("id")}, userID)
+	userID := helper.GetUserID(c)
+	res, err := r.fileSvc.Find([]string{c.Params("id")}, userID)
 	if err != nil {
 		return err
 	}
@@ -304,12 +286,12 @@ func (r *FileRouter) Find(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files [get]
 func (r *FileRouter) FindByPath(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	path := c.Query("path")
 	if path == "" {
 		return errorpkg.NewMissingQueryParamError("path")
 	}
-	res, err := r.fileFetchSvc.FindByPath(path, userID)
+	res, err := r.fileSvc.FindByPath(path, userID)
 	if err != nil {
 		return err
 	}
@@ -329,11 +311,11 @@ func (r *FileRouter) FindByPath(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/list [get]
 func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	if c.Query("path") == "" {
 		return errorpkg.NewMissingQueryParamError("path")
 	}
-	res, err := r.fileFetchSvc.ListByPath(c.Query("path"), userID)
+	res, err := r.fileSvc.ListByPath(c.Query("path"), userID)
 	if err != nil {
 		return err
 	}
@@ -359,12 +341,12 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 //	@Router			/files/{id}/list [get]
 func (r *FileRouter) List(c *fiber.Ctx) error {
 	id := c.Params("id")
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.fileListSvc.List(id, *opts, userID)
+	res, err := r.fileSvc.List(id, *opts, userID)
 	if err != nil {
 		return err
 	}
@@ -390,12 +372,12 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 //	@Router			/files/{id}/probe [get]
 func (r *FileRouter) Probe(c *fiber.Ctx) error {
 	id := c.Params("id")
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.fileListSvc.Probe(id, *opts, userID)
+	res, err := r.fileSvc.Probe(id, *opts, userID)
 	if err != nil {
 		return err
 	}
@@ -426,11 +408,11 @@ func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOption
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.fileSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.fileSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
@@ -468,8 +450,8 @@ func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOption
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/path [get]
 func (r *FileRouter) FindPath(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.fileFetchSvc.FindPath(c.Params("id"), userID)
+	userID := helper.GetUserID(c)
+	res, err := r.fileSvc.FindPath(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -493,8 +475,8 @@ type FileCopyOptions struct {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/copy/{targetId} [post]
 func (r *FileRouter) CopyOne(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.fileCopySvc.Copy(c.Params("id"), c.Params("targetId"), userID)
+	userID := helper.GetUserID(c)
+	res, err := r.fileSvc.Copy(c.Params("id"), c.Params("targetId"), userID)
 	if err != nil {
 		return err
 	}
@@ -514,7 +496,7 @@ func (r *FileRouter) CopyOne(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/copy [post]
 func (r *FileRouter) CopyMany(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(service.FileCopyManyOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -522,7 +504,7 @@ func (r *FileRouter) CopyMany(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileCopySvc.CopyMany(*opts, userID)
+	res, err := r.fileSvc.CopyMany(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -546,8 +528,8 @@ type FileMoveOptions struct {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/move/{targetId} [post]
 func (r *FileRouter) MoveOne(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.fileMoveSvc.Move(c.Params("id"), c.Params("targetId"), userID)
+	userID := helper.GetUserID(c)
+	res, err := r.fileSvc.Move(c.Params("id"), c.Params("targetId"), userID)
 	if err != nil {
 		return err
 	}
@@ -567,7 +549,7 @@ func (r *FileRouter) MoveOne(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/move [post]
 func (r *FileRouter) MoveMany(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(service.FileMoveManyOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -575,7 +557,7 @@ func (r *FileRouter) MoveMany(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileMoveSvc.MoveMany(*opts, userID)
+	res, err := r.fileSvc.MoveMany(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -600,7 +582,7 @@ type FilePatchNameOptions struct {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/name [patch]
 func (r *FileRouter) PatchName(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(FilePatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -608,7 +590,7 @@ func (r *FileRouter) PatchName(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.filePatchSvc.PatchName(c.Params("id"), opts.Name, userID)
+	res, err := r.fileSvc.PatchName(c.Params("id"), opts.Name, userID)
 	if err != nil {
 		return err
 	}
@@ -628,8 +610,8 @@ func (r *FileRouter) PatchName(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/reprocess [post]
 func (r *FileRouter) Reprocess(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.fileReprocessSvc.Reprocess(c.Params("id"), userID)
+	userID := helper.GetUserID(c)
+	res, err := r.fileSvc.Reprocess(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -653,8 +635,8 @@ type FileDeleteOptions struct {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id} [delete]
 func (r *FileRouter) DeleteOne(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	if err := r.fileDeleteSvc.Delete(c.Params("id"), userID); err != nil {
+	userID := helper.GetUserID(c)
+	if err := r.fileSvc.Delete(c.Params("id"), userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -672,7 +654,7 @@ func (r *FileRouter) DeleteOne(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files [delete]
 func (r *FileRouter) DeleteMany(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(service.FileDeleteManyOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -680,7 +662,7 @@ func (r *FileRouter) DeleteMany(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileDeleteSvc.DeleteMany(*opts, userID)
+	res, err := r.fileSvc.DeleteMany(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -700,9 +682,9 @@ func (r *FileRouter) DeleteMany(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/size [get]
 func (r *FileRouter) ComputeSize(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	id := c.Params("id")
-	res, err := r.fileComputeSvc.ComputeSize(id, userID)
+	res, err := r.fileSvc.ComputeSize(id, userID)
 	if err != nil {
 		return err
 	}
@@ -722,8 +704,8 @@ func (r *FileRouter) ComputeSize(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/count [get]
 func (r *FileRouter) Count(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.fileComputeSvc.Count(c.Params("id"), userID)
+	userID := helper.GetUserID(c)
+	res, err := r.fileSvc.Count(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -749,7 +731,7 @@ type FileGrantUserPermissionOptions struct {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/grant_user_permission [post]
 func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(FileGrantUserPermissionOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -757,7 +739,7 @@ func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.filePermissionSvc.GrantUserPermission(opts.IDs, opts.UserID, opts.Permission, userID); err != nil {
+	if err := r.fileSvc.GrantUserPermission(opts.IDs, opts.UserID, opts.Permission, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -781,7 +763,7 @@ type FileRevokeUserPermissionOptions struct {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/revoke_user_permission [post]
 func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(FileRevokeUserPermissionOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -789,7 +771,7 @@ func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.filePermissionSvc.RevokeUserPermission(opts.IDs, opts.UserID, userID); err != nil {
+	if err := r.fileSvc.RevokeUserPermission(opts.IDs, opts.UserID, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -814,7 +796,7 @@ type FileGrantGroupPermissionOptions struct {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/grant_group_permission [post]
 func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(FileGrantGroupPermissionOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -822,7 +804,7 @@ func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.filePermissionSvc.GrantGroupPermission(opts.IDs, opts.GroupID, opts.Permission, userID); err != nil {
+	if err := r.fileSvc.GrantGroupPermission(opts.IDs, opts.GroupID, opts.Permission, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -846,7 +828,7 @@ type FileRevokeGroupPermissionOptions struct {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/revoke_group_permission [post]
 func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(FileRevokeGroupPermissionOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -854,7 +836,7 @@ func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.filePermissionSvc.RevokeGroupPermission(opts.IDs, opts.GroupID, userID); err != nil {
+	if err := r.fileSvc.RevokeGroupPermission(opts.IDs, opts.GroupID, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -873,8 +855,8 @@ func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/user_permissions [get]
 func (r *FileRouter) FindUserPermissions(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.filePermissionSvc.FindUserPermissions(c.Params("id"), userID)
+	userID := helper.GetUserID(c)
+	res, err := r.fileSvc.FindUserPermissions(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -894,8 +876,8 @@ func (r *FileRouter) FindUserPermissions(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/group_permissions [get]
 func (r *FileRouter) FindGroupPermissions(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.filePermissionSvc.FindGroupPermissions(c.Params("id"), userID)
+	userID := helper.GetUserID(c)
+	res, err := r.fileSvc.FindGroupPermissions(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -938,7 +920,7 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	buf := r.bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer r.bufferPool.Put(buf)
-	res, err := r.fileDownloadSvc.DownloadOriginalBuffer(id, c.Get("Range"), buf, userID)
+	res, err := r.fileSvc.DownloadOriginalBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
@@ -993,7 +975,7 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	buf := r.bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer r.bufferPool.Put(buf)
-	res, err := r.fileDownloadSvc.DownloadPreviewBuffer(id, c.Get("Range"), buf, userID)
+	res, err := r.fileSvc.DownloadPreviewBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
@@ -1048,7 +1030,7 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	buf := r.bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer r.bufferPool.Put(buf)
-	snapshot, err := r.fileDownloadSvc.DownloadThumbnailBuffer(id, buf, userID)
+	snapshot, err := r.fileSvc.DownloadThumbnailBuffer(id, buf, userID)
 	if err != nil {
 		return err
 	}
@@ -1144,7 +1126,7 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	if !*ok {
 		return errorpkg.NewStorageLimitExceededError()
 	}
-	file, err := r.fileCreateSvc.Create(service.FileCreateOptions{
+	file, err := r.fileSvc.Create(service.FileCreateOptions{
 		Name:        name,
 		Type:        model.FileTypeFile,
 		ParentID:    parentID,
@@ -1153,7 +1135,7 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	file, err = r.fileStoreSvc.Store(file.ID, service.FileStoreOptions{
+	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{
 		S3Reference: &model.S3Reference{
 			Key:         s3Key,
 			Bucket:      s3Bucket,
@@ -1203,7 +1185,7 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	files, err := r.fileFetchSvc.Find([]string{c.Params("id")}, userID)
+	files, err := r.fileSvc.Find([]string{c.Params("id")}, userID)
 	if err != nil {
 		return err
 	}
@@ -1239,7 +1221,7 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 	if !*ok {
 		return errorpkg.NewStorageLimitExceededError()
 	}
-	file, err = r.fileStoreSvc.Store(file.ID, service.FileStoreOptions{
+	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{
 		S3Reference: &model.S3Reference{
 			Key:         s3Key,
 			Bucket:      s3Bucket,

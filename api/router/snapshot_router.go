@@ -19,6 +19,7 @@ import (
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -66,7 +67,7 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.snapshotSvc.List(c.Query("file_id"), *opts, GetUserID(c))
+	res, err := r.snapshotSvc.List(c.Query("file_id"), *opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -91,7 +92,7 @@ func (r *SnapshotRouter) Probe(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.snapshotSvc.Probe(c.Query("file_id"), *opts, GetUserID(c))
+	res, err := r.snapshotSvc.Probe(c.Query("file_id"), *opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -126,11 +127,11 @@ func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotLi
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.snapshotSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.snapshotSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	return &service.SnapshotListOptions{
@@ -153,7 +154,7 @@ func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotLi
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id}/activate [post]
 func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
-	res, err := r.snapshotSvc.Activate(c.Params("id"), GetUserID(c))
+	res, err := r.snapshotSvc.Activate(c.Params("id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -173,7 +174,7 @@ func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id}/detach [post]
 func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
-	if err := r.snapshotSvc.Detach(c.Params("id"), GetUserID(c)); err != nil {
+	if err := r.snapshotSvc.Detach(c.Params("id"), helper.GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

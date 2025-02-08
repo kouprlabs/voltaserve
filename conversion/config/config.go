@@ -46,30 +46,34 @@ type S3Config struct {
 	Secure    bool
 }
 
-var config *Config
-
 func GetConfig() *Config {
-	if config == nil {
+	config := &Config{}
+	readPort(config)
+	readEnableInstaller(config)
+	readURLs(config)
+	readSecurity(config)
+	readS3(config)
+	readLimits(config)
+	return config
+}
+
+func readPort(config *Config) {
+	if len(os.Getenv("PORT")) > 0 {
 		port, err := strconv.Atoi(os.Getenv("PORT"))
+		if err == nil {
+			config.Port = port
+		}
+	}
+}
+
+func readEnableInstaller(config *Config) {
+	if len(os.Getenv("ENABLE_INSTALLER")) > 0 {
+		v, err := strconv.ParseBool(os.Getenv("ENABLE_INSTALLER"))
 		if err != nil {
 			panic(err)
 		}
-		config = &Config{
-			Port: port,
-		}
-		if len(os.Getenv("ENABLE_INSTALLER")) > 0 {
-			v, err := strconv.ParseBool(os.Getenv("ENABLE_INSTALLER"))
-			if err != nil {
-				panic(err)
-			}
-			config.EnableInstaller = v
-		}
-		readURLs(config)
-		readSecurity(config)
-		readS3(config)
-		readLimits(config)
+		config.EnableInstaller = v
 	}
-	return config
 }
 
 func readURLs(config *Config) {

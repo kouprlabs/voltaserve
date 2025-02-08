@@ -24,6 +24,7 @@ import (
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
@@ -39,6 +40,10 @@ func NewInsightsRouter() *InsightsRouter {
 		accessTokenCookieName: "voltaserve_access_token",
 	}
 }
+
+const (
+	InsightsEntityDefaultPageSize = 100
+)
 
 func (r *InsightsRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/languages", r.FindLanguages)
@@ -96,7 +101,7 @@ func (r *InsightsRouter) Create(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.insightsSvc.Create(c.Params("id"), *opts, GetUserID(c))
+	res, err := r.insightsSvc.Create(c.Params("id"), *opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -118,7 +123,7 @@ func (r *InsightsRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id} [patch]
 func (r *InsightsRouter) Patch(c *fiber.Ctx) error {
-	res, err := r.insightsSvc.Patch(c.Params("id"), GetUserID(c))
+	res, err := r.insightsSvc.Patch(c.Params("id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -140,7 +145,7 @@ func (r *InsightsRouter) Patch(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id} [delete]
 func (r *InsightsRouter) Delete(c *fiber.Ctx) error {
-	res, err := r.insightsSvc.Delete(c.Params("id"), GetUserID(c))
+	res, err := r.insightsSvc.Delete(c.Params("id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -169,7 +174,7 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.insightsSvc.ListEntities(c.Params("id"), *opts, GetUserID(c))
+	res, err := r.insightsSvc.ListEntities(c.Params("id"), *opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -194,7 +199,7 @@ func (r *InsightsRouter) ProbeEntities(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.insightsSvc.ProbeEntities(c.Params("id"), *opts, GetUserID(c))
+	res, err := r.insightsSvc.ProbeEntities(c.Params("id"), *opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -225,11 +230,11 @@ func (r *InsightsRouter) parseEntityListQueryParams(c *fiber.Ctx) (*service.Insi
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.insightsSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.insightsSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
@@ -259,7 +264,7 @@ func (r *InsightsRouter) parseEntityListQueryParams(c *fiber.Ctx) (*service.Insi
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id}/info [get]
 func (r *InsightsRouter) ReadInfo(c *fiber.Ctx) error {
-	res, err := r.insightsSvc.ReadInfo(c.Params("id"), GetUserID(c))
+	res, err := r.insightsSvc.ReadInfo(c.Params("id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}

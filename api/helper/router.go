@@ -8,14 +8,15 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package infra
+package helper
 
-import "github.com/gabriel-vasile/mimetype"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
+)
 
-func DetectMIMEFromPath(path string) string {
-	mime, err := mimetype.DetectFile(path)
-	if err != nil {
-		return "application/octet-stream"
-	}
-	return mime.String()
+func GetUserID(c *fiber.Ctx) string {
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	return claims["sub"].(string)
 }

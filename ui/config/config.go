@@ -15,20 +15,20 @@ import (
 	"strconv"
 )
 
-var config *Config
-
 func GetConfig() Config {
-	if config == nil {
-		port, err := strconv.Atoi(os.Getenv("PORT"))
-		if err != nil {
-			panic(err)
-		}
-		config = &Config{
-			Port: port,
-		}
-		readURLs(config)
-	}
+	config := &Config{}
+	readPort(config)
+	readURLs(config)
 	return *config
+}
+
+func readPort(config *Config) {
+	if len(os.Getenv("PORT")) > 0 {
+		port, err := strconv.Atoi(os.Getenv("PORT"))
+		if err == nil {
+			config.Port = port
+		}
+	}
 }
 
 func readURLs(config *Config) {
