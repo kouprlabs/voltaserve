@@ -53,18 +53,18 @@ type FileService struct {
 
 func NewFileService() *FileService {
 	return &FileService{
-		fileCreate:     NewFileCreateService(),
-		fileStore:      NewFileStoreService(),
-		fileDelete:     NewFileDeleteService(),
-		fileMove:       NewFileMoveService(),
-		fileCopy:       NewFileCopyService(),
-		fileDownload:   NewFileDownloadService(),
-		fileFetch:      NewFileFetchService(),
-		fileList:       NewFileListService(),
-		fileReprocess:  NewFileReprocessService(),
-		filePermission: NewFilePermissionService(),
-		fileCompute:    NewFileComputeService(),
-		filePatch:      NewFilePatchService(),
+		fileCreate:     newFileCreate(),
+		fileStore:      newFileStore(),
+		fileDelete:     newFileDelete(),
+		fileMove:       newFileMove(),
+		fileCopy:       newFileCopy(),
+		fileDownload:   newFileDownload(),
+		fileFetch:      newFileFetch(),
+		fileList:       newFileList(),
+		fileReprocess:  newFileReprocess(),
+		filePermission: newFilePermission(),
+		fileCompute:    newFileCompute(),
+		filePatch:      newFilePatch(),
 	}
 }
 
@@ -224,7 +224,7 @@ type fileCreate struct {
 	fileCoreSvc *fileCoreService
 }
 
-func NewFileCreateService() *fileCreate {
+func newFileCreate() *fileCreate {
 	return &fileCreate{
 		fileRepo:    repo.NewFileRepo(),
 		fileSearch:  search.NewFileSearch(),
@@ -355,7 +355,7 @@ type fileFetch struct {
 	workspaceGuard guard.WorkspaceGuard
 }
 
-func NewFileFetchService() *fileFetch {
+func newFileFetch() *fileFetch {
 	return &fileFetch{
 		fileCache:      cache.NewFileCache(),
 		fileRepo:       repo.NewFileRepo(),
@@ -593,7 +593,7 @@ type fileList struct {
 	workspaceGuard guard.WorkspaceGuard
 }
 
-func NewFileListService() *fileList {
+func newFileList() *fileList {
 	return &fileList{
 		fileCache:      cache.NewFileCache(),
 		fileRepo:       repo.NewFileRepo(),
@@ -789,7 +789,7 @@ type fileCompute struct {
 	fileGuard guard.FileGuard
 }
 
-func NewFileComputeService() *fileCompute {
+func newFileCompute() *fileCompute {
 	return &fileCompute{
 		fileCache: cache.NewFileCache(),
 		fileRepo:  repo.NewFileRepo(),
@@ -838,7 +838,7 @@ type fileCopy struct {
 	snapshotRepo repo.SnapshotRepo
 }
 
-func NewFileCopyService() *fileCopy {
+func newFileCopy() *fileCopy {
 	return &fileCopy{
 		fileRepo:     repo.NewFileRepo(),
 		fileSearch:   search.NewFileSearch(),
@@ -1114,7 +1114,7 @@ type fileDelete struct {
 	snapshotSvc    *SnapshotService
 }
 
-func NewFileDeleteService() *fileDelete {
+func newFileDelete() *fileDelete {
 	return &fileDelete{
 		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
@@ -1292,7 +1292,7 @@ type fileDownload struct {
 	s3            infra.S3Manager
 }
 
-func NewFileDownloadService() *fileDownload {
+func newFileDownload() *fileDownload {
 	return &fileDownload{
 		fileCache:     cache.NewFileCache(),
 		fileGuard:     guard.NewFileGuard(),
@@ -1428,7 +1428,7 @@ type fileMove struct {
 	taskSvc     *TaskService
 }
 
-func NewFileMoveService() *fileMove {
+func newFileMove() *fileMove {
 	return &fileMove{
 		fileRepo:    repo.NewFileRepo(),
 		fileSearch:  search.NewFileSearch(),
@@ -1585,7 +1585,7 @@ type filePatch struct {
 	fileMapper  *fileMapper
 }
 
-func NewFilePatchService() *filePatch {
+func newFilePatch() *filePatch {
 	return &filePatch{
 		fileCache:   cache.NewFileCache(),
 		fileRepo:    repo.NewFileRepo(),
@@ -1641,7 +1641,7 @@ type filePermission struct {
 	permissionRepo repo.PermissionRepo
 }
 
-func NewFilePermissionService() *filePermission {
+func newFilePermission() *filePermission {
 	return &filePermission{
 		fileCache:      cache.NewFileCache(),
 		fileRepo:       repo.NewFileRepo(),
@@ -1906,7 +1906,7 @@ type fileReprocess struct {
 	pipelineClient *conversion_client.PipelineClient
 }
 
-func NewFileReprocessService() *fileReprocess {
+func newFileReprocess() *fileReprocess {
 	return &fileReprocess{
 		fileCache:      cache.NewFileCache(),
 		fileRepo:       repo.NewFileRepo(),
@@ -2072,7 +2072,7 @@ type fileStore struct {
 	pipelineClient *conversion_client.PipelineClient
 }
 
-func NewFileStoreService() *fileStore {
+func newFileStore() *fileStore {
 	return &fileStore{
 		fileCache:      cache.NewFileCache(),
 		fileCoreSvc:    newFileCoreService(),

@@ -112,7 +112,7 @@ func createWorkspace(orgID string, userID string) (*service.Workspace, string, e
 }
 
 func createFile(workspaceID string, workspaceRootID string, userID string) (*service.File, error) {
-	file, err := service.NewFileCreateService().Create(service.FileCreateOptions{
+	file, err := service.NewFileService().Create(service.FileCreateOptions{
 		WorkspaceID: workspaceID,
 		Name:        "workspace",
 		Type:        model.FileTypeFile,
@@ -136,7 +136,7 @@ func uploadFile(path string, size int64, bucket string, fileID string, snapshotI
 	if err := s3Manager.PutFile(s3Reference.Key, path, s3Reference.ContentType, s3Reference.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	res, err := service.NewFileStoreService().Store(fileID, service.FileStoreOptions{S3Reference: s3Reference}, userID)
+	res, err := service.NewFileService().Store(fileID, service.FileStoreOptions{S3Reference: s3Reference}, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func uploadFile(path string, size int64, bucket string, fileID string, snapshotI
 
 func downloadFile(fileID string, userID string) (*service.DownloadResult, string, error) {
 	buf := new(bytes.Buffer)
-	res, err := service.NewFileDownloadService().DownloadOriginalBuffer(fileID, "", buf, userID)
+	res, err := service.NewFileService().DownloadOriginalBuffer(fileID, "", buf, userID)
 	if err != nil {
 		return nil, "", err
 	}
