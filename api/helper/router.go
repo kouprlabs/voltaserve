@@ -8,22 +8,15 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package service
+package helper
 
-const (
-	SortByEmail        = "email"
-	SortByFullName     = "full_name"
-	SortByName         = "name"
-	SortByKind         = "kind"
-	SortBySize         = "size"
-	SortByVersion      = "version"
-	SortByFrequency    = "frequency"
-	SortByStatus       = "status"
-	SortByDateCreated  = "date_created"
-	SortByDateModified = "date_modified"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-const (
-	SortOrderAsc  = "asc"
-	SortOrderDesc = "desc"
-)
+func GetUserID(c *fiber.Ctx) string {
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	return claims["sub"].(string)
+}

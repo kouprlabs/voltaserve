@@ -11,6 +11,7 @@
 package service
 
 import (
+	"path/filepath"
 	"sort"
 	"time"
 
@@ -31,12 +32,12 @@ import (
 type SnapshotService struct {
 	snapshotRepo   repo.SnapshotRepo
 	snapshotCache  cache.SnapshotCache
-	snapshotMapper SnapshotMapper
+	snapshotMapper *snapshotMapper
 	fileCache      cache.FileCache
 	fileGuard      guard.FileGuard
 	fileRepo       repo.FileRepo
 	fileSearch     search.FileSearch
-	fileMapper     FileMapper
+	fileMapper     *fileMapper
 	taskRepo       repo.TaskRepo
 	taskCache      cache.TaskCache
 	s3             infra.S3Manager
@@ -58,6 +59,60 @@ func NewSnapshotService() *SnapshotService {
 		s3:             infra.NewS3Manager(),
 		config:         config.GetConfig(),
 	}
+}
+
+type Snapshot struct {
+	ID         string            `json:"id"`
+	Version    int64             `json:"version"`
+	Original   *Download         `json:"original,omitempty"`
+	Preview    *Download         `json:"preview,omitempty"`
+	OCR        *Download         `json:"ocr,omitempty"`
+	Text       *Download         `json:"text,omitempty"`
+	Entities   *Download         `json:"entities,omitempty"`
+	Mosaic     *Download         `json:"mosaic,omitempty"`
+	Thumbnail  *Download         `json:"thumbnail,omitempty"`
+	Language   *string           `json:"language,omitempty"`
+	Status     string            `json:"status,omitempty"`
+	IsActive   bool              `json:"isActive"`
+	Task       *SnapshotTaskInfo `json:"task,omitempty"`
+	CreateTime string            `json:"createTime"`
+	UpdateTime *string           `json:"updateTime,omitempty"`
+}
+
+const (
+	SnapshotSortByVersion      = "version"
+	SnapshotSortByDateCreated  = "date_created"
+	SnapshotSortByDateModified = "date_modified"
+)
+
+const (
+	SnapshotSortOrderAsc  = "asc"
+	SnapshotSortOrderDesc = "desc"
+)
+
+type Download struct {
+	Extension string               `json:"extension,omitempty"`
+	Size      *int64               `json:"size,omitempty"`
+	Image     *model.ImageProps    `json:"image,omitempty"`
+	Document  *model.DocumentProps `json:"document,omitempty"`
+}
+
+type SnapshotTaskInfo struct {
+	ID        string `json:"id"`
+	IsPending bool   `json:"isPending"`
+}
+
+type SnapshotList struct {
+	Data          []*Snapshot `json:"data"`
+	TotalPages    uint64      `json:"totalPages"`
+	TotalElements uint64      `json:"totalElements"`
+	Page          uint64      `json:"page"`
+	Size          uint64      `json:"size"`
+}
+
+type SnapshotProbe struct {
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 type SnapshotListOptions struct {
@@ -208,6 +263,17 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 
+func (svc *SnapshotService) IsValidSortBy(value string) bool {
+	return value == "" ||
+		value == SnapshotSortByVersion ||
+		value == SnapshotSortByDateCreated ||
+		value == SnapshotSortByDateModified
+}
+
+func (svc *SnapshotService) IsValidSortOrder(value string) bool {
+	return value == "" || value == SnapshotSortOrderAsc || value == SnapshotSortOrderDesc
+}
+
 func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, userID string) ([]model.Snapshot, model.File, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
@@ -220,10 +286,10 @@ func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, use
 		return nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
+		opts.SortBy = SnapshotSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
+		opts.SortOrder = SnapshotSortOrderAsc
 	}
 	ids, err := svc.snapshotRepo.FindIDsByFile(fileID)
 	if err != nil {
@@ -242,32 +308,32 @@ func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, use
 }
 
 func (svc *SnapshotService) sort(data []model.Snapshot, sortBy string, sortOrder string) []model.Snapshot {
-	if sortBy == SortByVersion {
+	if sortBy == SnapshotSortByVersion {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
+			if sortOrder == SnapshotSortOrderDesc {
 				return data[i].GetVersion() > data[j].GetVersion()
 			} else {
 				return data[i].GetVersion() < data[j].GetVersion()
 			}
 		})
 		return data
-	} else if sortBy == SortByDateCreated {
+	} else if sortBy == SnapshotSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
 			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
-			if sortOrder == SortOrderDesc {
+			if sortOrder == SnapshotSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == SortByDateModified {
+	} else if sortBy == SnapshotSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
 				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
-				if sortOrder == SortOrderDesc {
+				if sortOrder == SnapshotSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -433,4 +499,83 @@ func isTaskPending(snapshot model.Snapshot, taskCache cache.TaskCache) (bool, er
 		}
 	}
 	return false, nil
+}
+
+type snapshotMapper struct {
+	taskCache cache.TaskCache
+}
+
+func newSnapshotMapper() *snapshotMapper {
+	return &snapshotMapper{
+		taskCache: cache.NewTaskCache(),
+	}
+}
+
+func (mp *snapshotMapper) mapOne(m model.Snapshot) *Snapshot {
+	s := &Snapshot{
+		ID:         m.GetID(),
+		Version:    m.GetVersion(),
+		Status:     m.GetStatus(),
+		Language:   m.GetLanguage(),
+		CreateTime: m.GetCreateTime(),
+		UpdateTime: m.GetUpdateTime(),
+	}
+	if m.HasOriginal() {
+		s.Original = mp.mapS3Object(m.GetOriginal())
+	}
+	if m.HasPreview() {
+		s.Preview = mp.mapS3Object(m.GetPreview())
+	}
+	if m.HasOCR() {
+		s.OCR = mp.mapS3Object(m.GetOCR())
+	}
+	if m.HasText() {
+		s.Text = mp.mapS3Object(m.GetText())
+	}
+	if m.HasEntities() {
+		s.Entities = mp.mapS3Object(m.GetEntities())
+	}
+	if m.HasMosaic() {
+		s.Mosaic = mp.mapS3Object(m.GetMosaic())
+	}
+	if m.HasThumbnail() {
+		s.Thumbnail = mp.mapS3Object(m.GetThumbnail())
+	}
+	if m.GetTaskID() != nil {
+		s.Task = &SnapshotTaskInfo{
+			ID: *m.GetTaskID(),
+		}
+		isPending, err := isTaskPending(m, mp.taskCache)
+		if err != nil {
+			log.GetLogger().Error(err)
+		} else {
+			s.Task.IsPending = isPending
+		}
+	}
+
+	return s
+}
+
+func (mp *snapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) []*Snapshot {
+	res := make([]*Snapshot, 0)
+	for _, snapshot := range snapshots {
+		s := mp.mapOne(snapshot)
+		s.IsActive = activeID == snapshot.GetID()
+		res = append(res, s)
+	}
+	return res
+}
+
+func (mp *snapshotMapper) mapS3Object(o *model.S3Object) *Download {
+	download := &Download{
+		Extension: filepath.Ext(o.Key),
+		Size:      o.Size,
+	}
+	if o.Image != nil {
+		download.Image = o.Image
+	}
+	if o.Document != nil {
+		download.Document = o.Document
+	}
+	return download
 }

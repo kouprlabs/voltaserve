@@ -19,6 +19,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -31,6 +32,10 @@ func NewWorkspaceRouter() *WorkspaceRouter {
 		workspaceSvc: service.NewWorkspaceService(),
 	}
 }
+
+const (
+	WorkspaceDefaultPageSize = 100
+)
 
 func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
@@ -56,7 +61,7 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces [post]
 func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
-	userID := GetUserID(c)
+	userID := helper.GetUserID(c)
 	opts := new(service.WorkspaceCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -84,7 +89,7 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [get]
 func (r *WorkspaceRouter) Find(c *fiber.Ctx) error {
-	res, err := r.workspaceSvc.Find(c.Params("id"), GetUserID(c))
+	res, err := r.workspaceSvc.Find(c.Params("id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -112,7 +117,7 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.List(*opts, GetUserID(c))
+	res, err := r.workspaceSvc.List(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -136,7 +141,7 @@ func (r *WorkspaceRouter) Probe(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.Probe(*opts, GetUserID(c))
+	res, err := r.workspaceSvc.Probe(*opts, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -167,11 +172,11 @@ func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*service.Workspace
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
+	if !r.workspaceSvc.IsValidSortBy(sortBy) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
+	if !r.workspaceSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
@@ -210,7 +215,7 @@ func (r *WorkspaceRouter) PatchName(c *fiber.Ctx) error {
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.PatchName(c.Params("id"), opts.Name, GetUserID(c))
+	res, err := r.workspaceSvc.PatchName(c.Params("id"), opts.Name, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -240,7 +245,7 @@ func (r *WorkspaceRouter) PatchStorageCapacity(c *fiber.Ctx) error {
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.PatchStorageCapacity(c.Params("id"), opts.StorageCapacity, GetUserID(c))
+	res, err := r.workspaceSvc.PatchStorageCapacity(c.Params("id"), opts.StorageCapacity, helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -260,7 +265,7 @@ func (r *WorkspaceRouter) PatchStorageCapacity(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [delete]
 func (r *WorkspaceRouter) Delete(c *fiber.Ctx) error {
-	err := r.workspaceSvc.Delete(c.Params("id"), GetUserID(c))
+	err := r.workspaceSvc.Delete(c.Params("id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}

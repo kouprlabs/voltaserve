@@ -31,15 +31,15 @@ type OrganizationService struct {
 	orgRepo        repo.OrganizationRepo
 	orgCache       cache.OrganizationCache
 	orgGuard       guard.OrganizationGuard
-	orgMapper      OrganizationMapper
+	orgMapper      *organizationMapper
 	orgSearch      search.OrganizationSearch
 	userSearch     search.UserSearch
-	userMapper     UserMapper
+	userMapper     *userMapper
 	userRepo       repo.UserRepo
 	groupCache     cache.GroupCache
 	groupRepo      repo.GroupRepo
 	groupService   *GroupService
-	groupMapper    GroupMapper
+	groupMapper    *groupMapper
 	workspaceCache cache.WorkspaceCache
 	workspaceRepo  repo.WorkspaceRepo
 	config         *config.Config
@@ -63,6 +63,39 @@ func NewOrganizationService() *OrganizationService {
 		workspaceRepo:  repo.NewWorkspaceRepo(),
 		config:         config.GetConfig(),
 	}
+}
+
+type Organization struct {
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Image      *string `json:"image,omitempty"`
+	Permission string  `json:"permission"`
+	CreateTime string  `json:"createTime"`
+	UpdateTime *string `json:"updateTime,omitempty"`
+}
+
+const (
+	OrganizationSortByName         = "name"
+	OrganizationSortByDateCreated  = "date_created"
+	OrganizationSortByDateModified = "date_modified"
+)
+
+const (
+	OrganizationSortOrderAsc  = "asc"
+	OrganizationSortOrderDesc = "desc"
+)
+
+type OrganizationList struct {
+	Data          []*Organization `json:"data"`
+	TotalPages    uint64          `json:"totalPages"`
+	TotalElements uint64          `json:"totalElements"`
+	Page          uint64          `json:"page"`
+	Size          uint64          `json:"size"`
+}
+
+type OrganizationProbe struct {
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 type OrganizationCreateOptions struct {
@@ -124,10 +157,10 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
+		opts.SortBy = OrganizationSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
+		opts.SortOrder = OrganizationSortOrderAsc
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -219,6 +252,17 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return err
 	}
 	return nil
+}
+
+func (svc *OrganizationService) IsValidSortBy(value string) bool {
+	return value == "" ||
+		value == OrganizationSortByName ||
+		value == OrganizationSortByDateCreated ||
+		value == OrganizationSortByDateModified
+}
+
+func (svc *OrganizationService) IsValidSortOrder(value string) bool {
+	return value == "" || value == OrganizationSortOrderAsc || value == OrganizationSortOrderDesc
 }
 
 func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
@@ -344,32 +388,32 @@ func (svc *OrganizationService) authorizeIDs(ids []string, userID string) ([]mod
 }
 
 func (svc *OrganizationService) sort(data []model.Organization, sortBy string, sortOrder string) []model.Organization {
-	if sortBy == SortByName {
+	if sortBy == OrganizationSortByName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
+			if sortOrder == OrganizationSortOrderDesc {
 				return data[i].GetName() > data[j].GetName()
 			} else {
 				return data[i].GetName() < data[j].GetName()
 			}
 		})
 		return data
-	} else if sortBy == SortByDateCreated {
+	} else if sortBy == OrganizationSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
 			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
-			if sortOrder == SortOrderDesc {
+			if sortOrder == OrganizationSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == SortByDateModified {
+	} else if sortBy == OrganizationSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
 				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
-				if sortOrder == SortOrderDesc {
+				if sortOrder == OrganizationSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -405,4 +449,58 @@ func (svc *OrganizationService) sync(org model.Organization) error {
 		return err
 	}
 	return nil
+}
+
+type organizationMapper struct {
+	groupCache cache.GroupCache
+}
+
+func newOrganizationMapper() *organizationMapper {
+	return &organizationMapper{
+		groupCache: cache.NewGroupCache(),
+	}
+}
+
+func (mp *organizationMapper) mapOne(m model.Organization, userID string) (*Organization, error) {
+	res := &Organization{
+		ID:         m.GetID(),
+		Name:       m.GetName(),
+		CreateTime: m.GetCreateTime(),
+		UpdateTime: m.GetUpdateTime(),
+	}
+	res.Permission = model.PermissionNone
+	for _, p := range m.GetUserPermissions() {
+		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+			res.Permission = p.GetValue()
+		}
+	}
+	for _, p := range m.GetGroupPermissions() {
+		g, err := mp.groupCache.Get(p.GetGroupID())
+		if err != nil {
+			return nil, err
+		}
+		for _, u := range g.GetMembers() {
+			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+				res.Permission = p.GetValue()
+			}
+		}
+	}
+	return res, nil
+}
+
+func (mp *organizationMapper) mapMany(orgs []model.Organization, userID string) ([]*Organization, error) {
+	res := make([]*Organization, 0)
+	for _, org := range orgs {
+		o, err := mp.mapOne(org, userID)
+		if err != nil {
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+		res = append(res, o)
+	}
+	return res, nil
 }

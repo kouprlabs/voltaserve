@@ -38,8 +38,8 @@ type InsightsService struct {
 	snapshotSvc    *SnapshotService
 	fileCache      cache.FileCache
 	fileGuard      guard.FileGuard
-	taskSvc        TaskService
-	taskMapper     TaskMapper
+	taskSvc        *TaskService
+	taskMapper     *taskMapper
 	s3             infra.S3Manager
 	languageClient *language_client.LanguageClient
 	pipelineClient *conversion_client.PipelineClient
@@ -80,6 +80,16 @@ func NewInsightsService() *InsightsService {
 		fileIdent:      infra.NewFileIdentifier(),
 	}
 }
+
+const (
+	InsightsEntitiesSortByName      = "name"
+	InsightsEntitiesSortByFrequency = "frequency"
+)
+
+const (
+	InsightsEntitiesSortOrderAsc  = "asc"
+	InsightsEntitiesSortOrderDesc = "desc"
+)
 
 type InsightsLanguage struct {
 	ID      string `json:"id"`
@@ -292,7 +302,7 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = SortByName
+		opts.SortBy = InsightsEntitiesSortByName
 	}
 	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
 	data, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
@@ -430,6 +440,16 @@ func (svc *InsightsService) DownloadOCRBuffer(id string, userID string) (*bytes.
 	}
 }
 
+func (svc *InsightsService) IsValidSortBy(value string) bool {
+	return value == "" ||
+		value == InsightsEntitiesSortByName ||
+		value == InsightsEntitiesSortByFrequency
+}
+
+func (svc *InsightsService) IsValidSortOrder(value string) bool {
+	return value == "" || value == InsightsEntitiesSortOrderAsc || value == InsightsEntitiesSortOrderDesc
+}
+
 func (svc *InsightsService) runPipeline(snapshot model.Snapshot, task model.Task) error {
 	key := snapshot.GetOriginal().Key
 	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
@@ -544,16 +564,16 @@ func (svc *InsightsService) doFiltering(data []*language_client.InsightsEntity, 
 }
 
 func (svc *InsightsService) doSorting(data []*language_client.InsightsEntity, sortBy string, sortOrder string) []*language_client.InsightsEntity {
-	if sortBy == SortByName {
+	if sortBy == InsightsEntitiesSortByName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
+			if sortOrder == InsightsEntitiesSortOrderDesc {
 				return data[i].Text > data[j].Text
 			} else {
 				return data[i].Text < data[j].Text
 			}
 		})
 		return data
-	} else if sortBy == SortByFrequency {
+	} else if sortBy == InsightsEntitiesSortByFrequency {
 		sort.Slice(data, func(i, j int) bool {
 			return data[i].Frequency > data[j].Frequency
 		})

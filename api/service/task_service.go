@@ -26,27 +26,8 @@ import (
 	"github.com/kouprlabs/voltaserve/api/search"
 )
 
-type TaskService interface {
-	Create(opts TaskCreateOptions) (*Task, error)
-	Patch(id string, opts TaskPatchOptions) (*Task, error)
-	Find(id string, userID string) (*Task, error)
-	List(opts TaskListOptions, userID string) (*TaskList, error)
-	Probe(opts TaskListOptions, userID string) (*TaskProbe, error)
-	Dismiss(id string, userID string) error
-	DismissAll(userID string) (*TaskDismissAllResult, error)
-	Delete(id string) error
-	Count(userID string) (*int64, error)
-	insertAndSync(opts repo.TaskInsertOptions) (model.Task, error)
-	saveAndSync(task model.Task) error
-	deleteAndSync(id string) error
-}
-
-func NewTaskService() TaskService {
-	return newTaskService()
-}
-
-type taskService struct {
-	taskMapper    TaskMapper
+type TaskService struct {
+	taskMapper    *taskMapper
 	taskCache     cache.TaskCache
 	taskSearch    search.TaskSearch
 	taskRepo      repo.TaskRepo
@@ -56,8 +37,8 @@ type taskService struct {
 	fileCache     cache.FileCache
 }
 
-func newTaskService() *taskService {
-	return &taskService{
+func NewTaskService() *TaskService {
+	return &TaskService{
 		taskMapper:    newTaskMapper(),
 		taskCache:     cache.NewTaskCache(),
 		taskSearch:    search.NewTaskSearch(),
@@ -69,6 +50,31 @@ func newTaskService() *taskService {
 	}
 }
 
+type Task struct {
+	ID              string            `json:"id"`
+	Name            string            `json:"name"`
+	Error           *string           `json:"error,omitempty"`
+	Percentage      *int              `json:"percentage,omitempty"`
+	IsIndeterminate bool              `json:"isIndeterminate"`
+	UserID          string            `json:"userId"`
+	Status          string            `json:"status"`
+	Payload         map[string]string `json:"payload,omitempty"`
+	CreateTime      string            `json:"createTime"`
+	UpdateTime      *string           `json:"updateTime,omitempty"`
+}
+
+const (
+	TaskSortByName         = "name"
+	TaskSortByStatus       = "status"
+	TaskSortByDateCreated  = "date_created"
+	TaskSortByDateModified = "date_modified"
+)
+
+const (
+	TaskSortOrderAsc  = "asc"
+	TaskSortOrderDesc = "desc"
+)
+
 type TaskCreateOptions struct {
 	Name            string            `json:"name"`
 	Error           *string           `json:"error,omitempty"`
@@ -79,7 +85,7 @@ type TaskCreateOptions struct {
 	Payload         map[string]string `json:"payload,omitempty"`
 }
 
-func (svc *taskService) Create(opts TaskCreateOptions) (*Task, error) {
+func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
 	task, err := svc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            opts.Name,
@@ -120,7 +126,7 @@ const (
 	TaskFieldPayload         = "payload"
 )
 
-func (svc *taskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
+func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -156,7 +162,7 @@ func (svc *taskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	return res, nil
 }
 
-func (svc *taskService) Find(id string, userID string) (*Task, error) {
+func (svc *TaskService) Find(id string, userID string) (*Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -171,6 +177,14 @@ func (svc *taskService) Find(id string, userID string) (*Task, error) {
 	return res, nil
 }
 
+type TaskList struct {
+	Data          []*Task `json:"data"`
+	TotalPages    uint64  `json:"totalPages"`
+	TotalElements uint64  `json:"totalElements"`
+	Page          uint64  `json:"page"`
+	Size          uint64  `json:"size"`
+}
+
 type TaskListOptions struct {
 	Query     string
 	Page      uint64
@@ -179,16 +193,16 @@ type TaskListOptions struct {
 	SortOrder string
 }
 
-func (svc *taskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
+func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
+		opts.SortBy = TaskSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
+		opts.SortOrder = TaskSortOrderAsc
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -205,7 +219,12 @@ func (svc *taskService) List(opts TaskListOptions, userID string) (*TaskList, er
 	}, nil
 }
 
-func (svc *taskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, error) {
+type TaskProbe struct {
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
+}
+
+func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -217,7 +236,19 @@ func (svc *taskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, 
 	}, nil
 }
 
-func (svc *taskService) findAll(opts TaskListOptions, userID string) ([]model.Task, error) {
+func (svc *TaskService) IsValidSortBy(value string) bool {
+	return value == "" ||
+		value == TaskSortByName ||
+		value == TaskSortByStatus ||
+		value == TaskSortByDateCreated ||
+		value == TaskSortByDateModified
+}
+
+func (svc *TaskService) IsValidSortOrder(value string) bool {
+	return value == "" || value == TaskSortOrderAsc || value == TaskSortOrderDesc
+}
+
+func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Task, error) {
 	var res []model.Task
 	if opts.Query == "" {
 		ids, err := svc.taskRepo.FindIDs(userID)
@@ -255,7 +286,7 @@ func (svc *taskService) findAll(opts TaskListOptions, userID string) ([]model.Ta
 	return res, nil
 }
 
-func (svc *taskService) Count(userID string) (*int64, error) {
+func (svc *TaskService) Count(userID string) (*int64, error) {
 	var res int64
 	var err error
 	if res, err = svc.taskRepo.CountByEmail(userID); err != nil {
@@ -264,7 +295,7 @@ func (svc *taskService) Count(userID string) (*int64, error) {
 	return &res, nil
 }
 
-func (svc *taskService) Dismiss(id string, userID string) error {
+func (svc *TaskService) Dismiss(id string, userID string) error {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return err
@@ -283,7 +314,7 @@ type TaskDismissAllResult struct {
 	Failed    []string `json:"failed"`
 }
 
-func (svc *taskService) DismissAll(userID string) (*TaskDismissAllResult, error) {
+func (svc *TaskService) DismissAll(userID string) (*TaskDismissAllResult, error) {
 	ids, err := svc.taskRepo.FindIDs(userID)
 	if err != nil {
 		return nil, err
@@ -308,11 +339,11 @@ func (svc *taskService) DismissAll(userID string) (*TaskDismissAllResult, error)
 	return &res, nil
 }
 
-func (svc *taskService) Delete(id string) error {
+func (svc *TaskService) Delete(id string) error {
 	return svc.deleteAndSync(id)
 }
 
-func (svc *taskService) authorize(data []model.Task, userID string) ([]model.Task, error) {
+func (svc *TaskService) authorize(data []model.Task, userID string) ([]model.Task, error) {
 	var res []model.Task
 	for _, t := range data {
 		if t.GetUserID() == userID {
@@ -322,7 +353,7 @@ func (svc *taskService) authorize(data []model.Task, userID string) ([]model.Tas
 	return res, nil
 }
 
-func (svc *taskService) authorizeIDs(ids []string, userID string) ([]model.Task, error) {
+func (svc *TaskService) authorizeIDs(ids []string, userID string) ([]model.Task, error) {
 	var res []model.Task
 	for _, id := range ids {
 		var t model.Task
@@ -342,42 +373,42 @@ func (svc *taskService) authorizeIDs(ids []string, userID string) ([]model.Task,
 	return res, nil
 }
 
-func (svc *taskService) sort(data []model.Task, sortBy string, sortOrder string) []model.Task {
-	if sortBy == SortByName {
+func (svc *TaskService) sort(data []model.Task, sortBy string, sortOrder string) []model.Task {
+	if sortBy == TaskSortByName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
+			if sortOrder == TaskSortOrderDesc {
 				return data[i].GetName() > data[j].GetName()
 			} else {
 				return data[i].GetName() < data[j].GetName()
 			}
 		})
 		return data
-	} else if sortBy == SortByStatus {
+	} else if sortBy == TaskSortByStatus {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
+			if sortOrder == TaskSortOrderDesc {
 				return data[i].GetStatus() == model.TaskStatusRunning && data[j].GetStatus() != model.TaskStatusRunning
 			} else {
 				return data[i].GetStatus() == model.TaskStatusWaiting && data[j].GetStatus() != model.TaskStatusWaiting
 			}
 		})
 		return data
-	} else if sortBy == SortByDateCreated {
+	} else if sortBy == TaskSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
 			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
-			if sortOrder == SortOrderDesc {
+			if sortOrder == TaskSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == SortByDateModified {
+	} else if sortBy == TaskSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
 				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
-				if sortOrder == SortOrderDesc {
+				if sortOrder == TaskSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -391,7 +422,7 @@ func (svc *taskService) sort(data []model.Task, sortBy string, sortOrder string)
 	return data
 }
 
-func (svc *taskService) paginate(data []model.Task, page, size uint64) (pageData []model.Task, totalElements uint64, totalPages uint64) {
+func (svc *TaskService) paginate(data []model.Task, page, size uint64) (pageData []model.Task, totalElements uint64, totalPages uint64) {
 	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
@@ -405,7 +436,7 @@ func (svc *taskService) paginate(data []model.Task, page, size uint64) (pageData
 	return data[startIndex:endIndex], totalElements, totalPages
 }
 
-func (svc *taskService) insertAndSync(opts repo.TaskInsertOptions) (model.Task, error) {
+func (svc *TaskService) insertAndSync(opts repo.TaskInsertOptions) (model.Task, error) {
 	task, err := svc.taskRepo.Insert(opts)
 	if err != nil {
 		return nil, err
@@ -419,7 +450,7 @@ func (svc *taskService) insertAndSync(opts repo.TaskInsertOptions) (model.Task, 
 	return task, nil
 }
 
-func (svc *taskService) saveAndSync(task model.Task) error {
+func (svc *TaskService) saveAndSync(task model.Task) error {
 	if err := svc.taskRepo.Save(task); err != nil {
 		return nil
 	}
@@ -432,7 +463,7 @@ func (svc *taskService) saveAndSync(task model.Task) error {
 	return nil
 }
 
-func (svc *taskService) deleteAndSync(id string) error {
+func (svc *TaskService) deleteAndSync(id string) error {
 	snapshots, err := svc.snapshotRepo.FindAllForTask(id)
 	if err != nil {
 		return err
@@ -469,4 +500,46 @@ func (svc *taskService) deleteAndSync(id string) error {
 		return err
 	}
 	return nil
+}
+
+type taskMapper struct {
+	groupCache cache.TaskCache
+}
+
+func newTaskMapper() *taskMapper {
+	return &taskMapper{
+		groupCache: cache.NewTaskCache(),
+	}
+}
+
+func (mp *taskMapper) mapOne(m model.Task) (*Task, error) {
+	return &Task{
+		ID:              m.GetID(),
+		Name:            m.GetName(),
+		Error:           m.GetError(),
+		Percentage:      m.GetPercentage(),
+		IsIndeterminate: m.GetIsIndeterminate(),
+		UserID:          m.GetUserID(),
+		Status:          m.GetStatus(),
+		Payload:         m.GetPayload(),
+		CreateTime:      m.GetCreateTime(),
+		UpdateTime:      m.GetUpdateTime(),
+	}, nil
+}
+
+func (mp *taskMapper) mapMany(tasks []model.Task) ([]*Task, error) {
+	res := make([]*Task, 0)
+	for _, task := range tasks {
+		t, err := mp.mapOne(task)
+		if err != nil {
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewTaskNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+		res = append(res, t)
+	}
+	return res, nil
 }

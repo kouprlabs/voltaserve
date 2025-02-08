@@ -23,6 +23,7 @@ import (
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
@@ -63,7 +64,7 @@ func (r *MosaicRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{id} [post]
 func (r *MosaicRouter) Create(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.Create(c.Params("id"), GetUserID(c))
+	res, err := r.mosaicSvc.Create(c.Params("id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -84,7 +85,7 @@ func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{id} [delete]
 func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.Delete(c.Params("id"), GetUserID(c))
+	res, err := r.mosaicSvc.Delete(c.Params("id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -105,7 +106,7 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{id}/info [get]
 func (r *MosaicRouter) ReadInfo(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.ReadInfo(c.Params("id"), GetUserID(c))
+	res, err := r.mosaicSvc.ReadInfo(c.Params("id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}

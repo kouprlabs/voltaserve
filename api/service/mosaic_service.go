@@ -32,8 +32,8 @@ type MosaicService struct {
 	snapshotSvc    *SnapshotService
 	fileCache      cache.FileCache
 	fileGuard      guard.FileGuard
-	taskSvc        TaskService
-	taskMapper     TaskMapper
+	taskSvc        *TaskService
+	taskMapper     *taskMapper
 	s3             infra.S3Manager
 	mosaicClient   *mosaic_client.MosaicClient
 	pipelineClient *conversion_client.PipelineClient
@@ -138,6 +138,13 @@ func (svc *MosaicService) Delete(id string, userID string) (*Task, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+type MosaicInfo struct {
+	IsAvailable bool                          `json:"isAvailable"`
+	IsOutdated  bool                          `json:"isOutdated"`
+	Snapshot    *Snapshot                     `json:"snapshot,omitempty"`
+	Metadata    *mosaic_client.MosaicMetadata `json:"metadata,omitempty"`
 }
 
 func (svc *MosaicService) ReadInfo(id string, userID string) (*MosaicInfo, error) {

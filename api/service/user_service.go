@@ -26,7 +26,7 @@ import (
 )
 
 type UserService struct {
-	userMapper     UserMapper
+	userMapper     *userMapper
 	userRepo       repo.UserRepo
 	userSearch     search.UserSearch
 	orgRepo        repo.OrganizationRepo
@@ -55,6 +55,40 @@ func NewUserService() *UserService {
 	}
 }
 
+type User struct {
+	ID         string   `json:"id"`
+	FullName   string   `json:"fullName"`
+	Picture    *Picture `json:"picture,omitempty"`
+	Email      string   `json:"email"`
+	Username   string   `json:"username"`
+	CreateTime string   `json:"createTime"`
+	UpdateTime *string  `json:"updateTime"`
+}
+
+const (
+	UserSortByEmail        = "email"
+	UserSortByFullName     = "full_name"
+	UserSortByDateCreated  = "date_created"
+	UserSortByDateModified = "date_modified"
+)
+
+const (
+	UserSortOrderAsc  = "asc"
+	UserSortOrderDesc = "desc"
+)
+
+type Picture struct {
+	Extension string `json:"extension"`
+}
+
+type UserList struct {
+	Data          []*User `json:"data"`
+	TotalPages    uint64  `json:"totalPages"`
+	TotalElements uint64  `json:"totalElements"`
+	Page          uint64  `json:"page"`
+	Size          uint64  `json:"size"`
+}
+
 type UserListOptions struct {
 	Query               string
 	OrganizationID      string
@@ -73,10 +107,10 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
+		opts.SortBy = UserSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
+		opts.SortOrder = UserSortOrderAsc
 	}
 	sorted := svc.sort(users, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -91,6 +125,11 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 		Page:          opts.Page,
 		Size:          uint64(len(mapped)),
 	}, nil
+}
+
+type UserProbe struct {
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *UserService) Probe(opts UserListOptions, userID string) (*UserProbe, error) {
@@ -126,6 +165,18 @@ func (svc *UserService) ExtractPicture(id string, justification ExtractPictureJu
 		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
 	}
 	return b, &ext, &mime, nil
+}
+
+func (svc *UserService) IsValidSortBy(value string) bool {
+	return value == "" ||
+		value == UserSortByEmail ||
+		value == UserSortByFullName ||
+		value == UserSortByDateCreated ||
+		value == UserSortByDateModified
+}
+
+func (svc *UserService) IsValidSortOrder(value string) bool {
+	return value == "" || value == UserSortOrderAsc || value == UserSortOrderDesc
 }
 
 func (svc *UserService) findAll(opts UserListOptions, userID string) ([]model.User, error) {
@@ -248,18 +299,18 @@ func (svc *UserService) search(opts UserListOptions) ([]model.User, error) {
 }
 
 func (svc *UserService) sort(data []model.User, sortBy string, sortOrder string) []model.User {
-	if sortBy == SortByEmail {
+	if sortBy == UserSortByEmail {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
+			if sortOrder == UserSortOrderDesc {
 				return data[i].GetEmail() > data[j].GetEmail()
 			} else {
 				return data[i].GetEmail() < data[j].GetEmail()
 			}
 		})
 		return data
-	} else if sortBy == SortByFullName {
+	} else if sortBy == UserSortByFullName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SortOrderDesc {
+			if sortOrder == UserSortOrderDesc {
 				return data[i].GetFullName() > data[j].GetFullName()
 			} else {
 				return data[i].GetFullName() < data[j].GetFullName()
@@ -327,4 +378,35 @@ func (svc *UserService) findUserForPicture(id string, justification ExtractPictu
 		}
 	}
 	return user, nil
+}
+
+type userMapper struct{}
+
+func newUserMapper() *userMapper {
+	return &userMapper{}
+}
+
+func (mp *userMapper) mapOne(user model.User) *User {
+	res := &User{
+		ID:         user.GetID(),
+		FullName:   user.GetFullName(),
+		Email:      user.GetEmail(),
+		Username:   user.GetUsername(),
+		CreateTime: user.GetCreateTime(),
+		UpdateTime: user.GetUpdateTime(),
+	}
+	if user.GetPicture() != nil {
+		res.Picture = &Picture{
+			Extension: helper.Base64ToExtension(*user.GetPicture()),
+		}
+	}
+	return res
+}
+
+func (mp *userMapper) mapMany(users []model.User) ([]*User, error) {
+	res := make([]*User, 0)
+	for _, user := range users {
+		res = append(res, mp.mapOne(user))
+	}
+	return res, nil
 }
