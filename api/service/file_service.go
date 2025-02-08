@@ -95,31 +95,31 @@ const (
 )
 
 func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, error) {
-	return svc.fileCreate.Create(opts, userID)
+	return svc.fileCreate.create(opts, userID)
 }
 
 func (svc *FileService) Find(ids []string, userID string) ([]*File, error) {
-	return svc.fileFetch.Find(ids, userID)
+	return svc.fileFetch.find(ids, userID)
 }
 
 func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
-	return svc.fileFetch.FindByPath(path, userID)
+	return svc.fileFetch.findByPath(path, userID)
 }
 
 func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) {
-	return svc.fileFetch.ListByPath(path, userID)
+	return svc.fileFetch.listByPath(path, userID)
 }
 
 func (svc *FileService) FindPath(id string, userID string) ([]*File, error) {
-	return svc.fileFetch.FindPath(id, userID)
+	return svc.fileFetch.findPath(id, userID)
 }
 
 func (svc *FileService) Probe(id string, opts FileListOptions, userID string) (*FileProbe, error) {
-	return svc.fileList.Probe(id, opts, userID)
+	return svc.fileList.probe(id, opts, userID)
 }
 
 func (svc *FileService) List(id string, opts FileListOptions, userID string) (*FileList, error) {
-	return svc.fileList.List(id, opts, userID)
+	return svc.fileList.list(id, opts, userID)
 }
 
 func (svc *FileService) IsValidSortBy(value string) bool {
@@ -136,83 +136,83 @@ func (svc *FileService) IsValidSortOrder(value string) bool {
 }
 
 func (svc *FileService) ComputeSize(id string, userID string) (*int64, error) {
-	return svc.fileCompute.ComputeSize(id, userID)
+	return svc.fileCompute.computeSize(id, userID)
 }
 
 func (svc *FileService) Count(id string, userID string) (*int64, error) {
-	return svc.fileCompute.Count(id, userID)
+	return svc.fileCompute.count(id, userID)
 }
 
 func (svc *FileService) Copy(sourceID string, targetID string, userID string) (*File, error) {
-	return svc.fileCopy.Copy(sourceID, targetID, userID)
+	return svc.fileCopy.copy(sourceID, targetID, userID)
 }
 
 func (svc *FileService) CopyMany(opts FileCopyManyOptions, userID string) (*FileCopyManyResult, error) {
-	return svc.fileCopy.CopyMany(opts, userID)
+	return svc.fileCopy.copyMany(opts, userID)
 }
 
 func (svc *FileService) Delete(id string, userID string) error {
-	return svc.fileDelete.Delete(id, userID)
+	return svc.fileDelete.delete(id, userID)
 }
 
 func (svc *FileService) DeleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
-	return svc.fileDelete.DeleteMany(opts, userID)
+	return svc.fileDelete.deleteMany(opts, userID)
 }
 
 func (svc *FileService) DownloadOriginalBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
-	return svc.fileDownload.DownloadOriginalBuffer(id, rangeHeader, buf, userID)
+	return svc.fileDownload.downloadOriginalBuffer(id, rangeHeader, buf, userID)
 }
 
 func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
-	return svc.fileDownload.DownloadPreviewBuffer(id, rangeHeader, buf, userID)
+	return svc.fileDownload.downloadPreviewBuffer(id, rangeHeader, buf, userID)
 }
 
 func (svc *FileService) DownloadThumbnailBuffer(id string, buf *bytes.Buffer, userID string) (model.Snapshot, error) {
-	return svc.fileDownload.DownloadThumbnailBuffer(id, buf, userID)
+	return svc.fileDownload.downloadThumbnailBuffer(id, buf, userID)
 }
 
 func (svc *FileService) Move(sourceID string, targetID string, userID string) (*File, error) {
-	return svc.fileMove.Move(sourceID, targetID, userID)
+	return svc.fileMove.move(sourceID, targetID, userID)
 }
 
 func (svc *FileService) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
-	return svc.fileMove.MoveMany(opts, userID)
+	return svc.fileMove.moveMany(opts, userID)
 }
 
 func (svc *FileService) PatchName(id string, name string, userID string) (*File, error) {
-	return svc.filePatch.PatchName(id, name, userID)
+	return svc.filePatch.patchName(id, name, userID)
 }
 
 func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
-	return svc.filePermission.GrantUserPermission(ids, assigneeID, permission, userID)
+	return svc.filePermission.grantUserPermission(ids, assigneeID, permission, userID)
 }
 
 func (svc *FileService) RevokeUserPermission(ids []string, assigneeID string, userID string) error {
-	return svc.filePermission.RevokeUserPermission(ids, assigneeID, userID)
+	return svc.filePermission.revokeUserPermission(ids, assigneeID, userID)
 }
 
 func (svc *FileService) GrantGroupPermission(ids []string, groupID string, permission string, userID string) error {
-	return svc.filePermission.GrantGroupPermission(ids, groupID, permission, userID)
+	return svc.filePermission.grantGroupPermission(ids, groupID, permission, userID)
 }
 
 func (svc *FileService) RevokeGroupPermission(ids []string, groupID string, userID string) error {
-	return svc.filePermission.RevokeGroupPermission(ids, groupID, userID)
+	return svc.filePermission.revokeGroupPermission(ids, groupID, userID)
 }
 
 func (svc *FileService) FindUserPermissions(id string, userID string) ([]*UserPermission, error) {
-	return svc.filePermission.FindUserPermissions(id, userID)
+	return svc.filePermission.findUserPermissions(id, userID)
 }
 
 func (svc *FileService) FindGroupPermissions(id string, userID string) ([]*GroupPermission, error) {
-	return svc.filePermission.FindGroupPermissions(id, userID)
+	return svc.filePermission.findGroupPermissions(id, userID)
 }
 
 func (svc *FileService) Reprocess(id string, userID string) (*FileReprocessResponse, error) {
-	return svc.fileReprocess.Reprocess(id, userID)
+	return svc.fileReprocess.reprocess(id, userID)
 }
 
 func (svc *FileService) Store(id string, opts FileStoreOptions, userID string) (*File, error) {
-	return svc.fileStore.Store(id, opts, userID)
+	return svc.fileStore.store(id, opts, userID)
 }
 
 type fileCreate struct {
@@ -242,7 +242,7 @@ type FileCreateOptions struct {
 	ParentID    string `json:"parentId"    validate:"required"`
 }
 
-func (svc *fileCreate) Create(opts FileCreateOptions, userID string) (*File, error) {
+func (svc *fileCreate) create(opts FileCreateOptions, userID string) (*File, error) {
 	path := helper.PathFromFilename(opts.Name)
 	parentID := opts.ParentID
 	if len(path) > 1 {
@@ -371,7 +371,7 @@ func newFileFetch() *fileFetch {
 	}
 }
 
-func (svc *fileFetch) Find(ids []string, userID string) ([]*File, error) {
+func (svc *fileFetch) find(ids []string, userID string) ([]*File, error) {
 	var res []*File
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
@@ -390,7 +390,7 @@ func (svc *fileFetch) Find(ids []string, userID string) ([]*File, error) {
 	return res, nil
 }
 
-func (svc *fileFetch) FindByPath(path string, userID string) (*File, error) {
+func (svc *fileFetch) findByPath(path string, userID string) (*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -420,7 +420,7 @@ func (svc *fileFetch) FindByPath(path string, userID string) (*File, error) {
 	return res, nil
 }
 
-func (svc *fileFetch) ListByPath(path string, userID string) ([]*File, error) {
+func (svc *fileFetch) listByPath(path string, userID string) ([]*File, error) {
 	if path == "/" {
 		return svc.getWorkspacesAsFiles(userID)
 	}
@@ -443,7 +443,7 @@ func (svc *fileFetch) ListByPath(path string, userID string) ([]*File, error) {
 		}
 		return res, nil
 	} else if file.GetType() == model.FileTypeFile {
-		res, err := svc.Find([]string{file.GetID()}, userID)
+		res, err := svc.find([]string{file.GetID()}, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -454,7 +454,7 @@ func (svc *fileFetch) ListByPath(path string, userID string) ([]*File, error) {
 	}
 }
 
-func (svc *fileFetch) FindPath(id string, userID string) ([]*File, error) {
+func (svc *fileFetch) findPath(id string, userID string) ([]*File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -639,7 +639,7 @@ type FileProbe struct {
 	TotalElements uint64 `json:"totalElements"`
 }
 
-func (svc *fileList) Probe(id string, opts FileListOptions, userID string) (*FileProbe, error) {
+func (svc *fileList) probe(id string, opts FileListOptions, userID string) (*FileProbe, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -660,7 +660,7 @@ func (svc *fileList) Probe(id string, opts FileListOptions, userID string) (*Fil
 	}, nil
 }
 
-func (svc *fileList) List(id string, opts FileListOptions, userID string) (*FileList, error) {
+func (svc *fileList) list(id string, opts FileListOptions, userID string) (*FileList, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -797,7 +797,7 @@ func newFileCompute() *fileCompute {
 	}
 }
 
-func (svc *fileCompute) ComputeSize(id string, userID string) (*int64, error) {
+func (svc *fileCompute) computeSize(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -812,7 +812,7 @@ func (svc *fileCompute) ComputeSize(id string, userID string) (*int64, error) {
 	return &res, nil
 }
 
-func (svc *fileCompute) Count(id string, userID string) (*int64, error) {
+func (svc *fileCompute) count(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -851,7 +851,7 @@ func newFileCopy() *fileCopy {
 	}
 }
 
-func (svc *fileCopy) Copy(sourceID string, targetID string, userID string) (*File, error) {
+func (svc *fileCopy) copy(sourceID string, targetID string, userID string) (*File, error) {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return nil, err
@@ -886,14 +886,14 @@ type FileCopyManyResult struct {
 	Failed    []string `json:"failed"`
 }
 
-func (svc *fileCopy) CopyMany(opts FileCopyManyOptions, userID string) (*FileCopyManyResult, error) {
+func (svc *fileCopy) copyMany(opts FileCopyManyOptions, userID string) (*FileCopyManyResult, error) {
 	res := &FileCopyManyResult{
 		New:       make([]string, 0),
 		Succeeded: make([]string, 0),
 		Failed:    make([]string, 0),
 	}
 	for _, id := range opts.SourceIDs {
-		file, err := svc.Copy(id, opts.TargetID, userID)
+		file, err := svc.copy(id, opts.TargetID, userID)
 		if err != nil {
 			res.Failed = append(res.Failed, id)
 		} else {
@@ -1127,7 +1127,7 @@ func newFileDelete() *fileDelete {
 	}
 }
 
-func (svc *fileDelete) Delete(id string, userID string) error {
+func (svc *fileDelete) delete(id string, userID string) error {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
@@ -1159,13 +1159,13 @@ type FileDeleteManyResult struct {
 	Failed    []string `json:"failed"`
 }
 
-func (svc *fileDelete) DeleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
+func (svc *fileDelete) deleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
 	res := &FileDeleteManyResult{
 		Failed:    make([]string, 0),
 		Succeeded: make([]string, 0),
 	}
 	for _, id := range opts.IDs {
-		if err := svc.Delete(id, userID); err != nil {
+		if err := svc.delete(id, userID); err != nil {
 			res.Failed = append(res.Failed, id)
 		} else {
 			res.Succeeded = append(res.Succeeded, id)
@@ -1307,7 +1307,7 @@ type DownloadResult struct {
 	RangeInterval *infra.RangeInterval
 }
 
-func (svc *fileDownload) DownloadOriginalBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
+func (svc *fileDownload) downloadOriginalBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1337,7 +1337,7 @@ func (svc *fileDownload) DownloadOriginalBuffer(id string, rangeHeader string, b
 	}
 }
 
-func (svc *fileDownload) DownloadPreviewBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
+func (svc *fileDownload) downloadPreviewBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1367,7 +1367,7 @@ func (svc *fileDownload) DownloadPreviewBuffer(id string, rangeHeader string, bu
 	}
 }
 
-func (svc *fileDownload) DownloadThumbnailBuffer(id string, buf *bytes.Buffer, userID string) (model.Snapshot, error) {
+func (svc *fileDownload) downloadThumbnailBuffer(id string, buf *bytes.Buffer, userID string) (model.Snapshot, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1440,7 +1440,7 @@ func newFileMove() *fileMove {
 	}
 }
 
-func (svc *fileMove) Move(sourceID string, targetID string, userID string) (*File, error) {
+func (svc *fileMove) move(sourceID string, targetID string, userID string) (*File, error) {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return nil, err
@@ -1474,13 +1474,13 @@ type FileMoveManyResult struct {
 	Failed    []string `json:"failed"`
 }
 
-func (svc *fileMove) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
+func (svc *fileMove) moveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
 	res := &FileMoveManyResult{
 		Failed:    make([]string, 0),
 		Succeeded: make([]string, 0),
 	}
 	for _, id := range opts.SourceIDs {
-		if _, err := svc.Move(id, opts.TargetID, userID); err != nil {
+		if _, err := svc.move(id, opts.TargetID, userID); err != nil {
 			res.Failed = append(res.Failed, id)
 		} else {
 			res.Succeeded = append(res.Succeeded, id)
@@ -1595,7 +1595,7 @@ func newFilePatch() *filePatch {
 	}
 }
 
-func (svc *filePatch) PatchName(id string, name string, userID string) (*File, error) {
+func (svc *filePatch) patchName(id string, name string, userID string) (*File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1658,7 +1658,7 @@ func newFilePermission() *filePermission {
 	}
 }
 
-func (svc *filePermission) GrantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
+func (svc *filePermission) grantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
@@ -1705,7 +1705,7 @@ func (svc *filePermission) GrantUserPermission(ids []string, assigneeID string, 
 	return nil
 }
 
-func (svc *filePermission) RevokeUserPermission(ids []string, assigneeID string, userID string) error {
+func (svc *filePermission) revokeUserPermission(ids []string, assigneeID string, userID string) error {
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
@@ -1736,7 +1736,7 @@ func (svc *filePermission) RevokeUserPermission(ids []string, assigneeID string,
 	return nil
 }
 
-func (svc *filePermission) GrantGroupPermission(ids []string, groupID string, permission string, userID string) error {
+func (svc *filePermission) grantGroupPermission(ids []string, groupID string, permission string, userID string) error {
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
@@ -1787,7 +1787,7 @@ func (svc *filePermission) GrantGroupPermission(ids []string, groupID string, pe
 	return nil
 }
 
-func (svc *filePermission) RevokeGroupPermission(ids []string, groupID string, userID string) error {
+func (svc *filePermission) revokeGroupPermission(ids []string, groupID string, userID string) error {
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
@@ -1828,7 +1828,7 @@ type UserPermission struct {
 	Permission string `json:"permission"`
 }
 
-func (svc *filePermission) FindUserPermissions(id string, userID string) ([]*UserPermission, error) {
+func (svc *filePermission) findUserPermissions(id string, userID string) ([]*UserPermission, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1864,7 +1864,7 @@ type GroupPermission struct {
 	Permission string `json:"permission"`
 }
 
-func (svc *filePermission) FindGroupPermissions(id string, userID string) ([]*GroupPermission, error) {
+func (svc *filePermission) findGroupPermissions(id string, userID string) ([]*GroupPermission, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1936,7 +1936,7 @@ func (r *FileReprocessResponse) AppendRejected(id string) {
 	}
 }
 
-func (svc *fileReprocess) Reprocess(id string, userID string) (*FileReprocessResponse, error) {
+func (svc *fileReprocess) reprocess(id string, userID string) (*FileReprocessResponse, error) {
 	resp := &FileReprocessResponse{
 		// We intend to send an empty array to the caller, better than nil
 		Accepted: []string{},
@@ -2093,7 +2093,7 @@ type FileStoreOptions struct {
 	Path        *string
 }
 
-func (svc *fileStore) Store(id string, opts FileStoreOptions, userID string) (*File, error) {
+func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -2103,7 +2103,7 @@ func (svc *fileStore) Store(id string, opts FileStoreOptions, userID string) (*F
 		return nil, err
 	}
 	if opts.S3Reference == nil {
-		if err := svc.store(props); err != nil {
+		if err := svc.performStore(props); err != nil {
 			return nil, err
 		}
 	}
@@ -2190,7 +2190,7 @@ func (svc *fileStore) getPropertiesFromS3Reference(opts FileStoreOptions) fileSt
 	}
 }
 
-func (svc *fileStore) store(props fileStoreProperties) error {
+func (svc *fileStore) performStore(props fileStoreProperties) error {
 	if err := svc.s3.PutFile(props.Original.Key, props.Path, props.ContentType, props.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
