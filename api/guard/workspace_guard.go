@@ -17,26 +17,17 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type WorkspaceGuard interface {
-	IsAuthorized(userID string, workspace model.Workspace, permission string) bool
-	Authorize(userID string, workspace model.Workspace, permission string) error
+type WorkspaceGuard struct {
+	groupCache *cache.GroupCache
 }
 
-func NewWorkspaceGuard() WorkspaceGuard {
-	return newWorkspaceGuard()
-}
-
-type workspaceGuard struct {
-	groupCache cache.GroupCache
-}
-
-func newWorkspaceGuard() *workspaceGuard {
-	return &workspaceGuard{
+func NewWorkspaceGuard() *WorkspaceGuard {
+	return &WorkspaceGuard{
 		groupCache: cache.NewGroupCache(),
 	}
 }
 
-func (g *workspaceGuard) IsAuthorized(userID string, workspace model.Workspace, permission string) bool {
+func (g *WorkspaceGuard) IsAuthorized(userID string, workspace model.Workspace, permission string) bool {
 	for _, p := range workspace.GetUserPermissions() {
 		if p.GetUserID() == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
@@ -57,7 +48,7 @@ func (g *workspaceGuard) IsAuthorized(userID string, workspace model.Workspace, 
 	return false
 }
 
-func (g *workspaceGuard) Authorize(userID string, workspace model.Workspace, permission string) error {
+func (g *WorkspaceGuard) Authorize(userID string, workspace model.Workspace, permission string) error {
 	if !g.IsAuthorized(userID, workspace, permission) {
 		err := errorpkg.NewWorkspacePermissionError(userID, workspace, permission)
 		if g.IsAuthorized(userID, workspace, model.PermissionViewer) {

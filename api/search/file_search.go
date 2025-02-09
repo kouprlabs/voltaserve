@@ -20,22 +20,11 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type FileSearch interface {
-	Index(files []model.File) error
-	Update(files []model.File) error
-	Delete(ids []string) error
-	Query(query string, opts infra.QueryOptions) ([]model.File, error)
-}
-
-func NewFileSearch() FileSearch {
-	return newFileSearch()
-}
-
-type fileSearch struct {
+type FileSearch struct {
 	search       infra.SearchManager
 	index        string
 	s3           infra.S3Manager
-	snapshotRepo repo.SnapshotRepo
+	snapshotRepo *repo.SnapshotRepo
 }
 
 type fileEntity struct {
@@ -54,8 +43,8 @@ func (f fileEntity) GetID() string {
 	return f.ID
 }
 
-func newFileSearch() *fileSearch {
-	return &fileSearch{
+func NewFileSearch() *FileSearch {
+	return &FileSearch{
 		index:        infra.FileSearchIndex,
 		search:       infra.NewSearchManager(),
 		s3:           infra.NewS3Manager(),
@@ -63,7 +52,7 @@ func newFileSearch() *fileSearch {
 	}
 }
 
-func (s *fileSearch) Index(files []model.File) (err error) {
+func (s *FileSearch) Index(files []model.File) (err error) {
 	if len(files) == 0 {
 		return nil
 	}
@@ -80,7 +69,7 @@ func (s *fileSearch) Index(files []model.File) (err error) {
 	return nil
 }
 
-func (s *fileSearch) Update(files []model.File) (err error) {
+func (s *FileSearch) Update(files []model.File) (err error) {
 	if len(files) == 0 {
 		return nil
 	}
@@ -97,7 +86,7 @@ func (s *fileSearch) Update(files []model.File) (err error) {
 	return nil
 }
 
-func (s *fileSearch) Delete(ids []string) error {
+func (s *FileSearch) Delete(ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
@@ -107,7 +96,7 @@ func (s *fileSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (s *fileSearch) Query(query string, opts infra.QueryOptions) ([]model.File, error) {
+func (s *FileSearch) Query(query string, opts infra.QueryOptions) ([]model.File, error) {
 	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err
@@ -128,7 +117,7 @@ func (s *fileSearch) Query(query string, opts infra.QueryOptions) ([]model.File,
 	return res, nil
 }
 
-func (s *fileSearch) populateTextField(files []model.File) error {
+func (s *FileSearch) populateTextField(files []model.File) error {
 	for _, f := range files {
 		if f.GetType() == model.FileTypeFile && f.GetSnapshotID() != nil {
 			snapshot, err := s.snapshotRepo.Find(*f.GetSnapshotID())
@@ -147,7 +136,7 @@ func (s *fileSearch) populateTextField(files []model.File) error {
 	return nil
 }
 
-func (s *fileSearch) mapEntity(file model.File) *fileEntity {
+func (s *FileSearch) mapEntity(file model.File) *fileEntity {
 	return &fileEntity{
 		ID:          file.GetID(),
 		WorkspaceID: file.GetWorkspaceID(),

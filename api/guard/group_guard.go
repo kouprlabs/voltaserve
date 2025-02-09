@@ -17,26 +17,17 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type GroupGuard interface {
-	IsAuthorized(userID string, group model.Group, permission string) bool
-	Authorize(userID string, group model.Group, permission string) error
+type GroupGuard struct {
+	groupCache *cache.GroupCache
 }
 
-func NewGroupGuard() GroupGuard {
-	return newGroupGuard()
-}
-
-type groupGuard struct {
-	groupCache cache.GroupCache
-}
-
-func newGroupGuard() *groupGuard {
-	return &groupGuard{
+func NewGroupGuard() *GroupGuard {
+	return &GroupGuard{
 		groupCache: cache.NewGroupCache(),
 	}
 }
 
-func (g *groupGuard) IsAuthorized(userID string, group model.Group, permission string) bool {
+func (g *GroupGuard) IsAuthorized(userID string, group model.Group, permission string) bool {
 	for _, p := range group.GetUserPermissions() {
 		if p.GetUserID() == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
@@ -57,7 +48,7 @@ func (g *groupGuard) IsAuthorized(userID string, group model.Group, permission s
 	return false
 }
 
-func (g *groupGuard) Authorize(userID string, group model.Group, permission string) error {
+func (g *GroupGuard) Authorize(userID string, group model.Group, permission string) error {
 	if !g.IsAuthorized(userID, group, permission) {
 		err := errorpkg.NewGroupPermissionError(userID, group, permission)
 		if g.IsAuthorized(userID, group, model.PermissionViewer) {

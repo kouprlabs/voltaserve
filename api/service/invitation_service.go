@@ -25,13 +25,13 @@ import (
 )
 
 type InvitationService struct {
-	orgRepo          repo.OrganizationRepo
+	orgRepo          *repo.OrganizationRepo
 	orgMapper        *organizationMapper
-	invitationRepo   repo.InvitationRepo
+	invitationRepo   *repo.InvitationRepo
 	invitationMapper *invitationMapper
-	orgCache         cache.OrganizationCache
-	orgGuard         guard.OrganizationGuard
-	userRepo         repo.UserRepo
+	orgCache         *cache.OrganizationCache
+	orgGuard         *guard.OrganizationGuard
+	userRepo         *repo.UserRepo
 	mailTmpl         *infra.MailTemplate
 	config           *config.Config
 }
@@ -454,8 +454,8 @@ func (svc *InvitationService) paginate(data []model.Invitation, page, size uint6
 }
 
 type invitationMapper struct {
-	orgCache   cache.OrganizationCache
-	userRepo   repo.UserRepo
+	orgCache   *cache.OrganizationCache
+	userRepo   *repo.UserRepo
 	userMapper *userMapper
 	orgMapper  *organizationMapper
 }

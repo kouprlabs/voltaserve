@@ -27,22 +27,22 @@ import (
 )
 
 type GroupService struct {
-	groupRepo      repo.GroupRepo
-	groupGuard     guard.GroupGuard
-	groupSearch    search.GroupSearch
+	groupRepo      *repo.GroupRepo
+	groupGuard     *guard.GroupGuard
+	groupSearch    *search.GroupSearch
 	groupMapper    *groupMapper
-	groupCache     cache.GroupCache
-	userRepo       repo.UserRepo
-	userSearch     search.UserSearch
+	groupCache     *cache.GroupCache
+	userRepo       *repo.UserRepo
+	userSearch     *search.UserSearch
 	userMapper     *userMapper
-	workspaceRepo  repo.WorkspaceRepo
-	workspaceCache cache.WorkspaceCache
-	fileRepo       repo.FileRepo
-	fileCache      cache.FileCache
-	fileGuard      guard.FileGuard
-	orgRepo        repo.OrganizationRepo
-	orgCache       cache.OrganizationCache
-	orgGuard       guard.OrganizationGuard
+	workspaceRepo  *repo.WorkspaceRepo
+	workspaceCache *cache.WorkspaceCache
+	fileRepo       *repo.FileRepo
+	fileCache      *cache.FileCache
+	fileGuard      *guard.FileGuard
+	orgRepo        *repo.OrganizationRepo
+	orgCache       *cache.OrganizationCache
+	orgGuard       *guard.OrganizationGuard
 	config         *config.Config
 }
 
@@ -485,9 +485,9 @@ func (svc *GroupService) sync(group model.Group) error {
 }
 
 type groupMapper struct {
-	orgCache   cache.OrganizationCache
+	orgCache   *cache.OrganizationCache
 	orgMapper  *organizationMapper
-	groupCache cache.GroupCache
+	groupCache *cache.GroupCache
 }
 
 func newGroupMapper() *groupMapper {

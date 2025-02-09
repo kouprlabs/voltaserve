@@ -28,13 +28,13 @@ import (
 
 type TaskService struct {
 	taskMapper    *taskMapper
-	taskCache     cache.TaskCache
-	taskSearch    search.TaskSearch
-	taskRepo      repo.TaskRepo
-	snapshotRepo  repo.SnapshotRepo
-	snapshotCache cache.SnapshotCache
-	fileRepo      repo.FileRepo
-	fileCache     cache.FileCache
+	taskCache     *cache.TaskCache
+	taskSearch    *search.TaskSearch
+	taskRepo      *repo.TaskRepo
+	snapshotRepo  *repo.SnapshotRepo
+	snapshotCache *cache.SnapshotCache
+	fileRepo      *repo.FileRepo
+	fileCache     *cache.FileCache
 }
 
 func NewTaskService() *TaskService {
@@ -503,7 +503,7 @@ func (svc *TaskService) deleteAndSync(id string) error {
 }
 
 type taskMapper struct {
-	groupCache cache.TaskCache
+	groupCache *cache.TaskCache
 }
 
 func newTaskMapper() *taskMapper {

@@ -21,29 +21,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type GroupRepo interface {
-	Insert(opts GroupInsertOptions) (model.Group, error)
-	Find(id string) (model.Group, error)
-	Count() (int64, error)
-	FindIDs() ([]string, error)
-	FindIDsByFile(fileID string) ([]string, error)
-	FindIDsByOrganization(id string) ([]string, error)
-	Save(group model.Group) error
-	Delete(id string) error
-	FindMembers(id string) ([]model.User, error)
-	CountOwners(id string) (int64, error)
-	GrantUserPermission(id string, userID string, permission string) error
-	RevokeUserPermission(id string, userID string) error
-}
-
-func NewGroupRepo() GroupRepo {
-	return newGroupRepo()
-}
-
-func NewGroup() model.Group {
-	return &groupEntity{}
-}
-
 type groupEntity struct {
 	ID               string                  `gorm:"column:id"              json:"id"`
 	Name             string                  `gorm:"column:name"            json:"name"`
@@ -118,15 +95,19 @@ func (g *groupEntity) SetUpdateTime(updateTime *string) {
 	g.UpdateTime = updateTime
 }
 
-type groupRepo struct {
-	db             *gorm.DB
-	permissionRepo *permissionRepo
+func NewGroup() model.Group {
+	return &groupEntity{}
 }
 
-func newGroupRepo() *groupRepo {
-	return &groupRepo{
+type GroupRepo struct {
+	db             *gorm.DB
+	permissionRepo *PermissionRepo
+}
+
+func NewGroupRepo() *GroupRepo {
+	return &GroupRepo{
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
-		permissionRepo: newPermissionRepo(),
+		permissionRepo: NewPermissionRepo(),
 	}
 }
 
@@ -137,7 +118,7 @@ type GroupInsertOptions struct {
 	OwnerID        string
 }
 
-func (repo *groupRepo) Insert(opts GroupInsertOptions) (model.Group, error) {
+func (repo *GroupRepo) Insert(opts GroupInsertOptions) (model.Group, error) {
 	group := groupEntity{
 		ID:             opts.ID,
 		Name:           opts.Name,
@@ -153,7 +134,7 @@ func (repo *groupRepo) Insert(opts GroupInsertOptions) (model.Group, error) {
 	return res, nil
 }
 
-func (repo *groupRepo) find(id string) (*groupEntity, error) {
+func (repo *GroupRepo) find(id string) (*groupEntity, error) {
 	res := groupEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
@@ -166,7 +147,7 @@ func (repo *groupRepo) find(id string) (*groupEntity, error) {
 	return &res, nil
 }
 
-func (repo *groupRepo) Find(id string) (model.Group, error) {
+func (repo *GroupRepo) Find(id string) (model.Group, error) {
 	group, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -177,7 +158,7 @@ func (repo *groupRepo) Find(id string) (model.Group, error) {
 	return group, nil
 }
 
-func (repo *groupRepo) Count() (int64, error) {
+func (repo *GroupRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&groupEntity{}).Count(&count)
 	if db.Error != nil {
@@ -186,7 +167,7 @@ func (repo *groupRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (repo *groupRepo) FindIDsByFile(fileID string) ([]string, error) {
+func (repo *GroupRepo) FindIDsByFile(fileID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -207,7 +188,7 @@ func (repo *groupRepo) FindIDsByFile(fileID string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *groupRepo) FindIDsByOrganization(id string) ([]string, error) {
+func (repo *GroupRepo) FindIDsByOrganization(id string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -223,7 +204,7 @@ func (repo *groupRepo) FindIDsByOrganization(id string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *groupRepo) Save(group model.Group) error {
+func (repo *GroupRepo) Save(group model.Group) error {
 	db := repo.db.Save(group)
 	if db.Error != nil {
 		return db.Error
@@ -231,7 +212,7 @@ func (repo *groupRepo) Save(group model.Group) error {
 	return nil
 }
 
-func (repo *groupRepo) Delete(id string) error {
+func (repo *GroupRepo) Delete(id string) error {
 	db := repo.db.Exec(`DELETE FROM "group" WHERE id = ?`, id)
 	if db.Error != nil {
 		return db.Error
@@ -247,7 +228,7 @@ func (repo *groupRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *groupRepo) FindIDs() ([]string, error) {
+func (repo *GroupRepo) FindIDs() ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -263,7 +244,7 @@ func (repo *groupRepo) FindIDs() ([]string, error) {
 	return res, nil
 }
 
-func (repo *groupRepo) FindMembers(id string) ([]model.User, error) {
+func (repo *GroupRepo) FindMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
 		Raw(`SELECT u.* FROM "user" u INNER JOIN userpermission up on
@@ -279,7 +260,7 @@ func (repo *groupRepo) FindMembers(id string) ([]model.User, error) {
 	return res, nil
 }
 
-func (repo *groupRepo) CountOwners(id string) (int64, error) {
+func (repo *GroupRepo) CountOwners(id string) (int64, error) {
 	var count int64
 	db := repo.db.Model(&userPermissionEntity{}).
 		Where("resource_id = ?", id).
@@ -291,7 +272,7 @@ func (repo *groupRepo) CountOwners(id string) (int64, error) {
 	return count, nil
 }
 
-func (repo *groupRepo) GrantUserPermission(id string, userID string, permission string) error {
+func (repo *GroupRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
@@ -302,7 +283,7 @@ func (repo *groupRepo) GrantUserPermission(id string, userID string, permission 
 	return nil
 }
 
-func (repo *groupRepo) RevokeUserPermission(id string, userID string) error {
+func (repo *GroupRepo) RevokeUserPermission(id string, userID string) error {
 	db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userID, id)
 	if db.Error != nil {
 		return db.Error
@@ -310,7 +291,7 @@ func (repo *groupRepo) RevokeUserPermission(id string, userID string) error {
 	return nil
 }
 
-func (repo *groupRepo) populateModelFields(groups []*groupEntity) error {
+func (repo *GroupRepo) populateModelFields(groups []*groupEntity) error {
 	for _, g := range groups {
 		g.UserPermissions = make([]*UserPermissionValue, 0)
 		userPermissions, err := repo.permissionRepo.FindUserPermissions(g.ID)

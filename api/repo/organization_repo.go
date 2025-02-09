@@ -21,51 +21,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type OrganizationRepo interface {
-	Insert(opts OrganizationInsertOptions) (model.Organization, error)
-	Find(id string) (model.Organization, error)
-	Count() (int64, error)
-	Save(org model.Organization) error
-	Delete(id string) error
-	FindIDs() ([]string, error)
-	FindMembers(id string) ([]model.User, error)
-	FindGroups(id string) ([]model.Group, error)
-	CountOwners(id string) (int64, error)
-	GrantUserPermission(id string, userID string, permission string) error
-	RevokeUserPermission(id string, userID string) error
-}
-
-func NewOrganizationRepo() OrganizationRepo {
-	return newOrganizationRepo()
-}
-
-func NewOrganization() model.Organization {
-	return &organizationEntity{}
-}
-
-type NewOrganizationOptions struct {
-	ID               string
-	Name             string
-	UserPermissions  []model.CoreUserPermission
-	GroupPermissions []model.CoreGroupPermission
-	Members          []string
-	CreateTime       string
-	UpdateTime       *string
-}
-
-func NewOrganizationWithOptions(opts NewOrganizationOptions) model.Organization {
-	res := &organizationEntity{
-		ID:         opts.ID,
-		Name:       opts.Name,
-		Members:    opts.Members,
-		CreateTime: opts.CreateTime,
-		UpdateTime: opts.UpdateTime,
-	}
-	res.SetUserPermissions(opts.UserPermissions)
-	res.SetGroupPermissions(opts.GroupPermissions)
-	return res
-}
-
 type organizationEntity struct {
 	ID               string                  `gorm:"column:id"          json:"id"`
 	Name             string                  `gorm:"column:name"        json:"name"`
@@ -157,17 +112,44 @@ func (o *organizationEntity) SetUpdateTime(updateTime *string) {
 	o.UpdateTime = updateTime
 }
 
-type organizationRepo struct {
-	db             *gorm.DB
-	groupRepo      *groupRepo
-	permissionRepo *permissionRepo
+func NewOrganization() model.Organization {
+	return &organizationEntity{}
 }
 
-func newOrganizationRepo() *organizationRepo {
-	return &organizationRepo{
+type NewOrganizationOptions struct {
+	ID               string
+	Name             string
+	UserPermissions  []model.CoreUserPermission
+	GroupPermissions []model.CoreGroupPermission
+	Members          []string
+	CreateTime       string
+	UpdateTime       *string
+}
+
+func NewOrganizationWithOptions(opts NewOrganizationOptions) model.Organization {
+	res := &organizationEntity{
+		ID:         opts.ID,
+		Name:       opts.Name,
+		Members:    opts.Members,
+		CreateTime: opts.CreateTime,
+		UpdateTime: opts.UpdateTime,
+	}
+	res.SetUserPermissions(opts.UserPermissions)
+	res.SetGroupPermissions(opts.GroupPermissions)
+	return res
+}
+
+type OrganizationRepo struct {
+	db             *gorm.DB
+	groupRepo      *GroupRepo
+	permissionRepo *PermissionRepo
+}
+
+func NewOrganizationRepo() *OrganizationRepo {
+	return &OrganizationRepo{
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
-		groupRepo:      newGroupRepo(),
-		permissionRepo: newPermissionRepo(),
+		groupRepo:      NewGroupRepo(),
+		permissionRepo: NewPermissionRepo(),
 	}
 }
 
@@ -176,7 +158,7 @@ type OrganizationInsertOptions struct {
 	Name string
 }
 
-func (repo *organizationRepo) Insert(opts OrganizationInsertOptions) (model.Organization, error) {
+func (repo *OrganizationRepo) Insert(opts OrganizationInsertOptions) (model.Organization, error) {
 	org := organizationEntity{
 		ID:   opts.ID,
 		Name: opts.Name,
@@ -191,7 +173,7 @@ func (repo *organizationRepo) Insert(opts OrganizationInsertOptions) (model.Orga
 	return res, nil
 }
 
-func (repo *organizationRepo) find(id string) (*organizationEntity, error) {
+func (repo *OrganizationRepo) find(id string) (*organizationEntity, error) {
 	res := organizationEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
@@ -204,7 +186,7 @@ func (repo *organizationRepo) find(id string) (*organizationEntity, error) {
 	return &res, nil
 }
 
-func (repo *organizationRepo) Find(id string) (model.Organization, error) {
+func (repo *OrganizationRepo) Find(id string) (model.Organization, error) {
 	org, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -215,7 +197,7 @@ func (repo *organizationRepo) Find(id string) (model.Organization, error) {
 	return org, nil
 }
 
-func (repo *organizationRepo) Count() (int64, error) {
+func (repo *OrganizationRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&organizationEntity{}).Count(&count)
 	if db.Error != nil {
@@ -224,7 +206,7 @@ func (repo *organizationRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (repo *organizationRepo) Save(org model.Organization) error {
+func (repo *OrganizationRepo) Save(org model.Organization) error {
 	db := repo.db.Save(org)
 	if db.Error != nil {
 		return db.Error
@@ -232,7 +214,7 @@ func (repo *organizationRepo) Save(org model.Organization) error {
 	return nil
 }
 
-func (repo *organizationRepo) Delete(id string) error {
+func (repo *OrganizationRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM organization WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error
@@ -248,7 +230,7 @@ func (repo *organizationRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *organizationRepo) FindIDs() ([]string, error) {
+func (repo *OrganizationRepo) FindIDs() ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -264,7 +246,7 @@ func (repo *organizationRepo) FindIDs() ([]string, error) {
 	return res, nil
 }
 
-func (repo *organizationRepo) FindMembers(id string) ([]model.User, error) {
+func (repo *OrganizationRepo) FindMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
 		Raw(`SELECT u.* FROM "user" u INNER JOIN userpermission up on
@@ -281,7 +263,7 @@ func (repo *organizationRepo) FindMembers(id string) ([]model.User, error) {
 	return res, nil
 }
 
-func (repo *organizationRepo) FindGroups(id string) ([]model.Group, error) {
+func (repo *OrganizationRepo) FindGroups(id string) ([]model.Group, error) {
 	var entities []*groupEntity
 	db := repo.db.
 		Raw(`SELECT * FROM "group" g WHERE g.organization_id = ? ORDER BY g.name`, id).
@@ -299,7 +281,7 @@ func (repo *organizationRepo) FindGroups(id string) ([]model.Group, error) {
 	return res, nil
 }
 
-func (repo *organizationRepo) CountOwners(id string) (int64, error) {
+func (repo *OrganizationRepo) CountOwners(id string) (int64, error) {
 	var count int64
 	db := repo.db.Model(&userPermissionEntity{}).
 		Where("resource_id = ?", id).
@@ -311,7 +293,7 @@ func (repo *organizationRepo) CountOwners(id string) (int64, error) {
 	return count, nil
 }
 
-func (repo *organizationRepo) GrantUserPermission(id string, userID string, permission string) error {
+func (repo *OrganizationRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
@@ -322,7 +304,7 @@ func (repo *organizationRepo) GrantUserPermission(id string, userID string, perm
 	return nil
 }
 
-func (repo *organizationRepo) RevokeUserPermission(id string, userID string) error {
+func (repo *OrganizationRepo) RevokeUserPermission(id string, userID string) error {
 	db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userID, id)
 	if db.Error != nil {
 		return db.Error
@@ -330,7 +312,7 @@ func (repo *organizationRepo) RevokeUserPermission(id string, userID string) err
 	return nil
 }
 
-func (repo *organizationRepo) populateModelFields(organizations []*organizationEntity) error {
+func (repo *OrganizationRepo) populateModelFields(organizations []*organizationEntity) error {
 	for _, o := range organizations {
 		o.UserPermissions = make([]*UserPermissionValue, 0)
 		userPermissions, err := repo.permissionRepo.FindUserPermissions(o.ID)

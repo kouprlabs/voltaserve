@@ -18,32 +18,21 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type WorkspaceCache interface {
-	Set(workspace model.Workspace) error
-	Get(id string) (model.Workspace, error)
-	Refresh(id string) (model.Workspace, error)
-	Delete(id string) error
-}
-
-func NewWorkspaceCache() WorkspaceCache {
-	return newWorkspaceCache()
-}
-
-type workspaceCache struct {
+type WorkspaceCache struct {
 	redis         *infra.RedisManager
-	workspaceRepo repo.WorkspaceRepo
+	workspaceRepo *repo.WorkspaceRepo
 	keyPrefix     string
 }
 
-func newWorkspaceCache() *workspaceCache {
-	return &workspaceCache{
+func NewWorkspaceCache() *WorkspaceCache {
+	return &WorkspaceCache{
 		redis:         infra.NewRedisManager(),
 		workspaceRepo: repo.NewWorkspaceRepo(),
 		keyPrefix:     "workspace:",
 	}
 }
 
-func (c *workspaceCache) Set(workspace model.Workspace) error {
+func (c *WorkspaceCache) Set(workspace model.Workspace) error {
 	b, err := json.Marshal(workspace)
 	if err != nil {
 		return err
@@ -55,7 +44,7 @@ func (c *workspaceCache) Set(workspace model.Workspace) error {
 	return nil
 }
 
-func (c *workspaceCache) Get(id string) (model.Workspace, error) {
+func (c *WorkspaceCache) Get(id string) (model.Workspace, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
@@ -67,7 +56,7 @@ func (c *workspaceCache) Get(id string) (model.Workspace, error) {
 	return res, nil
 }
 
-func (c *workspaceCache) Refresh(id string) (model.Workspace, error) {
+func (c *WorkspaceCache) Refresh(id string) (model.Workspace, error) {
 	res, err := c.workspaceRepo.Find(id)
 	if err != nil {
 		return nil, err
@@ -78,7 +67,7 @@ func (c *workspaceCache) Refresh(id string) (model.Workspace, error) {
 	return res, nil
 }
 
-func (c *workspaceCache) Delete(id string) error {
+func (c *WorkspaceCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
 		return err
 	}

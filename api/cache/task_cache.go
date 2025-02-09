@@ -18,32 +18,21 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type TaskCache interface {
-	Set(file model.Task) error
-	Get(id string) (model.Task, error)
-	Refresh(id string) (model.Task, error)
-	Delete(id string) error
-}
-
-func NewTaskCache() TaskCache {
-	return newTaskCache()
-}
-
-type taskCache struct {
+type TaskCache struct {
 	redis     *infra.RedisManager
-	taskRepo  repo.TaskRepo
+	taskRepo  *repo.TaskRepo
 	keyPrefix string
 }
 
-func newTaskCache() *taskCache {
-	return &taskCache{
+func NewTaskCache() *TaskCache {
+	return &TaskCache{
 		taskRepo:  repo.NewTaskRepo(),
 		redis:     infra.NewRedisManager(),
 		keyPrefix: "task:",
 	}
 }
 
-func (c *taskCache) Set(file model.Task) error {
+func (c *TaskCache) Set(file model.Task) error {
 	b, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -55,7 +44,7 @@ func (c *taskCache) Set(file model.Task) error {
 	return nil
 }
 
-func (c *taskCache) Get(id string) (model.Task, error) {
+func (c *TaskCache) Get(id string) (model.Task, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
@@ -67,7 +56,7 @@ func (c *taskCache) Get(id string) (model.Task, error) {
 	return task, nil
 }
 
-func (c *taskCache) Refresh(id string) (model.Task, error) {
+func (c *TaskCache) Refresh(id string) (model.Task, error) {
 	res, err := c.taskRepo.Find(id)
 	if err != nil {
 		return nil, err
@@ -78,7 +67,7 @@ func (c *taskCache) Refresh(id string) (model.Task, error) {
 	return res, nil
 }
 
-func (c *taskCache) Delete(id string) error {
+func (c *TaskCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
 		return nil
 	}

@@ -18,21 +18,10 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type GroupSearch interface {
-	Index(groups []model.Group) error
-	Update(groups []model.Group) error
-	Delete(ids []string) error
-	Query(query string, opts infra.QueryOptions) ([]model.Group, error)
-}
-
-func NewGroupSearch() GroupSearch {
-	return newGroupSearch()
-}
-
-type groupSearch struct {
+type GroupSearch struct {
 	index     string
 	search    infra.SearchManager
-	groupRepo repo.GroupRepo
+	groupRepo *repo.GroupRepo
 }
 
 type groupEntity struct {
@@ -48,15 +37,15 @@ func (g groupEntity) GetID() string {
 	return g.ID
 }
 
-func newGroupSearch() *groupSearch {
-	return &groupSearch{
+func NewGroupSearch() *GroupSearch {
+	return &GroupSearch{
 		index:     infra.GroupSearchIndex,
 		search:    infra.NewSearchManager(),
 		groupRepo: repo.NewGroupRepo(),
 	}
 }
 
-func (s *groupSearch) Index(groups []model.Group) error {
+func (s *GroupSearch) Index(groups []model.Group) error {
 	if len(groups) == 0 {
 		return nil
 	}
@@ -70,7 +59,7 @@ func (s *groupSearch) Index(groups []model.Group) error {
 	return nil
 }
 
-func (s *groupSearch) Update(groups []model.Group) error {
+func (s *GroupSearch) Update(groups []model.Group) error {
 	if len(groups) == 0 {
 		return nil
 	}
@@ -84,7 +73,7 @@ func (s *groupSearch) Update(groups []model.Group) error {
 	return nil
 }
 
-func (s *groupSearch) Delete(ids []string) error {
+func (s *GroupSearch) Delete(ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
@@ -94,7 +83,7 @@ func (s *groupSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (s *groupSearch) Query(query string, opts infra.QueryOptions) ([]model.Group, error) {
+func (s *GroupSearch) Query(query string, opts infra.QueryOptions) ([]model.Group, error) {
 	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err
@@ -115,7 +104,7 @@ func (s *groupSearch) Query(query string, opts infra.QueryOptions) ([]model.Grou
 	return res, nil
 }
 
-func (s *groupSearch) mapEntity(group model.Group) *groupEntity {
+func (s *GroupSearch) mapEntity(group model.Group) *groupEntity {
 	return &groupEntity{
 		ID:             group.GetID(),
 		Name:           group.GetName(),

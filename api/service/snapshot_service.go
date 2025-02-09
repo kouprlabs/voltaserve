@@ -30,16 +30,16 @@ import (
 )
 
 type SnapshotService struct {
-	snapshotRepo   repo.SnapshotRepo
-	snapshotCache  cache.SnapshotCache
+	snapshotRepo   *repo.SnapshotRepo
+	snapshotCache  *cache.SnapshotCache
 	snapshotMapper *snapshotMapper
-	fileCache      cache.FileCache
-	fileGuard      guard.FileGuard
-	fileRepo       repo.FileRepo
-	fileSearch     search.FileSearch
+	fileCache      *cache.FileCache
+	fileGuard      *guard.FileGuard
+	fileRepo       *repo.FileRepo
+	fileSearch     *search.FileSearch
 	fileMapper     *fileMapper
-	taskRepo       repo.TaskRepo
-	taskCache      cache.TaskCache
+	taskRepo       *repo.TaskRepo
+	taskCache      *cache.TaskCache
 	s3             infra.S3Manager
 	config         *config.Config
 }
@@ -488,7 +488,7 @@ func (svc *SnapshotService) insertAndSync(snapshot model.Snapshot) error {
 	return nil
 }
 
-func isTaskPending(snapshot model.Snapshot, taskCache cache.TaskCache) (bool, error) {
+func isTaskPending(snapshot model.Snapshot, taskCache *cache.TaskCache) (bool, error) {
 	if snapshot.GetTaskID() != nil {
 		task, err := taskCache.Get(*snapshot.GetTaskID())
 		if err != nil {
@@ -502,7 +502,7 @@ func isTaskPending(snapshot model.Snapshot, taskCache cache.TaskCache) (bool, er
 }
 
 type snapshotMapper struct {
-	taskCache cache.TaskCache
+	taskCache *cache.TaskCache
 }
 
 func newSnapshotMapper() *snapshotMapper {
