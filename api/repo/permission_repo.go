@@ -18,19 +18,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type PermissionRepo interface {
-	FindUserPermissions(id string) ([]model.UserPermission, error)
-	FindGroupPermissions(id string) ([]model.GroupPermission, error)
-}
-
-func NewPermissionRepo() PermissionRepo {
-	return newPermissionRepo()
-}
-
-func NewUserPermission() model.UserPermission {
-	return &userPermissionEntity{}
-}
-
 type userPermissionEntity struct {
 	ID         string `gorm:"column:id"          json:"id"`
 	UserID     string `gorm:"column:user_id"     json:"userId"`
@@ -171,17 +158,21 @@ func (p GroupPermissionValue) GetValue() string {
 	return p.Value
 }
 
-type permissionRepo struct {
+func NewUserPermission() model.UserPermission {
+	return &userPermissionEntity{}
+}
+
+type PermissionRepo struct {
 	db *gorm.DB
 }
 
-func newPermissionRepo() *permissionRepo {
-	return &permissionRepo{
+func NewPermissionRepo() *PermissionRepo {
+	return &PermissionRepo{
 		db: infra.NewPostgresManager().GetDBOrPanic(),
 	}
 }
 
-func (repo *permissionRepo) FindUserPermissions(id string) ([]model.UserPermission, error) {
+func (repo *PermissionRepo) FindUserPermissions(id string) ([]model.UserPermission, error) {
 	var entities []*userPermissionEntity
 	if db := repo.db.
 		Raw("SELECT * FROM userpermission WHERE resource_id = ?", id).
@@ -199,7 +190,7 @@ func (repo *permissionRepo) FindUserPermissions(id string) ([]model.UserPermissi
 	}
 }
 
-func (repo *permissionRepo) FindGroupPermissions(id string) ([]model.GroupPermission, error) {
+func (repo *PermissionRepo) FindGroupPermissions(id string) ([]model.GroupPermission, error) {
 	var entities []*groupPermissionEntity
 	if db := repo.db.
 		Raw("SELECT * FROM grouppermission WHERE resource_id = ?", id).

@@ -17,26 +17,17 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type FileGuard interface {
-	IsAuthorized(userID string, file model.File, permission string) bool
-	Authorize(userID string, file model.File, permission string) error
+type FileGuard struct {
+	groupCache *cache.GroupCache
 }
 
-func NewFileGuard() FileGuard {
-	return newFileGuard()
-}
-
-type fileGuard struct {
-	groupCache cache.GroupCache
-}
-
-func newFileGuard() *fileGuard {
-	return &fileGuard{
+func NewFileGuard() *FileGuard {
+	return &FileGuard{
 		groupCache: cache.NewGroupCache(),
 	}
 }
 
-func (g *fileGuard) IsAuthorized(userID string, file model.File, permission string) bool {
+func (g *FileGuard) IsAuthorized(userID string, file model.File, permission string) bool {
 	for _, p := range file.GetUserPermissions() {
 		if p.GetUserID() == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
@@ -57,7 +48,7 @@ func (g *fileGuard) IsAuthorized(userID string, file model.File, permission stri
 	return false
 }
 
-func (g *fileGuard) Authorize(userID string, file model.File, permission string) error {
+func (g *FileGuard) Authorize(userID string, file model.File, permission string) error {
 	if !g.IsAuthorized(userID, file, permission) {
 		err := errorpkg.NewFilePermissionError(userID, file, permission)
 		if g.IsAuthorized(userID, file, model.PermissionViewer) {

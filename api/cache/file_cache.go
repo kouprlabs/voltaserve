@@ -18,33 +18,21 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type FileCache interface {
-	Set(file model.File) error
-	Get(id string) (model.File, error)
-	Refresh(id string) (model.File, error)
-	RefreshWithExisting(file model.File, userID string) (model.File, error)
-	Delete(id string) error
-}
-
-func NewFileCache() FileCache {
-	return newFileCache()
-}
-
-type fileCache struct {
+type FileCache struct {
 	redis     *infra.RedisManager
-	fileRepo  repo.FileRepo
+	fileRepo  *repo.FileRepo
 	keyPrefix string
 }
 
-func newFileCache() *fileCache {
-	return &fileCache{
+func NewFileCache() *FileCache {
+	return &FileCache{
 		fileRepo:  repo.NewFileRepo(),
 		redis:     infra.NewRedisManager(),
 		keyPrefix: "file:",
 	}
 }
 
-func (c *fileCache) Set(file model.File) error {
+func (c *FileCache) Set(file model.File) error {
 	b, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -56,7 +44,7 @@ func (c *fileCache) Set(file model.File) error {
 	return nil
 }
 
-func (c *fileCache) Get(id string) (model.File, error) {
+func (c *FileCache) Get(id string) (model.File, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
@@ -68,7 +56,7 @@ func (c *fileCache) Get(id string) (model.File, error) {
 	return res, nil
 }
 
-func (c *fileCache) Refresh(id string) (model.File, error) {
+func (c *FileCache) Refresh(id string) (model.File, error) {
 	res, err := c.fileRepo.Find(id)
 	if err != nil {
 		return nil, err
@@ -79,7 +67,7 @@ func (c *fileCache) Refresh(id string) (model.File, error) {
 	return res, nil
 }
 
-func (c *fileCache) RefreshWithExisting(file model.File, userID string) (model.File, error) {
+func (c *FileCache) RefreshWithExisting(file model.File, userID string) (model.File, error) {
 	err := c.fileRepo.PopulateModelFieldsForUser([]model.File{file}, userID)
 	if err != nil {
 		return nil, err
@@ -90,7 +78,7 @@ func (c *fileCache) RefreshWithExisting(file model.File, userID string) (model.F
 	return file, nil
 }
 
-func (c *fileCache) Delete(id string) error {
+func (c *FileCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
 		return nil
 	}

@@ -21,58 +21,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type WorkspaceRepo interface {
-	Insert(opts WorkspaceInsertOptions) (model.Workspace, error)
-	Find(id string) (model.Workspace, error)
-	Count() (int64, error)
-	UpdateName(id string, name string) (model.Workspace, error)
-	UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error)
-	UpdateRootID(id string, rootNodeID string) error
-	Delete(id string) error
-	FindIDs() ([]string, error)
-	FindIDsByOrganization(orgID string) ([]string, error)
-	GrantUserPermission(id string, userID string, permission string) error
-	RevokeUserPermission(id string, userID string) error
-}
-
-func NewWorkspaceRepo() WorkspaceRepo {
-	return newWorkspaceRepo()
-}
-
-type NewWorkspaceOptions struct {
-	ID               string
-	Name             string
-	StorageCapacity  int64
-	Image            *string
-	OrganizationID   string
-	RootID           *string
-	Bucket           string
-	UserPermissions  []model.CoreUserPermission
-	GroupPermissions []model.CoreGroupPermission
-	CreateTime       string
-	UpdateTime       *string
-}
-
-func NewWorkspace() model.Workspace {
-	return &workspaceEntity{}
-}
-
-func NewWorkspaceWithOptions(opts NewWorkspaceOptions) model.Workspace {
-	res := &workspaceEntity{
-		ID:              opts.ID,
-		Name:            opts.Name,
-		StorageCapacity: opts.StorageCapacity,
-		RootID:          opts.RootID,
-		OrganizationID:  opts.OrganizationID,
-		Bucket:          opts.Bucket,
-		CreateTime:      opts.CreateTime,
-		UpdateTime:      opts.UpdateTime,
-	}
-	res.SetUserPermissions(opts.UserPermissions)
-	res.SetGroupPermissions(opts.GroupPermissions)
-	return res
-}
-
 type workspaceEntity struct {
 	ID               string                  `gorm:"column:id;size:36"              json:"id"`
 	Name             string                  `gorm:"column:name;size:255"           json:"name"`
@@ -199,15 +147,49 @@ func (w *workspaceEntity) SetUpdateTime(updateTime *string) {
 	w.UpdateTime = updateTime
 }
 
-type workspaceRepo struct {
-	db             *gorm.DB
-	permissionRepo *permissionRepo
+type NewWorkspaceOptions struct {
+	ID               string
+	Name             string
+	StorageCapacity  int64
+	Image            *string
+	OrganizationID   string
+	RootID           *string
+	Bucket           string
+	UserPermissions  []model.CoreUserPermission
+	GroupPermissions []model.CoreGroupPermission
+	CreateTime       string
+	UpdateTime       *string
 }
 
-func newWorkspaceRepo() *workspaceRepo {
-	return &workspaceRepo{
+func NewWorkspace() model.Workspace {
+	return &workspaceEntity{}
+}
+
+func NewWorkspaceWithOptions(opts NewWorkspaceOptions) model.Workspace {
+	res := &workspaceEntity{
+		ID:              opts.ID,
+		Name:            opts.Name,
+		StorageCapacity: opts.StorageCapacity,
+		RootID:          opts.RootID,
+		OrganizationID:  opts.OrganizationID,
+		Bucket:          opts.Bucket,
+		CreateTime:      opts.CreateTime,
+		UpdateTime:      opts.UpdateTime,
+	}
+	res.SetUserPermissions(opts.UserPermissions)
+	res.SetGroupPermissions(opts.GroupPermissions)
+	return res
+}
+
+type WorkspaceRepo struct {
+	db             *gorm.DB
+	permissionRepo *PermissionRepo
+}
+
+func NewWorkspaceRepo() *WorkspaceRepo {
+	return &WorkspaceRepo{
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
-		permissionRepo: newPermissionRepo(),
+		permissionRepo: NewPermissionRepo(),
 	}
 }
 
@@ -221,7 +203,7 @@ type WorkspaceInsertOptions struct {
 	Bucket          string
 }
 
-func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace, error) {
+func (repo *WorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace, error) {
 	var id string
 	if len(opts.ID) > 0 {
 		id = opts.ID
@@ -249,7 +231,7 @@ func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 	return res, nil
 }
 
-func (repo *workspaceRepo) find(id string) (*workspaceEntity, error) {
+func (repo *WorkspaceRepo) find(id string) (*workspaceEntity, error) {
 	res := workspaceEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
@@ -262,7 +244,7 @@ func (repo *workspaceRepo) find(id string) (*workspaceEntity, error) {
 	return &res, nil
 }
 
-func (repo *workspaceRepo) Find(id string) (model.Workspace, error) {
+func (repo *WorkspaceRepo) Find(id string) (model.Workspace, error) {
 	workspace, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -273,7 +255,7 @@ func (repo *workspaceRepo) Find(id string) (model.Workspace, error) {
 	return workspace, err
 }
 
-func (repo *workspaceRepo) Count() (int64, error) {
+func (repo *WorkspaceRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&workspaceEntity{}).Count(&count)
 	if db.Error != nil {
@@ -282,7 +264,7 @@ func (repo *workspaceRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (repo *workspaceRepo) UpdateName(id string, name string) (model.Workspace, error) {
+func (repo *WorkspaceRepo) UpdateName(id string, name string) (model.Workspace, error) {
 	workspace, err := repo.find(id)
 	if err != nil {
 		return &workspaceEntity{}, err
@@ -298,7 +280,7 @@ func (repo *workspaceRepo) UpdateName(id string, name string) (model.Workspace, 
 	return res, nil
 }
 
-func (repo *workspaceRepo) UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error) {
+func (repo *WorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error) {
 	workspace, err := repo.find(id)
 	if err != nil {
 		return &workspaceEntity{}, err
@@ -315,7 +297,7 @@ func (repo *workspaceRepo) UpdateStorageCapacity(id string, storageCapacity int6
 	return res, nil
 }
 
-func (repo *workspaceRepo) UpdateRootID(id string, rootNodeID string) error {
+func (repo *WorkspaceRepo) UpdateRootID(id string, rootNodeID string) error {
 	db := repo.db.Exec("UPDATE workspace SET root_id = ? WHERE id = ?", rootNodeID, id)
 	if db.Error != nil {
 		return db.Error
@@ -323,7 +305,7 @@ func (repo *workspaceRepo) UpdateRootID(id string, rootNodeID string) error {
 	return nil
 }
 
-func (repo *workspaceRepo) Delete(id string) error {
+func (repo *WorkspaceRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM workspace WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error
@@ -339,7 +321,7 @@ func (repo *workspaceRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *workspaceRepo) FindIDs() ([]string, error) {
+func (repo *WorkspaceRepo) FindIDs() ([]string, error) {
 	type IDResult struct {
 		Result string
 	}
@@ -355,7 +337,7 @@ func (repo *workspaceRepo) FindIDs() ([]string, error) {
 	return res, nil
 }
 
-func (repo *workspaceRepo) FindIDsByOrganization(orgID string) ([]string, error) {
+func (repo *WorkspaceRepo) FindIDsByOrganization(orgID string) ([]string, error) {
 	type IDResult struct {
 		Result string
 	}
@@ -373,7 +355,7 @@ func (repo *workspaceRepo) FindIDsByOrganization(orgID string) ([]string, error)
 	return res, nil
 }
 
-func (repo *workspaceRepo) GrantUserPermission(id string, userID string, permission string) error {
+func (repo *WorkspaceRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               VALUES (?, ?, ?, ?, ?)
@@ -385,7 +367,7 @@ func (repo *workspaceRepo) GrantUserPermission(id string, userID string, permiss
 	return nil
 }
 
-func (repo *workspaceRepo) RevokeUserPermission(id string, userID string) error {
+func (repo *WorkspaceRepo) RevokeUserPermission(id string, userID string) error {
 	db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userID, id)
 	if db.Error != nil {
 		return db.Error
@@ -393,7 +375,7 @@ func (repo *workspaceRepo) RevokeUserPermission(id string, userID string) error 
 	return nil
 }
 
-func (repo *workspaceRepo) populateModelFields(workspaces []*workspaceEntity) error {
+func (repo *WorkspaceRepo) populateModelFields(workspaces []*workspaceEntity) error {
 	for _, w := range workspaces {
 		w.UserPermissions = make([]*UserPermissionValue, 0)
 		userPermissions, err := repo.permissionRepo.FindUserPermissions(w.ID)

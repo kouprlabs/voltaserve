@@ -18,21 +18,10 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type WorkspaceSearch interface {
-	Index(workspaces []model.Workspace) error
-	Update(workspaces []model.Workspace) error
-	Delete(ids []string) error
-	Query(query string, opts infra.QueryOptions) ([]model.Workspace, error)
-}
-
-func NewWorkspaceSearch() WorkspaceSearch {
-	return newWorkspaceSearch()
-}
-
-type workspaceSearch struct {
+type WorkspaceSearch struct {
 	index         string
 	search        infra.SearchManager
-	workspaceRepo repo.WorkspaceRepo
+	workspaceRepo *repo.WorkspaceRepo
 }
 
 type workspaceEntity struct {
@@ -50,15 +39,15 @@ func (w workspaceEntity) GetID() string {
 	return w.ID
 }
 
-func newWorkspaceSearch() *workspaceSearch {
-	return &workspaceSearch{
+func NewWorkspaceSearch() *WorkspaceSearch {
+	return &WorkspaceSearch{
 		index:         infra.WorkspaceSearchIndex,
 		search:        infra.NewSearchManager(),
 		workspaceRepo: repo.NewWorkspaceRepo(),
 	}
 }
 
-func (s *workspaceSearch) Index(workspaces []model.Workspace) error {
+func (s *WorkspaceSearch) Index(workspaces []model.Workspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
@@ -72,7 +61,7 @@ func (s *workspaceSearch) Index(workspaces []model.Workspace) error {
 	return nil
 }
 
-func (s *workspaceSearch) Update(workspaces []model.Workspace) error {
+func (s *WorkspaceSearch) Update(workspaces []model.Workspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
@@ -86,7 +75,7 @@ func (s *workspaceSearch) Update(workspaces []model.Workspace) error {
 	return nil
 }
 
-func (s *workspaceSearch) Delete(ids []string) error {
+func (s *WorkspaceSearch) Delete(ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
@@ -96,7 +85,7 @@ func (s *workspaceSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (s *workspaceSearch) Query(query string, opts infra.QueryOptions) ([]model.Workspace, error) {
+func (s *WorkspaceSearch) Query(query string, opts infra.QueryOptions) ([]model.Workspace, error) {
 	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err
@@ -117,7 +106,7 @@ func (s *workspaceSearch) Query(query string, opts infra.QueryOptions) ([]model.
 	return res, nil
 }
 
-func (s *workspaceSearch) mapEntity(workspace model.Workspace) *workspaceEntity {
+func (s *WorkspaceSearch) mapEntity(workspace model.Workspace) *workspaceEntity {
 	entity := &workspaceEntity{
 		ID:              workspace.GetID(),
 		Name:            workspace.GetName(),

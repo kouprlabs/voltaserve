@@ -216,10 +216,10 @@ func (svc *FileService) Store(id string, opts FileStoreOptions, userID string) (
 }
 
 type fileCreate struct {
-	fileRepo    repo.FileRepo
-	fileSearch  search.FileSearch
-	fileCache   cache.FileCache
-	fileGuard   guard.FileGuard
+	fileRepo    *repo.FileRepo
+	fileSearch  *search.FileSearch
+	fileCache   *cache.FileCache
+	fileGuard   *guard.FileGuard
 	fileMapper  *fileMapper
 	fileCoreSvc *fileCoreService
 }
@@ -342,17 +342,17 @@ func (svc *fileCreate) validateParent(id string, userID string) error {
 }
 
 type fileFetch struct {
-	fileCache      cache.FileCache
-	fileRepo       repo.FileRepo
-	fileSearch     search.FileSearch
-	fileGuard      guard.FileGuard
+	fileCache      *cache.FileCache
+	fileRepo       *repo.FileRepo
+	fileSearch     *search.FileSearch
+	fileGuard      *guard.FileGuard
 	fileMapper     *fileMapper
 	fileCoreSvc    *fileCoreService
 	fileIdent      *infra.FileIdentifier
-	userRepo       repo.UserRepo
-	workspaceRepo  repo.WorkspaceRepo
+	userRepo       *repo.UserRepo
+	workspaceRepo  *repo.WorkspaceRepo
 	workspaceSvc   *WorkspaceService
-	workspaceGuard guard.WorkspaceGuard
+	workspaceGuard *guard.WorkspaceGuard
 }
 
 func newFileFetch() *fileFetch {
@@ -581,16 +581,16 @@ func (svc *fileFetch) getComponentsFromPath(path string) ([]string, error) {
 }
 
 type fileList struct {
-	fileCache      cache.FileCache
-	fileRepo       repo.FileRepo
-	fileSearch     search.FileSearch
-	fileGuard      guard.FileGuard
+	fileCache      *cache.FileCache
+	fileRepo       *repo.FileRepo
+	fileSearch     *search.FileSearch
+	fileGuard      *guard.FileGuard
 	fileCoreSvc    *fileCoreService
 	fileFilterSvc  *fileFilterService
 	fileSortSvc    *fileSortService
 	fileMapper     *fileMapper
-	workspaceRepo  repo.WorkspaceRepo
-	workspaceGuard guard.WorkspaceGuard
+	workspaceRepo  *repo.WorkspaceRepo
+	workspaceGuard *guard.WorkspaceGuard
 }
 
 func newFileList() *fileList {
@@ -784,9 +784,9 @@ func (svc *fileList) paginate(data []model.File, page, size uint64) (pageData []
 }
 
 type fileCompute struct {
-	fileCache cache.FileCache
-	fileRepo  repo.FileRepo
-	fileGuard guard.FileGuard
+	fileCache *cache.FileCache
+	fileRepo  *repo.FileRepo
+	fileGuard *guard.FileGuard
 }
 
 func newFileCompute() *fileCompute {
@@ -828,14 +828,14 @@ func (svc *fileCompute) count(id string, userID string) (*int64, error) {
 }
 
 type fileCopy struct {
-	fileRepo     repo.FileRepo
-	fileSearch   search.FileSearch
-	fileCache    cache.FileCache
-	fileGuard    guard.FileGuard
+	fileRepo     *repo.FileRepo
+	fileSearch   *search.FileSearch
+	fileCache    *cache.FileCache
+	fileGuard    *guard.FileGuard
 	fileMapper   *fileMapper
 	fileCoreSvc  *fileCoreService
 	taskSvc      *TaskService
-	snapshotRepo repo.SnapshotRepo
+	snapshotRepo *repo.SnapshotRepo
 }
 
 func newFileCopy() *fileCopy {
@@ -1104,13 +1104,13 @@ func (svc *fileCopy) refreshUpdateTime(target model.File) error {
 }
 
 type fileDelete struct {
-	fileRepo       repo.FileRepo
-	fileSearch     search.FileSearch
-	fileGuard      guard.FileGuard
-	fileCache      cache.FileCache
-	workspaceCache cache.WorkspaceCache
+	fileRepo       *repo.FileRepo
+	fileSearch     *search.FileSearch
+	fileGuard      *guard.FileGuard
+	fileCache      *cache.FileCache
+	workspaceCache *cache.WorkspaceCache
 	taskSvc        *TaskService
-	snapshotRepo   repo.SnapshotRepo
+	snapshotRepo   *repo.SnapshotRepo
 	snapshotSvc    *SnapshotService
 }
 
@@ -1286,9 +1286,9 @@ func (svc *fileDelete) deleteFromSearch(ids []string) {
 }
 
 type fileDownload struct {
-	fileCache     cache.FileCache
-	fileGuard     guard.FileGuard
-	snapshotCache cache.SnapshotCache
+	fileCache     *cache.FileCache
+	fileGuard     *guard.FileGuard
+	snapshotCache *cache.SnapshotCache
 	s3            infra.S3Manager
 }
 
@@ -1419,10 +1419,10 @@ func (svc *fileDownload) downloadS3Object(s3Object *model.S3Object, rangeHeader 
 }
 
 type fileMove struct {
-	fileRepo    repo.FileRepo
-	fileSearch  search.FileSearch
-	fileCache   cache.FileCache
-	fileGuard   guard.FileGuard
+	fileRepo    *repo.FileRepo
+	fileSearch  *search.FileSearch
+	fileCache   *cache.FileCache
+	fileGuard   *guard.FileGuard
 	fileMapper  *fileMapper
 	fileCoreSvc *fileCoreService
 	taskSvc     *TaskService
@@ -1578,9 +1578,9 @@ func (svc *fileMove) refreshUpdateAndCreateTime(source model.File, target model.
 }
 
 type filePatch struct {
-	fileCache   cache.FileCache
-	fileRepo    repo.FileRepo
-	fileGuard   guard.FileGuard
+	fileCache   *cache.FileCache
+	fileRepo    *repo.FileRepo
+	fileGuard   *guard.FileGuard
 	fileCoreSvc *fileCoreService
 	fileMapper  *fileMapper
 }
@@ -1627,18 +1627,18 @@ func (svc *filePatch) patchName(id string, name string, userID string) (*File, e
 }
 
 type filePermission struct {
-	fileCache      cache.FileCache
-	fileRepo       repo.FileRepo
-	fileGuard      guard.FileGuard
+	fileCache      *cache.FileCache
+	fileRepo       *repo.FileRepo
+	fileGuard      *guard.FileGuard
 	fileCoreSvc    *fileCoreService
-	userRepo       repo.UserRepo
+	userRepo       *repo.UserRepo
 	userMapper     *userMapper
-	workspaceRepo  repo.WorkspaceRepo
-	workspaceCache cache.WorkspaceCache
-	groupCache     cache.GroupCache
-	groupGuard     guard.GroupGuard
+	workspaceRepo  *repo.WorkspaceRepo
+	workspaceCache *cache.WorkspaceCache
+	groupCache     *cache.GroupCache
+	groupGuard     *guard.GroupGuard
 	groupMapper    *groupMapper
-	permissionRepo repo.PermissionRepo
+	permissionRepo *repo.PermissionRepo
 }
 
 func newFilePermission() *filePermission {
@@ -1660,77 +1660,53 @@ func newFilePermission() *filePermission {
 
 func (svc *filePermission) grantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
 	for _, id := range ids {
-		file, err := svc.fileCache.Get(id)
-		if err != nil {
+		if err := svc.grantOneUserPermission(id, assigneeID, permission, userID); err != nil {
 			return err
 		}
-		if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
-			return err
-		}
-		if _, err := svc.userRepo.Find(assigneeID); err != nil {
-			return err
-		}
-		if err = svc.fileRepo.GrantUserPermission(id, assigneeID, permission); err != nil {
-			return err
-		}
-		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
-			return err
-		}
-		workspace, err := svc.workspaceRepo.Find(file.GetWorkspaceID())
-		if err != nil {
-			return err
-		}
-		if err = svc.workspaceCache.Set(workspace); err != nil {
-			return err
-		}
-		path, err := svc.fileRepo.FindPath(id)
-		if err != nil {
-			return err
-		}
-		for _, f := range path {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
-				return err
-			}
-		}
-		tree, err := svc.fileRepo.FindTree(id)
-		if err != nil {
-			return err
-		}
-		for _, f := range tree {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
-				return err
-			}
-		}
+	}
+	return nil
+}
+
+func (svc *filePermission) grantOneUserPermission(id string, assigneeID string, permission string, userID string) error {
+	file, err := svc.authorizeUserPermission(id, assigneeID, userID)
+	if err != nil {
+		return err
+	}
+	if err = svc.fileRepo.GrantUserPermission(id, assigneeID, permission); err != nil {
+		return err
+	}
+	if _, err := svc.workspaceCache.Refresh(file.GetWorkspaceID()); err != nil {
+		return err
+	}
+	if err := svc.refreshPathAndTree(id); err != nil {
+		return nil
 	}
 	return nil
 }
 
 func (svc *filePermission) revokeUserPermission(ids []string, assigneeID string, userID string) error {
 	for _, id := range ids {
-		file, err := svc.fileCache.Get(id)
-		if err != nil {
+		if err := svc.revokeOneUserPermission(id, assigneeID, userID); err != nil {
 			return err
 		}
-		if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
+	}
+	return nil
+}
+
+func (svc *filePermission) revokeOneUserPermission(id string, assigneeID string, userID string) error {
+	if _, err := svc.authorizeUserPermission(id, assigneeID, userID); err != nil {
+		return err
+	}
+	tree, err := svc.fileRepo.FindTree(id)
+	if err != nil {
+		return err
+	}
+	if err := svc.fileRepo.RevokeUserPermission(tree, assigneeID); err != nil {
+		return err
+	}
+	for _, f := range tree {
+		if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
 			return err
-		}
-		if _, err := svc.userRepo.Find(assigneeID); err != nil {
-			return err
-		}
-		tree, err := svc.fileRepo.FindTree(id)
-		if err != nil {
-			return err
-		}
-		if err := svc.fileRepo.RevokeUserPermission(tree, assigneeID); err != nil {
-			return err
-		}
-		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
-			return err
-		}
-		for _, f := range tree {
-			if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
-				return err
-			}
 		}
 	}
 	return nil
@@ -1738,85 +1714,107 @@ func (svc *filePermission) revokeUserPermission(ids []string, assigneeID string,
 
 func (svc *filePermission) grantGroupPermission(ids []string, groupID string, permission string, userID string) error {
 	for _, id := range ids {
-		file, err := svc.fileCache.Get(id)
-		if err != nil {
+		if err := svc.grantOneGroupPermission(id, groupID, permission, userID); err != nil {
 			return err
 		}
-		if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
-			return err
-		}
-		group, err := svc.groupCache.Get(groupID)
-		if err != nil {
-			return err
-		}
-		if err := svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
-			return err
-		}
-		if err = svc.fileRepo.GrantGroupPermission(id, groupID, permission); err != nil {
-			return err
-		}
-		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
-			return err
-		}
-		workspace, err := svc.workspaceRepo.Find(file.GetWorkspaceID())
-		if err != nil {
-			return err
-		}
-		if err = svc.workspaceCache.Set(workspace); err != nil {
-			return err
-		}
-		path, err := svc.fileRepo.FindPath(id)
-		if err != nil {
-			return err
-		}
-		for _, f := range path {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
-				return err
-			}
-		}
-		tree, err := svc.fileRepo.FindTree(id)
-		if err != nil {
-			return err
-		}
-		for _, f := range tree {
-			if err := svc.fileCoreSvc.sync(f); err != nil {
-				return err
-			}
-		}
+	}
+	return nil
+}
+
+func (svc *filePermission) grantOneGroupPermission(id string, groupID string, permission string, userID string) error {
+	file, _, err := svc.authorizeGroupPermission(id, groupID, userID)
+	if err != nil {
+		return err
+	}
+	if err := svc.fileRepo.GrantGroupPermission(id, groupID, permission); err != nil {
+		return err
+	}
+	if _, err := svc.workspaceCache.Refresh(file.GetWorkspaceID()); err != nil {
+		return err
+	}
+	if err := svc.refreshPathAndTree(id); err != nil {
+		return nil
 	}
 	return nil
 }
 
 func (svc *filePermission) revokeGroupPermission(ids []string, groupID string, userID string) error {
 	for _, id := range ids {
-		file, err := svc.fileCache.Get(id)
-		if err != nil {
+		if err := svc.revokeOneGroupPermission(id, groupID, userID); err != nil {
 			return err
 		}
-		if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
+	}
+	return nil
+}
+
+func (svc *filePermission) revokeOneGroupPermission(id string, groupID string, userID string) error {
+	if _, _, err := svc.authorizeGroupPermission(id, groupID, userID); err != nil {
+		return err
+	}
+	tree, err := svc.fileRepo.FindTree(id)
+	if err != nil {
+		return err
+	}
+	if err := svc.fileRepo.RevokeGroupPermission(tree, groupID); err != nil {
+		return err
+	}
+	for _, f := range tree {
+		if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
 			return err
 		}
-		group, err := svc.groupCache.Get(groupID)
-		if err != nil {
+	}
+	return nil
+}
+
+func (svc *filePermission) authorizeUserPermission(id string, assigneeID string, userID string) (model.File, error) {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
+		return nil, err
+	}
+	if _, err := svc.userRepo.Find(assigneeID); err != nil {
+		return nil, err
+	}
+	return file, nil
+}
+
+func (svc *filePermission) authorizeGroupPermission(id string, groupID string, userID string) (model.File, model.Group, error) {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
+		return nil, nil, err
+	}
+	group, err := svc.groupCache.Get(groupID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
+		return nil, nil, err
+	}
+	return file, group, nil
+}
+
+func (svc *filePermission) refreshPathAndTree(id string) error {
+	path, err := svc.fileRepo.FindPath(id)
+	if err != nil {
+		return err
+	}
+	for _, f := range path {
+		if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
 			return err
 		}
-		if err := svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
+	}
+	tree, err := svc.fileRepo.FindTree(id)
+	if err != nil {
+		return err
+	}
+	for _, f := range tree {
+		if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
 			return err
-		}
-		tree, err := svc.fileRepo.FindTree(id)
-		if err != nil {
-			return err
-		}
-		if err := svc.fileRepo.RevokeGroupPermission(tree, groupID); err != nil {
-			return err
-		}
-		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
-			return err
-		}
-		for _, f := range tree {
-			if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
-				return err
-			}
 		}
 	}
 	return nil
@@ -1896,12 +1894,12 @@ func (svc *filePermission) findGroupPermissions(id string, userID string) ([]*Gr
 }
 
 type fileReprocess struct {
-	fileCache      cache.FileCache
-	fileRepo       repo.FileRepo
-	fileGuard      guard.FileGuard
-	snapshotCache  cache.SnapshotCache
+	fileCache      *cache.FileCache
+	fileRepo       *repo.FileRepo
+	fileGuard      *guard.FileGuard
+	snapshotCache  *cache.SnapshotCache
 	snapshotSvc    *SnapshotService
-	taskCache      cache.TaskCache
+	taskCache      *cache.TaskCache
 	taskSvc        *TaskService
 	pipelineClient *conversion_client.PipelineClient
 }
@@ -2059,12 +2057,12 @@ func (svc *fileReprocess) runPipeline(file model.File, snapshot model.Snapshot, 
 }
 
 type fileStore struct {
-	fileCache      cache.FileCache
+	fileCache      *cache.FileCache
 	fileCoreSvc    *fileCoreService
 	fileMapper     *fileMapper
-	workspaceCache cache.WorkspaceCache
-	snapshotRepo   repo.SnapshotRepo
-	snapshotCache  cache.SnapshotCache
+	workspaceCache *cache.WorkspaceCache
+	snapshotRepo   *repo.SnapshotRepo
+	snapshotCache  *cache.SnapshotCache
 	snapshotSvc    *SnapshotService
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
@@ -2263,6 +2261,13 @@ func (svc *fileStore) process(file model.File, snapshot model.Snapshot, props fi
 	return nil
 }
 
+type fileCoreService struct {
+	fileRepo   *repo.FileRepo
+	fileSearch *search.FileSearch
+	fileCache  *cache.FileCache
+	fileGuard  *guard.FileGuard
+}
+
 func newFileCoreService() *fileCoreService {
 	return &fileCoreService{
 		fileRepo:   repo.NewFileRepo(),
@@ -2270,13 +2275,6 @@ func newFileCoreService() *fileCoreService {
 		fileSearch: search.NewFileSearch(),
 		fileGuard:  guard.NewFileGuard(),
 	}
-}
-
-type fileCoreService struct {
-	fileRepo   repo.FileRepo
-	fileSearch search.FileSearch
-	fileCache  cache.FileCache
-	fileGuard  guard.FileGuard
 }
 
 func (svc *fileCoreService) getChildWithName(id string, name string) (model.File, error) {
@@ -2343,8 +2341,8 @@ func (svc *fileCoreService) authorizeIDs(userID string, ids []string, permission
 }
 
 type fileFilterService struct {
-	fileRepo   repo.FileRepo
-	fileGuard  guard.FileGuard
+	fileRepo   *repo.FileRepo
+	fileGuard  *guard.FileGuard
 	fileMapper *fileMapper
 	fileIdent  *infra.FileIdentifier
 }
@@ -2700,10 +2698,10 @@ func (svc *fileSortService) sortByKind(data []model.File, userID string) []model
 }
 
 type fileMapper struct {
-	groupCache     cache.GroupCache
+	groupCache     *cache.GroupCache
 	snapshotMapper *snapshotMapper
-	snapshotCache  cache.SnapshotCache
-	snapshotRepo   repo.SnapshotRepo
+	snapshotCache  *cache.SnapshotCache
+	snapshotRepo   *repo.SnapshotRepo
 }
 
 func newFileMapper() *fileMapper {

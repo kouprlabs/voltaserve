@@ -155,20 +155,6 @@ func (e *taskEntity) SetUpdateTime(updateTime *string) {
 	e.UpdateTime = updateTime
 }
 
-type TaskRepo interface {
-	Insert(opts TaskInsertOptions) (model.Task, error)
-	Find(id string) (model.Task, error)
-	Count() (int64, error)
-	FindIDs(userID string) ([]string, error)
-	CountByEmail(email string) (int64, error)
-	Save(task model.Task) error
-	Delete(id string) error
-}
-
-func NewTaskRepo() TaskRepo {
-	return newTaskRepo()
-}
-
 func NewTask() model.Task {
 	return &taskEntity{}
 }
@@ -202,12 +188,12 @@ func NewTaskWithOptions(opts NewTaskOptions) model.Task {
 	return res
 }
 
-type taskRepo struct {
+type TaskRepo struct {
 	db *gorm.DB
 }
 
-func newTaskRepo() *taskRepo {
-	return &taskRepo{
+func NewTaskRepo() *TaskRepo {
+	return &TaskRepo{
 		db: infra.NewPostgresManager().GetDBOrPanic(),
 	}
 }
@@ -225,7 +211,7 @@ type TaskInsertOptions struct {
 
 const TaskPayloadObjectKey = "object"
 
-func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
+func (repo *TaskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
 	task := taskEntity{
 		ID:              opts.ID,
 		Name:            opts.Name,
@@ -248,7 +234,7 @@ func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
 	return res, nil
 }
 
-func (repo *taskRepo) find(id string) (*taskEntity, error) {
+func (repo *TaskRepo) find(id string) (*taskEntity, error) {
 	res := taskEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
@@ -261,7 +247,7 @@ func (repo *taskRepo) find(id string) (*taskEntity, error) {
 	return &res, nil
 }
 
-func (repo *taskRepo) Find(id string) (model.Task, error) {
+func (repo *TaskRepo) Find(id string) (model.Task, error) {
 	res, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -269,7 +255,7 @@ func (repo *taskRepo) Find(id string) (model.Task, error) {
 	return res, nil
 }
 
-func (repo *taskRepo) Count() (int64, error) {
+func (repo *TaskRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&taskEntity{}).Count(&count)
 	if db.Error != nil {
@@ -278,7 +264,7 @@ func (repo *taskRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (repo *taskRepo) FindIDs(userID string) ([]string, error) {
+func (repo *TaskRepo) FindIDs(userID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -296,7 +282,7 @@ func (repo *taskRepo) FindIDs(userID string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *taskRepo) CountByEmail(userID string) (int64, error) {
+func (repo *TaskRepo) CountByEmail(userID string) (int64, error) {
 	var count int64
 	db := repo.db.
 		Model(&taskEntity{}).
@@ -308,7 +294,7 @@ func (repo *taskRepo) CountByEmail(userID string) (int64, error) {
 	return count, nil
 }
 
-func (repo *taskRepo) Save(task model.Task) error {
+func (repo *TaskRepo) Save(task model.Task) error {
 	db := repo.db.Save(task)
 	if db.Error != nil {
 		return db.Error
@@ -316,7 +302,7 @@ func (repo *taskRepo) Save(task model.Task) error {
 	return nil
 }
 
-func (repo *taskRepo) Delete(id string) error {
+func (repo *TaskRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM task WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error

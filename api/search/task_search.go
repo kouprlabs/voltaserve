@@ -18,21 +18,10 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type TaskSearch interface {
-	Index(tasks []model.Task) error
-	Update(tasks []model.Task) error
-	Delete(ids []string) error
-	Query(query string, opts infra.QueryOptions) ([]model.Task, error)
-}
-
-func NewTaskSearch() TaskSearch {
-	return newTaskSearch()
-}
-
-type taskSearch struct {
+type TaskSearch struct {
 	index    string
 	search   infra.SearchManager
-	taskRepo repo.TaskRepo
+	taskRepo *repo.TaskRepo
 }
 
 type taskEntity struct {
@@ -51,15 +40,15 @@ func (t taskEntity) GetID() string {
 	return t.ID
 }
 
-func newTaskSearch() *taskSearch {
-	return &taskSearch{
+func NewTaskSearch() *TaskSearch {
+	return &TaskSearch{
 		index:    infra.TaskSearchIndex,
 		search:   infra.NewSearchManager(),
 		taskRepo: repo.NewTaskRepo(),
 	}
 }
 
-func (s *taskSearch) Index(tasks []model.Task) error {
+func (s *TaskSearch) Index(tasks []model.Task) error {
 	if len(tasks) == 0 {
 		return nil
 	}
@@ -73,7 +62,7 @@ func (s *taskSearch) Index(tasks []model.Task) error {
 	return nil
 }
 
-func (s *taskSearch) Update(orgs []model.Task) error {
+func (s *TaskSearch) Update(orgs []model.Task) error {
 	if len(orgs) == 0 {
 		return nil
 	}
@@ -87,7 +76,7 @@ func (s *taskSearch) Update(orgs []model.Task) error {
 	return nil
 }
 
-func (s *taskSearch) Delete(ids []string) error {
+func (s *TaskSearch) Delete(ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
@@ -97,7 +86,7 @@ func (s *taskSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (s *taskSearch) Query(query string, opts infra.QueryOptions) ([]model.Task, error) {
+func (s *TaskSearch) Query(query string, opts infra.QueryOptions) ([]model.Task, error) {
 	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err
@@ -118,7 +107,7 @@ func (s *taskSearch) Query(query string, opts infra.QueryOptions) ([]model.Task,
 	return res, nil
 }
 
-func (s *taskSearch) mapEntity(task model.Task) *taskEntity {
+func (s *TaskSearch) mapEntity(task model.Task) *taskEntity {
 	return &taskEntity{
 		ID:              task.GetID(),
 		Name:            task.GetName(),

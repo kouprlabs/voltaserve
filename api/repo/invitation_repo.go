@@ -21,20 +21,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type InvitationRepo interface {
-	Insert(opts InvitationInsertOptions) ([]model.Invitation, error)
-	Find(id string) (model.Invitation, error)
-	FindIncoming(email string) ([]model.Invitation, error)
-	CountIncoming(email string) (int64, error)
-	FindOutgoing(orgID string, userID string) ([]model.Invitation, error)
-	Save(org model.Invitation) error
-	Delete(id string) error
-}
-
-func NewInvitationRepo() InvitationRepo {
-	return newInvitationRepo()
-}
-
 type invitationEntity struct {
 	ID             string  `gorm:"column:id"              json:"id"`
 	OrganizationID string  `gorm:"column:organization_id" json:"organizationId"`
@@ -92,15 +78,15 @@ func (i *invitationEntity) SetStatus(status string) {
 	i.Status = status
 }
 
-type invitationRepo struct {
+type InvitationRepo struct {
 	db       *gorm.DB
-	userRepo *userRepo
+	userRepo *UserRepo
 }
 
-func newInvitationRepo() *invitationRepo {
-	return &invitationRepo{
+func NewInvitationRepo() *InvitationRepo {
+	return &InvitationRepo{
 		db:       infra.NewPostgresManager().GetDBOrPanic(),
-		userRepo: newUserRepo(),
+		userRepo: NewUserRepo(),
 	}
 }
 
@@ -110,7 +96,7 @@ type InvitationInsertOptions struct {
 	Emails         []string
 }
 
-func (repo *invitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invitation, error) {
+func (repo *InvitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invitation, error) {
 	var res []model.Invitation
 	for _, e := range opts.Emails {
 		invitation := invitationEntity{
@@ -132,7 +118,7 @@ func (repo *invitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invita
 	return res, nil
 }
 
-func (repo *invitationRepo) Find(id string) (model.Invitation, error) {
+func (repo *InvitationRepo) Find(id string) (model.Invitation, error) {
 	invitation := invitationEntity{}
 	db := repo.db.Where("id = ?", id).First(&invitation)
 	if db.Error != nil {
@@ -145,7 +131,7 @@ func (repo *invitationRepo) Find(id string) (model.Invitation, error) {
 	return &invitation, nil
 }
 
-func (repo *invitationRepo) FindIncoming(email string) ([]model.Invitation, error) {
+func (repo *InvitationRepo) FindIncoming(email string) ([]model.Invitation, error) {
 	var invitations []*invitationEntity
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE email = ? and status = 'pending' ORDER BY create_time DESC", email).
@@ -160,7 +146,7 @@ func (repo *invitationRepo) FindIncoming(email string) ([]model.Invitation, erro
 	return res, nil
 }
 
-func (repo *invitationRepo) CountIncoming(email string) (int64, error) {
+func (repo *InvitationRepo) CountIncoming(email string) (int64, error) {
 	var count int64
 	db := repo.db.
 		Model(&invitationEntity{}).
@@ -173,7 +159,7 @@ func (repo *invitationRepo) CountIncoming(email string) (int64, error) {
 	return count, nil
 }
 
-func (repo *invitationRepo) FindOutgoing(orgID string, userID string) ([]model.Invitation, error) {
+func (repo *InvitationRepo) FindOutgoing(orgID string, userID string) ([]model.Invitation, error) {
 	var invitations []*invitationEntity
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE organization_id = ? and owner_id = ? ORDER BY create_time DESC", orgID, userID).
@@ -188,7 +174,7 @@ func (repo *invitationRepo) FindOutgoing(orgID string, userID string) ([]model.I
 	return res, nil
 }
 
-func (repo *invitationRepo) Save(org model.Invitation) error {
+func (repo *InvitationRepo) Save(org model.Invitation) error {
 	db := repo.db.Save(org)
 	if db.Error != nil {
 		return db.Error
@@ -196,7 +182,7 @@ func (repo *invitationRepo) Save(org model.Invitation) error {
 	return nil
 }
 
-func (repo *invitationRepo) Delete(id string) error {
+func (repo *InvitationRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM invitation WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error

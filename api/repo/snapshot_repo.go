@@ -25,39 +25,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type SnapshotRepo interface {
-	Find(id string) (model.Snapshot, error)
-	FindByVersion(version int64) (model.Snapshot, error)
-	FindAllForFile(fileID string) ([]model.Snapshot, error)
-	FindExclusiveForFile(fileID string) ([]model.Snapshot, error)
-	FindAllForTask(taskID string) ([]model.Snapshot, error)
-	FindAllDangling() ([]model.Snapshot, error)
-	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
-	FindIDsByFile(fileID string) ([]string, error)
-	Insert(snapshot model.Snapshot) error
-	Save(snapshot model.Snapshot) error
-	Delete(id string) error
-	Update(id string, opts SnapshotUpdateOptions) error
-	MapWithFile(id string, fileID string) error
-	BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error
-	DeleteMappingsForFile(fileID string) error
-	DeleteMappingsForTree(fileID string) error
-	DeleteAllDangling() error
-	FindLatestVersionForFile(fileID string) (int64, error)
-	FindFileID(id string) (string, error)
-	CountAssociations(id string) (int64, error)
-	Attach(sourceFileID string, targetFileID string) error
-	Detach(id string, fileID string) error
-}
-
-func NewSnapshotRepo() SnapshotRepo {
-	return newSnapshotRepo()
-}
-
-func NewSnapshot() model.Snapshot {
-	return &snapshotEntity{}
-}
-
 type snapshotEntity struct {
 	ID         string         `gorm:"column:id;size:36"  json:"id"`
 	Version    int64          `gorm:"column:version"     json:"version"`
@@ -355,6 +322,10 @@ func (s *snapshotEntity) GetUpdateTime() *string {
 	return s.UpdateTime
 }
 
+func NewSnapshot() model.Snapshot {
+	return &snapshotEntity{}
+}
+
 type SnapshotFileEntity struct {
 	SnapshotID string `gorm:"column:snapshot_id"`
 	FileID     string `gorm:"column:file_id"`
@@ -370,17 +341,25 @@ func (s *SnapshotFileEntity) BeforeCreate(*gorm.DB) (err error) {
 	return nil
 }
 
-type snapshotRepo struct {
+type SnapshotRepo struct {
 	db *gorm.DB
 }
 
-func newSnapshotRepo() *snapshotRepo {
-	return &snapshotRepo{
+func NewSnapshotRepo() *SnapshotRepo {
+	return &SnapshotRepo{
 		db: infra.NewPostgresManager().GetDBOrPanic(),
 	}
 }
 
-func (repo *snapshotRepo) find(id string) (*snapshotEntity, error) {
+func (repo *SnapshotRepo) Find(id string) (model.Snapshot, error) {
+	res, err := repo.find(id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (repo *SnapshotRepo) find(id string) (*snapshotEntity, error) {
 	var res snapshotEntity
 	if db := repo.db.Where("id = ?", id).First(&res); db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -392,15 +371,7 @@ func (repo *snapshotRepo) find(id string) (*snapshotEntity, error) {
 	return &res, nil
 }
 
-func (repo *snapshotRepo) Find(id string) (model.Snapshot, error) {
-	res, err := repo.find(id)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (repo *snapshotRepo) FindByVersion(version int64) (model.Snapshot, error) {
+func (repo *SnapshotRepo) FindByVersion(version int64) (model.Snapshot, error) {
 	res := snapshotEntity{}
 	db := repo.db.Where("version = ?", version).First(&res)
 	if db.Error != nil {
@@ -413,21 +384,21 @@ func (repo *snapshotRepo) FindByVersion(version int64) (model.Snapshot, error) {
 	return &res, nil
 }
 
-func (repo *snapshotRepo) Insert(snapshot model.Snapshot) error {
+func (repo *SnapshotRepo) Insert(snapshot model.Snapshot) error {
 	if db := repo.db.Create(snapshot); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *snapshotRepo) Save(snapshot model.Snapshot) error {
+func (repo *SnapshotRepo) Save(snapshot model.Snapshot) error {
 	if db := repo.db.Save(snapshot); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *snapshotRepo) Delete(id string) error {
+func (repo *SnapshotRepo) Delete(id string) error {
 	snapshot, err := repo.find(id)
 	if err != nil {
 		return err
@@ -465,7 +436,7 @@ const (
 	SnapshotFieldTaskID    = "taskId"
 )
 
-func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
+func (repo *SnapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	snapshot, err := repo.find(id)
 	if err != nil {
 		return err
@@ -506,28 +477,28 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	return nil
 }
 
-func (repo *snapshotRepo) MapWithFile(id string, fileID string) error {
+func (repo *SnapshotRepo) MapWithFile(id string, fileID string) error {
 	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id, create_time) VALUES (?, ?, ?)", id, fileID, helper.NewTimestamp()); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *snapshotRepo) BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error {
+func (repo *SnapshotRepo) BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error {
 	if db := repo.db.CreateInBatches(entities, chunkSize); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *snapshotRepo) DeleteMappingsForFile(fileID string) error {
+func (repo *SnapshotRepo) DeleteMappingsForFile(fileID string) error {
 	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE file_id = ?", fileID); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *snapshotRepo) DeleteMappingsForTree(fileID string) error {
+func (repo *SnapshotRepo) DeleteMappingsForTree(fileID string) error {
 	db := repo.db.
 		Exec(`WITH RECURSIVE rec (id, parent_id, create_time) AS
               (SELECT f.id, f.parent_id, f.create_time FROM file f WHERE f.parent_id = ?
@@ -540,7 +511,7 @@ func (repo *snapshotRepo) DeleteMappingsForTree(fileID string) error {
 	return nil
 }
 
-func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {
+func (repo *SnapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {
 	var entities []*snapshotEntity
 	db := repo.db.
 		Raw(`SELECT * FROM snapshot s
@@ -558,7 +529,7 @@ func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error
 	return res, nil
 }
 
-func (repo *snapshotRepo) FindExclusiveForFile(fileID string) ([]model.Snapshot, error) {
+func (repo *SnapshotRepo) FindExclusiveForFile(fileID string) ([]model.Snapshot, error) {
 	var entities []*snapshotEntity
 	db := repo.db.
 		Raw(`SELECT s.* FROM snapshot s
@@ -578,7 +549,7 @@ func (repo *snapshotRepo) FindExclusiveForFile(fileID string) ([]model.Snapshot,
 	return res, nil
 }
 
-func (repo *snapshotRepo) FindAllForTask(taskID string) ([]model.Snapshot, error) {
+func (repo *SnapshotRepo) FindAllForTask(taskID string) ([]model.Snapshot, error) {
 	var entities []*snapshotEntity
 	db := repo.db.
 		Raw(`SELECT * FROM snapshot WHERE task_id = ?`, taskID).
@@ -593,7 +564,7 @@ func (repo *snapshotRepo) FindAllForTask(taskID string) ([]model.Snapshot, error
 	return res, nil
 }
 
-func (repo *snapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
+func (repo *SnapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
 	var entities []*snapshotEntity
 	db := repo.db.
 		Raw(`SELECT * FROM snapshot s
@@ -610,7 +581,7 @@ func (repo *snapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
 	return res, nil
 }
 
-func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error) {
+func (repo *SnapshotRepo) FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error) {
 	var entities []*snapshotEntity
 	db := repo.db.
 		Raw(`SELECT * FROM snapshot s
@@ -629,7 +600,7 @@ func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model
 	return res, nil
 }
 
-func (repo *snapshotRepo) FindIDsByFile(fileID string) ([]string, error) {
+func (repo *SnapshotRepo) FindIDsByFile(fileID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -647,7 +618,7 @@ func (repo *snapshotRepo) FindIDsByFile(fileID string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *snapshotRepo) DeleteAllDangling() error {
+func (repo *SnapshotRepo) DeleteAllDangling() error {
 	if db := repo.db.
 		Exec(`DELETE FROM snapshot
               WHERE id IN (SELECT s.id FROM (SELECT * FROM snapshot) s 
@@ -657,7 +628,7 @@ func (repo *snapshotRepo) DeleteAllDangling() error {
 	return nil
 }
 
-func (repo *snapshotRepo) FindLatestVersionForFile(fileID string) (int64, error) {
+func (repo *SnapshotRepo) FindLatestVersionForFile(fileID string) (int64, error) {
 	type Result struct {
 		Result int64
 	}
@@ -673,7 +644,7 @@ func (repo *snapshotRepo) FindLatestVersionForFile(fileID string) (int64, error)
 	return res.Result, nil
 }
 
-func (repo *snapshotRepo) FindFileID(id string) (string, error) {
+func (repo *SnapshotRepo) FindFileID(id string) (string, error) {
 	type Result struct {
 		Result string
 	}
@@ -686,7 +657,7 @@ func (repo *snapshotRepo) FindFileID(id string) (string, error) {
 	return res.Result, nil
 }
 
-func (repo *snapshotRepo) CountAssociations(id string) (int64, error) {
+func (repo *SnapshotRepo) CountAssociations(id string) (int64, error) {
 	var count int64
 	if db := repo.db.Model(&SnapshotFileEntity{}).
 		Where("snapshot_id = ?", id).
@@ -696,7 +667,7 @@ func (repo *snapshotRepo) CountAssociations(id string) (int64, error) {
 	return count, nil
 }
 
-func (repo *snapshotRepo) Attach(sourceFileID string, targetFileID string) error {
+func (repo *SnapshotRepo) Attach(sourceFileID string, targetFileID string) error {
 	if db := repo.db.
 		Exec(`INSERT INTO snapshot_file (snapshot_id, file_id, create_time) SELECT s.id, ?, ?
               FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id
@@ -707,7 +678,7 @@ func (repo *snapshotRepo) Attach(sourceFileID string, targetFileID string) error
 	return nil
 }
 
-func (repo *snapshotRepo) Detach(id string, fileID string) error {
+func (repo *SnapshotRepo) Detach(id string, fileID string) error {
 	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE snapshot_id = ? AND file_id = ?", id, fileID); db.Error != nil {
 		return db.Error
 	}

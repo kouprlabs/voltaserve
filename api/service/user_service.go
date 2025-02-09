@@ -27,15 +27,15 @@ import (
 
 type UserService struct {
 	userMapper     *userMapper
-	userRepo       repo.UserRepo
-	userSearch     search.UserSearch
-	orgRepo        repo.OrganizationRepo
-	orgCache       cache.OrganizationCache
-	orgGuard       guard.OrganizationGuard
-	groupRepo      repo.GroupRepo
-	groupGuard     guard.GroupGuard
-	groupCache     cache.GroupCache
-	invitationRepo repo.InvitationRepo
+	userRepo       *repo.UserRepo
+	userSearch     *search.UserSearch
+	orgRepo        *repo.OrganizationRepo
+	orgCache       *cache.OrganizationCache
+	orgGuard       *guard.OrganizationGuard
+	groupRepo      *repo.GroupRepo
+	groupGuard     *guard.GroupGuard
+	groupCache     *cache.GroupCache
+	invitationRepo *repo.InvitationRepo
 	config         *config.Config
 }
 

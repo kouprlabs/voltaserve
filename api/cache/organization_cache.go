@@ -18,32 +18,21 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type OrganizationCache interface {
-	Set(organization model.Organization) error
-	Get(id string) (model.Organization, error)
-	Refresh(id string) (model.Organization, error)
-	Delete(id string) error
-}
-
-func NewOrganizationCache() OrganizationCache {
-	return newOrganizationCache()
-}
-
-type organizationCache struct {
+type OrganizationCache struct {
 	redis     *infra.RedisManager
-	orgRepo   repo.OrganizationRepo
+	orgRepo   *repo.OrganizationRepo
 	keyPrefix string
 }
 
-func newOrganizationCache() *organizationCache {
-	return &organizationCache{
+func NewOrganizationCache() *OrganizationCache {
+	return &OrganizationCache{
 		redis:     infra.NewRedisManager(),
 		orgRepo:   repo.NewOrganizationRepo(),
 		keyPrefix: "organization:",
 	}
 }
 
-func (c *organizationCache) Set(organization model.Organization) error {
+func (c *OrganizationCache) Set(organization model.Organization) error {
 	b, err := json.Marshal(organization)
 	if err != nil {
 		return err
@@ -55,7 +44,7 @@ func (c *organizationCache) Set(organization model.Organization) error {
 	return nil
 }
 
-func (c *organizationCache) Get(id string) (model.Organization, error) {
+func (c *OrganizationCache) Get(id string) (model.Organization, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
@@ -67,7 +56,7 @@ func (c *organizationCache) Get(id string) (model.Organization, error) {
 	return res, nil
 }
 
-func (c *organizationCache) Refresh(id string) (model.Organization, error) {
+func (c *OrganizationCache) Refresh(id string) (model.Organization, error) {
 	res, err := c.orgRepo.Find(id)
 	if err != nil {
 		return nil, err
@@ -78,7 +67,7 @@ func (c *organizationCache) Refresh(id string) (model.Organization, error) {
 	return res, nil
 }
 
-func (c *organizationCache) Delete(id string) error {
+func (c *OrganizationCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
 		return err
 	}

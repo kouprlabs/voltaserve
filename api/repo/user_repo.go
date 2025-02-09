@@ -20,21 +20,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 )
 
-type UserRepo interface {
-	Find(id string) (model.User, error)
-	FindByEmail(email string) (model.User, error)
-	FindAll() ([]model.User, error)
-	Count() (int64, error)
-}
-
-func NewUserRepo() UserRepo {
-	return newUserRepo()
-}
-
-func NewUser() model.User {
-	return &userEntity{}
-}
-
 type userEntity struct {
 	ID                     string  `gorm:"column:id"                       json:"id"`
 	FullName               string  `gorm:"column:full_name"                json:"fullName"`
@@ -87,17 +72,21 @@ func (u userEntity) GetUpdateTime() *string {
 	return u.UpdateTime
 }
 
-type userRepo struct {
+func NewUser() model.User {
+	return &userEntity{}
+}
+
+type UserRepo struct {
 	db *gorm.DB
 }
 
-func newUserRepo() *userRepo {
-	return &userRepo{
+func NewUserRepo() *UserRepo {
+	return &UserRepo{
 		db: infra.NewPostgresManager().GetDBOrPanic(),
 	}
 }
 
-func (repo *userRepo) Find(id string) (model.User, error) {
+func (repo *UserRepo) Find(id string) (model.User, error) {
 	res := userEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
@@ -110,7 +99,7 @@ func (repo *userRepo) Find(id string) (model.User, error) {
 	return &res, nil
 }
 
-func (repo *userRepo) FindByEmail(email string) (model.User, error) {
+func (repo *UserRepo) FindByEmail(email string) (model.User, error) {
 	res := userEntity{}
 	db := repo.db.Where("email = ?", email).First(&res)
 	if db.Error != nil {
@@ -123,7 +112,7 @@ func (repo *userRepo) FindByEmail(email string) (model.User, error) {
 	return &res, nil
 }
 
-func (repo *userRepo) FindAll() ([]model.User, error) {
+func (repo *UserRepo) FindAll() ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.Raw(`SELECT * FROM "user"`).Scan(&entities)
 	if db.Error != nil {
@@ -136,7 +125,7 @@ func (repo *userRepo) FindAll() ([]model.User, error) {
 	return res, nil
 }
 
-func (repo *userRepo) Count() (int64, error) {
+func (repo *UserRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&userEntity{}).Count(&count)
 	if db.Error != nil {

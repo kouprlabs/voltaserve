@@ -28,20 +28,20 @@ import (
 )
 
 type OrganizationService struct {
-	orgRepo        repo.OrganizationRepo
-	orgCache       cache.OrganizationCache
-	orgGuard       guard.OrganizationGuard
+	orgRepo        *repo.OrganizationRepo
+	orgCache       *cache.OrganizationCache
+	orgGuard       *guard.OrganizationGuard
 	orgMapper      *organizationMapper
-	orgSearch      search.OrganizationSearch
-	userSearch     search.UserSearch
+	orgSearch      *search.OrganizationSearch
+	userSearch     *search.UserSearch
 	userMapper     *userMapper
-	userRepo       repo.UserRepo
-	groupCache     cache.GroupCache
-	groupRepo      repo.GroupRepo
+	userRepo       *repo.UserRepo
+	groupCache     *cache.GroupCache
+	groupRepo      *repo.GroupRepo
 	groupService   *GroupService
 	groupMapper    *groupMapper
-	workspaceCache cache.WorkspaceCache
-	workspaceRepo  repo.WorkspaceRepo
+	workspaceCache *cache.WorkspaceCache
+	workspaceRepo  *repo.WorkspaceRepo
 	config         *config.Config
 }
 
@@ -452,7 +452,7 @@ func (svc *OrganizationService) sync(org model.Organization) error {
 }
 
 type organizationMapper struct {
-	groupCache cache.GroupCache
+	groupCache *cache.GroupCache
 }
 
 func newOrganizationMapper() *organizationMapper {

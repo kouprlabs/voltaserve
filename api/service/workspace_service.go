@@ -30,14 +30,14 @@ import (
 )
 
 type WorkspaceService struct {
-	workspaceRepo   repo.WorkspaceRepo
-	workspaceCache  cache.WorkspaceCache
-	workspaceGuard  guard.WorkspaceGuard
-	workspaceSearch search.WorkspaceSearch
+	workspaceRepo   *repo.WorkspaceRepo
+	workspaceCache  *cache.WorkspaceCache
+	workspaceGuard  *guard.WorkspaceGuard
+	workspaceSearch *search.WorkspaceSearch
 	workspaceMapper *workspaceMapper
-	fileRepo        repo.FileRepo
-	fileCache       cache.FileCache
-	fileGuard       guard.FileGuard
+	fileRepo        *repo.FileRepo
+	fileCache       *cache.FileCache
+	fileGuard       *guard.FileGuard
 	fileMapper      *fileMapper
 	s3              infra.S3Manager
 	config          *config.Config
@@ -497,9 +497,9 @@ func (svc *WorkspaceService) sync(workspace model.Workspace) error {
 }
 
 type workspaceMapper struct {
-	orgCache   cache.OrganizationCache
+	orgCache   *cache.OrganizationCache
 	orgMapper  *organizationMapper
-	groupCache cache.GroupCache
+	groupCache *cache.GroupCache
 }
 
 func newWorkspaceMapper() *workspaceMapper {
