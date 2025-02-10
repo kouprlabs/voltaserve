@@ -72,7 +72,7 @@ func createUser() (string, error) {
 		return "", nil
 	}
 	db = db.Exec("INSERT INTO \"user\" (id, full_name, username, email, password_hash, create_time) VALUES (?, ?, ?, ?, ?, ?)",
-		userID, "Test", "test@voltaserve.com", "test@voltaserve.com", "", helper.NewTimestamp())
+		userID, "user", "user@voltaserve.com", "user@voltaserve.com", "", helper.NewTimestamp())
 	if db.Error != nil {
 		return "", db.Error
 	}
@@ -106,7 +106,7 @@ func createWorkspace(orgID string, userID string) (*service.Workspace, string, e
 func createFile(workspaceID string, workspaceRootID string, userID string) (*service.File, error) {
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
 		WorkspaceID: workspaceID,
-		Name:        "workspace",
+		Name:        "file",
 		Type:        model.FileTypeFile,
 		ParentID:    workspaceRootID,
 	}, userID)
