@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gosimple/slug"
 	"github.com/minio/minio-go/v7"
 	"github.com/reactivex/rxgo/v2"
 
@@ -207,7 +208,7 @@ func (svc *FileService) FindGroupPermissions(id string, userID string) ([]*Group
 	return svc.filePermission.findGroupPermissions(id, userID)
 }
 
-func (svc *FileService) Reprocess(id string, userID string) (*FileReprocessResponse, error) {
+func (svc *FileService) Reprocess(id string, userID string) (*FileReprocessResult, error) {
 	return svc.fileReprocess.reprocess(id, userID)
 }
 
@@ -257,7 +258,7 @@ func (svc *fileCreate) create(opts FileCreateOptions, userID string) (*File, err
 		Name:        helper.FilenameFromPath(path),
 		Type:        opts.Type,
 		ParentID:    parentID,
-	}, userID)
+	}, len(path) == 1, userID)
 }
 
 func (svc *fileCreate) createDirectoriesForPath(path []string, parentID string, workspaceID string, userID string) (*string, error) {
@@ -274,7 +275,7 @@ func (svc *fileCreate) createDirectoriesForPath(path []string, parentID string, 
 				Type:        model.FileTypeFolder,
 				ParentID:    parentID,
 				WorkspaceID: workspaceID,
-			}, userID)
+			}, false, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -284,7 +285,7 @@ func (svc *fileCreate) createDirectoriesForPath(path []string, parentID string, 
 	return &parentID, nil
 }
 
-func (svc *fileCreate) performCreate(opts FileCreateOptions, userID string) (*File, error) {
+func (svc *fileCreate) performCreate(opts FileCreateOptions, failOnDuplicateName bool, userID string) (*File, error) {
 	if len(opts.ParentID) > 0 {
 		if err := svc.validateParent(opts.ParentID, userID); err != nil {
 			return nil, err
@@ -294,11 +295,15 @@ func (svc *fileCreate) performCreate(opts FileCreateOptions, userID string) (*Fi
 			return nil, err
 		}
 		if existing != nil {
-			res, err := svc.fileMapper.mapOne(existing, userID)
-			if err != nil {
-				return nil, err
+			if failOnDuplicateName {
+				return nil, errorpkg.NewFileWithSimilarNameExistsError()
+			} else {
+				res, err := svc.fileMapper.mapOne(existing, userID)
+				if err != nil {
+					return nil, err
+				}
+				return res, nil
 			}
-			return res, nil
 		}
 	}
 	file, err := svc.fileRepo.Insert(repo.FileInsertOptions{
@@ -395,6 +400,9 @@ func (svc *fileFetch) findByPath(path string, userID string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := svc.validatePath(path); err != nil {
+		return nil, err
+	}
 	if path == "/" {
 		return svc.getUserAsFile(user), nil
 	}
@@ -402,7 +410,7 @@ func (svc *fileFetch) findByPath(path string, userID string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceSvc.Find(helper.WorkspaceIDFromSlug(components[0]), userID)
+	workspace, err := svc.workspaceSvc.Find(svc.workspaceIDFromSlug(components[0]), userID)
 	if err != nil {
 		return nil, err
 	}
@@ -413,6 +421,9 @@ func (svc *fileFetch) findByPath(path string, userID string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := svc.validatePathForFileType(path, file.GetType()); err != nil {
+		return nil, err
+	}
 	res, err := svc.fileMapper.mapOne(file, userID)
 	if err != nil {
 		return nil, err
@@ -421,6 +432,9 @@ func (svc *fileFetch) findByPath(path string, userID string) (*File, error) {
 }
 
 func (svc *fileFetch) listByPath(path string, userID string) ([]*File, error) {
+	if err := svc.validatePath(path); err != nil {
+		return nil, err
+	}
 	if path == "/" {
 		return svc.getWorkspacesAsFiles(userID)
 	}
@@ -430,6 +444,9 @@ func (svc *fileFetch) listByPath(path string, userID string) ([]*File, error) {
 	}
 	file, err := svc.getFileFromComponents(components, userID)
 	if err != nil {
+		return nil, err
+	}
+	if err := svc.validatePathForFileType(path, file.GetType()); err != nil {
 		return nil, err
 	}
 	if file.GetType() == model.FileTypeFolder {
@@ -450,7 +467,7 @@ func (svc *fileFetch) listByPath(path string, userID string) ([]*File, error) {
 		return res, nil
 	} else {
 		// This should never happen
-		return nil, errorpkg.NewInternalServerError(fmt.Errorf("invalid file type %s", file.GetType()))
+		return nil, errorpkg.NewFileTypeIsInvalid(file.GetType())
 	}
 }
 
@@ -493,7 +510,7 @@ func (svc *fileFetch) getWorkspaceAsFile(workspace *Workspace) *File {
 	return &File{
 		ID:          workspace.RootID,
 		WorkspaceID: workspace.ID,
-		Name:        helper.SlugFromWorkspace(workspace.ID, workspace.Name),
+		Name:        svc.slugFromWorkspace(workspace.ID, workspace.Name),
 		Type:        model.FileTypeFolder,
 		Permission:  workspace.Permission,
 		CreateTime:  workspace.CreateTime,
@@ -514,7 +531,7 @@ func (svc *fileFetch) getUserAsFile(user model.User) *File {
 }
 
 func (svc *fileFetch) getFileFromComponents(components []string, userID string) (model.File, error) {
-	workspace, err := svc.workspaceRepo.Find(helper.WorkspaceIDFromSlug(components[0]))
+	workspace, err := svc.workspaceRepo.Find(svc.workspaceIDFromSlug(components[0]))
 	if err != nil {
 		return nil, err
 	}
@@ -578,6 +595,29 @@ func (svc *fileFetch) getComponentsFromPath(path string) ([]string, error) {
 		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
 	return components, nil
+}
+
+func (svc *fileFetch) slugFromWorkspace(id string, name string) string {
+	return fmt.Sprintf("%s-%s", slug.Make(name), id)
+}
+
+func (svc *fileFetch) workspaceIDFromSlug(slug string) string {
+	parts := strings.Split(slug, "-")
+	return parts[len(parts)-1]
+}
+
+func (svc *fileFetch) validatePath(path string) error {
+	if !strings.HasPrefix(path, "/") {
+		return errorpkg.NewFilePathMissingLeadingSlash()
+	}
+	return nil
+}
+
+func (svc *fileFetch) validatePathForFileType(path string, fileType string) error {
+	if fileType == model.FileTypeFile && strings.HasSuffix(path, "/") {
+		return errorpkg.NewFilePathOfTypeFileHasTrailingSlash()
+	}
+	return nil
 }
 
 type fileList struct {
@@ -1704,8 +1744,8 @@ func (svc *filePermission) revokeOneUserPermission(id string, assigneeID string,
 	if err := svc.fileRepo.RevokeUserPermission(tree, assigneeID); err != nil {
 		return err
 	}
-	for _, f := range tree {
-		if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
+	for _, leaf := range tree {
+		if _, err := svc.fileCache.Refresh(leaf.GetID()); err != nil {
 			return err
 		}
 	}
@@ -1758,8 +1798,8 @@ func (svc *filePermission) revokeOneGroupPermission(id string, groupID string, u
 	if err := svc.fileRepo.RevokeGroupPermission(tree, groupID); err != nil {
 		return err
 	}
-	for _, f := range tree {
-		if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
+	for _, leaf := range tree {
+		if _, err := svc.fileCache.Refresh(leaf.GetID()); err != nil {
 			return err
 		}
 	}
@@ -1812,8 +1852,8 @@ func (svc *filePermission) refreshPathAndTree(id string) error {
 	if err != nil {
 		return err
 	}
-	for _, f := range tree {
-		if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
+	for _, leaf := range tree {
+		if _, err := svc.fileCache.Refresh(leaf.GetID()); err != nil {
 			return err
 		}
 	}
@@ -1901,7 +1941,8 @@ type fileReprocess struct {
 	snapshotSvc    *SnapshotService
 	taskCache      *cache.TaskCache
 	taskSvc        *TaskService
-	pipelineClient *conversion_client.PipelineClient
+	fileIdent      *infra.FileIdentifier
+	pipelineClient conversion_client.PipelineClient
 }
 
 func newFileReprocess() *fileReprocess {
@@ -1913,29 +1954,30 @@ func newFileReprocess() *fileReprocess {
 		snapshotSvc:    NewSnapshotService(),
 		taskCache:      cache.NewTaskCache(),
 		taskSvc:        NewTaskService(),
+		fileIdent:      infra.NewFileIdentifier(),
 		pipelineClient: conversion_client.NewPipelineClient(),
 	}
 }
 
-type FileReprocessResponse struct {
+type FileReprocessResult struct {
 	Accepted []string `json:"accepted"`
 	Rejected []string `json:"rejected"`
 }
 
-func (r *FileReprocessResponse) AppendAccepted(id string) {
+func (r *FileReprocessResult) AppendAccepted(id string) {
 	if !slices.Contains(r.Accepted, id) {
 		r.Accepted = append(r.Accepted, id)
 	}
 }
 
-func (r *FileReprocessResponse) AppendRejected(id string) {
+func (r *FileReprocessResult) AppendRejected(id string) {
 	if !slices.Contains(r.Rejected, id) {
 		r.Rejected = append(r.Rejected, id)
 	}
 }
 
-func (svc *fileReprocess) reprocess(id string, userID string) (*FileReprocessResponse, error) {
-	resp := &FileReprocessResponse{
+func (svc *fileReprocess) reprocess(id string, userID string) (*FileReprocessResult, error) {
+	resp := &FileReprocessResult{
 		// We intend to send an empty array to the caller, better than nil
 		Accepted: []string{},
 		Rejected: []string{},
@@ -1949,10 +1991,16 @@ func (svc *fileReprocess) reprocess(id string, userID string) (*FileReprocessRes
 		return nil, err
 	}
 	for _, leaf := range tree {
-		if svc.performReprocess(leaf, userID) {
-			resp.AppendAccepted(leaf.GetID())
-		} else {
-			resp.AppendRejected(leaf.GetID())
+		snapshot, err := svc.snapshotCache.Get(*leaf.GetSnapshotID())
+		if err != nil {
+			return nil, err
+		}
+		if *snapshot.GetOriginal().Size <= helper.MegabyteToByte(svc.fileIdent.GetProcessingLimitMB(leaf.GetName())) {
+			if svc.performReprocess(leaf, userID) {
+				resp.AppendAccepted(leaf.GetID())
+			} else {
+				resp.AppendRejected(leaf.GetID())
+			}
 		}
 	}
 	return resp, nil
@@ -2067,7 +2115,7 @@ type fileStore struct {
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
 	s3             infra.S3Manager
-	pipelineClient *conversion_client.PipelineClient
+	pipelineClient conversion_client.PipelineClient
 }
 
 func newFileStore() *fileStore {
@@ -2113,7 +2161,7 @@ func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*F
 		return nil, err
 	}
 	if !props.ExceedsProcessingLimit {
-		if err := svc.process(file, snapshot, props, userID); err != nil {
+		if err := svc.runPipeline(file, snapshot, props, userID); err != nil {
 			return nil, err
 		}
 	}
@@ -2241,7 +2289,7 @@ func (svc *fileStore) createTask(file model.File, userID string) (model.Task, er
 	return res, nil
 }
 
-func (svc *fileStore) process(file model.File, snapshot model.Snapshot, props fileStoreProperties, userID string) error {
+func (svc *fileStore) runPipeline(file model.File, snapshot model.Snapshot, props fileStoreProperties, userID string) error {
 	task, err := svc.createTask(file, userID)
 	if err != nil {
 		return err

@@ -36,7 +36,7 @@ type MosaicService struct {
 	taskMapper     *taskMapper
 	s3             infra.S3Manager
 	mosaicClient   *mosaic_client.MosaicClient
-	pipelineClient *conversion_client.PipelineClient
+	pipelineClient conversion_client.PipelineClient
 	fileIdent      *infra.FileIdentifier
 }
 

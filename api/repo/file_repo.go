@@ -573,11 +573,11 @@ func (repo *FileRepo) GrantUserPermission(id string, userID string, permission s
 	if err != nil {
 		return err
 	}
-	for _, f := range tree {
+	for _, leaf := range tree {
 		db := repo.db.
 			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
                   VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-				helper.NewID(), userID, f.GetID(), permission, helper.NewTimestamp(), permission)
+				helper.NewID(), userID, leaf.GetID(), permission, helper.NewTimestamp(), permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -587,10 +587,10 @@ func (repo *FileRepo) GrantUserPermission(id string, userID string, permission s
 }
 
 func (repo *FileRepo) RevokeUserPermission(tree []model.File, userID string) error {
-	for _, f := range tree {
+	for _, leaf := range tree {
 		db := repo.db.
 			Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?",
-				userID, f.GetID())
+				userID, leaf.GetID())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -630,11 +630,11 @@ func (repo *FileRepo) GrantGroupPermission(id string, groupID string, permission
 	if err != nil {
 		return err
 	}
-	for _, f := range tree {
+	for _, leaf := range tree {
 		db := repo.db.
 			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
                   VALUES (?, ?, ?, ?, ?) ON CONFLICT (group_id, resource_id) DO UPDATE SET permission = ?`,
-				helper.NewID(), groupID, f.GetID(), permission, helper.NewTimestamp(), permission)
+				helper.NewID(), groupID, leaf.GetID(), permission, helper.NewTimestamp(), permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -644,10 +644,10 @@ func (repo *FileRepo) GrantGroupPermission(id string, groupID string, permission
 }
 
 func (repo *FileRepo) RevokeGroupPermission(tree []model.File, groupID string) error {
-	for _, f := range tree {
+	for _, leaf := range tree {
 		db := repo.db.
 			Exec("DELETE FROM grouppermission WHERE group_id = ? AND resource_id = ?",
-				groupID, f.GetID())
+				groupID, leaf.GetID())
 		if db.Error != nil {
 			return db.Error
 		}
