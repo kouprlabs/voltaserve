@@ -116,8 +116,8 @@ func (suite *FileServiceTestSuite) TestCreate() {
 	for _, path := range pathFiles {
 		pathComponents = append(pathComponents, path.Name)
 	}
-	path := strings.Join(pathComponents, "/")
-	suite.Equal("root/a/b/c/test-file.txt", path)
+	path := strings.Join(pathComponents[1:], "/")
+	suite.Equal("a/b/c/test-file.txt", path)
 }
 
 func (suite *FileServiceTestSuite) TestFind() {
@@ -167,7 +167,17 @@ func (suite *FileServiceTestSuite) TestFindByPath() {
 	// Test finding a non-existent path
 	_, err = suite.fileSvc.FindByPath(fmt.Sprintf("/%s/non-existent-path", suite.workspace.ID), suite.userID)
 	suite.Require().Error(err)
-	suite.Contains(err.Error(), errorpkg.NewFileNotFoundError(err).Error())
+	suite.Equal(err.Error(), errorpkg.NewFileNotFoundError(err).Error())
+
+	// Test finding the file without a leading slash
+	_, err = suite.fileSvc.FindByPath(fmt.Sprintf("%s/test-folder/test-file.txt/", suite.workspace.ID), suite.userID)
+	suite.Require().Error(err)
+	suite.Equal(err.Error(), errorpkg.NewFilePathMissingLeadingSlash().Error())
+
+	// Test finding the file with a trailing slash
+	_, err = suite.fileSvc.FindByPath(fmt.Sprintf("/%s/test-folder/test-file.txt/", suite.workspace.ID), suite.userID)
+	suite.Require().Error(err)
+	suite.Equal(err.Error(), errorpkg.NewFilePathOfTypeFileHasTrailingSlash().Error())
 }
 
 func (suite *FileServiceTestSuite) TestListByPath() {
@@ -179,7 +189,7 @@ func (suite *FileServiceTestSuite) TestListByPath() {
 		ParentID:    suite.workspace.RootID,
 	}, suite.userID)
 	suite.Require().NoError(err)
-	_, err = suite.fileSvc.Create(service.FileCreateOptions{
+	file, err := suite.fileSvc.Create(service.FileCreateOptions{
 		WorkspaceID: suite.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
@@ -191,7 +201,23 @@ func (suite *FileServiceTestSuite) TestListByPath() {
 	files, err := suite.fileSvc.ListByPath(fmt.Sprintf("/%s/test-folder", suite.workspace.ID), suite.userID)
 	suite.Require().NoError(err)
 	suite.Len(files, 1)
-	suite.Equal("test-file.txt", files[0].Name)
+	suite.Equal(file.ID, files[0].ID)
+
+	// Test listing the file
+	_, err = suite.fileSvc.ListByPath(fmt.Sprintf("/%s/test-folder/test-file.txt", suite.workspace.ID), suite.userID)
+	suite.Require().NoError(err)
+	suite.Len(files, 1)
+	suite.Equal(file.ID, files[0].ID)
+
+	// Test listing files in the folder without a leading slash
+	_, err = suite.fileSvc.ListByPath(fmt.Sprintf("%s/test-folder", suite.workspace.ID), suite.userID)
+	suite.Require().Error(err)
+	suite.Equal(err.Error(), errorpkg.NewFilePathMissingLeadingSlash().Error())
+
+	// Test listing the file with a trailing slash
+	_, err = suite.fileSvc.ListByPath(fmt.Sprintf("/%s/test-folder/test-file.txt/", suite.workspace.ID), suite.userID)
+	suite.Require().Error(err)
+	suite.Equal(err.Error(), errorpkg.NewFilePathOfTypeFileHasTrailingSlash().Error())
 }
 
 func (suite *FileServiceTestSuite) TestFindPath() {

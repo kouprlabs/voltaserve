@@ -377,6 +377,36 @@ func NewFileIsNotAFileError(file model.File) *ErrorResponse {
 	)
 }
 
+func NewFilePathMissingLeadingSlash() *ErrorResponse {
+	return NewErrorResponse(
+		"file_path_is_missing_leading_slash",
+		http.StatusBadRequest,
+		"File path is missing leading slash.",
+		"File path is missing leading slash.",
+		nil,
+	)
+}
+
+func NewFilePathOfTypeFileHasTrailingSlash() *ErrorResponse {
+	return NewErrorResponse(
+		"file_path_of_type_file_has_trailing_slash",
+		http.StatusBadRequest,
+		"File path of type file has trailing slash.",
+		"File path of type file has trailing slash.",
+		nil,
+	)
+}
+
+func NewFileTypeIsInvalid(fileType string) *ErrorResponse {
+	return NewErrorResponse(
+		"file_type_is_invalid",
+		http.StatusInternalServerError,
+		fmt.Sprintf("File type '%s' is invalid.", fileType),
+		fmt.Sprintf("File type '%s' is invalid.", fileType),
+		nil,
+	)
+}
+
 func NewTargetIsGrandChildOfSourceError(file model.File) *ErrorResponse {
 	return NewErrorResponse(
 		"target_is_grant_child_of_source",

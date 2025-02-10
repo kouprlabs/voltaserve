@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gosimple/slug"
 	"github.com/minio/minio-go/v7"
 	"github.com/reactivex/rxgo/v2"
 
@@ -399,6 +400,9 @@ func (svc *fileFetch) findByPath(path string, userID string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := svc.validatePath(path); err != nil {
+		return nil, err
+	}
 	if path == "/" {
 		return svc.getUserAsFile(user), nil
 	}
@@ -406,7 +410,7 @@ func (svc *fileFetch) findByPath(path string, userID string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceSvc.Find(helper.WorkspaceIDFromSlug(components[0]), userID)
+	workspace, err := svc.workspaceSvc.Find(svc.workspaceIDFromSlug(components[0]), userID)
 	if err != nil {
 		return nil, err
 	}
@@ -417,6 +421,9 @@ func (svc *fileFetch) findByPath(path string, userID string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := svc.validatePathForFileType(path, file.GetType()); err != nil {
+		return nil, err
+	}
 	res, err := svc.fileMapper.mapOne(file, userID)
 	if err != nil {
 		return nil, err
@@ -425,6 +432,9 @@ func (svc *fileFetch) findByPath(path string, userID string) (*File, error) {
 }
 
 func (svc *fileFetch) listByPath(path string, userID string) ([]*File, error) {
+	if err := svc.validatePath(path); err != nil {
+		return nil, err
+	}
 	if path == "/" {
 		return svc.getWorkspacesAsFiles(userID)
 	}
@@ -434,6 +444,9 @@ func (svc *fileFetch) listByPath(path string, userID string) ([]*File, error) {
 	}
 	file, err := svc.getFileFromComponents(components, userID)
 	if err != nil {
+		return nil, err
+	}
+	if err := svc.validatePathForFileType(path, file.GetType()); err != nil {
 		return nil, err
 	}
 	if file.GetType() == model.FileTypeFolder {
@@ -454,7 +467,7 @@ func (svc *fileFetch) listByPath(path string, userID string) ([]*File, error) {
 		return res, nil
 	} else {
 		// This should never happen
-		return nil, errorpkg.NewInternalServerError(fmt.Errorf("invalid file type %s", file.GetType()))
+		return nil, errorpkg.NewFileTypeIsInvalid(file.GetType())
 	}
 }
 
@@ -497,7 +510,7 @@ func (svc *fileFetch) getWorkspaceAsFile(workspace *Workspace) *File {
 	return &File{
 		ID:          workspace.RootID,
 		WorkspaceID: workspace.ID,
-		Name:        helper.SlugFromWorkspace(workspace.ID, workspace.Name),
+		Name:        svc.slugFromWorkspace(workspace.ID, workspace.Name),
 		Type:        model.FileTypeFolder,
 		Permission:  workspace.Permission,
 		CreateTime:  workspace.CreateTime,
@@ -518,7 +531,7 @@ func (svc *fileFetch) getUserAsFile(user model.User) *File {
 }
 
 func (svc *fileFetch) getFileFromComponents(components []string, userID string) (model.File, error) {
-	workspace, err := svc.workspaceRepo.Find(helper.WorkspaceIDFromSlug(components[0]))
+	workspace, err := svc.workspaceRepo.Find(svc.workspaceIDFromSlug(components[0]))
 	if err != nil {
 		return nil, err
 	}
@@ -582,6 +595,29 @@ func (svc *fileFetch) getComponentsFromPath(path string) ([]string, error) {
 		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
 	return components, nil
+}
+
+func (svc *fileFetch) slugFromWorkspace(id string, name string) string {
+	return fmt.Sprintf("%s-%s", slug.Make(name), id)
+}
+
+func (svc *fileFetch) workspaceIDFromSlug(slug string) string {
+	parts := strings.Split(slug, "-")
+	return parts[len(parts)-1]
+}
+
+func (svc *fileFetch) validatePath(path string) error {
+	if !strings.HasPrefix(path, "/") {
+		return errorpkg.NewFilePathMissingLeadingSlash()
+	}
+	return nil
+}
+
+func (svc *fileFetch) validatePathForFileType(path string, fileType string) error {
+	if fileType == model.FileTypeFile && strings.HasSuffix(path, "/") {
+		return errorpkg.NewFilePathOfTypeFileHasTrailingSlash()
+	}
+	return nil
 }
 
 type fileList struct {
