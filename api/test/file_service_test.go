@@ -168,7 +168,7 @@ func (suite *FileServiceTestSuite) TestFindByPath() {
 	suite.Equal(err.Error(), errorpkg.NewFileNotFoundError(err).Error())
 
 	// Test finding the file without a leading slash
-	_, err = suite.fileSvc.FindByPath(fmt.Sprintf("%s/test-folder/test-file.txt/", suite.workspace.ID), suite.userIDs[0])
+	_, err = suite.fileSvc.FindByPath(fmt.Sprintf("%s/test-folder/test-file.txt", suite.workspace.ID), suite.userIDs[0])
 	suite.Require().Error(err)
 	suite.Equal(err.Error(), errorpkg.NewFilePathMissingLeadingSlash().Error())
 
@@ -277,7 +277,7 @@ func (suite *FileServiceTestSuite) TestList() {
 		ParentID:    suite.workspace.RootID,
 	}, suite.userIDs[0])
 	suite.Require().NoError(err)
-	_, err = suite.fileSvc.Create(service.FileCreateOptions{
+	file, err := suite.fileSvc.Create(service.FileCreateOptions{
 		WorkspaceID: suite.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
@@ -289,7 +289,7 @@ func (suite *FileServiceTestSuite) TestList() {
 	list, err := suite.fileSvc.List(folder.ID, service.FileListOptions{Page: 1, Size: 10}, suite.userIDs[0])
 	suite.Require().NoError(err)
 	suite.Len(list.Data, 1)
-	suite.Equal("test-file.txt", list.Data[0].Name)
+	suite.Equal(file.ID, list.Data[0].ID)
 }
 
 func (suite *FileServiceTestSuite) TestComputeSize() {
@@ -545,15 +545,22 @@ func (suite *FileServiceTestSuite) TestReprocess() {
 	suite.Require().NoError(err)
 
 	// Store the file
-	_, err = suite.fileSvc.Store(file.ID, service.FileStoreOptions{
+	file, err = suite.fileSvc.Store(file.ID, service.FileStoreOptions{
 		Path: helper.ToPtr(filepath.Join("assets", "file.txt")),
 	}, suite.userIDs[0])
+	suite.Require().NoError(err)
+
+	// Alter task ID status to allow reprocessing
+	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, service.TaskPatchOptions{
+		Fields: []string{service.TaskFieldStatus},
+		Status: helper.ToPtr(string(model.TaskStatusError)),
+	})
 	suite.Require().NoError(err)
 
 	// Test reprocessing the file
 	reprocessResult, err := suite.fileSvc.Reprocess(file.ID, suite.userIDs[0])
 	suite.Require().NoError(err)
-	suite.Empty(reprocessResult.Accepted)
+	suite.Len(reprocessResult.Accepted, 1)
 }
 
 func (suite *FileServiceTestSuite) createUsers() ([]string, error) {

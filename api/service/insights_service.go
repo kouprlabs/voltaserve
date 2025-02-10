@@ -42,7 +42,7 @@ type InsightsService struct {
 	taskMapper     *taskMapper
 	s3             infra.S3Manager
 	languageClient *language_client.LanguageClient
-	pipelineClient *conversion_client.PipelineClient
+	pipelineClient conversion_client.PipelineClient
 	fileIdent      *infra.FileIdentifier
 }
 

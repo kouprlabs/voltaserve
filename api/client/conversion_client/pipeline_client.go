@@ -19,12 +19,24 @@ import (
 	"github.com/kouprlabs/voltaserve/api/config"
 )
 
-type PipelineClient struct {
+type PipelineClient interface {
+	Run(opts *PipelineRunOptions) error
+}
+
+func NewPipelineClient() PipelineClient {
+	if config.GetConfig().ConversionURL != "" {
+		return newPipelineClient()
+	} else {
+		return NewMockPipelineClient()
+	}
+}
+
+type pipelineClient struct {
 	config *config.Config
 }
 
-func NewPipelineClient() *PipelineClient {
-	return &PipelineClient{
+func newPipelineClient() *pipelineClient {
+	return &pipelineClient{
 		config: config.GetConfig(),
 	}
 }
@@ -43,7 +55,7 @@ type PipelineRunOptions struct {
 	Payload    map[string]string `json:"payload,omitempty"`
 }
 
-func (cl *PipelineClient) Run(opts *PipelineRunOptions) error {
+func (cl *pipelineClient) Run(opts *PipelineRunOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
@@ -64,5 +76,15 @@ func (cl *PipelineClient) Run(opts *PipelineRunOptions) error {
 	if err := resp.Body.Close(); err != nil {
 		return err
 	}
+	return nil
+}
+
+type MockPipelineClient struct{}
+
+func NewMockPipelineClient() *MockPipelineClient {
+	return &MockPipelineClient{}
+}
+
+func (m *MockPipelineClient) Run(opts *PipelineRunOptions) error {
 	return nil
 }

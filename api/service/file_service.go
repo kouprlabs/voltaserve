@@ -1942,7 +1942,7 @@ type fileReprocess struct {
 	taskCache      *cache.TaskCache
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
-	pipelineClient *conversion_client.PipelineClient
+	pipelineClient conversion_client.PipelineClient
 }
 
 func newFileReprocess() *fileReprocess {
@@ -2115,7 +2115,7 @@ type fileStore struct {
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
 	s3             infra.S3Manager
-	pipelineClient *conversion_client.PipelineClient
+	pipelineClient conversion_client.PipelineClient
 }
 
 func newFileStore() *fileStore {
