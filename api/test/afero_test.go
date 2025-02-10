@@ -20,6 +20,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
@@ -31,44 +32,35 @@ import (
 
 func TestAfero_UploadAndDownload(t *testing.T) {
 	userID, err := createUser()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	org, err := createOrganization(userID)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	workspace, bucket, err := createWorkspace(org.ID, userID)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	emptyFile, err := createFile(workspace.ID, workspace.RootID, userID)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	path := path.Join("assets", "file.txt")
 	stat, err := os.Stat(path)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	content, err := os.ReadFile(path) //nolint:gosec // Used for tests only
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	snapshotID := helper.NewID()
 	file, err := uploadFile(path, stat.Size(), bucket, emptyFile.ID, snapshotID, userID)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	assert.NotNil(t, file.Snapshot)
 	assert.Equal(t, file.Snapshot.ID, snapshotID)
 	assert.Equal(t, *file.Snapshot.Original.Size, stat.Size())
 	assert.Equal(t, file.Snapshot.Original.Extension, filepath.Ext(path))
 	assert.Equal(t, int64(1), file.Snapshot.Version)
+
 	downloadResult, downloadContent, err := downloadFile(file.ID, userID)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	assert.Equal(t, downloadResult.File.GetID(), file.ID)
 	assert.Equal(t, downloadContent, string(content))
 }

@@ -16,6 +16,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
@@ -29,7 +30,7 @@ func TestPostgres_InsertAndFind(t *testing.T) {
 		Name: "organization",
 	})
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 	workspaceRepo := repo.NewWorkspaceRepo()
 	workspace, err := workspaceRepo.Insert(repo.WorkspaceInsertOptions{
@@ -38,7 +39,7 @@ func TestPostgres_InsertAndFind(t *testing.T) {
 		OrganizationID: org.GetID(),
 	})
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 	fileRepo := repo.NewFileRepo()
 	file, err := fileRepo.Insert(repo.FileInsertOptions{
@@ -47,11 +48,11 @@ func TestPostgres_InsertAndFind(t *testing.T) {
 		WorkspaceID: workspace.GetID(),
 	})
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 	foundFile, err := fileRepo.Find(file.GetID())
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 	assert.Equal(t, file.GetID(), foundFile.GetID())
 }

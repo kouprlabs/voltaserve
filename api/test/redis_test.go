@@ -16,6 +16,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/helper"
@@ -31,11 +32,11 @@ func TestRedis_SetAndGet(t *testing.T) {
 		Type: model.FileTypeFile,
 	}
 	if err := fileCache.Set(repo.NewFileWithOptions(opts)); err != nil {
-		t.Fatal(err)
+		assert.NoError(t, err)
 	}
 	file, err := fileCache.Get(opts.ID)
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 	assert.Equal(t, file.GetID(), opts.ID)
 	assert.Equal(t, file.GetName(), opts.Name)

@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
@@ -31,19 +32,19 @@ func TestBleve_Query(t *testing.T) {
 	}
 	for _, v := range values {
 		if err := orgSearch.Index([]model.Organization{repo.NewOrganizationWithOptions(v)}); err != nil {
-			t.Fatal(err)
+			assert.NoError(t, err)
 		}
 	}
 	hits, err := orgSearch.Query("foo", infra.QueryOptions{Limit: 10})
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 	if assert.Len(t, hits, 1) {
 		assert.Equal(t, "org_a", hits[0].GetID())
 	}
 	hits, err = orgSearch.Query("world", infra.QueryOptions{Limit: 10})
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 	if assert.Len(t, hits, 1) {
 		assert.Equal(t, "org_b", hits[0].GetID())
@@ -77,7 +78,7 @@ func TestBleve_Filter(t *testing.T) {
 	}
 	for _, v := range values {
 		if err := fileSearch.Index([]model.File{repo.NewFileWithOptions(v)}); err != nil {
-			t.Fatal(err)
+			assert.NoError(t, err)
 		}
 	}
 	hits, err := fileSearch.Query("exercitation", infra.QueryOptions{
@@ -85,7 +86,7 @@ func TestBleve_Filter(t *testing.T) {
 		Filter: fmt.Sprintf("workspaceId=\"workspace_b\" AND type=\"%s\"", model.FileTypeFile),
 	})
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 	if assert.Len(t, hits, 1) {
 		assert.Equal(t, "file_b", hits[0].GetID())
