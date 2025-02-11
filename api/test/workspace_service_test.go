@@ -24,7 +24,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
-type WorkspaceServiceTestSuite struct {
+type WorkspaceServiceSuite struct {
 	suite.Suite
 	service *service.WorkspaceService
 	userIDs []string
@@ -32,10 +32,10 @@ type WorkspaceServiceTestSuite struct {
 }
 
 func TestWorkspaceServiceTestSuite(t *testing.T) {
-	suite.Run(t, new(WorkspaceServiceTestSuite))
+	suite.Run(t, new(WorkspaceServiceSuite))
 }
 
-func (suite *WorkspaceServiceTestSuite) SetupTest() {
+func (suite *WorkspaceServiceSuite) SetupTest() {
 	userIDs, err := suite.createUsers()
 	if err != nil {
 		suite.Fail(err.Error())
@@ -49,7 +49,7 @@ func (suite *WorkspaceServiceTestSuite) SetupTest() {
 	suite.org = org
 }
 
-func (suite *WorkspaceServiceTestSuite) TestCreate() {
+func (suite *WorkspaceServiceSuite) TestCreate() {
 	// Test successful creation
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -70,7 +70,7 @@ func (suite *WorkspaceServiceTestSuite) TestCreate() {
 	suite.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) TestFind() {
+func (suite *WorkspaceServiceSuite) TestFind() {
 	// Create a workspace to find
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -97,7 +97,7 @@ func (suite *WorkspaceServiceTestSuite) TestFind() {
 	suite.Equal(err.Error(), errorpkg.NewWorkspaceNotFoundError(err).Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) TestList() {
+func (suite *WorkspaceServiceSuite) TestList() {
 	// Create multiple workspaces
 	for i := range 5 {
 		opts := service.WorkspaceCreateOptions{
@@ -144,7 +144,7 @@ func (suite *WorkspaceServiceTestSuite) TestList() {
 	suite.True(firstCreateTime.After(secondCreateTime))
 }
 
-func (suite *WorkspaceServiceTestSuite) TestPatchName() {
+func (suite *WorkspaceServiceSuite) TestPatchName() {
 	// Create a workspace to patch
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -172,7 +172,7 @@ func (suite *WorkspaceServiceTestSuite) TestPatchName() {
 	suite.Equal(err.Error(), errorpkg.NewWorkspaceNotFoundError(err).Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) TestPatchStorageCapacity() {
+func (suite *WorkspaceServiceSuite) TestPatchStorageCapacity() {
 	// Create a workspace to patch
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -200,7 +200,7 @@ func (suite *WorkspaceServiceTestSuite) TestPatchStorageCapacity() {
 	suite.Equal(err.Error(), errorpkg.NewWorkspaceNotFoundError(err).Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) TestDelete() {
+func (suite *WorkspaceServiceSuite) TestDelete() {
 	// Create a workspace to delete
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -225,7 +225,7 @@ func (suite *WorkspaceServiceTestSuite) TestDelete() {
 	suite.Equal(err.Error(), errorpkg.NewWorkspaceNotFoundError(err).Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) TestHasEnoughSpaceForByteSize() {
+func (suite *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize() {
 	// Create a workspace to test
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -251,7 +251,7 @@ func (suite *WorkspaceServiceTestSuite) TestHasEnoughSpaceForByteSize() {
 	suite.Equal(err.Error(), errorpkg.NewWorkspaceNotFoundError(err).Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) createUsers() ([]string, error) {
+func (suite *WorkspaceServiceSuite) createUsers() ([]string, error) {
 	db, err := infra.NewPostgresManager().GetDB()
 	if err != nil {
 		return nil, nil
@@ -269,7 +269,7 @@ func (suite *WorkspaceServiceTestSuite) createUsers() ([]string, error) {
 	return ids, nil
 }
 
-func (suite *WorkspaceServiceTestSuite) createOrganization(userID string) (*service.Organization, error) {
+func (suite *WorkspaceServiceSuite) createOrganization(userID string) (*service.Organization, error) {
 	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{Name: "organization"}, userID)
 	if err != nil {
 		return nil, err
