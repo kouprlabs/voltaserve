@@ -35,6 +35,8 @@ type WorkspaceService struct {
 	workspaceGuard  *guard.WorkspaceGuard
 	workspaceSearch *search.WorkspaceSearch
 	workspaceMapper *workspaceMapper
+	orgCache        *cache.OrganizationCache
+	orgGuard        *guard.OrganizationGuard
 	fileRepo        *repo.FileRepo
 	fileCache       *cache.FileCache
 	fileGuard       *guard.FileGuard
@@ -50,6 +52,8 @@ func NewWorkspaceService() *WorkspaceService {
 		workspaceSearch: search.NewWorkspaceSearch(),
 		workspaceGuard:  guard.NewWorkspaceGuard(),
 		workspaceMapper: newWorkspaceMapper(),
+		orgCache:        cache.NewOrganizationCache(),
+		orgGuard:        guard.NewOrganizationGuard(),
 		fileRepo:        repo.NewFileRepo(),
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
@@ -90,6 +94,13 @@ type WorkspaceCreateOptions struct {
 }
 
 func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) (*Workspace, error) {
+	org, err := svc.orgCache.Get(opts.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionEditor); err != nil {
+		return nil, err
+	}
 	workspace, err := svc.createWorkspace(opts, userID)
 	if err != nil {
 		return nil, err
