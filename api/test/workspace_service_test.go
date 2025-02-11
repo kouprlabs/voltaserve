@@ -49,7 +49,7 @@ func (suite *WorkspaceServiceTestSuite) SetupTest() {
 	suite.org = org
 }
 
-func (suite *WorkspaceServiceTestSuite) TestCreateWorkspace() {
+func (suite *WorkspaceServiceTestSuite) TestCreate() {
 	// Test successful creation
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -70,7 +70,7 @@ func (suite *WorkspaceServiceTestSuite) TestCreateWorkspace() {
 	suite.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) TestFindWorkspace() {
+func (suite *WorkspaceServiceTestSuite) TestFind() {
 	// Create a workspace to find
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -97,7 +97,7 @@ func (suite *WorkspaceServiceTestSuite) TestFindWorkspace() {
 	suite.Equal(err.Error(), errorpkg.NewWorkspaceNotFoundError(err).Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) TestListWorkspaces() {
+func (suite *WorkspaceServiceTestSuite) TestList() {
 	// Create multiple workspaces
 	for i := range 5 {
 		opts := service.WorkspaceCreateOptions{
@@ -144,7 +144,7 @@ func (suite *WorkspaceServiceTestSuite) TestListWorkspaces() {
 	suite.True(firstCreateTime.After(secondCreateTime))
 }
 
-func (suite *WorkspaceServiceTestSuite) TestPatchWorkspaceName() {
+func (suite *WorkspaceServiceTestSuite) TestPatchName() {
 	// Create a workspace to patch
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -172,7 +172,7 @@ func (suite *WorkspaceServiceTestSuite) TestPatchWorkspaceName() {
 	suite.Equal(err.Error(), errorpkg.NewWorkspaceNotFoundError(err).Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) TestPatchWorkspaceStorageCapacity() {
+func (suite *WorkspaceServiceTestSuite) TestPatchStorageCapacity() {
 	// Create a workspace to patch
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -200,7 +200,7 @@ func (suite *WorkspaceServiceTestSuite) TestPatchWorkspaceStorageCapacity() {
 	suite.Equal(err.Error(), errorpkg.NewWorkspaceNotFoundError(err).Error())
 }
 
-func (suite *WorkspaceServiceTestSuite) TestDeleteWorkspace() {
+func (suite *WorkspaceServiceTestSuite) TestDelete() {
 	// Create a workspace to delete
 	opts := service.WorkspaceCreateOptions{
 		Name:            "workspace",
