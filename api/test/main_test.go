@@ -14,6 +14,10 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/alicebob/miniredis/v2"
+	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
+	"github.com/golang-migrate/migrate/v4"
 )
 
 func TestMain(m *testing.M) {
@@ -40,4 +44,38 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	os.Exit(code)
+}
+
+func setupPostgres() (*embeddedpostgres.EmbeddedPostgres, error) {
+	if err := os.Setenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB", "100000"); err != nil {
+		return nil, err
+	}
+	port := 15432
+	url := fmt.Sprintf("postgres://postgres:postgres@localhost:%d/postgres?sslmode=disable", port)
+	if err := os.Setenv("POSTGRES_URL", url); err != nil {
+		return nil, err
+	}
+	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(uint32(port)).Logger(nil))
+	if err := postgres.Start(); err != nil {
+		return nil, err
+	}
+	m, err := migrate.New("file://fixtures/migrations", url)
+	if err != nil {
+		return nil, err
+	}
+	if err := m.Up(); err != nil {
+		return nil, err
+	}
+	return postgres, nil
+}
+
+func setupRedis() error {
+	s, err := miniredis.Run()
+	if err != nil {
+		return err
+	}
+	if err := os.Setenv("REDIS_ADDRESS", s.Addr()); err != nil {
+		return err
+	}
+	return nil
 }
