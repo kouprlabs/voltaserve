@@ -168,11 +168,13 @@ func (s *OrganizationServiceSuite) TestPatchOrganizationName() {
 	// Test patching with insufficient permissions
 	updatedOrg, err = s.orgSvc.PatchName(createdOrg.ID, newName, s.userIDs[1])
 	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 	s.Nil(updatedOrg)
 
 	// Test patching a non-existent organization
 	updatedOrg, err = s.orgSvc.PatchName("non-existent-org-id", newName, s.userIDs[0])
 	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 	s.Nil(updatedOrg)
 }
 
@@ -189,17 +191,20 @@ func (s *OrganizationServiceSuite) TestDeleteOrganization() {
 	// Verify the organization is deleted
 	foundOrg, err := s.orgSvc.Find(createdOrg.ID, s.userIDs[0])
 	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 	s.Nil(foundOrg)
 
 	// Test deleting a non-existent organization
 	err = s.orgSvc.Delete("non-existent-org-id", s.userIDs[0])
 	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 
 	// Test deleting with insufficient permissions
 	createdOrg, err = s.orgSvc.Create(opts, s.userIDs[0])
 	s.Require().NoError(err)
 	err = s.orgSvc.Delete(createdOrg.ID, s.userIDs[1])
 	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember() {
