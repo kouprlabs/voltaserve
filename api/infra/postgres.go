@@ -13,6 +13,7 @@ package infra
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	"github.com/kouprlabs/voltaserve/api/config"
 )
@@ -30,7 +31,11 @@ func (mgr *PostgresManager) Connect(ignoreExisting bool) error {
 		return nil
 	}
 	var err error
-	db, err = gorm.Open(postgres.Open(config.GetConfig().DatabaseURL), &gorm.Config{})
+	opts := &gorm.Config{}
+	if config.GetConfig().Environment.IsTest {
+		opts.Logger = logger.Default.LogMode(logger.Silent)
+	}
+	db, err = gorm.Open(postgres.Open(config.GetConfig().DatabaseURL), opts)
 	if err != nil {
 		return err
 	}

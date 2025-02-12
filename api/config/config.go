@@ -30,6 +30,7 @@ type Config struct {
 	Security      SecurityConfig
 	SMTP          SMTPConfig
 	Defaults      DefaultsConfig
+	Environment   EnvironmentConfig
 }
 
 type LimitsConfig struct {
@@ -82,6 +83,10 @@ type SMTPConfig struct {
 	SenderName    string
 }
 
+type EnvironmentConfig struct {
+	IsTest bool
+}
+
 const (
 	FileTypePDF            = "pdf"
 	FileTypeOffice         = "office"
@@ -106,6 +111,7 @@ func GetConfig() *Config {
 	readSMTP(config)
 	readLimits(config)
 	readDefaults(config)
+	readEnvironment(config)
 	return config
 }
 
@@ -225,5 +231,11 @@ func readDefaults(config *Config) {
 			panic(err)
 		}
 		config.Defaults.WorkspaceStorageCapacityMB = int(v)
+	}
+}
+
+func readEnvironment(config *Config) {
+	if os.Getenv("TEST") == "true" {
+		config.Environment.IsTest = true
 	}
 }
