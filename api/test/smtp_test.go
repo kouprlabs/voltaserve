@@ -43,15 +43,15 @@ var joinOrganization string
 //go:embed fixtures/templates/sign-up-and-join-organization.eml
 var signupAndJoinOrganization string
 
-type MailTemplateSuite struct {
+type SMTPSuite struct {
 	suite.Suite
 }
 
-func TestMailTemplateSuite(t *testing.T) {
-	suite.Run(t, new(MailTemplateSuite))
+func TestSMTPSuite(t *testing.T) {
+	suite.Run(t, new(SMTPSuite))
 }
 
-func (s *MailTemplateSuite) TestSend() {
+func (s *SMTPSuite) TestSend() {
 	tests := map[string]struct {
 		TemplateName string
 		Address      string
