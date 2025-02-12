@@ -20,10 +20,14 @@ import (
 )
 
 func setupPostgres() (*embeddedpostgres.EmbeddedPostgres, error) {
-	os.Setenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB", "100000")
+	if err := os.Setenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB", "100000"); err != nil {
+		return nil, err
+	}
 	port := 15432
 	url := fmt.Sprintf("postgres://postgres:postgres@localhost:%d/postgres?sslmode=disable", port)
-	os.Setenv("POSTGRES_URL", url)
+	if err := os.Setenv("POSTGRES_URL", url); err != nil {
+		return nil, err
+	}
 	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(uint32(port)).Logger(nil))
 	if err := postgres.Start(); err != nil {
 		return nil, err
@@ -43,6 +47,8 @@ func setupRedis() error {
 	if err != nil {
 		return err
 	}
-	os.Setenv("REDIS_ADDRESS", s.Addr())
+	if err := os.Setenv("REDIS_ADDRESS", s.Addr()); err != nil {
+		return err
+	}
 	return nil
 }

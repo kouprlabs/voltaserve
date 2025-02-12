@@ -20,10 +20,10 @@ type SearchManager interface {
 }
 
 func NewSearchManager() SearchManager {
-	if config.GetConfig().Search.URL != "" {
-		return newMeilisearchManager()
-	} else {
+	if config.GetConfig().Environment.IsTest {
 		return newBleveSearchManager()
+	} else {
+		return newMeilisearchManager()
 	}
 }
 

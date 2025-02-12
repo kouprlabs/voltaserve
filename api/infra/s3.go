@@ -34,9 +34,9 @@ type S3Manager interface {
 }
 
 func NewS3Manager() S3Manager {
-	if config.GetConfig().S3.URL != "" {
-		return newMinioManager()
-	} else {
+	if config.GetConfig().Environment.IsTest {
 		return newAferoManager()
+	} else {
+		return newMinioManager()
 	}
 }

@@ -35,535 +35,537 @@ type FileServiceTestSuite struct {
 	userIDs   []string
 }
 
-func (suite *FileServiceTestSuite) SetupTest() {
-	userIDs, err := suite.createUsers()
+func (s *FileServiceTestSuite) SetupTest() {
+	userIDs, err := s.createUsers()
 	if err != nil {
-		suite.Fail(err.Error())
+		s.Fail(err.Error())
+		return
 	}
-	org, err := suite.createOrganization(userIDs[0])
+	org, err := s.createOrganization(userIDs[0])
 	if err != nil {
-		suite.Fail(err.Error())
+		s.Fail(err.Error())
+		return
 	}
-	workspace, err := suite.createWorkspace(org.ID, userIDs[0])
+	workspace, err := s.createWorkspace(org.ID, userIDs[0])
 	if err != nil {
-		suite.Fail(err.Error())
+		s.Fail(err.Error())
 	}
-	suite.fileSvc = service.NewFileService()
-	suite.workspace = workspace
-	suite.userIDs = userIDs
+	s.fileSvc = service.NewFileService()
+	s.workspace = workspace
+	s.userIDs = userIDs
 }
 
 func TestFileServiceSuite(t *testing.T) {
 	suite.Run(t, new(FileServiceTestSuite))
 }
 
-func (suite *FileServiceTestSuite) TestCreate() {
+func (s *FileServiceTestSuite) TestCreate() {
 	// Test creating a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Equal("test-file.txt", file.Name)
-	suite.Equal(model.FileTypeFile, file.Type)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Equal("test-file.txt", file.Name)
+	s.Equal(model.FileTypeFile, file.Type)
 
 	// Test creating a folder
-	folder, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	folder, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Equal("test-folder", folder.Name)
-	suite.Equal(model.FileTypeFolder, folder.Type)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Equal("test-folder", folder.Name)
+	s.Equal(model.FileTypeFolder, folder.Type)
 
 	// Test creating a file with an invalid parent ID
-	_, err = suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	_, err = s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "invalid-parent-file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    "invalid-parent-id",
-	}, suite.userIDs[0])
-	suite.Require().Error(err)
-	suite.Equal(err.Error(), errorpkg.NewFileNotFoundError(err).Error())
+	}, s.userIDs[0])
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
 
 	// Test creating a file with a duplicate name
-	_, err = suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	_, err = s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().Error(err)
-	suite.Equal(err.Error(), errorpkg.NewFileWithSimilarNameExistsError().Error())
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFileWithSimilarNameExistsError().Error(), err.Error())
 
 	// Test creating a file with a duplicate name using a path name
-	file, err = suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err = s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "a/b/c/test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	pathFiles, err := suite.fileSvc.FindPath(file.ID, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	pathFiles, err := s.fileSvc.FindPath(file.ID, s.userIDs[0])
+	s.Require().NoError(err)
 	var pathComponents []string
 	for _, path := range pathFiles {
 		pathComponents = append(pathComponents, path.Name)
 	}
 	path := strings.Join(pathComponents[1:], "/")
-	suite.Equal("a/b/c/test-file.txt", path)
+	s.Equal("a/b/c/test-file.txt", path)
 }
 
-func (suite *FileServiceTestSuite) TestFind() {
+func (s *FileServiceTestSuite) TestFind() {
 	// Create a file to find
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "find-me.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test finding the file
-	foundFiles, err := suite.fileSvc.Find([]string{file.ID}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Len(foundFiles, 1)
-	suite.Equal(file.ID, foundFiles[0].ID)
+	foundFiles, err := s.fileSvc.Find([]string{file.ID}, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Len(foundFiles, 1)
+	s.Equal(file.ID, foundFiles[0].ID)
 
 	// Test finding a non-existent file
-	foundFiles, err = suite.fileSvc.Find([]string{"non-existent-id"}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Empty(foundFiles)
+	foundFiles, err = s.fileSvc.Find([]string{"non-existent-id"}, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Empty(foundFiles)
 }
 
-func (suite *FileServiceTestSuite) TestFindByPath() {
+func (s *FileServiceTestSuite) TestFindByPath() {
 	// Create a folder and a file inside it
-	folder, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	folder, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test finding the file by path
-	foundFile, err := suite.fileSvc.FindByPath(fmt.Sprintf("/%s/test-folder/test-file.txt", suite.workspace.ID), suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Equal(file.ID, foundFile.ID)
+	foundFile, err := s.fileSvc.FindByPath(fmt.Sprintf("/%s/test-folder/test-file.txt", s.workspace.ID), s.userIDs[0])
+	s.Require().NoError(err)
+	s.Equal(file.ID, foundFile.ID)
 
 	// Test finding a non-existent path
-	_, err = suite.fileSvc.FindByPath(fmt.Sprintf("/%s/non-existent-path", suite.workspace.ID), suite.userIDs[0])
-	suite.Require().Error(err)
-	suite.Equal(err.Error(), errorpkg.NewFileNotFoundError(err).Error())
+	_, err = s.fileSvc.FindByPath(fmt.Sprintf("/%s/non-existent-path", s.workspace.ID), s.userIDs[0])
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
 
 	// Test finding the file without a leading slash
-	_, err = suite.fileSvc.FindByPath(fmt.Sprintf("%s/test-folder/test-file.txt", suite.workspace.ID), suite.userIDs[0])
-	suite.Require().Error(err)
-	suite.Equal(err.Error(), errorpkg.NewFilePathMissingLeadingSlash().Error())
+	_, err = s.fileSvc.FindByPath(fmt.Sprintf("%s/test-folder/test-file.txt", s.workspace.ID), s.userIDs[0])
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFilePathMissingLeadingSlash().Error(), err.Error())
 
 	// Test finding the file with a trailing slash
-	_, err = suite.fileSvc.FindByPath(fmt.Sprintf("/%s/test-folder/test-file.txt/", suite.workspace.ID), suite.userIDs[0])
-	suite.Require().Error(err)
-	suite.Equal(err.Error(), errorpkg.NewFilePathOfTypeFileHasTrailingSlash().Error())
+	_, err = s.fileSvc.FindByPath(fmt.Sprintf("/%s/test-folder/test-file.txt/", s.workspace.ID), s.userIDs[0])
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFilePathOfTypeFileHasTrailingSlash().Error(), err.Error())
 }
 
-func (suite *FileServiceTestSuite) TestListByPath() {
+func (s *FileServiceTestSuite) TestListByPath() {
 	// Create a folder and a file inside it
-	folder, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	folder, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test listing files in the folder
-	files, err := suite.fileSvc.ListByPath(fmt.Sprintf("/%s/test-folder", suite.workspace.ID), suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Len(files, 1)
-	suite.Equal(file.ID, files[0].ID)
+	files, err := s.fileSvc.ListByPath(fmt.Sprintf("/%s/test-folder", s.workspace.ID), s.userIDs[0])
+	s.Require().NoError(err)
+	s.Len(files, 1)
+	s.Equal(file.ID, files[0].ID)
 
 	// Test listing the file
-	_, err = suite.fileSvc.ListByPath(fmt.Sprintf("/%s/test-folder/test-file.txt", suite.workspace.ID), suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Len(files, 1)
-	suite.Equal(file.ID, files[0].ID)
+	_, err = s.fileSvc.ListByPath(fmt.Sprintf("/%s/test-folder/test-file.txt", s.workspace.ID), s.userIDs[0])
+	s.Require().NoError(err)
+	s.Len(files, 1)
+	s.Equal(file.ID, files[0].ID)
 
 	// Test listing files in the folder without a leading slash
-	_, err = suite.fileSvc.ListByPath(fmt.Sprintf("%s/test-folder", suite.workspace.ID), suite.userIDs[0])
-	suite.Require().Error(err)
-	suite.Equal(err.Error(), errorpkg.NewFilePathMissingLeadingSlash().Error())
+	_, err = s.fileSvc.ListByPath(fmt.Sprintf("%s/test-folder", s.workspace.ID), s.userIDs[0])
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFilePathMissingLeadingSlash().Error(), err.Error())
 
 	// Test listing the file with a trailing slash
-	_, err = suite.fileSvc.ListByPath(fmt.Sprintf("/%s/test-folder/test-file.txt/", suite.workspace.ID), suite.userIDs[0])
-	suite.Require().Error(err)
-	suite.Equal(err.Error(), errorpkg.NewFilePathOfTypeFileHasTrailingSlash().Error())
+	_, err = s.fileSvc.ListByPath(fmt.Sprintf("/%s/test-folder/test-file.txt/", s.workspace.ID), s.userIDs[0])
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFilePathOfTypeFileHasTrailingSlash().Error(), err.Error())
 }
 
-func (suite *FileServiceTestSuite) TestFindPath() {
+func (s *FileServiceTestSuite) TestFindPath() {
 	// Create a folder and a file inside it
-	folder, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	folder, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test finding the path of the file
-	path, err := suite.fileSvc.FindPath(file.ID, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Len(path, 3)
-	suite.Equal(path[0].ID, suite.workspace.RootID)
-	suite.Equal(path[1].ID, folder.ID)
-	suite.Equal(path[2].ID, file.ID)
+	path, err := s.fileSvc.FindPath(file.ID, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Len(path, 3)
+	s.Equal(s.workspace.RootID, path[0].ID)
+	s.Equal(folder.ID, path[1].ID)
+	s.Equal(file.ID, path[2].ID)
 }
 
-func (suite *FileServiceTestSuite) TestProbe() {
+func (s *FileServiceTestSuite) TestProbe() {
 	// Create a folder and a file inside it
-	folder, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	folder, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	_, err = suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	_, err = s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test probing the folder
-	probe, err := suite.fileSvc.Probe(folder.ID, service.FileListOptions{Page: 1, Size: 10}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Equal(uint64(1), probe.TotalElements)
-	suite.Equal(uint64(1), probe.TotalPages)
+	probe, err := s.fileSvc.Probe(folder.ID, service.FileListOptions{Page: 1, Size: 10}, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Equal(uint64(1), probe.TotalElements)
+	s.Equal(uint64(1), probe.TotalPages)
 }
 
-func (suite *FileServiceTestSuite) TestList() {
+func (s *FileServiceTestSuite) TestList() {
 	// Create a folder and a file inside it
-	folder, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	folder, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test listing files in the folder
-	list, err := suite.fileSvc.List(folder.ID, service.FileListOptions{Page: 1, Size: 10}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Len(list.Data, 1)
-	suite.Equal(file.ID, list.Data[0].ID)
+	list, err := s.fileSvc.List(folder.ID, service.FileListOptions{Page: 1, Size: 10}, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Len(list.Data, 1)
+	s.Equal(file.ID, list.Data[0].ID)
 }
 
-func (suite *FileServiceTestSuite) TestComputeSize() {
+func (s *FileServiceTestSuite) TestComputeSize() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test computing the size of the file
-	size, err := suite.fileSvc.ComputeSize(file.ID, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.NotNil(size)
-	suite.GreaterOrEqual(*size, int64(0))
+	size, err := s.fileSvc.ComputeSize(file.ID, s.userIDs[0])
+	s.Require().NoError(err)
+	s.NotNil(size)
+	s.GreaterOrEqual(*size, int64(0))
 }
 
-func (suite *FileServiceTestSuite) TestCount() {
+func (s *FileServiceTestSuite) TestCount() {
 	// Create a folder and a file inside it
-	folder, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	folder, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	_, err = suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	_, err = s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test counting items in the folder
-	count, err := suite.fileSvc.Count(folder.ID, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.NotNil(count)
-	suite.Equal(int64(1), *count)
+	count, err := s.fileSvc.Count(folder.ID, s.userIDs[0])
+	s.Require().NoError(err)
+	s.NotNil(count)
+	s.Equal(int64(1), *count)
 }
 
-func (suite *FileServiceTestSuite) TestCopy() {
+func (s *FileServiceTestSuite) TestCopy() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Create a destination folder
-	folder, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	folder, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test copying the file
-	copiedFile, err := suite.fileSvc.Copy(file.ID, folder.ID, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Equal("test-file.txt", copiedFile.Name)
-	suite.Equal(model.FileTypeFile, copiedFile.Type)
-	suite.Equal(folder.ID, *copiedFile.ParentID)
+	copiedFile, err := s.fileSvc.Copy(file.ID, folder.ID, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Equal("test-file.txt", copiedFile.Name)
+	s.Equal(model.FileTypeFile, copiedFile.Type)
+	s.Equal(folder.ID, *copiedFile.ParentID)
 }
 
-func (suite *FileServiceTestSuite) TestDelete() {
+func (s *FileServiceTestSuite) TestDelete() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test deleting the file
-	err = suite.fileSvc.Delete(file.ID, suite.userIDs[0])
-	suite.Require().NoError(err)
+	err = s.fileSvc.Delete(file.ID, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Verify the file is deleted
-	foundFiles, err := suite.fileSvc.Find([]string{file.ID}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Empty(foundFiles)
+	foundFiles, err := s.fileSvc.Find([]string{file.ID}, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Empty(foundFiles)
 }
 
-func (suite *FileServiceTestSuite) TestDownloadOriginalBuffer() {
+func (s *FileServiceTestSuite) TestDownloadOriginalBuffer() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Store the file
-	path := filepath.Join("assets", "file.txt")
+	path := filepath.Join("fixtures", "files", "file.txt")
 	content, err := os.ReadFile(path) //nolint:gosec // Used for tests only
-	suite.Require().NoError(err)
-	_, err = suite.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &path}, suite.userIDs[0])
-	suite.Require().NoError(err)
+	s.Require().NoError(err)
+	_, err = s.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &path}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test downloading the file
 	buf := new(bytes.Buffer)
-	_, err = suite.fileSvc.DownloadOriginalBuffer(file.ID, "", buf, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Equal(string(content), buf.String())
+	_, err = s.fileSvc.DownloadOriginalBuffer(file.ID, "", buf, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Equal(string(content), buf.String())
 }
 
-func (suite *FileServiceTestSuite) TestMove() {
+func (s *FileServiceTestSuite) TestMove() {
 	// Create two folders
-	folder1, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
-		Name:        "folder1",
+	folderA, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
+		Name:        "folder A",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
-	folder2, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
-		Name:        "folder2",
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
+	folderB, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
+		Name:        "folder B",
 		Type:        model.FileTypeFolder,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Create a file in folder1
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    folder1.ID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    folderA.ID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test moving the file to folder2
-	movedFile, err := suite.fileSvc.Move(file.ID, folder2.ID, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Equal(folder2.ID, *movedFile.ParentID)
+	movedFile, err := s.fileSvc.Move(file.ID, folderB.ID, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Equal(folderB.ID, *movedFile.ParentID)
 }
 
-func (suite *FileServiceTestSuite) TestPatchName() {
+func (s *FileServiceTestSuite) TestPatchName() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test patching the file name
-	patchedFile, err := suite.fileSvc.PatchName(file.ID, "new-name.txt", suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Equal("new-name.txt", patchedFile.Name)
+	patchedFile, err := s.fileSvc.PatchName(file.ID, "new-name.txt", s.userIDs[0])
+	s.Require().NoError(err)
+	s.Equal("new-name.txt", patchedFile.Name)
 }
 
-func (suite *FileServiceTestSuite) TestGrantUserPermission() {
+func (s *FileServiceTestSuite) TestGrantUserPermission() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test granting user permission
-	err = suite.fileSvc.GrantUserPermission([]string{file.ID}, suite.userIDs[1], model.PermissionViewer, suite.userIDs[0])
-	suite.Require().NoError(err)
+	err = s.fileSvc.GrantUserPermission([]string{file.ID}, s.userIDs[1], model.PermissionViewer, s.userIDs[0])
+	s.Require().NoError(err)
 }
 
-func (suite *FileServiceTestSuite) TestRevokeUserPermission() {
+func (s *FileServiceTestSuite) TestRevokeUserPermission() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Grant user permission first
-	err = suite.fileSvc.GrantUserPermission([]string{file.ID}, suite.userIDs[1], model.PermissionViewer, suite.userIDs[0])
-	suite.Require().NoError(err)
+	err = s.fileSvc.GrantUserPermission([]string{file.ID}, s.userIDs[1], model.PermissionViewer, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test revoking user permission
-	err = suite.fileSvc.RevokeUserPermission([]string{file.ID}, suite.userIDs[1], suite.userIDs[0])
-	suite.Require().NoError(err)
+	err = s.fileSvc.RevokeUserPermission([]string{file.ID}, s.userIDs[1], s.userIDs[0])
+	s.Require().NoError(err)
 }
 
-func (suite *FileServiceTestSuite) TestGrantGroupPermission() {
+func (s *FileServiceTestSuite) TestGrantGroupPermission() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Create a group
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: suite.workspace.Organization.ID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		OrganizationID: s.workspace.Organization.ID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test granting group permission
-	err = suite.fileSvc.GrantGroupPermission([]string{file.ID}, group.ID, model.PermissionViewer, suite.userIDs[0])
-	suite.Require().NoError(err)
+	err = s.fileSvc.GrantGroupPermission([]string{file.ID}, group.ID, model.PermissionViewer, s.userIDs[0])
+	s.Require().NoError(err)
 }
 
-func (suite *FileServiceTestSuite) TestRevokeGroupPermission() {
+func (s *FileServiceTestSuite) TestRevokeGroupPermission() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Create a group
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: suite.workspace.Organization.ID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		OrganizationID: s.workspace.Organization.ID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Grant group permission first
-	err = suite.fileSvc.GrantGroupPermission([]string{file.ID}, group.ID, model.PermissionViewer, suite.userIDs[0])
-	suite.Require().NoError(err)
+	err = s.fileSvc.GrantGroupPermission([]string{file.ID}, group.ID, model.PermissionViewer, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Test revoking group permission
-	err = suite.fileSvc.RevokeGroupPermission([]string{file.ID}, group.ID, suite.userIDs[0])
-	suite.Require().NoError(err)
+	err = s.fileSvc.RevokeGroupPermission([]string{file.ID}, group.ID, s.userIDs[0])
+	s.Require().NoError(err)
 }
 
-func (suite *FileServiceTestSuite) TestReprocess() {
+func (s *FileServiceTestSuite) TestReprocess() {
 	// Create a file
-	file, err := suite.fileSvc.Create(service.FileCreateOptions{
-		WorkspaceID: suite.workspace.ID,
+	file, err := s.fileSvc.Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
 		Name:        "test-file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    suite.workspace.RootID,
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+		ParentID:    s.workspace.RootID,
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Store the file
-	file, err = suite.fileSvc.Store(file.ID, service.FileStoreOptions{
-		Path: helper.ToPtr(filepath.Join("assets", "file.txt")),
-	}, suite.userIDs[0])
-	suite.Require().NoError(err)
+	file, err = s.fileSvc.Store(file.ID, service.FileStoreOptions{
+		Path: helper.ToPtr(filepath.Join("fixtures", "files", "file.txt")),
+	}, s.userIDs[0])
+	s.Require().NoError(err)
 
 	// Alter task ID status to allow reprocessing
 	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, service.TaskPatchOptions{
 		Fields: []string{service.TaskFieldStatus},
 		Status: helper.ToPtr(string(model.TaskStatusError)),
 	})
-	suite.Require().NoError(err)
+	s.Require().NoError(err)
 
 	// Test reprocessing the file
-	reprocessResult, err := suite.fileSvc.Reprocess(file.ID, suite.userIDs[0])
-	suite.Require().NoError(err)
-	suite.Len(reprocessResult.Accepted, 1)
+	reprocessResult, err := s.fileSvc.Reprocess(file.ID, s.userIDs[0])
+	s.Require().NoError(err)
+	s.Len(reprocessResult.Accepted, 1)
 }
 
-func (suite *FileServiceTestSuite) createUsers() ([]string, error) {
+func (s *FileServiceTestSuite) createUsers() ([]string, error) {
 	db, err := infra.NewPostgresManager().GetDB()
 	if err != nil {
 		return nil, nil
@@ -581,7 +583,7 @@ func (suite *FileServiceTestSuite) createUsers() ([]string, error) {
 	return ids, nil
 }
 
-func (suite *FileServiceTestSuite) createOrganization(userID string) (*service.Organization, error) {
+func (s *FileServiceTestSuite) createOrganization(userID string) (*service.Organization, error) {
 	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{Name: "organization"}, userID)
 	if err != nil {
 		return nil, err
@@ -589,7 +591,7 @@ func (suite *FileServiceTestSuite) createOrganization(userID string) (*service.O
 	return org, nil
 }
 
-func (suite *FileServiceTestSuite) createWorkspace(orgID string, userID string) (*service.Workspace, error) {
+func (s *FileServiceTestSuite) createWorkspace(orgID string, userID string) (*service.Workspace, error) {
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  orgID,
