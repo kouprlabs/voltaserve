@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -222,10 +223,12 @@ func (s *OrganizationServiceSuite) TestRemoveMember() {
 	// Test removing a non-existent member
 	err = s.orgSvc.RemoveMember(createdOrg.ID, "non-existent-user-id", s.userIDs[0])
 	s.Require().Error(err)
+	s.Equal(errorpkg.NewUserNotFoundError(err).Error(), err.Error())
 
 	// Test removing the last owner
 	err = s.orgSvc.RemoveMember(createdOrg.ID, s.userIDs[0], s.userIDs[0])
 	s.Require().Error(err)
+	s.Equal(errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(org).Error(), err.Error())
 }
 
 func (s *OrganizationServiceSuite) createUsers() ([]string, error) {
