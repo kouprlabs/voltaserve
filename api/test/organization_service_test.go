@@ -2,12 +2,12 @@ package test
 
 import (
 	"fmt"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
