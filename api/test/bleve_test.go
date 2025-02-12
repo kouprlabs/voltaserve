@@ -14,8 +14,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
@@ -24,34 +23,37 @@ import (
 	"github.com/kouprlabs/voltaserve/api/search"
 )
 
-func TestBleve_Query(t *testing.T) {
+type BleveSuite struct {
+	suite.Suite
+}
+
+func TestBleveSuite(t *testing.T) {
+	suite.Run(t, new(BleveSuite))
+}
+
+func (s *BleveSuite) TestQuery() {
 	orgSearch := search.NewOrganizationSearch()
 	values := []repo.NewOrganizationOptions{
 		{ID: "org_a", Name: "foo bar"},
 		{ID: "org_b", Name: "hello world"},
 	}
 	for _, v := range values {
-		if err := orgSearch.Index([]model.Organization{repo.NewOrganizationWithOptions(v)}); err != nil {
-			assert.NoError(t, err)
-		}
+		err := orgSearch.Index([]model.Organization{repo.NewOrganizationWithOptions(v)})
+		s.Require().NoError(err)
 	}
 	hits, err := orgSearch.Query("foo", infra.QueryOptions{Limit: 10})
-	if err != nil {
-		require.NoError(t, err)
-	}
-	if assert.Len(t, hits, 1) {
-		assert.Equal(t, "org_a", hits[0].GetID())
+	s.Require().NoError(err)
+	if s.Len(hits, 1) {
+		s.Equal("org_a", hits[0].GetID())
 	}
 	hits, err = orgSearch.Query("world", infra.QueryOptions{Limit: 10})
-	if err != nil {
-		require.NoError(t, err)
-	}
-	if assert.Len(t, hits, 1) {
-		assert.Equal(t, "org_b", hits[0].GetID())
+	s.Require().NoError(err)
+	if s.Len(hits, 1) {
+		s.Equal("org_b", hits[0].GetID())
 	}
 }
 
-func TestBleve_Filter(t *testing.T) {
+func (s *BleveSuite) TestFilter() {
 	fileSearch := search.NewFileSearch()
 	values := []repo.NewFileOptions{
 		{
@@ -77,18 +79,15 @@ func TestBleve_Filter(t *testing.T) {
 		},
 	}
 	for _, v := range values {
-		if err := fileSearch.Index([]model.File{repo.NewFileWithOptions(v)}); err != nil {
-			assert.NoError(t, err)
-		}
+		err := fileSearch.Index([]model.File{repo.NewFileWithOptions(v)})
+		s.Require().NoError(err)
 	}
 	hits, err := fileSearch.Query("exercitation", infra.QueryOptions{
 		Limit:  10,
 		Filter: fmt.Sprintf("workspaceId=\"workspace_b\" AND type=\"%s\"", model.FileTypeFile),
 	})
-	if err != nil {
-		require.NoError(t, err)
-	}
-	if assert.Len(t, hits, 1) {
-		assert.Equal(t, "file_b", hits[0].GetID())
+	s.Require().NoError(err)
+	if s.Len(hits, 1) {
+		s.Equal("file_b", hits[0].GetID())
 	}
 }

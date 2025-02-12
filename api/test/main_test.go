@@ -17,7 +17,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	os.Setenv("LIMITS_FILE_PROCESSING_MB", "video:10000,*:1000")
+	if err := os.Setenv("LIMITS_FILE_PROCESSING_MB", "video:10000,*:1000"); err != nil {
+		return
+	}
 	if err := setupRedis(); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)

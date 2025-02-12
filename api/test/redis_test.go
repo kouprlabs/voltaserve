@@ -15,8 +15,7 @@ import (
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/helper"
@@ -24,21 +23,26 @@ import (
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-func TestRedis_SetAndGet(t *testing.T) {
+type RedisSuite struct {
+	suite.Suite
+}
+
+func TestRedisSuite(t *testing.T) {
+	suite.Run(t, new(RedisSuite))
+}
+
+func (s *RedisSuite) TestSetAndGet() {
 	fileCache := cache.NewFileCache()
 	opts := repo.NewFileOptions{
 		ID:   helper.NewID(),
 		Name: "file",
 		Type: model.FileTypeFile,
 	}
-	if err := fileCache.Set(repo.NewFileWithOptions(opts)); err != nil {
-		assert.NoError(t, err)
-	}
+	err := fileCache.Set(repo.NewFileWithOptions(opts))
+	s.Require().NoError(err)
 	file, err := fileCache.Get(opts.ID)
-	if err != nil {
-		require.NoError(t, err)
-	}
-	assert.Equal(t, file.GetID(), opts.ID)
-	assert.Equal(t, file.GetName(), opts.Name)
-	assert.Equal(t, file.GetType(), opts.Type)
+	s.Require().NoError(err)
+	s.Equal(opts.ID, file.GetID())
+	s.Equal(opts.Name, file.GetName())
+	s.Equal(opts.Type, file.GetType())
 }

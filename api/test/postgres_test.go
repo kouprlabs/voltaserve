@@ -15,44 +15,43 @@ import (
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-func TestPostgres_InsertAndFind(t *testing.T) {
+type PostgresSuite struct {
+	suite.Suite
+}
+
+func TestPostgresSuite(t *testing.T) {
+	suite.Run(t, new(PostgresSuite))
+}
+
+func (s *PostgresSuite) TestInsertAndFind() {
 	orgRepo := repo.NewOrganizationRepo()
 	org, err := orgRepo.Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewID(),
 		Name: "organization",
 	})
-	if err != nil {
-		require.NoError(t, err)
-	}
+	s.Require().NoError(err)
 	workspaceRepo := repo.NewWorkspaceRepo()
 	workspace, err := workspaceRepo.Insert(repo.WorkspaceInsertOptions{
 		ID:             helper.NewID(),
-		Name:           "wokrspace",
+		Name:           "workspace",
 		OrganizationID: org.GetID(),
 	})
-	if err != nil {
-		require.NoError(t, err)
-	}
+	s.Require().NoError(err)
 	fileRepo := repo.NewFileRepo()
 	file, err := fileRepo.Insert(repo.FileInsertOptions{
 		Name:        "file",
 		Type:        model.FileTypeFile,
 		WorkspaceID: workspace.GetID(),
 	})
-	if err != nil {
-		require.NoError(t, err)
-	}
+	s.Require().NoError(err)
 	foundFile, err := fileRepo.Find(file.GetID())
-	if err != nil {
-		require.NoError(t, err)
-	}
-	assert.Equal(t, file.GetID(), foundFile.GetID())
+	s.Require().NoError(err)
+	s.Equal(file.GetID(), foundFile.GetID())
 }
