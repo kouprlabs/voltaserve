@@ -393,7 +393,7 @@ func (s *FileServiceTestSuite) TestDownloadOriginalBuffer() {
 	s.Require().NoError(err)
 
 	// Store the file
-	path := filepath.Join("assets", "file.txt")
+	path := filepath.Join("fixtures", "files", "file.txt")
 	content, err := os.ReadFile(path) //nolint:gosec // Used for tests only
 	s.Require().NoError(err)
 	_, err = s.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &path}, s.userIDs[0])
@@ -548,7 +548,7 @@ func (s *FileServiceTestSuite) TestReprocess() {
 
 	// Store the file
 	file, err = s.fileSvc.Store(file.ID, service.FileStoreOptions{
-		Path: helper.ToPtr(filepath.Join("assets", "file.txt")),
+		Path: helper.ToPtr(filepath.Join("fixtures", "files", "file.txt")),
 	}, s.userIDs[0])
 	s.Require().NoError(err)
 

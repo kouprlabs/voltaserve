@@ -1,4 +1,4 @@
-package infra_test
+package test_test
 
 import (
 	_ "embed"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 	"gopkg.in/gomail.v2"
 
 	"github.com/kouprlabs/voltaserve/api/config"
@@ -36,15 +37,21 @@ func (d *DialMock) DialAndSend(m ...*gomail.Message) error {
 	return d.Err
 }
 
-//go:embed fixtures/join-organization.eml
+//go:embed fixtures/templates/join-organization.eml
 var joinOrganization string
 
-//go:embed fixtures/sign-up-and-join-organization.eml
+//go:embed fixtures/templates/sign-up-and-join-organization.eml
 var signupAndJoinOrganization string
 
-func TestMailTemplate_Send(t *testing.T) {
-	t.Parallel()
+type MailTemplateSuite struct {
+	suite.Suite
+}
 
+func TestMailTemplateSuite(t *testing.T) {
+	suite.Run(t, new(MailTemplateSuite))
+}
+
+func (s *MailTemplateSuite) TestSend() {
 	tests := map[string]struct {
 		TemplateName string
 		Address      string
@@ -74,9 +81,7 @@ func TestMailTemplate_Send(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
+		s.Run(name, func() {
 			dialMock := &DialMock{}
 
 			mt := infra.NewMailTemplateWithDialer(config.SMTPConfig{
@@ -85,7 +90,7 @@ func TestMailTemplate_Send(t *testing.T) {
 			}, dialMock)
 
 			// gomail is non-deterministic in its headers, so we'll brute force our expected body.
-			assert.EventuallyWithT(t, func(t *assert.CollectT) {
+			s.EventuallyWithT(func(t *assert.CollectT) {
 				err := mt.Send(tc.TemplateName, tc.Address, tc.Variables)
 				require.NoError(t, err)
 

@@ -67,7 +67,7 @@ func (s *AferoSuite) TestUploadAndDownload() {
 	emptyFile, err := s.createFile(s.workspace.ID, s.workspace.RootID, s.userID)
 	s.Require().NoError(err)
 
-	filePath := path.Join("assets", "file.txt")
+	filePath := path.Join("fixtures", "files", "file.txt")
 	stat, err := os.Stat(filePath)
 	s.Require().NoError(err)
 
