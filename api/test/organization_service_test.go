@@ -75,8 +75,8 @@ func (s *OrganizationServiceSuite) TestFindOrganization() {
 
 func (s *OrganizationServiceSuite) TestListOrganizations() {
 	// Create multiple organizations
-	orgNames := []string{"organization A", "organization B", "organization C"}
-	for _, name := range orgNames {
+	names := []string{"organization A", "organization B", "organization C"}
+	for _, name := range names {
 		opts := service.OrganizationCreateOptions{
 			Name:  name,
 			Image: nil,
@@ -86,52 +86,56 @@ func (s *OrganizationServiceSuite) TestListOrganizations() {
 	}
 
 	// Test listing all organizations
-	listOpts := service.OrganizationListOptions{
+	list, err := s.orgSvc.List(service.OrganizationListOptions{
 		Page:      1,
 		Size:      10,
 		SortBy:    service.OrganizationSortByName,
 		SortOrder: service.OrganizationSortOrderAsc,
-	}
-	orgList, err := s.orgSvc.List(listOpts, s.userIDs[0])
+	}, s.userIDs[0])
 	s.Require().NoError(err)
-	s.Require().NotNil(orgList)
-	s.Equal(uint64(len(orgNames)), orgList.TotalElements)
-	s.Equal(orgNames[0], orgList.Data[0].Name)
-	s.Equal(orgNames[1], orgList.Data[1].Name)
-	s.Equal(orgNames[2], orgList.Data[2].Name)
+	s.Require().NotNil(list)
+	s.Equal(uint64(len(names)), list.TotalElements)
+	s.Equal(names[0], list.Data[0].Name)
+	s.Equal(names[1], list.Data[1].Name)
+	s.Equal(names[2], list.Data[2].Name)
 
 	// Test pagination
-	listOpts.Page = 1
-	listOpts.Size = 2
-	orgList, err = s.orgSvc.List(listOpts, s.userIDs[0])
+	list, err = s.orgSvc.List(service.OrganizationListOptions{Page: 1, Size: 2}, s.userIDs[0])
 	s.Require().NoError(err)
-	s.Require().NotNil(orgList)
-	s.Equal(uint64(2), orgList.Size)
-	s.Equal(uint64(3), orgList.TotalElements)
-	s.Equal(uint64(2), orgList.TotalPages)
+	s.Require().NotNil(list)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
 
 	// Test sorting by name in descending order
-	listOpts.SortOrder = service.OrganizationSortOrderDesc
-	orgList, err = s.orgSvc.List(listOpts, s.userIDs[0])
+	list, err = s.orgSvc.List(service.OrganizationListOptions{
+		Page:      1,
+		Size:      2,
+		SortBy:    service.OrganizationSortByName,
+		SortOrder: service.OrganizationSortOrderDesc,
+	}, s.userIDs[0])
 	s.Require().NoError(err)
-	s.Require().NotNil(orgList)
-	s.Equal("organization C", orgList.Data[0].Name)
-	s.Equal("organization B", orgList.Data[1].Name)
+	s.Require().NotNil(list)
+	s.Equal("organization C", list.Data[0].Name)
+	s.Equal("organization B", list.Data[1].Name)
 
 	// Test sorting by date created
-	listOpts.SortBy = service.OrganizationSortByDateCreated
-	listOpts.SortOrder = service.OrganizationSortOrderAsc
-	orgList, err = s.orgSvc.List(listOpts, s.userIDs[0])
+	list, err = s.orgSvc.List(service.OrganizationListOptions{
+		Page:      1,
+		Size:      2,
+		SortBy:    service.OrganizationSortByName,
+		SortOrder: service.OrganizationSortOrderAsc,
+	}, s.userIDs[0])
 	s.Require().NoError(err)
-	s.Require().NotNil(orgList)
-	s.Equal("organization A", orgList.Data[0].Name)
-	s.Equal("organization B", orgList.Data[1].Name)
+	s.Require().NotNil(list)
+	s.Equal("organization A", list.Data[0].Name)
+	s.Equal("organization B", list.Data[1].Name)
 }
 
 func (s *OrganizationServiceSuite) TestProbeOrganizations() {
 	// Create multiple organizations
-	orgNames := []string{"organization A", "organization B", "organization C"}
-	for _, name := range orgNames {
+	names := []string{"organization A", "organization B", "organization C"}
+	for _, name := range names {
 		opts := service.OrganizationCreateOptions{
 			Name:  name,
 			Image: nil,
@@ -144,7 +148,7 @@ func (s *OrganizationServiceSuite) TestProbeOrganizations() {
 	probe, err := s.orgSvc.Probe(service.OrganizationListOptions{Page: 1, Size: 10}, s.userIDs[0])
 	s.Require().NoError(err)
 	s.Require().NotNil(probe)
-	s.Equal(uint64(len(orgNames)), probe.TotalElements)
+	s.Equal(uint64(len(names)), probe.TotalElements)
 	s.Equal(uint64(1), probe.TotalPages)
 }
 
