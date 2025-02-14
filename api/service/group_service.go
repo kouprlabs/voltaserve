@@ -252,20 +252,11 @@ func (svc *GroupService) AddMember(id string, memberID string, userID string) er
 	if err != nil {
 		return nil
 	}
-	// Ensure the member exists before proceeding
-	if _, err := svc.userRepo.Find(memberID); err != nil {
-		return err
-	}
 	if err := svc.groupGuard.Authorize(userID, group, model.PermissionOwner); err != nil {
 		return err
 	}
-	// Ensure the member belongs to the organization
-	org, err := svc.orgCache.Get(group.GetOrganizationID())
-	if err != nil {
+	if err := svc.checkUserIsMemberOfOrganization(memberID, group.GetOrganizationID()); err != nil {
 		return err
-	}
-	if !slices.Contains(org.GetMembers(), memberID) {
-		return errorpkg.NewUserNotMemberOfOrganizationError()
 	}
 	// Ensure that the member doesn't already have a higher permission on the group,
 	// if we don't check that, we risk downgrading the existing permission
@@ -286,20 +277,11 @@ func (svc *GroupService) RemoveMember(id string, memberID string, userID string)
 	if err != nil {
 		return err
 	}
-	// Ensure the member exists before proceeding
-	if _, err := svc.userRepo.Find(memberID); err != nil {
-		return err
-	}
 	if err := svc.groupGuard.Authorize(userID, group, model.PermissionOwner); err != nil {
 		return err
 	}
-	// Ensure the member belongs to the organization
-	org, err := svc.orgCache.Get(group.GetOrganizationID())
-	if err != nil {
+	if err := svc.checkUserIsMemberOfOrganization(memberID, group.GetOrganizationID()); err != nil {
 		return err
-	}
-	if !slices.Contains(org.GetMembers(), memberID) {
-		return errorpkg.NewUserNotMemberOfOrganizationError()
 	}
 	// Make sure member is not the last remaining owner of the group
 	ownerCount, err := svc.groupRepo.CountOwners(group.GetID())
@@ -327,6 +309,17 @@ func (svc *GroupService) IsValidSortBy(value string) bool {
 
 func (svc *GroupService) IsValidSortOrder(value string) bool {
 	return value == "" || value == GroupSortOrderAsc || value == GroupSortOrderDesc
+}
+
+func (svc *GroupService) checkUserIsMemberOfOrganization(userID string, organizationID string) error {
+	org, err := svc.orgCache.Get(organizationID)
+	if err != nil {
+		return err
+	}
+	if !slices.Contains(org.GetMembers(), userID) {
+		return errorpkg.NewUserNotMemberOfOrganizationError()
+	}
+	return nil
 }
 
 func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.Group, error) {
