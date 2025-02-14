@@ -26,6 +26,10 @@ import (
 	"github.com/kouprlabs/voltaserve/api/templates"
 )
 
+type MailTemplate interface {
+	Send(templateName string, address string, variables map[string]string) error
+}
+
 type dialer interface {
 	DialAndSend(m ...*gomail.Message) error
 }
@@ -34,23 +38,39 @@ type MessageParams struct {
 	Subject string
 }
 
-type MailTemplate struct {
+type mailTemplate struct {
 	dialer dialer
 	config config.SMTPConfig
 }
 
-func NewMailTemplate(config config.SMTPConfig) *MailTemplate {
-	return NewMailTemplateWithDialer(config, gomail.NewDialer(config.Host, config.Port, config.Username, config.Password))
+func NewMailTemplate(cfg config.SMTPConfig) MailTemplate {
+	if config.GetConfig().Environment.IsTest {
+		return newMockMailTemplate()
+	} else {
+		return newMailTemplate(cfg)
+	}
 }
 
-func NewMailTemplateWithDialer(config config.SMTPConfig, dialer dialer) *MailTemplate {
-	return &MailTemplate{
-		config: config,
+func NewMailTemplateWithDialer(cfg config.SMTPConfig, dialer dialer) MailTemplate {
+	if config.GetConfig().Environment.IsTest {
+		return newMockMailTemplate()
+	} else {
+		return newMailTemplateWithDialer(cfg, dialer)
+	}
+}
+
+func newMailTemplate(cfg config.SMTPConfig) *mailTemplate {
+	return newMailTemplateWithDialer(cfg, gomail.NewDialer(cfg.Host, cfg.Port, cfg.Username, cfg.Password))
+}
+
+func newMailTemplateWithDialer(cfg config.SMTPConfig, dialer dialer) *mailTemplate {
+	return &mailTemplate{
+		config: cfg,
 		dialer: dialer,
 	}
 }
 
-func (mt *MailTemplate) Send(templateName string, address string, variables map[string]string) error {
+func (mt *mailTemplate) Send(templateName string, address string, variables map[string]string) error {
 	html, err := mt.getText(filepath.FromSlash(templateName+"/template.html"), variables)
 	if err != nil {
 		return err
@@ -75,7 +95,7 @@ func (mt *MailTemplate) Send(templateName string, address string, variables map[
 	return nil
 }
 
-func (mt *MailTemplate) getText(path string, variables map[string]string) (string, error) {
+func (mt *mailTemplate) getText(path string, variables map[string]string) (string, error) {
 	f, err := templates.FS.Open(path)
 	if err != nil {
 		return "", err
@@ -99,7 +119,7 @@ func (mt *MailTemplate) getText(path string, variables map[string]string) (strin
 	return buf.String(), nil
 }
 
-func (mt *MailTemplate) getMessageParams(templateName string) (*MessageParams, error) {
+func (mt *mailTemplate) getMessageParams(templateName string) (*MessageParams, error) {
 	f, err := templates.FS.Open(filepath.FromSlash(templateName + "/params.yml"))
 	if err != nil {
 		return nil, err
@@ -115,4 +135,14 @@ func (mt *MailTemplate) getMessageParams(templateName string) (*MessageParams, e
 		return nil, err
 	}
 	return res, nil
+}
+
+type mockMailTemplate struct{}
+
+func newMockMailTemplate() *mockMailTemplate {
+	return &mockMailTemplate{}
+}
+
+func (mt *mockMailTemplate) Send(templateName string, address string, variables map[string]string) error {
+	return nil
 }

@@ -32,7 +32,7 @@ type InvitationService struct {
 	orgCache         *cache.OrganizationCache
 	orgGuard         *guard.OrganizationGuard
 	userRepo         *repo.UserRepo
-	mailTmpl         *infra.MailTemplate
+	mailTmpl         infra.MailTemplate
 	config           *config.Config
 }
 
@@ -241,7 +241,7 @@ func (svc *InvitationService) Accept(id string, userID string) error {
 	if invitation.GetStatus() != model.InvitationStatusPending {
 		return errorpkg.NewCannotAcceptNonPendingInvitationError(invitation)
 	}
-	if user.GetEmail() != invitation.GetEmail() {
+	if !strings.EqualFold(user.GetEmail(), invitation.GetEmail()) {
 		return errorpkg.NewUserNotAllowedToAcceptInvitationError(user, invitation)
 	}
 	org, err := svc.orgCache.Get(invitation.GetOrganizationID())

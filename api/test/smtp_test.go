@@ -48,6 +48,8 @@ type SMTPSuite struct {
 }
 
 func TestSMTPSuite(t *testing.T) {
+	// Avoid the mock being instantiated, because here we are testing the real implementation
+	t.Setenv("TEST", "")
 	suite.Run(t, new(SMTPSuite))
 }
 

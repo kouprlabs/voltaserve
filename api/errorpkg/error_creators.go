@@ -110,6 +110,16 @@ func NewUserNotFoundError(err error) *ErrorResponse {
 	)
 }
 
+func NewUserNotMemberOfOrganizationError() *ErrorResponse {
+	return NewErrorResponse(
+		"user_not_member_of_organization",
+		http.StatusNotFound,
+		"User not is not a member of organization.",
+		"User not is not a member of organization.",
+		nil,
+	)
+}
+
 func NewPictureNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"Picture_not_found",
