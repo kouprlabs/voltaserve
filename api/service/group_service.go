@@ -12,6 +12,7 @@ package service
 
 import (
 	"errors"
+	"slices"
 	"sort"
 	"time"
 
@@ -229,7 +230,7 @@ func (svc *GroupService) PatchName(id string, name string, userID string) (*Grou
 func (svc *GroupService) Delete(id string, userID string) error {
 	group, err := svc.groupCache.Get(id)
 	if err != nil {
-		return nil
+		return err
 	}
 	if err := svc.groupGuard.Authorize(userID, group, model.PermissionOwner); err != nil {
 		return err
@@ -258,6 +259,14 @@ func (svc *GroupService) AddMember(id string, memberID string, userID string) er
 	if err := svc.groupGuard.Authorize(userID, group, model.PermissionOwner); err != nil {
 		return err
 	}
+	// Ensure the member belongs to the organization
+	org, err := svc.orgCache.Get(group.GetOrganizationID())
+	if err != nil {
+		return err
+	}
+	if !slices.Contains(org.GetMembers(), memberID) {
+		return errorpkg.NewUserNotMemberOfOrganizationError()
+	}
 	// Ensure that the member doesn't already have a higher permission on the group,
 	// if we don't check that, we risk downgrading the existing permission
 	if !svc.groupGuard.IsAuthorized(memberID, group, model.PermissionViewer) &&
@@ -275,7 +284,7 @@ func (svc *GroupService) AddMember(id string, memberID string, userID string) er
 func (svc *GroupService) RemoveMember(id string, memberID string, userID string) error {
 	group, err := svc.groupCache.Get(id)
 	if err != nil {
-		return nil
+		return err
 	}
 	// Ensure the member exists before proceeding
 	if _, err := svc.userRepo.Find(memberID); err != nil {
@@ -283,6 +292,14 @@ func (svc *GroupService) RemoveMember(id string, memberID string, userID string)
 	}
 	if err := svc.groupGuard.Authorize(userID, group, model.PermissionOwner); err != nil {
 		return err
+	}
+	// Ensure the member belongs to the organization
+	org, err := svc.orgCache.Get(group.GetOrganizationID())
+	if err != nil {
+		return err
+	}
+	if !slices.Contains(org.GetMembers(), memberID) {
+		return errorpkg.NewUserNotMemberOfOrganizationError()
 	}
 	// Make sure member is not the last remaining owner of the group
 	ownerCount, err := svc.groupRepo.CountOwners(group.GetID())

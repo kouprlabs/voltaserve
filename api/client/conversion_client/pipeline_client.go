@@ -24,10 +24,10 @@ type PipelineClient interface {
 }
 
 func NewPipelineClient() PipelineClient {
-	if config.GetConfig().ConversionURL != "" {
-		return newPipelineClient()
+	if config.GetConfig().Environment.IsTest {
+		return newMockPipelineClient()
 	} else {
-		return NewMockPipelineClient()
+		return newPipelineClient()
 	}
 }
 
@@ -79,12 +79,12 @@ func (cl *pipelineClient) Run(opts *PipelineRunOptions) error {
 	return nil
 }
 
-type MockPipelineClient struct{}
+type mockPipelineClient struct{}
 
-func NewMockPipelineClient() *MockPipelineClient {
-	return &MockPipelineClient{}
+func newMockPipelineClient() *mockPipelineClient {
+	return &mockPipelineClient{}
 }
 
-func (m *MockPipelineClient) Run(opts *PipelineRunOptions) error {
+func (m *mockPipelineClient) Run(opts *PipelineRunOptions) error {
 	return nil
 }
