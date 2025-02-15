@@ -89,6 +89,7 @@ func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
 	task, err := svc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            opts.Name,
+		Status:          opts.Status,
 		Error:           opts.Error,
 		Percentage:      opts.Percentage,
 		IsIndeterminate: opts.IsIndeterminate,
