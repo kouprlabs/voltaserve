@@ -11,17 +11,15 @@
 package test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
-	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
+	"github.com/kouprlabs/voltaserve/api/test/test_helper"
 )
 
 type TaskServiceSuite struct {
@@ -35,7 +33,7 @@ func TestTaskServiceSuite(t *testing.T) {
 }
 
 func (s *TaskServiceSuite) SetupTest() {
-	users, err := s.createUsers()
+	users, err := test_helper.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
@@ -305,31 +303,4 @@ func (s *TaskServiceSuite) TestCount() {
 	count, err := s.svc.Count(s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(int64(2), *count)
-}
-
-func (s *TaskServiceSuite) createUsers() ([]model.User, error) {
-	db, err := infra.NewPostgresManager().GetDB()
-	if err != nil {
-		return nil, nil
-	}
-	var ids []string
-	for i := range 2 {
-		id := helper.NewID()
-		db = db.Exec("INSERT INTO \"user\" (id, full_name, username, email, password_hash, create_time) VALUES (?, ?, ?, ?, ?, ?)",
-			id, fmt.Sprintf("user %d", i), id+"@voltaserve.com", id+"@voltaserve.com", "", helper.NewTimestamp())
-		if db.Error != nil {
-			return nil, db.Error
-		}
-		ids = append(ids, id)
-	}
-	var res []model.User
-	userRepo := repo.NewUserRepo()
-	for _, id := range ids {
-		user, err := userRepo.Find(id)
-		if err != nil {
-			continue
-		}
-		res = append(res, user)
-	}
-	return res, nil
 }

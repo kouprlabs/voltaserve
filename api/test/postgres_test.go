@@ -31,19 +31,19 @@ func TestPostgresSuite(t *testing.T) {
 }
 
 func (s *PostgresSuite) TestInsertAndFind() {
-	orgRepo := repo.NewOrganizationRepo()
-	org, err := orgRepo.Insert(repo.OrganizationInsertOptions{
+	org, err := repo.NewOrganizationRepo().Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewID(),
 		Name: "organization",
 	})
 	s.Require().NoError(err)
-	workspaceRepo := repo.NewWorkspaceRepo()
-	workspace, err := workspaceRepo.Insert(repo.WorkspaceInsertOptions{
+
+	workspace, err := repo.NewWorkspaceRepo().Insert(repo.WorkspaceInsertOptions{
 		ID:             helper.NewID(),
 		Name:           "workspace",
 		OrganizationID: org.GetID(),
 	})
 	s.Require().NoError(err)
+
 	fileRepo := repo.NewFileRepo()
 	file, err := fileRepo.Insert(repo.FileInsertOptions{
 		Name:        "file",
@@ -51,6 +51,7 @@ func (s *PostgresSuite) TestInsertAndFind() {
 		WorkspaceID: workspace.GetID(),
 	})
 	s.Require().NoError(err)
+
 	foundFile, err := fileRepo.Find(file.GetID())
 	s.Require().NoError(err)
 	s.Equal(file.GetID(), foundFile.GetID())

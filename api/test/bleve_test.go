@@ -41,11 +41,13 @@ func (s *BleveSuite) TestQuery() {
 		err := orgSearch.Index([]model.Organization{repo.NewOrganizationWithOptions(v)})
 		s.Require().NoError(err)
 	}
+
 	hits, err := orgSearch.Query("foo", infra.QueryOptions{Limit: 10})
 	s.Require().NoError(err)
 	if s.Len(hits, 1) {
 		s.Equal("org_a", hits[0].GetID())
 	}
+
 	hits, err = orgSearch.Query("world", infra.QueryOptions{Limit: 10})
 	s.Require().NoError(err)
 	if s.Len(hits, 1) {
@@ -82,6 +84,7 @@ func (s *BleveSuite) TestFilter() {
 		err := fileSearch.Index([]model.File{repo.NewFileWithOptions(v)})
 		s.Require().NoError(err)
 	}
+
 	hits, err := fileSearch.Query("exercitation", infra.QueryOptions{
 		Limit:  10,
 		Filter: fmt.Sprintf("workspaceId=\"workspace_b\" AND type=\"%s\"", model.FileTypeFile),
