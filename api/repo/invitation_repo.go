@@ -131,10 +131,18 @@ func (repo *InvitationRepo) Find(id string) (model.Invitation, error) {
 	return &invitation, nil
 }
 
+func (repo *InvitationRepo) FindOrNil(id string) model.Invitation {
+	res, err := repo.Find(id)
+	if err != nil {
+		return nil
+	}
+	return res
+}
+
 func (repo *InvitationRepo) FindIncoming(email string) ([]model.Invitation, error) {
 	var invitations []*invitationEntity
 	db := repo.db.
-		Raw("SELECT * FROM invitation WHERE email = ? and status = 'pending' ORDER BY create_time DESC", email).
+		Raw("SELECT * FROM invitation WHERE LOWER(email) = LOWER(?) and status = 'pending' ORDER BY create_time DESC", email).
 		Scan(&invitations)
 	if db.Error != nil {
 		return nil, db.Error
@@ -150,7 +158,7 @@ func (repo *InvitationRepo) CountIncoming(email string) (int64, error) {
 	var count int64
 	db := repo.db.
 		Model(&invitationEntity{}).
-		Where("email = ?", email).
+		Where("LOWER(email) = LOWER(?)", email).
 		Where("status = 'pending'").
 		Count(&count)
 	if db.Error != nil {

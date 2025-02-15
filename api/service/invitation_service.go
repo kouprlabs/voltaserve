@@ -278,7 +278,7 @@ func (svc *InvitationService) Decline(id string, userID string) error {
 	if invitation.GetStatus() != model.InvitationStatusPending {
 		return errorpkg.NewCannotDeclineNonPendingInvitationError(invitation)
 	}
-	if user.GetEmail() != invitation.GetEmail() {
+	if !strings.EqualFold(user.GetEmail(), invitation.GetEmail()) {
 		return errorpkg.NewUserNotAllowedToDeclineInvitationError(user, invitation)
 	}
 	invitation.SetStatus(model.InvitationStatusDeclined)
