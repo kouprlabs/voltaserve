@@ -56,6 +56,14 @@ func (c *OrganizationCache) Get(id string) (model.Organization, error) {
 	return res, nil
 }
 
+func (c *OrganizationCache) GetOrNil(id string) model.Organization {
+	res, err := c.Get(id)
+	if err != nil {
+		return nil
+	}
+	return res
+}
+
 func (c *OrganizationCache) Refresh(id string) (model.Organization, error) {
 	res, err := c.orgRepo.Find(id)
 	if err != nil {

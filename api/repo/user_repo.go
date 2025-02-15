@@ -101,7 +101,7 @@ func (repo *UserRepo) Find(id string) (model.User, error) {
 
 func (repo *UserRepo) FindByEmail(email string) (model.User, error) {
 	res := userEntity{}
-	db := repo.db.Where("email = ?", email).First(&res)
+	db := repo.db.Where("LOWER(email) = LOWER(?)", email).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
 			return nil, errorpkg.NewUserNotFoundError(db.Error)
