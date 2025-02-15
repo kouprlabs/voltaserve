@@ -56,6 +56,14 @@ func (c *GroupCache) Get(id string) (model.Group, error) {
 	return res, nil
 }
 
+func (c *GroupCache) GetOrNil(id string) model.Group {
+	res, err := c.Get(id)
+	if err != nil {
+		return nil
+	}
+	return res
+}
+
 func (c *GroupCache) Refresh(id string) (model.Group, error) {
 	res, err := c.groupRepo.Find(id)
 	if err != nil {

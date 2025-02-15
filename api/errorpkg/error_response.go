@@ -33,7 +33,7 @@ func NewErrorResponse(code string, status int, message string, userMessage strin
 }
 
 func (err ErrorResponse) Error() string {
-	return err.Code
+	return fmt.Sprintf("%s: %s", err.Code, err.Message)
 }
 
 func (err ErrorResponse) Unwrap() error {

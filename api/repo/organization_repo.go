@@ -197,6 +197,14 @@ func (repo *OrganizationRepo) Find(id string) (model.Organization, error) {
 	return org, nil
 }
 
+func (repo *OrganizationRepo) FindOrNil(id string) model.Organization {
+	res, err := repo.Find(id)
+	if err != nil {
+		return nil
+	}
+	return res
+}
+
 func (repo *OrganizationRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&organizationEntity{}).Count(&count)
