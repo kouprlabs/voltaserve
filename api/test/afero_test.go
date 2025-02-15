@@ -22,18 +22,18 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/service"
+	"github.com/kouprlabs/voltaserve/api/test/test_helper"
 )
 
 type AferoSuite struct {
 	suite.Suite
-	userID    string
 	org       *service.Organization
 	workspace *service.Workspace
+	users     []model.User
 }
 
 func TestAferoSuite(t *testing.T) {
@@ -41,28 +41,28 @@ func TestAferoSuite(t *testing.T) {
 }
 
 func (s *AferoSuite) SetupTest() {
-	userID, err := s.createUser()
+	users, err := test_helper.CreateUsers(1)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := s.createOrganization(userID)
+	org, err := test_helper.CreateOrganization(users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	workspace, err := s.createWorkspace(org.ID, userID)
+	workspace, err := test_helper.CreateWorkspace(org.ID, users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.userID = userID
+	s.users = users
 	s.org = org
 	s.workspace = workspace
 }
 
 func (s *AferoSuite) TestUploadAndDownload() {
-	emptyFile, err := s.createFile(s.workspace.ID, s.workspace.RootID, s.userID)
+	emptyFile, err := s.createFile(s.workspace.ID, s.workspace.RootID, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	filePath := path.Join("fixtures", "files", "file.txt")
@@ -79,7 +79,7 @@ func (s *AferoSuite) TestUploadAndDownload() {
 		cache.NewWorkspaceCache().GetOrNil(s.workspace.ID).GetBucket(),
 		emptyFile.ID,
 		snapshotID,
-		s.userID,
+		s.users[0].GetID(),
 	)
 	s.Require().NoError(err)
 	s.NotNil(file.Snapshot)
@@ -88,44 +88,10 @@ func (s *AferoSuite) TestUploadAndDownload() {
 	s.Equal(filepath.Ext(filePath), file.Snapshot.Original.Extension)
 	s.Equal(int64(1), file.Snapshot.Version)
 
-	downloadResult, downloadContent, err := s.downloadFile(file.ID, s.userID)
+	downloadResult, downloadContent, err := s.downloadFile(file.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(downloadResult.File.GetID(), file.ID)
 	s.Equal(downloadContent, string(content))
-}
-
-func (s *AferoSuite) createUser() (string, error) {
-	userID := helper.NewID()
-	db, err := infra.NewPostgresManager().GetDB()
-	if err != nil {
-		return "", nil
-	}
-	db = db.Exec("INSERT INTO \"user\" (id, full_name, username, email, password_hash, create_time) VALUES (?, ?, ?, ?, ?, ?)",
-		userID, "user", "user@voltaserve.com", "user@voltaserve.com", "", helper.NewTimestamp())
-	if db.Error != nil {
-		return "", db.Error
-	}
-	return userID, nil
-}
-
-func (s *AferoSuite) createOrganization(userID string) (*service.Organization, error) {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{Name: "organization"}, userID)
-	if err != nil {
-		return nil, err
-	}
-	return org, nil
-}
-
-func (s *AferoSuite) createWorkspace(orgID string, userID string) (*service.Workspace, error) {
-	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
-		Name:            "workspace",
-		OrganizationID:  orgID,
-		StorageCapacity: int64(config.GetConfig().Defaults.WorkspaceStorageCapacityMB),
-	}, userID)
-	if err != nil {
-		return nil, err
-	}
-	return workspace, nil
 }
 
 func (s *AferoSuite) createFile(workspaceID string, workspaceRootID string, userID string) (*service.File, error) {

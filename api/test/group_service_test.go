@@ -11,18 +11,15 @@
 package test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
-	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
+	"github.com/kouprlabs/voltaserve/api/test/test_helper"
 )
 
 type GroupServiceSuite struct {
@@ -37,12 +34,12 @@ func TestGroupServiceTestSuite(t *testing.T) {
 }
 
 func (s *GroupServiceSuite) SetupTest() {
-	users, err := s.createUsers()
+	users, err := test_helper.CreateUsers(3)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := s.createOrganization(users[0].GetID())
+	org, err := test_helper.CreateOrganization(users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
@@ -288,39 +285,4 @@ func (s *GroupServiceSuite) TestRemoveMember() {
 	err = s.service.RemoveMember(group.ID, s.users[2].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewUserNotMemberOfOrganizationError().Error(), err.Error())
-}
-
-func (s *GroupServiceSuite) createUsers() ([]model.User, error) {
-	db, err := infra.NewPostgresManager().GetDB()
-	if err != nil {
-		return nil, nil
-	}
-	var ids []string
-	for i := range 3 {
-		id := helper.NewID()
-		db = db.Exec("INSERT INTO \"user\" (id, full_name, username, email, password_hash, create_time) VALUES (?, ?, ?, ?, ?, ?)",
-			id, fmt.Sprintf("user %d", i), id+"@voltaserve.com", id+"@voltaserve.com", "", helper.NewTimestamp())
-		if db.Error != nil {
-			return nil, db.Error
-		}
-		ids = append(ids, id)
-	}
-	var res []model.User
-	userRepo := repo.NewUserRepo()
-	for _, id := range ids {
-		user, err := userRepo.Find(id)
-		if err != nil {
-			continue
-		}
-		res = append(res, user)
-	}
-	return res, nil
-}
-
-func (s *GroupServiceSuite) createOrganization(userID string) (*service.Organization, error) {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{Name: "organization"}, userID)
-	if err != nil {
-		return nil, err
-	}
-	return org, nil
 }
