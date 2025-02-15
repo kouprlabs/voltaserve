@@ -158,6 +158,14 @@ func (repo *GroupRepo) Find(id string) (model.Group, error) {
 	return group, nil
 }
 
+func (repo *GroupRepo) FindOrNil(id string) model.Group {
+	res, err := repo.Find(id)
+	if err != nil {
+		return nil
+	}
+	return res
+}
+
 func (repo *GroupRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&groupEntity{}).Count(&count)

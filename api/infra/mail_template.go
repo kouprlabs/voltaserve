@@ -143,6 +143,6 @@ func newMockMailTemplate() *mockMailTemplate {
 	return &mockMailTemplate{}
 }
 
-func (mt *mockMailTemplate) Send(templateName string, address string, variables map[string]string) error {
+func (mt *mockMailTemplate) Send(_ string, _ string, _ map[string]string) error {
 	return nil
 }

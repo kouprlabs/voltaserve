@@ -21,14 +21,21 @@ import (
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
+)
+
+const (
+	GB = 1024 * 1024 * 1024
+	MB = 1024 * 1024
 )
 
 type WorkspaceServiceSuite struct {
 	suite.Suite
 	service *service.WorkspaceService
-	userIDs []string
 	org     *service.Organization
+	users   []model.User
 }
 
 func TestWorkspaceServiceSuite(t *testing.T) {
@@ -36,65 +43,65 @@ func TestWorkspaceServiceSuite(t *testing.T) {
 }
 
 func (s *WorkspaceServiceSuite) SetupTest() {
-	userIDs, err := s.createUsers()
+	users, err := s.createUsers()
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := s.createOrganization(userIDs[0])
+	org, err := s.createOrganization(users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
 	s.service = service.NewWorkspaceService()
-	s.userIDs = userIDs
+	s.users = users
 	s.org = org
 }
 
 func (s *WorkspaceServiceSuite) TestCreate() {
 	// Test successful creation
-	opts := service.WorkspaceCreateOptions{
+	workspace, err := s.service.Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
-		StorageCapacity: 1024 * 1024 * 1024, // 1GB
-	}
-	workspace, err := s.service.Create(opts, s.userIDs[0])
+		StorageCapacity: 1 * GB,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.NotNil(workspace)
-	s.Equal(opts.Name, workspace.Name)
-	s.Equal(opts.StorageCapacity, workspace.StorageCapacity)
+	s.Equal("workspace", workspace.Name)
+	s.Equal(int64(1*GB), workspace.StorageCapacity)
 
 	// Test invalid organization ID
-	opts.Name = "workspace"
-	opts.OrganizationID = "invalid-org-id"
-	_, err = s.service.Create(opts, s.userIDs[0])
+	_, err = s.service.Create(service.WorkspaceCreateOptions{
+		Name:            "workspace",
+		OrganizationID:  "invalid-org-id",
+		StorageCapacity: 1 * GB,
+	}, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *WorkspaceServiceSuite) TestFind() {
 	// Create a workspace to find
-	opts := service.WorkspaceCreateOptions{
+	createdWorkspace, err := s.service.Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
-		StorageCapacity: 1024 * 1024 * 1024,
-	}
-	createdWorkspace, err := s.service.Create(opts, s.userIDs[0])
+		StorageCapacity: 1 * GB,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test successful find
-	foundWorkspace, err := s.service.Find(createdWorkspace.ID, s.userIDs[0])
+	foundWorkspace, err := s.service.Find(createdWorkspace.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.NotNil(foundWorkspace)
 	s.Equal(createdWorkspace.ID, foundWorkspace.ID)
 
 	// Test non-existent workspace
-	_, err = s.service.Find(uuid.NewString(), s.userIDs[0])
+	_, err = s.service.Find(uuid.NewString(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 
 	// Test unauthorized user
-	_, err = s.service.Find(createdWorkspace.ID, s.userIDs[1])
+	_, err = s.service.Find(createdWorkspace.ID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
@@ -102,148 +109,144 @@ func (s *WorkspaceServiceSuite) TestFind() {
 func (s *WorkspaceServiceSuite) TestList() {
 	// Create multiple workspaces
 	for i := range 5 {
-		opts := service.WorkspaceCreateOptions{
+		_, err := s.service.Create(service.WorkspaceCreateOptions{
 			Name:            fmt.Sprintf("workspace %d", i),
 			OrganizationID:  s.org.ID,
-			StorageCapacity: 1024 * 1024 * 1024,
-		}
-		_, err := s.service.Create(opts, s.userIDs[0])
+			StorageCapacity: 1 * GB,
+		}, s.users[0].GetID())
 		s.Require().NoError(err)
 		time.Sleep(1 * time.Second)
 	}
 
 	// Test list all workspaces
-	listOpts := service.WorkspaceListOptions{Page: 1, Size: 10}
-	workspaceList, err := s.service.List(listOpts, s.userIDs[0])
+	list, err := s.service.List(service.WorkspaceListOptions{Page: 1, Size: 10}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(workspaceList)
-	s.GreaterOrEqual(len(workspaceList.Data), 5)
+	s.NotNil(list)
+	s.GreaterOrEqual(len(list.Data), 5)
 
 	// Test pagination
-	listOpts.Page = 2
-	listOpts.Size = 2
-	workspaceList, err = s.service.List(listOpts, s.userIDs[0])
+	list, err = s.service.List(service.WorkspaceListOptions{Page: 2, Size: 2}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(workspaceList)
-	s.Len(workspaceList.Data, 2)
+	s.NotNil(list)
+	s.Len(list.Data, 2)
 
 	// Test sorting by name
-	listOpts.SortBy = service.WorkspaceSortByName
-	listOpts.SortOrder = service.WorkspaceSortOrderAsc
-	workspaceList, err = s.service.List(listOpts, s.userIDs[0])
+	list, err = s.service.List(service.WorkspaceListOptions{
+		Page:      1,
+		Size:      10,
+		SortBy:    service.WorkspaceSortByName,
+		SortOrder: service.WorkspaceSortOrderAsc,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(workspaceList)
-	s.Less(workspaceList.Data[0].Name, workspaceList.Data[1].Name)
+	s.NotNil(list)
+	s.Less(list.Data[0].Name, list.Data[1].Name)
 
 	// Test sorting by date created
-	listOpts.SortBy = service.WorkspaceSortByDateCreated
-	listOpts.SortOrder = service.WorkspaceSortOrderDesc
-	workspaceList, err = s.service.List(listOpts, s.userIDs[0])
+	list, err = s.service.List(service.WorkspaceListOptions{
+		Page:      1,
+		Size:      10,
+		SortBy:    service.WorkspaceSortByDateCreated,
+		SortOrder: service.WorkspaceSortOrderDesc,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(workspaceList)
-	firstCreateTime, _ := time.Parse(time.RFC3339, workspaceList.Data[0].CreateTime)
-	secondCreateTime, _ := time.Parse(time.RFC3339, workspaceList.Data[1].CreateTime)
+	s.NotNil(list)
+	firstCreateTime, _ := time.Parse(time.RFC3339, list.Data[0].CreateTime)
+	secondCreateTime, _ := time.Parse(time.RFC3339, list.Data[1].CreateTime)
 	s.True(firstCreateTime.After(secondCreateTime))
 }
 
 func (s *WorkspaceServiceSuite) TestPatchName() {
 	// Create a workspace to patch
-	opts := service.WorkspaceCreateOptions{
+	workspace, err := s.service.Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
-		StorageCapacity: 1024 * 1024 * 1024,
-	}
-	createdWorkspace, err := s.service.Create(opts, s.userIDs[0])
+		StorageCapacity: 1 * GB,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test successful patch
-	newName := "workspace (edit)"
-	updatedWorkspace, err := s.service.PatchName(createdWorkspace.ID, newName, s.userIDs[0])
+	workspace, err = s.service.PatchName(workspace.ID, "workspace (edit)", s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(updatedWorkspace)
-	s.Equal(newName, updatedWorkspace.Name)
+	s.NotNil(workspace)
+	s.Equal("workspace (edit)", workspace.Name)
 
 	// Test unauthorized user
-	_, err = s.service.PatchName(createdWorkspace.ID, newName, s.userIDs[1])
+	_, err = s.service.PatchName(workspace.ID, "workspace", s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 
 	// Test non-existent workspace
-	_, err = s.service.PatchName(uuid.NewString(), newName, s.userIDs[0])
+	_, err = s.service.PatchName(uuid.NewString(), "workspace", s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
 func (s *WorkspaceServiceSuite) TestPatchStorageCapacity() {
 	// Create a workspace to patch
-	opts := service.WorkspaceCreateOptions{
+	workspace, err := s.service.Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
-		StorageCapacity: 1024 * 1024 * 1024,
-	}
-	createdWorkspace, err := s.service.Create(opts, s.userIDs[0])
+		StorageCapacity: 1 * GB,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test successful patch
-	newStorageCapacity := int64(2 * 1024 * 1024 * 1024) // 2GB
-	updatedWorkspace, err := s.service.PatchStorageCapacity(createdWorkspace.ID, newStorageCapacity, s.userIDs[0])
+	workspace, err = s.service.PatchStorageCapacity(workspace.ID, int64(2*GB), s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(updatedWorkspace)
-	s.Equal(newStorageCapacity, updatedWorkspace.StorageCapacity)
+	s.NotNil(workspace)
+	s.Equal(int64(2*GB), workspace.StorageCapacity)
 
 	// Test unauthorized user
-	_, err = s.service.PatchStorageCapacity(createdWorkspace.ID, newStorageCapacity, s.userIDs[1])
+	_, err = s.service.PatchStorageCapacity(workspace.ID, int64(1*GB), s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 
 	// Test non-existent workspace
-	_, err = s.service.PatchStorageCapacity(uuid.NewString(), newStorageCapacity, s.userIDs[0])
+	_, err = s.service.PatchStorageCapacity(uuid.NewString(), int64(1*GB), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
 func (s *WorkspaceServiceSuite) TestDelete() {
 	// Create a workspace to delete
-	opts := service.WorkspaceCreateOptions{
+	workspace, err := s.service.Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
-		StorageCapacity: 1024 * 1024 * 1024,
-	}
-	createdWorkspace, err := s.service.Create(opts, s.userIDs[0])
+		StorageCapacity: 1 * GB,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test successful delete
-	err = s.service.Delete(createdWorkspace.ID, s.userIDs[0])
+	err = s.service.Delete(workspace.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test non-existent workspace
-	err = s.service.Delete(uuid.NewString(), s.userIDs[0])
+	err = s.service.Delete(uuid.NewString(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 
 	// Test unauthorized user
-	err = s.service.Delete(createdWorkspace.ID, s.userIDs[1])
+	err = s.service.Delete(workspace.ID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
 func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize() {
 	// Create a workspace to test
-	opts := service.WorkspaceCreateOptions{
+	workspace, err := s.service.Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
-		StorageCapacity: 1024 * 1024 * 1024, // 1GB
-	}
-	createdWorkspace, err := s.service.Create(opts, s.userIDs[0])
+		StorageCapacity: 1 * GB,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test enough space
-	hasEnoughSpace, err := s.service.HasEnoughSpaceForByteSize(createdWorkspace.ID, 512*1024*1024) // 512MB
+	hasEnoughSpace, err := s.service.HasEnoughSpaceForByteSize(workspace.ID, 512*MB)
 	s.Require().NoError(err)
 	s.True(*hasEnoughSpace)
 
 	// Test not enough space
-	hasEnoughSpace, err = s.service.HasEnoughSpaceForByteSize(createdWorkspace.ID, 2*1024*1024*1024) // 2GB
+	hasEnoughSpace, err = s.service.HasEnoughSpaceForByteSize(workspace.ID, 2*GB)
 	s.Require().NoError(err)
 	s.False(*hasEnoughSpace)
 
@@ -253,7 +256,7 @@ func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize() {
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
-func (s *WorkspaceServiceSuite) createUsers() ([]string, error) {
+func (s *WorkspaceServiceSuite) createUsers() ([]model.User, error) {
 	db, err := infra.NewPostgresManager().GetDB()
 	if err != nil {
 		return nil, nil
@@ -268,7 +271,16 @@ func (s *WorkspaceServiceSuite) createUsers() ([]string, error) {
 		}
 		ids = append(ids, id)
 	}
-	return ids, nil
+	var res []model.User
+	userRepo := repo.NewUserRepo()
+	for _, id := range ids {
+		user, err := userRepo.Find(id)
+		if err != nil {
+			continue
+		}
+		res = append(res, user)
+	}
+	return res, nil
 }
 
 func (s *WorkspaceServiceSuite) createOrganization(userID string) (*service.Organization, error) {

@@ -231,19 +231,6 @@ func (repo *WorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 	return res, nil
 }
 
-func (repo *WorkspaceRepo) find(id string) (*workspaceEntity, error) {
-	res := workspaceEntity{}
-	db := repo.db.Where("id = ?", id).First(&res)
-	if db.Error != nil {
-		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
-			return nil, errorpkg.NewWorkspaceNotFoundError(db.Error)
-		} else {
-			return nil, errorpkg.NewInternalServerError(db.Error)
-		}
-	}
-	return &res, nil
-}
-
 func (repo *WorkspaceRepo) Find(id string) (model.Workspace, error) {
 	workspace, err := repo.find(id)
 	if err != nil {
@@ -253,6 +240,14 @@ func (repo *WorkspaceRepo) Find(id string) (model.Workspace, error) {
 		return nil, err
 	}
 	return workspace, err
+}
+
+func (repo *WorkspaceRepo) FindOrNil(id string) model.Workspace {
+	res, err := repo.Find(id)
+	if err != nil {
+		return nil
+	}
+	return res
 }
 
 func (repo *WorkspaceRepo) Count() (int64, error) {
@@ -373,6 +368,19 @@ func (repo *WorkspaceRepo) RevokeUserPermission(id string, userID string) error 
 		return db.Error
 	}
 	return nil
+}
+
+func (repo *WorkspaceRepo) find(id string) (*workspaceEntity, error) {
+	res := workspaceEntity{}
+	db := repo.db.Where("id = ?", id).First(&res)
+	if db.Error != nil {
+		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
+			return nil, errorpkg.NewWorkspaceNotFoundError(db.Error)
+		} else {
+			return nil, errorpkg.NewInternalServerError(db.Error)
+		}
+	}
+	return &res, nil
 }
 
 func (repo *WorkspaceRepo) populateModelFields(workspaces []*workspaceEntity) error {

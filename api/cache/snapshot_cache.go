@@ -56,6 +56,14 @@ func (c *SnapshotCache) Get(id string) (model.Snapshot, error) {
 	return res, nil
 }
 
+func (c *SnapshotCache) GetOrNil(id string) (model.Snapshot, error) {
+	res, err := c.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (c *SnapshotCache) Refresh(id string) (model.Snapshot, error) {
 	res, err := c.snapshotRepo.Find(id)
 	if err != nil {

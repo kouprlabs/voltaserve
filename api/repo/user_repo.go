@@ -99,6 +99,14 @@ func (repo *UserRepo) Find(id string) (model.User, error) {
 	return &res, nil
 }
 
+func (repo *UserRepo) FindOrNil(id string) model.User {
+	res, err := repo.Find(id)
+	if err != nil {
+		return nil
+	}
+	return res
+}
+
 func (repo *UserRepo) FindByEmail(email string) (model.User, error) {
 	res := userEntity{}
 	db := repo.db.Where("LOWER(email) = LOWER(?)", email).First(&res)

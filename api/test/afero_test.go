@@ -34,7 +34,6 @@ type AferoSuite struct {
 	userID    string
 	org       *service.Organization
 	workspace *service.Workspace
-	bucket    string
 }
 
 func TestAferoSuite(t *testing.T) {
@@ -52,7 +51,7 @@ func (s *AferoSuite) SetupTest() {
 		s.Fail(err.Error())
 		return
 	}
-	workspace, bucket, err := s.createWorkspace(org.ID, userID)
+	workspace, err := s.createWorkspace(org.ID, userID)
 	if err != nil {
 		s.Fail(err.Error())
 		return
@@ -60,7 +59,6 @@ func (s *AferoSuite) SetupTest() {
 	s.userID = userID
 	s.org = org
 	s.workspace = workspace
-	s.bucket = bucket
 }
 
 func (s *AferoSuite) TestUploadAndDownload() {
@@ -75,7 +73,14 @@ func (s *AferoSuite) TestUploadAndDownload() {
 	s.Require().NoError(err)
 
 	snapshotID := helper.NewID()
-	file, err := s.uploadFile(filePath, stat.Size(), s.bucket, emptyFile.ID, snapshotID, s.userID)
+	file, err := s.uploadFile(
+		filePath,
+		stat.Size(),
+		cache.NewWorkspaceCache().GetOrNil(s.workspace.ID).GetBucket(),
+		emptyFile.ID,
+		snapshotID,
+		s.userID,
+	)
 	s.Require().NoError(err)
 	s.NotNil(file.Snapshot)
 	s.Equal(snapshotID, file.Snapshot.ID)
@@ -111,20 +116,16 @@ func (s *AferoSuite) createOrganization(userID string) (*service.Organization, e
 	return org, nil
 }
 
-func (s *AferoSuite) createWorkspace(orgID string, userID string) (*service.Workspace, string, error) {
+func (s *AferoSuite) createWorkspace(orgID string, userID string) (*service.Workspace, error) {
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  orgID,
 		StorageCapacity: int64(config.GetConfig().Defaults.WorkspaceStorageCapacityMB),
 	}, userID)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
-	workspaceModel, err := cache.NewWorkspaceCache().Get(workspace.ID)
-	if err != nil {
-		return nil, "", err
-	}
-	return workspace, workspaceModel.GetBucket(), nil
+	return workspace, nil
 }
 
 func (s *AferoSuite) createFile(workspaceID string, workspaceRootID string, userID string) (*service.File, error) {

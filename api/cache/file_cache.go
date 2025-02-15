@@ -56,6 +56,14 @@ func (c *FileCache) Get(id string) (model.File, error) {
 	return res, nil
 }
 
+func (c *FileCache) GetOrNil(id string) (model.File, error) {
+	res, err := c.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (c *FileCache) Refresh(id string) (model.File, error) {
 	res, err := c.fileRepo.Find(id)
 	if err != nil {

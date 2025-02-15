@@ -22,7 +22,7 @@ type OrganizationServiceSuite struct {
 	orgRepo  *repo.OrganizationRepo
 	orgCache *cache.OrganizationCache
 	orgGuard *guard.OrganizationGuard
-	userIDs  []string
+	users    []model.User
 }
 
 func TestOrganizationServiceTestSuite(t *testing.T) {
@@ -33,17 +33,17 @@ func (s *OrganizationServiceSuite) SetupTest() {
 	s.orgSvc = service.NewOrganizationService()
 	s.orgRepo = repo.NewOrganizationRepo()
 	s.orgCache = cache.NewOrganizationCache()
-	userIDs, err := s.createUsers()
+	users, err := s.createUsers()
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.userIDs = userIDs
+	s.users = users
 }
 
 func (s *OrganizationServiceSuite) TestCreateOrganization() {
 	opts := service.OrganizationCreateOptions{Name: "organization"}
-	org, err := s.orgSvc.Create(opts, s.userIDs[0])
+	org, err := s.orgSvc.Create(opts, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NotNil(org)
 	s.Equal(opts.Name, org.Name)
@@ -52,24 +52,23 @@ func (s *OrganizationServiceSuite) TestCreateOrganization() {
 
 func (s *OrganizationServiceSuite) TestFindOrganization() {
 	// Create a new organization to find
-	opts := service.OrganizationCreateOptions{Name: "organization"}
-	createdOrg, err := s.orgSvc.Create(opts, s.userIDs[0])
+	org, err := s.orgSvc.Create(service.OrganizationCreateOptions{Name: "organization"}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test finding the organization
-	foundOrg, err := s.orgSvc.Find(createdOrg.ID, s.userIDs[0])
+	foundOrg, err := s.orgSvc.Find(org.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NotNil(foundOrg)
-	s.Equal(createdOrg.ID, foundOrg.ID)
-	s.Equal(createdOrg.Name, foundOrg.Name)
+	s.Equal(org.ID, foundOrg.ID)
+	s.Equal(org.Name, foundOrg.Name)
 
 	// Test finding a non-existent organization
-	foundOrg, err = s.orgSvc.Find("non-existent-org-id", s.userIDs[0])
+	foundOrg, err = s.orgSvc.Find("non-existent-org-id", s.users[0].GetID())
 	s.Require().Error(err)
 	s.Nil(foundOrg)
 
 	// Test finding an organization with insufficient permissions
-	foundOrg, err = s.orgSvc.Find(createdOrg.ID, s.userIDs[1])
+	foundOrg, err = s.orgSvc.Find(org.ID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Nil(foundOrg)
 }
@@ -78,11 +77,7 @@ func (s *OrganizationServiceSuite) TestListOrganizations() {
 	// Create multiple organizations
 	names := []string{"organization A", "organization B", "organization C"}
 	for _, name := range names {
-		opts := service.OrganizationCreateOptions{
-			Name:  name,
-			Image: nil,
-		}
-		_, err := s.orgSvc.Create(opts, s.userIDs[0])
+		_, err := s.orgSvc.Create(service.OrganizationCreateOptions{Name: name}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
@@ -92,7 +87,7 @@ func (s *OrganizationServiceSuite) TestListOrganizations() {
 		Size:      10,
 		SortBy:    service.OrganizationSortByName,
 		SortOrder: service.OrganizationSortOrderAsc,
-	}, s.userIDs[0])
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NotNil(list)
 	s.Equal(uint64(len(names)), list.TotalElements)
@@ -101,7 +96,7 @@ func (s *OrganizationServiceSuite) TestListOrganizations() {
 	s.Equal(names[2], list.Data[2].Name)
 
 	// Test pagination
-	list, err = s.orgSvc.List(service.OrganizationListOptions{Page: 1, Size: 2}, s.userIDs[0])
+	list, err = s.orgSvc.List(service.OrganizationListOptions{Page: 1, Size: 2}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NotNil(list)
 	s.Equal(uint64(2), list.Size)
@@ -114,7 +109,7 @@ func (s *OrganizationServiceSuite) TestListOrganizations() {
 		Size:      2,
 		SortBy:    service.OrganizationSortByName,
 		SortOrder: service.OrganizationSortOrderDesc,
-	}, s.userIDs[0])
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NotNil(list)
 	s.Equal("organization C", list.Data[0].Name)
@@ -126,7 +121,7 @@ func (s *OrganizationServiceSuite) TestListOrganizations() {
 		Size:      2,
 		SortBy:    service.OrganizationSortByName,
 		SortOrder: service.OrganizationSortOrderAsc,
-	}, s.userIDs[0])
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NotNil(list)
 	s.Equal("organization A", list.Data[0].Name)
@@ -137,16 +132,12 @@ func (s *OrganizationServiceSuite) TestProbeOrganizations() {
 	// Create multiple organizations
 	names := []string{"organization A", "organization B", "organization C"}
 	for _, name := range names {
-		opts := service.OrganizationCreateOptions{
-			Name:  name,
-			Image: nil,
-		}
-		_, err := s.orgSvc.Create(opts, s.userIDs[0])
+		_, err := s.orgSvc.Create(service.OrganizationCreateOptions{Name: name}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
 	// Test probing organizations
-	probe, err := s.orgSvc.Probe(service.OrganizationListOptions{Page: 1, Size: 10}, s.userIDs[0])
+	probe, err := s.orgSvc.Probe(service.OrganizationListOptions{Page: 1, Size: 10}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NotNil(probe)
 	s.Equal(uint64(len(names)), probe.TotalElements)
@@ -155,88 +146,82 @@ func (s *OrganizationServiceSuite) TestProbeOrganizations() {
 
 func (s *OrganizationServiceSuite) TestPatchOrganizationName() {
 	// Create a new organization
-	createdOrg, err := s.orgSvc.Create(service.OrganizationCreateOptions{Name: "organization"}, s.userIDs[0])
+	org, err := s.orgSvc.Create(service.OrganizationCreateOptions{Name: "organization"}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test patching the organization name
-	newName := "organization (edit)"
-	updatedOrg, err := s.orgSvc.PatchName(createdOrg.ID, newName, s.userIDs[0])
+	org, err = s.orgSvc.PatchName(org.ID, "organization (edit)", s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Require().NotNil(updatedOrg)
-	s.Equal(newName, updatedOrg.Name)
+	s.Require().NotNil(org)
+	s.Equal("organization (edit)", org.Name)
 
 	// Test patching with insufficient permissions
-	updatedOrg, err = s.orgSvc.PatchName(createdOrg.ID, newName, s.userIDs[1])
+	org, err = s.orgSvc.PatchName(org.ID, "organization", s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-	s.Nil(updatedOrg)
+	s.Nil(org)
 
 	// Test patching a non-existent organization
-	updatedOrg, err = s.orgSvc.PatchName("non-existent-org-id", newName, s.userIDs[0])
+	org, err = s.orgSvc.PatchName("non-existent-org-id", "organization", s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-	s.Nil(updatedOrg)
+	s.Nil(org)
 }
 
 func (s *OrganizationServiceSuite) TestDeleteOrganization() {
 	// Create a new organization
-	opts := service.OrganizationCreateOptions{Name: "organization"}
-	createdOrg, err := s.orgSvc.Create(opts, s.userIDs[0])
+	org, err := s.orgSvc.Create(service.OrganizationCreateOptions{Name: "organization"}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test deleting the organization
-	err = s.orgSvc.Delete(createdOrg.ID, s.userIDs[0])
+	err = s.orgSvc.Delete(org.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Verify the organization is deleted
-	foundOrg, err := s.orgSvc.Find(createdOrg.ID, s.userIDs[0])
+	org, err = s.orgSvc.Find(org.ID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-	s.Nil(foundOrg)
+	s.Nil(org)
 
 	// Test deleting a non-existent organization
-	err = s.orgSvc.Delete("non-existent-org-id", s.userIDs[0])
+	err = s.orgSvc.Delete("non-existent-org-id", s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 
 	// Test deleting with insufficient permissions
-	createdOrg, err = s.orgSvc.Create(opts, s.userIDs[0])
+	org, err = s.orgSvc.Create(service.OrganizationCreateOptions{Name: "organization"}, s.users[0].GetID())
 	s.Require().NoError(err)
-	err = s.orgSvc.Delete(createdOrg.ID, s.userIDs[1])
+	err = s.orgSvc.Delete(org.ID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember() {
 	// Create a new organization
-	createdOrg, err := s.orgSvc.Create(service.OrganizationCreateOptions{Name: "organization"}, s.userIDs[0])
+	org, err := s.orgSvc.Create(service.OrganizationCreateOptions{Name: "organization"}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Add another user to the organization
-	err = s.orgRepo.GrantUserPermission(createdOrg.ID, s.userIDs[1], model.PermissionEditor)
+	err = s.orgRepo.GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
 	s.Require().NoError(err)
 
 	// Test removing the member
-	err = s.orgSvc.RemoveMember(createdOrg.ID, s.userIDs[1], s.userIDs[0])
+	err = s.orgSvc.RemoveMember(org.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
-
-	// Verify the member is removed
-	org, err := s.orgCache.Get(createdOrg.ID)
-	s.Require().NoError(err)
-	s.False(s.orgGuard.IsAuthorized(s.userIDs[1], org, model.PermissionEditor))
+	s.False(s.orgGuard.IsAuthorized(s.users[1].GetID(), s.orgCache.GetOrNil(org.ID), model.PermissionEditor))
 
 	// Test removing a non-existent member
-	err = s.orgSvc.RemoveMember(createdOrg.ID, "non-existent-user-id", s.userIDs[0])
+	err = s.orgSvc.RemoveMember(org.ID, "non-existent-user-id", s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewUserNotFoundError(err).Error(), err.Error())
 
 	// Test removing the last owner
-	err = s.orgSvc.RemoveMember(createdOrg.ID, s.userIDs[0], s.userIDs[0])
+	err = s.orgSvc.RemoveMember(org.ID, s.users[0].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(org).Error(), err.Error())
+	s.Equal(errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(s.orgCache.GetOrNil(org.ID)).Error(), err.Error())
 }
 
-func (s *OrganizationServiceSuite) createUsers() ([]string, error) {
+func (s *OrganizationServiceSuite) createUsers() ([]model.User, error) {
 	db, err := infra.NewPostgresManager().GetDB()
 	if err != nil {
 		return nil, nil
@@ -251,5 +236,14 @@ func (s *OrganizationServiceSuite) createUsers() ([]string, error) {
 		}
 		ids = append(ids, id)
 	}
-	return ids, nil
+	var res []model.User
+	userRepo := repo.NewUserRepo()
+	for _, id := range ids {
+		user, err := userRepo.Find(id)
+		if err != nil {
+			continue
+		}
+		res = append(res, user)
+	}
+	return res, nil
 }

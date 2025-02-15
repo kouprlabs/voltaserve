@@ -243,6 +243,14 @@ func (repo *FileRepo) Find(id string) (model.File, error) {
 	return file, nil
 }
 
+func (repo *FileRepo) FindOrNil(id string) model.File {
+	res, err := repo.Find(id)
+	if err != nil {
+		return nil
+	}
+	return res
+}
+
 func (repo *FileRepo) find(id string) (*fileEntity, error) {
 	res := fileEntity{}
 	db := repo.db.

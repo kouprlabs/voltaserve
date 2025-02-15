@@ -359,6 +359,14 @@ func (repo *SnapshotRepo) Find(id string) (model.Snapshot, error) {
 	return res, nil
 }
 
+func (repo *SnapshotRepo) FindOrNil(id string) model.Snapshot {
+	res, err := repo.Find(id)
+	if err != nil {
+		return nil
+	}
+	return res
+}
+
 func (repo *SnapshotRepo) find(id string) (*snapshotEntity, error) {
 	var res snapshotEntity
 	if db := repo.db.Where("id = ?", id).First(&res); db.Error != nil {

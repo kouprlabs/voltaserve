@@ -234,25 +234,20 @@ func (repo *TaskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
 	return res, nil
 }
 
-func (repo *TaskRepo) find(id string) (*taskEntity, error) {
-	res := taskEntity{}
-	db := repo.db.Where("id = ?", id).First(&res)
-	if db.Error != nil {
-		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
-			return nil, errorpkg.NewTaskNotFoundError(db.Error)
-		} else {
-			return nil, errorpkg.NewInternalServerError(db.Error)
-		}
-	}
-	return &res, nil
-}
-
 func (repo *TaskRepo) Find(id string) (model.Task, error) {
 	res, err := repo.find(id)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
+}
+
+func (repo *TaskRepo) FindOrNil(id string) model.Task {
+	res, err := repo.Find(id)
+	if err != nil {
+		return nil
+	}
+	return res
 }
 
 func (repo *TaskRepo) Count() (int64, error) {
@@ -308,4 +303,17 @@ func (repo *TaskRepo) Delete(id string) error {
 		return db.Error
 	}
 	return nil
+}
+
+func (repo *TaskRepo) find(id string) (*taskEntity, error) {
+	res := taskEntity{}
+	db := repo.db.Where("id = ?", id).First(&res)
+	if db.Error != nil {
+		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
+			return nil, errorpkg.NewTaskNotFoundError(db.Error)
+		} else {
+			return nil, errorpkg.NewInternalServerError(db.Error)
+		}
+	}
+	return &res, nil
 }
