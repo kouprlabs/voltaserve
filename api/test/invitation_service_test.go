@@ -12,15 +12,16 @@ package test
 
 import (
 	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/suite"
+
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
-	"testing"
-
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/service"
-	"github.com/stretchr/testify/suite"
 )
 
 type InvitationServiceSuite struct {
@@ -63,7 +64,7 @@ func (s *InvitationServiceSuite) TestCreateInvitation() {
 	// Test duplicate emails should not create new invitations
 	invitations, err = s.svc.Create(opts, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Len(invitations, 0)
+	s.Empty(invitations)
 
 	// Test invalid organization ID
 	opts.OrganizationID = "invalid-org"
@@ -102,7 +103,7 @@ func (s *InvitationServiceSuite) TestListIncomingInvitations() {
 	listOpts.Page = 2
 	list, err = s.svc.ListIncoming(listOpts, s.users[1].GetID())
 	s.Require().NoError(err)
-	s.Len(list.Data, 0)
+	s.Empty(list.Data)
 }
 
 func (s *InvitationServiceSuite) TestProbeIncomingInvitations() {
@@ -149,7 +150,7 @@ func (s *InvitationServiceSuite) TestListOutgoingInvitations() {
 	// Test pagination
 	list, err = s.svc.ListOutgoing(s.org.ID, service.InvitationListOptions{Page: 2, Size: 10}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Len(list.Data, 0)
+	s.Empty(list.Data)
 }
 
 func (s *InvitationServiceSuite) TestProbeOutgoingInvitations() {
