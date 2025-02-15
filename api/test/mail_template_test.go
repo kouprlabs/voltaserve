@@ -43,17 +43,17 @@ var joinOrganization string
 //go:embed fixtures/templates/sign-up-and-join-organization.eml
 var signupAndJoinOrganization string
 
-type SMTPSuite struct {
+type MailTemplateSuite struct {
 	suite.Suite
 }
 
-func TestSMTPSuite(t *testing.T) {
+func TestMailTemplateSuite(t *testing.T) {
 	// Avoid the mock being instantiated, because here we are testing the real implementation
 	t.Setenv("TEST", "")
-	suite.Run(t, new(SMTPSuite))
+	suite.Run(t, new(MailTemplateSuite))
 }
 
-func (s *SMTPSuite) TestSend() {
+func (s *MailTemplateSuite) TestSend() {
 	tests := map[string]struct {
 		TemplateName string
 		Address      string
@@ -85,7 +85,6 @@ func (s *SMTPSuite) TestSend() {
 	for name, tc := range tests {
 		s.Run(name, func() {
 			dialMock := &DialMock{}
-
 			mt := infra.NewMailTemplateWithDialer(config.SMTPConfig{
 				SenderName:    "Voltaserve",
 				SenderAddress: "voltaserve@example.com",
@@ -100,7 +99,6 @@ func (s *SMTPSuite) TestSend() {
 				simplifiedBody = regexp.MustCompile("--.+(|--)").ReplaceAllString(simplifiedBody, "--XXX$1")
 				simplifiedBody = regexp.MustCompile("Date: .+").ReplaceAllString(simplifiedBody, "Date: Now")
 				simplifiedBody = strings.ReplaceAll(simplifiedBody, "\r\n", "\n")
-
 				assert.Equal(t, tc.ExpectedBody, simplifiedBody)
 			}, 1*time.Second, 1)
 		})
