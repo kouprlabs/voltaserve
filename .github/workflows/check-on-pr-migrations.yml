@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-name: Lint and build voltaserve/migrations
+name: Voltaserve Migrations
 
 on:
   pull_request:
