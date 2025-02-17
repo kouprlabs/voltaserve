@@ -18,7 +18,7 @@ on:
       - "conversion/**"
       - "!conversion/.env"
       - "!conversion/README.md"
-      
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -27,9 +27,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Lint Using golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v6.1.0
         with:
           working-directory: conversion
+          args: --timeout=5m
+          version: v1.61.0
     permissions:
       contents: read
       pull-requests: read
@@ -40,7 +42,7 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        platform: [ "arm64", "amd64" ]
+        platform: ["arm64", "amd64"]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
