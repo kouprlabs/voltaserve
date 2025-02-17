@@ -4,7 +4,7 @@
 
 Prerequisites:
 
-- [golangci-lint v1.61.0](https://github.com/golangci/golangci-lint/releases/tag/v1.61.0)
+- [golangci-lint](https://github.com/golangci/golangci-lint/releases/tag/v1.61.0) (v1.61.0)
 - [gci](https://github.com/daixiang0/gci)
 - [gofumpt](https://github.com/mvdan/gofumpt)
 - [swag](https://github.com/swaggo/swag)
