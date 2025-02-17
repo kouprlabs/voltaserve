@@ -62,7 +62,7 @@ func (s *AferoSuite) SetupTest() {
 }
 
 func (s *AferoSuite) TestUploadAndDownload() {
-	emptyFile, err := s.createFile(s.workspace.ID, s.workspace.RootID, s.users[0].GetID())
+	emptyFile, err := test_helper.CreateFile(s.workspace.ID, s.workspace.RootID, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	filePath := path.Join("fixtures", "files", "file.txt")
@@ -92,19 +92,6 @@ func (s *AferoSuite) TestUploadAndDownload() {
 	s.Require().NoError(err)
 	s.Equal(downloadResult.File.GetID(), file.ID)
 	s.Equal(downloadContent, string(content))
-}
-
-func (s *AferoSuite) createFile(workspaceID string, workspaceRootID string, userID string) (*service.File, error) {
-	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: workspaceID,
-		Name:        "file",
-		Type:        model.FileTypeFile,
-		ParentID:    workspaceRootID,
-	}, userID)
-	if err != nil {
-		return nil, err
-	}
-	return file, nil
 }
 
 func (s *AferoSuite) uploadFile(path string, size int64, bucket string, fileID string, snapshotID string, userID string) (*service.File, error) {

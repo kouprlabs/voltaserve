@@ -49,7 +49,7 @@ func (c *TaskCache) Get(id string) (model.Task, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	task := repo.NewTask()
+	task := repo.NewTaskModel()
 	if err = json.Unmarshal([]byte(value), &task); err != nil {
 		return nil, err
 	}

@@ -95,7 +95,7 @@ func (s *GroupSearch) Query(query string, opts infra.QueryOptions) ([]model.Grou
 		if err != nil {
 			return nil, err
 		}
-		group := repo.NewGroup()
+		group := repo.NewGroupModel()
 		if err = json.Unmarshal(b, &group); err != nil {
 			return nil, err
 		}

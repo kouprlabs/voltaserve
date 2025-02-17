@@ -129,7 +129,7 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped := newSnapshotMapper().mapMany(paged, *file.GetSnapshotID())
+	mapped := newSnapshotMapper().mapMany(paged, file.GetSnapshotID())
 	return &SnapshotList{
 		Data:          mapped,
 		TotalPages:    totalPages,
@@ -282,7 +282,7 @@ func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, use
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return nil, nil, err
 	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+	if file.GetType() != model.FileTypeFile {
 		return nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	if opts.SortBy == "" {
@@ -556,11 +556,11 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 	return s
 }
 
-func (mp *snapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) []*Snapshot {
+func (mp *snapshotMapper) mapMany(snapshots []model.Snapshot, activeID *string) []*Snapshot {
 	res := make([]*Snapshot, 0)
 	for _, snapshot := range snapshots {
 		s := mp.mapOne(snapshot)
-		s.IsActive = activeID == snapshot.GetID()
+		s.IsActive = activeID != nil && *activeID == snapshot.GetID()
 		res = append(res, s)
 	}
 	return res

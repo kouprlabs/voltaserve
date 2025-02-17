@@ -67,3 +67,16 @@ func CreateWorkspace(orgID string, userID string) (*service.Workspace, error) {
 	}
 	return workspace, nil
 }
+
+func CreateFile(workspaceID string, workspaceRootID string, userID string) (*service.File, error) {
+	file, err := service.NewFileService().Create(service.FileCreateOptions{
+		WorkspaceID: workspaceID,
+		Name:        "file",
+		Type:        model.FileTypeFile,
+		ParentID:    workspaceRootID,
+	}, userID)
+	if err != nil {
+		return nil, err
+	}
+	return file, nil
+}

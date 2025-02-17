@@ -98,7 +98,7 @@ func (s *TaskSearch) Query(query string, opts infra.QueryOptions) ([]model.Task,
 		if err != nil {
 			return nil, err
 		}
-		org := repo.NewTask()
+		org := repo.NewTaskModel()
 		if err = json.Unmarshal(b, &org); err != nil {
 			return nil, err
 		}

@@ -74,8 +74,58 @@ func (i *invitationEntity) GetUpdateTime() *string {
 	return i.UpdateTime
 }
 
+func (i *invitationEntity) SetID(id string) {
+	i.ID = id
+}
+
+func (i *invitationEntity) SetOrganizationID(id string) {
+	i.OrganizationID = id
+}
+
+func (i *invitationEntity) SetOwnerID(id string) {
+	i.OwnerID = id
+}
+
+func (i *invitationEntity) SetEmail(email string) {
+	i.Email = email
+}
+
 func (i *invitationEntity) SetStatus(status string) {
 	i.Status = status
+}
+
+func (i *invitationEntity) SetCreateTime(time string) {
+	i.CreateTime = time
+}
+
+func (i *invitationEntity) SetUpdateTime(time *string) {
+	i.UpdateTime = time
+}
+
+func NewInvitationModel() model.Invitation {
+	return &invitationEntity{}
+}
+
+type InvitationNewModelOptions struct {
+	ID             string
+	OrganizationID string
+	OwnerID        string
+	Email          string
+	Status         string
+	CreateTime     string
+	UpdateTime     *string
+}
+
+func NewInvitationModelWithOptions(opts InvitationNewModelOptions) model.Invitation {
+	return &invitationEntity{
+		ID:             opts.ID,
+		OrganizationID: opts.OrganizationID,
+		OwnerID:        opts.OwnerID,
+		Email:          opts.Email,
+		Status:         opts.Status,
+		CreateTime:     opts.CreateTime,
+		UpdateTime:     opts.UpdateTime,
+	}
 }
 
 type InvitationRepo struct {

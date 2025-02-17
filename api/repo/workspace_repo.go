@@ -147,7 +147,11 @@ func (w *workspaceEntity) SetUpdateTime(updateTime *string) {
 	w.UpdateTime = updateTime
 }
 
-type NewWorkspaceOptions struct {
+func NewWorkspaceModel() model.Workspace {
+	return &workspaceEntity{}
+}
+
+type WorkspaceNewModelOptions struct {
 	ID               string
 	Name             string
 	StorageCapacity  int64
@@ -161,11 +165,7 @@ type NewWorkspaceOptions struct {
 	UpdateTime       *string
 }
 
-func NewWorkspace() model.Workspace {
-	return &workspaceEntity{}
-}
-
-func NewWorkspaceWithOptions(opts NewWorkspaceOptions) model.Workspace {
+func NewWorkspaceModelWithOptions(opts WorkspaceNewModelOptions) model.Workspace {
 	res := &workspaceEntity{
 		ID:              opts.ID,
 		Name:            opts.Name,

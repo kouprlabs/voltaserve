@@ -24,5 +24,11 @@ type Invitation interface {
 	GetStatus() string
 	GetCreateTime() string
 	GetUpdateTime() *string
+	SetID(string)
+	SetOrganizationID(string)
+	SetOwnerID(string)
+	SetEmail(string)
 	SetStatus(string)
+	SetCreateTime(string)
+	SetUpdateTime(*string)
 }

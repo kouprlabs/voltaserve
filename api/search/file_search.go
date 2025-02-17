@@ -108,7 +108,7 @@ func (s *FileSearch) Query(query string, opts infra.QueryOptions) ([]model.File,
 		if err != nil {
 			return nil, err
 		}
-		file := repo.NewFile()
+		file := repo.NewFileModel()
 		if err = json.Unmarshal(b, &file); err != nil {
 			return nil, err
 		}

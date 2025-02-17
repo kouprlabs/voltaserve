@@ -94,7 +94,7 @@ func (s *OrganizationSearch) Query(query string, opts infra.QueryOptions) ([]mod
 		if err != nil {
 			return nil, err
 		}
-		org := repo.NewOrganization()
+		org := repo.NewOrganizationModel()
 		if err = json.Unmarshal(b, &org); err != nil {
 			return nil, err
 		}

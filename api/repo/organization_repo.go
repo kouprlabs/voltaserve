@@ -112,11 +112,11 @@ func (o *organizationEntity) SetUpdateTime(updateTime *string) {
 	o.UpdateTime = updateTime
 }
 
-func NewOrganization() model.Organization {
+func NewOrganizationModel() model.Organization {
 	return &organizationEntity{}
 }
 
-type NewOrganizationOptions struct {
+type OrganizationNewModelOptions struct {
 	ID               string
 	Name             string
 	UserPermissions  []model.CoreUserPermission
@@ -126,7 +126,7 @@ type NewOrganizationOptions struct {
 	UpdateTime       *string
 }
 
-func NewOrganizationWithOptions(opts NewOrganizationOptions) model.Organization {
+func NewOrganizationModelWithOptions(opts OrganizationNewModelOptions) model.Organization {
 	res := &organizationEntity{
 		ID:         opts.ID,
 		Name:       opts.Name,
