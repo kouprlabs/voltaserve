@@ -50,6 +50,8 @@ type Snapshot interface {
 	SetStatus(string)
 	SetLanguage(string)
 	SetTaskID(*string)
+	SetCreateTime(string)
+	SetUpdateTime(*string)
 }
 
 type S3Object struct {

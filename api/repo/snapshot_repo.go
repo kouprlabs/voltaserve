@@ -161,6 +161,42 @@ func (s *snapshotEntity) GetTaskID() *string {
 	return s.TaskID
 }
 
+func (s *snapshotEntity) HasOriginal() bool {
+	return s.Original != nil
+}
+
+func (s *snapshotEntity) HasPreview() bool {
+	return s.Preview != nil
+}
+
+func (s *snapshotEntity) HasText() bool {
+	return s.Text != nil
+}
+
+func (s *snapshotEntity) HasOCR() bool {
+	return s.OCR != nil
+}
+
+func (s *snapshotEntity) HasEntities() bool {
+	return s.Entities != nil
+}
+
+func (s *snapshotEntity) HasMosaic() bool {
+	return s.Mosaic != nil
+}
+
+func (s *snapshotEntity) HasThumbnail() bool {
+	return s.Thumbnail != nil
+}
+
+func (s *snapshotEntity) GetCreateTime() string {
+	return s.CreateTime
+}
+
+func (s *snapshotEntity) GetUpdateTime() *string {
+	return s.UpdateTime
+}
+
 func (s *snapshotEntity) SetID(id string) {
 	s.ID = id
 }
@@ -286,44 +322,52 @@ func (s *snapshotEntity) SetTaskID(taskID *string) {
 	s.TaskID = taskID
 }
 
-func (s *snapshotEntity) HasOriginal() bool {
-	return s.Original != nil
+func (s *snapshotEntity) SetCreateTime(createTime string) {
+	s.CreateTime = createTime
 }
 
-func (s *snapshotEntity) HasPreview() bool {
-	return s.Preview != nil
+func (s *snapshotEntity) SetUpdateTime(updateTime *string) {
+	s.UpdateTime = updateTime
 }
 
-func (s *snapshotEntity) HasText() bool {
-	return s.Text != nil
-}
-
-func (s *snapshotEntity) HasOCR() bool {
-	return s.OCR != nil
-}
-
-func (s *snapshotEntity) HasEntities() bool {
-	return s.Entities != nil
-}
-
-func (s *snapshotEntity) HasMosaic() bool {
-	return s.Mosaic != nil
-}
-
-func (s *snapshotEntity) HasThumbnail() bool {
-	return s.Thumbnail != nil
-}
-
-func (s *snapshotEntity) GetCreateTime() string {
-	return s.CreateTime
-}
-
-func (s *snapshotEntity) GetUpdateTime() *string {
-	return s.UpdateTime
-}
-
-func NewSnapshot() model.Snapshot {
+func NewSnapshotModel() model.Snapshot {
 	return &snapshotEntity{}
+}
+
+type SnapshotNewModelOptions struct {
+	ID         string
+	Version    int64
+	Original   *model.S3Object
+	Preview    *model.S3Object
+	Text       *model.S3Object
+	OCR        *model.S3Object
+	Entities   *model.S3Object
+	Mosaic     *model.S3Object
+	Thumbnail  *model.S3Object
+	Status     string
+	Language   string
+	TaskID     *string
+	CreateTime string
+	UpdateTime *string
+}
+
+func NewSnapshotModelWithOptions(opts SnapshotNewModelOptions) model.Snapshot {
+	res := &snapshotEntity{
+		ID:         opts.ID,
+		Version:    opts.Version,
+		Status:     opts.Status,
+		TaskID:     opts.TaskID,
+		CreateTime: opts.CreateTime,
+		UpdateTime: opts.UpdateTime,
+	}
+	res.SetOriginal(opts.Original)
+	res.SetPreview(opts.Preview)
+	res.SetText(opts.Text)
+	res.SetOCR(opts.OCR)
+	res.SetEntities(opts.Entities)
+	res.SetMosaic(opts.Mosaic)
+	res.SetThumbnail(opts.Thumbnail)
+	return res
 }
 
 type SnapshotFileEntity struct {

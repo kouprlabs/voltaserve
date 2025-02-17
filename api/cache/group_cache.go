@@ -49,7 +49,7 @@ func (c *GroupCache) Get(id string) (model.Group, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	res := repo.NewGroup()
+	res := repo.NewGroupModel()
 	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}

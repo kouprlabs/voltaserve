@@ -49,7 +49,7 @@ func (c *OrganizationCache) Get(id string) (model.Organization, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	res := repo.NewOrganization()
+	res := repo.NewOrganizationModel()
 	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}

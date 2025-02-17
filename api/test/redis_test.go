@@ -32,12 +32,12 @@ func TestRedisSuite(t *testing.T) {
 }
 
 func (s *RedisSuite) TestSetAndGet() {
-	opts := repo.NewFileOptions{
+	opts := repo.FileNewModelOptions{
 		ID:   helper.NewID(),
 		Name: "file",
 		Type: model.FileTypeFile,
 	}
-	err := cache.NewFileCache().Set(repo.NewFileWithOptions(opts))
+	err := cache.NewFileCache().Set(repo.NewFileModelWithOptions(opts))
 	s.Require().NoError(err)
 	file, err := cache.NewFileCache().Get(opts.ID)
 	s.Require().NoError(err)

@@ -155,11 +155,11 @@ func (e *taskEntity) SetUpdateTime(updateTime *string) {
 	e.UpdateTime = updateTime
 }
 
-func NewTask() model.Task {
+func NewTaskModel() model.Task {
 	return &taskEntity{}
 }
 
-type NewTaskOptions struct {
+type TaskNewModelOptions struct {
 	ID              string
 	Name            string
 	Error           *string
@@ -172,7 +172,7 @@ type NewTaskOptions struct {
 	UpdateTime      *string
 }
 
-func NewTaskWithOptions(opts NewTaskOptions) model.Task {
+func NewTaskModelWithOptions(opts TaskNewModelOptions) model.Task {
 	res := &taskEntity{
 		ID:              opts.ID,
 		Name:            opts.Name,

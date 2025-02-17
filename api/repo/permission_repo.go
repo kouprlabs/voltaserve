@@ -158,8 +158,48 @@ func (p GroupPermissionValue) GetValue() string {
 	return p.Value
 }
 
-func NewUserPermission() model.UserPermission {
+func NewUserPermissionModel() model.UserPermission {
 	return &userPermissionEntity{}
+}
+
+type UserPermissionNewModelOptions struct {
+	ID         string
+	UserID     string
+	ResourceID string
+	Permission string
+	CreateTime string
+}
+
+func NewUserPermissionNewModel(opts UserPermissionNewModelOptions) model.UserPermission {
+	return &userPermissionEntity{
+		ID:         opts.ID,
+		UserID:     opts.UserID,
+		ResourceID: opts.ResourceID,
+		Permission: opts.Permission,
+		CreateTime: opts.CreateTime,
+	}
+}
+
+func NewGroupPermissionModel() model.GroupPermission {
+	return &groupPermissionEntity{}
+}
+
+type GroupPermissionNewModelOptions struct {
+	ID         string
+	GroupID    string
+	ResourceID string
+	Permission string
+	CreateTime string
+}
+
+func NewGroupPermissionModelWithOptions(opts GroupPermissionNewModelOptions) model.GroupPermission {
+	return &groupPermissionEntity{
+		ID:         opts.ID,
+		GroupID:    opts.GroupID,
+		ResourceID: opts.ResourceID,
+		Permission: opts.Permission,
+		CreateTime: opts.CreateTime,
+	}
 }
 
 type PermissionRepo struct {

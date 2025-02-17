@@ -255,7 +255,7 @@ func (svc *InsightsService) Delete(id string, userID string) (*Task, error) {
 		}
 		if failed {
 			task.SetError(&combinedErrMsg)
-			if err := svc.taskSvc.saveAndSync(repo.NewTask()); err != nil {
+			if err := svc.taskSvc.saveAndSync(repo.NewTaskModel()); err != nil {
 				log.GetLogger().Error(err)
 				return
 			}

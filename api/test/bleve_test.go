@@ -33,12 +33,12 @@ func TestBleveSuite(t *testing.T) {
 
 func (s *BleveSuite) TestQuery() {
 	orgSearch := search.NewOrganizationSearch()
-	values := []repo.NewOrganizationOptions{
+	values := []repo.OrganizationNewModelOptions{
 		{ID: "org_a", Name: "foo bar"},
 		{ID: "org_b", Name: "hello world"},
 	}
 	for _, v := range values {
-		err := orgSearch.Index([]model.Organization{repo.NewOrganizationWithOptions(v)})
+		err := orgSearch.Index([]model.Organization{repo.NewOrganizationModelWithOptions(v)})
 		s.Require().NoError(err)
 	}
 
@@ -57,7 +57,7 @@ func (s *BleveSuite) TestQuery() {
 
 func (s *BleveSuite) TestFilter() {
 	fileSearch := search.NewFileSearch()
-	values := []repo.NewFileOptions{
+	values := []repo.FileNewModelOptions{
 		{
 			ID:          "file_a",
 			WorkspaceID: "workspace_a",
@@ -81,7 +81,7 @@ func (s *BleveSuite) TestFilter() {
 		},
 	}
 	for _, v := range values {
-		err := fileSearch.Index([]model.File{repo.NewFileWithOptions(v)})
+		err := fileSearch.Index([]model.File{repo.NewFileModelWithOptions(v)})
 		s.Require().NoError(err)
 	}
 

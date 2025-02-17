@@ -41,7 +41,7 @@ func (s *UserSearch) Query(query string, opts infra.QueryOptions) ([]model.User,
 		if err != nil {
 			return nil, err
 		}
-		user := repo.NewUser()
+		user := repo.NewUserModel()
 		if err := json.Unmarshal(b, &user); err != nil {
 			return nil, err
 		}

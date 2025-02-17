@@ -1067,7 +1067,7 @@ func (svc *fileCopy) cloneTree(source model.File, target model.File, tree []mode
 }
 
 func (svc *fileCopy) newClone(file model.File) model.File {
-	f := repo.NewFile()
+	f := repo.NewFileModel()
 	f.SetID(helper.NewID())
 	f.SetParentID(file.GetParentID())
 	f.SetWorkspaceID(file.GetWorkspaceID())
@@ -1079,7 +1079,7 @@ func (svc *fileCopy) newClone(file model.File) model.File {
 }
 
 func (svc *fileCopy) newUserPermission(file model.File, userID string) model.UserPermission {
-	p := repo.NewUserPermission()
+	p := repo.NewUserPermissionModel()
 	p.SetID(helper.NewID())
 	p.SetUserID(userID)
 	p.SetResourceID(file.GetID())
@@ -2244,7 +2244,7 @@ func (svc *fileStore) performStore(props fileStoreProperties) error {
 }
 
 func (svc *fileStore) createSnapshot(file model.File, props fileStoreProperties) (model.Snapshot, error) {
-	res := repo.NewSnapshot()
+	res := repo.NewSnapshotModel()
 	res.SetID(props.SnapshotID)
 	if props.ExceedsProcessingLimit {
 		res.SetStatus(model.SnapshotStatusReady)

@@ -49,7 +49,7 @@ func (c *SnapshotCache) Get(id string) (model.Snapshot, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	res := repo.NewSnapshot()
+	res := repo.NewSnapshotModel()
 	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}

@@ -97,7 +97,7 @@ func (s *WorkspaceSearch) Query(query string, opts infra.QueryOptions) ([]model.
 		if err != nil {
 			return nil, err
 		}
-		workspace := repo.NewWorkspace()
+		workspace := repo.NewWorkspaceModel()
 		if err = json.Unmarshal(b, &workspace); err != nil {
 			return nil, err
 		}

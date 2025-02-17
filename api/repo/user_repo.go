@@ -72,7 +72,7 @@ func (u userEntity) GetUpdateTime() *string {
 	return u.UpdateTime
 }
 
-func NewUser() model.User {
+func NewUserModel() model.User {
 	return &userEntity{}
 }
 

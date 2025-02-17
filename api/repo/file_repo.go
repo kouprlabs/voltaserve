@@ -152,11 +152,11 @@ func (f *fileEntity) SetUpdateTime(updateTime *string) {
 	f.UpdateTime = updateTime
 }
 
-func NewFile() model.File {
+func NewFileModel() model.File {
 	return &fileEntity{}
 }
 
-type NewFileOptions struct {
+type FileNewModelOptions struct {
 	ID               string
 	WorkspaceID      string
 	ParentID         *string
@@ -170,7 +170,7 @@ type NewFileOptions struct {
 	UpdateTime       *string
 }
 
-func NewFileWithOptions(opts NewFileOptions) model.File {
+func NewFileModelWithOptions(opts FileNewModelOptions) model.File {
 	res := &fileEntity{
 		ID:          opts.ID,
 		WorkspaceID: opts.WorkspaceID,

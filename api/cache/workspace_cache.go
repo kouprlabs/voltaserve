@@ -49,7 +49,7 @@ func (c *WorkspaceCache) Get(id string) (model.Workspace, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	res := repo.NewWorkspace()
+	res := repo.NewWorkspaceModel()
 	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}

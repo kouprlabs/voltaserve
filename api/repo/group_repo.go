@@ -87,16 +87,71 @@ func (g *groupEntity) GetUpdateTime() *string {
 	return g.UpdateTime
 }
 
+func (g *groupEntity) SetID(id string) {
+	g.ID = id
+}
+
 func (g *groupEntity) SetName(name string) {
 	g.Name = name
+}
+
+func (g *groupEntity) SetOrganizationID(id string) {
+	g.OrganizationID = id
+}
+
+func (w *groupEntity) SetUserPermissions(permissions []model.CoreUserPermission) {
+	w.UserPermissions = make([]*UserPermissionValue, len(permissions))
+	for i, p := range permissions {
+		w.UserPermissions[i] = p.(*UserPermissionValue)
+	}
+}
+
+func (w *groupEntity) SetGroupPermissions(permissions []model.CoreGroupPermission) {
+	w.GroupPermissions = make([]*GroupPermissionValue, len(permissions))
+	for i, p := range permissions {
+		w.GroupPermissions[i] = p.(*GroupPermissionValue)
+	}
+}
+
+func (g *groupEntity) SetMembers(members []string) {
+	g.Members = members
+}
+
+func (g *groupEntity) SetCreateTime(createTime string) {
+	g.CreateTime = createTime
 }
 
 func (g *groupEntity) SetUpdateTime(updateTime *string) {
 	g.UpdateTime = updateTime
 }
 
-func NewGroup() model.Group {
+func NewGroupModel() model.Group {
 	return &groupEntity{}
+}
+
+type GroupNewModelOptions struct {
+	ID               string
+	Name             string
+	OrganizationID   string
+	UserPermissions  []model.CoreUserPermission
+	GroupPermissions []model.CoreGroupPermission
+	Members          []string
+	CreateTime       string
+	UpdateTime       *string
+}
+
+func NewGroupModelWithOptions(opts GroupNewModelOptions) model.Group {
+	res := &groupEntity{
+		ID:             opts.ID,
+		Name:           opts.Name,
+		OrganizationID: opts.OrganizationID,
+		Members:        make([]string, len(opts.Members)),
+		CreateTime:     opts.CreateTime,
+		UpdateTime:     opts.UpdateTime,
+	}
+	res.SetUserPermissions(opts.UserPermissions)
+	res.SetGroupPermissions(opts.GroupPermissions)
+	return res
 }
 
 type GroupRepo struct {

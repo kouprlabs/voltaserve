@@ -49,7 +49,7 @@ func (c *FileCache) Get(id string) (model.File, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	res := repo.NewFile()
+	res := repo.NewFileModel()
 	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}
