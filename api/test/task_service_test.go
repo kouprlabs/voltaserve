@@ -32,12 +32,12 @@ func TestTaskServiceSuite(t *testing.T) {
 }
 
 func (s *TaskServiceSuite) SetupTest() {
-	users, err := test_helper.CreateUsers(2)
+	var err error
+	s.users, err = test_helper.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.users = users
 }
 
 func (s *TaskServiceSuite) TestCreate() {

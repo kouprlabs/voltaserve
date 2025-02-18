@@ -40,18 +40,17 @@ func TestWorkspaceServiceSuite(t *testing.T) {
 }
 
 func (s *WorkspaceServiceSuite) SetupTest() {
-	users, err := test_helper.CreateUsers(2)
+	var err error
+	s.users, err = test_helper.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := test_helper.CreateOrganization(users[0].GetID())
+	s.org, err = test_helper.CreateOrganization(s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.users = users
-	s.org = org
 }
 
 func (s *WorkspaceServiceSuite) TestCreate() {

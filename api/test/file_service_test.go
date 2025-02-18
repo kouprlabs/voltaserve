@@ -34,22 +34,21 @@ type FileServiceTestSuite struct {
 }
 
 func (s *FileServiceTestSuite) SetupTest() {
-	users, err := test_helper.CreateUsers(2)
+	var err error
+	s.users, err = test_helper.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := test_helper.CreateOrganization(users[0].GetID())
+	org, err := test_helper.CreateOrganization(s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	workspace, err := test_helper.CreateWorkspace(org.ID, users[0].GetID())
+	s.workspace, err = test_helper.CreateWorkspace(org.ID, s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 	}
-	s.workspace = workspace
-	s.users = users
 }
 
 func TestFileServiceSuite(t *testing.T) {

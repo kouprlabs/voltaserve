@@ -33,18 +33,17 @@ func TestGroupServiceTestSuite(t *testing.T) {
 }
 
 func (s *GroupServiceSuite) SetupTest() {
-	users, err := test_helper.CreateUsers(3)
+	var err error
+	s.users, err = test_helper.CreateUsers(3)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := test_helper.CreateOrganization(users[0].GetID())
+	s.org, err = test_helper.CreateOrganization(s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.users = users
-	s.org = org
 }
 
 func (s *GroupServiceSuite) TestCreateGroup() {

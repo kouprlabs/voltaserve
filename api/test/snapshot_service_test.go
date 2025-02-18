@@ -38,30 +38,27 @@ func TestSnapshotServiceSuite(t *testing.T) {
 }
 
 func (s *SnapshotServiceSuite) SetupTest() {
-	users, err := test_helper.CreateUsers(1)
+	var err error
+	s.users, err = test_helper.CreateUsers(1)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := test_helper.CreateOrganization(users[0].GetID())
+	s.org, err = test_helper.CreateOrganization(s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	workspace, err := test_helper.CreateWorkspace(org.ID, users[0].GetID())
+	s.workspace, err = test_helper.CreateWorkspace(s.org.ID, s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	file, err := test_helper.CreateFile(workspace.ID, workspace.RootID, users[0].GetID())
+	s.file, err = test_helper.CreateFile(s.workspace.ID, s.workspace.RootID, s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.users = users
-	s.org = org
-	s.workspace = workspace
-	s.file = file
 }
 
 func (s *SnapshotServiceSuite) TestList() {
