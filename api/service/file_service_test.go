@@ -597,7 +597,7 @@ func (s *FileServiceTestSuite) TestReprocess() {
 
 	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, service.TaskPatchOptions{
 		Fields: []string{service.TaskFieldStatus},
-		Status: helper.ToPtr(string(model.TaskStatusError)),
+		Status: helper.ToPtr(model.TaskStatusError),
 	})
 	s.Require().NoError(err)
 

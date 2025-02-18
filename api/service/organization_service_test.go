@@ -163,82 +163,96 @@ func (s *OrganizationServiceSuite) TestProbe() {
 }
 
 func (s *OrganizationServiceSuite) TestPatchName() {
-	// Create a new organization
 	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	// Test patching the organization name
 	org, err = service.NewOrganizationService().PatchName(org.ID, "organization (edit)", s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal("organization (edit)", org.Name)
+}
 
-	// Test patching with insufficient permissions
-	org, err = service.NewOrganizationService().PatchName(org.ID, "organization", s.users[1].GetID())
+func (s *OrganizationServiceSuite) TestPatchName_NonExistentOrganization() {
+	_, err := service.NewOrganizationService().PatchName(helper.NewID(), "organization (edit)", s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-	s.Nil(org)
+}
 
-	// Test patching a non-existent organization
-	org, err = service.NewOrganizationService().PatchName("non-existent-org-id", "organization", s.users[0].GetID())
+func (s *OrganizationServiceSuite) TestPatchName_UnauthorizedUser() {
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	org, err = service.NewOrganizationService().PatchName(org.ID, "organization (edit)", s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 	s.Nil(org)
 }
 
 func (s *OrganizationServiceSuite) TestDelete() {
-	// Create a new organization
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{Name: "organization"}, s.users[0].GetID())
-	s.Require().NoError(err)
-
-	// Test deleting the organization
-	err = service.NewOrganizationService().Delete(org.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-
-	// Verify the organization is deleted
-	org, err = service.NewOrganizationService().Find(org.ID, s.users[0].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-	s.Nil(org)
-
-	// Test deleting a non-existent organization
-	err = service.NewOrganizationService().Delete("non-existent-org-id", s.users[0].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-
-	// Test deleting with insufficient permissions
-	org, err = service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
+
+	err = service.NewOrganizationService().Delete(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	_, err = service.NewOrganizationService().Find(org.ID, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
+}
+
+func (s *OrganizationServiceSuite) TestDelete_NonExistentOrganization() {
+	err := service.NewOrganizationService().Delete(helper.NewID(), s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
+}
+
+func (s *OrganizationServiceSuite) TestDelete_UnauthorizedUser() {
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
 	err = service.NewOrganizationService().Delete(org.ID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember() {
-	// Create a new organization
 	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	// Add another user to the organization
 	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
 	s.Require().NoError(err)
 
-	// Test removing the member
 	err = service.NewOrganizationService().RemoveMember(org.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 	s.False(guard.NewOrganizationGuard().IsAuthorized(s.users[1].GetID(), cache.NewOrganizationCache().GetOrNil(org.ID), model.PermissionEditor))
+}
 
-	// Test removing a non-existent member
+func (s *OrganizationServiceSuite) TestRemoveMember_NonExistentMember() {
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
 	err = service.NewOrganizationService().RemoveMember(org.ID, helper.NewID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewUserNotFoundError(err).Error(), err.Error())
+}
 
-	// Test removing the last owner
+func (s *OrganizationServiceSuite) TestRemoveMember_LastOwnerOfOrganization() {
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
 	err = service.NewOrganizationService().RemoveMember(org.ID, s.users[0].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(cache.NewOrganizationCache().GetOrNil(org.ID)).Error(), err.Error())
