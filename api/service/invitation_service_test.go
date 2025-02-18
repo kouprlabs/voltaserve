@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package test
+package service_test
 
 import (
 	"testing"
@@ -20,7 +20,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
-	"github.com/kouprlabs/voltaserve/api/test/test_helper"
+	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 type InvitationServiceSuite struct {
@@ -34,7 +34,7 @@ func TestInvitationServiceTestSuite(t *testing.T) {
 
 func (s *InvitationServiceSuite) SetupTest() {
 	var err error
-	s.users, err = test_helper.CreateUsers(2)
+	s.users, err = test.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
@@ -42,7 +42,7 @@ func (s *InvitationServiceSuite) SetupTest() {
 }
 
 func (s *InvitationServiceSuite) TestCreate() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
@@ -54,7 +54,7 @@ func (s *InvitationServiceSuite) TestCreate() {
 }
 
 func (s *InvitationServiceSuite) TestCreate_DuplicateEmails() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
@@ -80,7 +80,7 @@ func (s *InvitationServiceSuite) TestCreate_NonExistentOrganization() {
 }
 
 func (s *InvitationServiceSuite) TestCreate_UnauthorizedUser() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
@@ -92,7 +92,7 @@ func (s *InvitationServiceSuite) TestCreate_UnauthorizedUser() {
 }
 
 func (s *InvitationServiceSuite) TestListIncoming() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -120,7 +120,7 @@ func (s *InvitationServiceSuite) TestListIncoming() {
 }
 
 func (s *InvitationServiceSuite) TestProbeIncoming() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -137,7 +137,7 @@ func (s *InvitationServiceSuite) TestProbeIncoming() {
 }
 
 func (s *InvitationServiceSuite) TestCountIncoming() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -151,7 +151,7 @@ func (s *InvitationServiceSuite) TestCountIncoming() {
 }
 
 func (s *InvitationServiceSuite) TestListOutgoing() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -175,7 +175,7 @@ func (s *InvitationServiceSuite) TestListOutgoing() {
 }
 
 func (s *InvitationServiceSuite) TestProbeOutgoing() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -192,7 +192,7 @@ func (s *InvitationServiceSuite) TestProbeOutgoing() {
 }
 
 func (s *InvitationServiceSuite) TestAccept() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -205,7 +205,7 @@ func (s *InvitationServiceSuite) TestAccept() {
 }
 
 func (s *InvitationServiceSuite) TestAccept_AlreadyAccepted() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -227,7 +227,7 @@ func (s *InvitationServiceSuite) TestAccept_AlreadyAccepted() {
 }
 
 func (s *InvitationServiceSuite) TestAccept_UnauthorizedUser() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -247,7 +247,7 @@ func (s *InvitationServiceSuite) TestAccept_UnauthorizedUser() {
 }
 
 func (s *InvitationServiceSuite) TestDecline() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -260,7 +260,7 @@ func (s *InvitationServiceSuite) TestDecline() {
 }
 
 func (s *InvitationServiceSuite) TestDecline_AlreadyDeclined() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -282,7 +282,7 @@ func (s *InvitationServiceSuite) TestDecline_AlreadyDeclined() {
 }
 
 func (s *InvitationServiceSuite) TestDecline_UnauthorizedUser() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -302,7 +302,7 @@ func (s *InvitationServiceSuite) TestDecline_UnauthorizedUser() {
 }
 
 func (s *InvitationServiceSuite) TestResend() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -315,7 +315,7 @@ func (s *InvitationServiceSuite) TestResend() {
 }
 
 func (s *InvitationServiceSuite) TestDelete() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -328,7 +328,7 @@ func (s *InvitationServiceSuite) TestDelete() {
 }
 
 func (s *InvitationServiceSuite) TestDelete_UnauthorizedUser() {
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,

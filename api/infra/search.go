@@ -13,7 +13,7 @@ package infra
 import "github.com/kouprlabs/voltaserve/api/config"
 
 type SearchManager interface {
-	Query(index string, query string, opts QueryOptions) ([]interface{}, error)
+	Query(index string, query string, opts SearchQueryOptions) ([]interface{}, error)
 	Index(index string, models []SearchModel) error
 	Update(index string, models []SearchModel) error
 	Delete(index string, ids []string) error
@@ -31,7 +31,7 @@ type SearchModel interface {
 	GetID() string
 }
 
-type QueryOptions struct {
+type SearchQueryOptions struct {
 	Limit  int64
 	Filter interface{}
 }

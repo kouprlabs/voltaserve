@@ -85,7 +85,7 @@ func (s *WorkspaceSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (s *WorkspaceSearch) Query(query string, opts infra.QueryOptions) ([]model.Workspace, error) {
+func (s *WorkspaceSearch) Query(query string, opts infra.SearchQueryOptions) ([]model.Workspace, error) {
 	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err

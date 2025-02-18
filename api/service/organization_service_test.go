@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package test
+package service_test
 
 import (
 	"testing"
@@ -23,7 +23,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
-	"github.com/kouprlabs/voltaserve/api/test/test_helper"
+	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 type OrganizationServiceSuite struct {
@@ -37,7 +37,7 @@ func TestOrganizationServiceTestSuite(t *testing.T) {
 
 func (s *OrganizationServiceSuite) SetupTest() {
 	var err error
-	s.users, err = test_helper.CreateUsers(2)
+	s.users, err = test.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
@@ -208,7 +208,9 @@ func (s *OrganizationServiceSuite) TestDelete() {
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 
 	// Test deleting with insufficient permissions
-	org, err = service.NewOrganizationService().Create(service.OrganizationCreateOptions{Name: "organization"}, s.users[0].GetID())
+	org, err = service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	err = service.NewOrganizationService().Delete(org.ID, s.users[1].GetID())
 	s.Require().Error(err)
@@ -217,7 +219,9 @@ func (s *OrganizationServiceSuite) TestDelete() {
 
 func (s *OrganizationServiceSuite) TestRemoveMember() {
 	// Create a new organization
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{Name: "organization"}, s.users[0].GetID())
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Add another user to the organization
@@ -230,7 +234,7 @@ func (s *OrganizationServiceSuite) TestRemoveMember() {
 	s.False(guard.NewOrganizationGuard().IsAuthorized(s.users[1].GetID(), cache.NewOrganizationCache().GetOrNil(org.ID), model.PermissionEditor))
 
 	// Test removing a non-existent member
-	err = service.NewOrganizationService().RemoveMember(org.ID, "non-existent-user-id", s.users[0].GetID())
+	err = service.NewOrganizationService().RemoveMember(org.ID, helper.NewID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewUserNotFoundError(err).Error(), err.Error())
 

@@ -30,7 +30,7 @@ func NewUserSearch() *UserSearch {
 	}
 }
 
-func (s *UserSearch) Query(query string, opts infra.QueryOptions) ([]model.User, error) {
+func (s *UserSearch) Query(query string, opts infra.SearchQueryOptions) ([]model.User, error) {
 	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err

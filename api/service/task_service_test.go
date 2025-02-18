@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package test
+package service_test
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/service"
-	"github.com/kouprlabs/voltaserve/api/test/test_helper"
+	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 type TaskServiceSuite struct {
@@ -33,7 +33,7 @@ func TestTaskServiceSuite(t *testing.T) {
 
 func (s *TaskServiceSuite) SetupTest() {
 	var err error
-	s.users, err = test_helper.CreateUsers(2)
+	s.users, err = test.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
@@ -176,7 +176,10 @@ func (s *TaskServiceSuite) TestList() {
 	})
 	s.Require().NoError(err)
 
-	list, err := service.NewTaskService().List(service.TaskListOptions{Page: 1, Size: 10}, s.users[0].GetID())
+	list, err := service.NewTaskService().List(service.TaskListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Len(list.Data, 2)
 	s.Equal(uint64(2), list.TotalElements)
@@ -196,7 +199,10 @@ func (s *TaskServiceSuite) TestList_Pagination() {
 	})
 	s.Require().NoError(err)
 
-	list, err := service.NewTaskService().List(service.TaskListOptions{Page: 1, Size: 1}, s.users[0].GetID())
+	list, err := service.NewTaskService().List(service.TaskListOptions{
+		Page: 1,
+		Size: 1,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Len(list.Data, 1)
 	s.Equal(uint64(2), list.TotalElements)
@@ -241,7 +247,10 @@ func (s *TaskServiceSuite) TestProbe() {
 	})
 	s.Require().NoError(err)
 
-	probe, err := service.NewTaskService().Probe(service.TaskListOptions{Page: 1, Size: 10}, s.users[0].GetID())
+	probe, err := service.NewTaskService().Probe(service.TaskListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(uint64(2), probe.TotalElements)
 	s.Equal(uint64(1), probe.TotalPages)
@@ -308,7 +317,10 @@ func (s *TaskServiceSuite) TestDismissAll() {
 	s.Len(dismissAllResult.Succeeded, 2)
 	s.Empty(dismissAllResult.Failed)
 
-	list, err := service.NewTaskService().List(service.TaskListOptions{Page: 1, Size: 10}, s.users[0].GetID())
+	list, err := service.NewTaskService().List(service.TaskListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Empty(list.Data)
 }

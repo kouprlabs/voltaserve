@@ -51,7 +51,7 @@ func newBleveSearchManager() SearchManager {
 	return mgr
 }
 
-func (mgr *bleveSearchManager) Query(indexName string, query string, opts QueryOptions) ([]interface{}, error) {
+func (mgr *bleveSearchManager) Query(indexName string, query string, opts SearchQueryOptions) ([]interface{}, error) {
 	index, ok := indices[indexName]
 	if !ok {
 		return nil, errors.New("index not found")

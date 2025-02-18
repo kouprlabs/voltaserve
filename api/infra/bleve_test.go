@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package test
+package infra_test
 
 import (
 	"fmt"
@@ -41,13 +41,13 @@ func (s *BleveSuite) TestQuery() {
 		s.Require().NoError(err)
 	}
 
-	hits, err := search.NewOrganizationSearch().Query("foo", infra.QueryOptions{Limit: 10})
+	hits, err := search.NewOrganizationSearch().Query("foo", infra.SearchQueryOptions{Limit: 10})
 	s.Require().NoError(err)
 	if s.Len(hits, 1) {
 		s.Equal("org_a", hits[0].GetID())
 	}
 
-	hits, err = search.NewOrganizationSearch().Query("world", infra.QueryOptions{Limit: 10})
+	hits, err = search.NewOrganizationSearch().Query("world", infra.SearchQueryOptions{Limit: 10})
 	s.Require().NoError(err)
 	if s.Len(hits, 1) {
 		s.Equal("org_b", hits[0].GetID())
@@ -83,7 +83,7 @@ func (s *BleveSuite) TestFilter() {
 		s.Require().NoError(err)
 	}
 
-	hits, err := search.NewFileSearch().Query("exercitation", infra.QueryOptions{
+	hits, err := search.NewFileSearch().Query("exercitation", infra.SearchQueryOptions{
 		Limit:  10,
 		Filter: fmt.Sprintf("workspaceId=\"workspace_b\" AND type=\"%s\"", model.FileTypeFile),
 	})

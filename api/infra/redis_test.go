@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package test
+package infra_test
 
 import (
 	"testing"
@@ -17,41 +17,32 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
-type PostgresSuite struct {
+type RedisSuite struct {
 	suite.Suite
 }
 
-func TestPostgresSuite(t *testing.T) {
-	suite.Run(t, new(PostgresSuite))
+func TestRedisSuite(t *testing.T) {
+	suite.Run(t, new(RedisSuite))
 }
 
-func (s *PostgresSuite) TestInsertAndFind() {
-	org, err := repo.NewOrganizationRepo().Insert(repo.OrganizationInsertOptions{
+func (s *RedisSuite) TestSetAndGet() {
+	opts := repo.FileNewModelOptions{
 		ID:   helper.NewID(),
-		Name: "organization",
-	})
+		Name: "file",
+		Type: model.FileTypeFile,
+	}
+	err := cache.NewFileCache().Set(repo.NewFileModelWithOptions(opts))
 	s.Require().NoError(err)
 
-	workspace, err := repo.NewWorkspaceRepo().Insert(repo.WorkspaceInsertOptions{
-		ID:             helper.NewID(),
-		Name:           "workspace",
-		OrganizationID: org.GetID(),
-	})
+	file, err := cache.NewFileCache().Get(opts.ID)
 	s.Require().NoError(err)
-
-	file, err := repo.NewFileRepo().Insert(repo.FileInsertOptions{
-		Name:        "file",
-		Type:        model.FileTypeFile,
-		WorkspaceID: workspace.GetID(),
-	})
-	s.Require().NoError(err)
-
-	foundFile, err := repo.NewFileRepo().Find(file.GetID())
-	s.Require().NoError(err)
-	s.Equal(file.GetID(), foundFile.GetID())
+	s.Equal(opts.ID, file.GetID())
+	s.Equal(opts.Name, file.GetName())
+	s.Equal(opts.Type, file.GetType())
 }
