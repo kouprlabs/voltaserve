@@ -185,7 +185,7 @@ func (s *TaskServiceSuite) TestList() {
 	s.Equal(uint64(2), list.TotalElements)
 }
 
-func (s *TaskServiceSuite) TestList_Pagination() {
+func (s *TaskServiceSuite) TestList_Paginate() {
 	_, err := service.NewTaskService().Create(service.TaskCreateOptions{
 		Name:   "task A",
 		UserID: s.users[0].GetID(),

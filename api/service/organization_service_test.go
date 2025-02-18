@@ -96,6 +96,7 @@ func (s *OrganizationServiceSuite) TestList() {
 		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
 	s.Equal(uint64(3), list.Size)
 	s.Equal(uint64(3), list.TotalElements)
 	s.Equal(uint64(1), list.TotalPages)
@@ -104,7 +105,7 @@ func (s *OrganizationServiceSuite) TestList() {
 	s.Equal("organization C", list.Data[2].Name)
 }
 
-func (s *OrganizationServiceSuite) TestList_Pagination() {
+func (s *OrganizationServiceSuite) TestList_Paginate() {
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
 		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 			Name: name,
@@ -118,11 +119,23 @@ func (s *OrganizationServiceSuite) TestList_Pagination() {
 		Size: 2,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
 	s.Equal(uint64(2), list.Size)
 	s.Equal(uint64(3), list.TotalElements)
 	s.Equal(uint64(2), list.TotalPages)
 	s.Equal("organization A", list.Data[0].Name)
 	s.Equal("organization B", list.Data[1].Name)
+
+	list, err = service.NewOrganizationService().List(service.OrganizationListOptions{
+		Page: 2,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(2), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal("organization C", list.Data[0].Name)
 }
 
 func (s *OrganizationServiceSuite) TestList_SortByNameDescending() {

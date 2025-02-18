@@ -812,18 +812,24 @@ func (svc *fileList) createList(data []model.File, parent model.File, opts FileL
 	if err != nil {
 		return nil, err
 	}
+	if opts.SortBy == "" {
+		opts.SortBy = FileSortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = FileSortOrderAsc
+	}
 	sorted := svc.fileSortSvc.sort(authorized, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mappedData, err := svc.fileMapper.mapMany(paged, userID)
+	mapped, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
 	res := &FileList{
-		Data:          mappedData,
+		Data:          mapped,
 		TotalElements: totalElements,
 		TotalPages:    totalPages,
 		Page:          opts.Page,
-		Size:          opts.Size,
+		Size:          uint64(len(mapped)),
 		Query:         opts.Query,
 	}
 	return res, nil

@@ -11,7 +11,9 @@
 package service_test
 
 import (
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 
@@ -34,7 +36,7 @@ func TestInvitationServiceTestSuite(t *testing.T) {
 
 func (s *InvitationServiceSuite) SetupTest() {
 	var err error
-	s.users, err = test.CreateUsers(2)
+	s.users, err = test.CreateUsers(4)
 	if err != nil {
 		s.Fail(err.Error())
 		return
@@ -92,62 +94,125 @@ func (s *InvitationServiceSuite) TestCreate_UnauthorizedUser() {
 }
 
 func (s *InvitationServiceSuite) TestListIncoming() {
-	org, err := test.CreateOrganization(s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
-		OrganizationID: org.ID,
-		Emails:         []string{s.users[1].GetEmail()},
+	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
+		org, err := test.CreateOrganization(userID)
+		s.Require().NoError(err)
+		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+			OrganizationID: org.ID,
+			Emails:         []string{s.users[0].GetEmail()},
+		}, userID)
+		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
+	}
+
+	list, err := service.NewInvitationService().ListIncoming(service.InvitationListOptions{
+		Page: 1,
+		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(3), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal(s.users[1].GetEmail(), list.Data[0].Owner.Email)
+	s.Equal(s.users[2].GetEmail(), list.Data[1].Owner.Email)
+	s.Equal(s.users[3].GetEmail(), list.Data[2].Owner.Email)
+}
+
+func (s *InvitationServiceSuite) TestListIncoming_SortByEmailDescending() {
+	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
+		org, err := test.CreateOrganization(userID)
+		s.Require().NoError(err)
+		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+			OrganizationID: org.ID,
+			Emails:         []string{s.users[0].GetEmail()},
+		}, userID)
+		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
+	}
 
 	list, err := service.NewInvitationService().ListIncoming(service.InvitationListOptions{
 		Page:      1,
-		Size:      10,
+		Size:      3,
 		SortBy:    service.InvitationSortByEmail,
-		SortOrder: service.InvitationSortOrderAsc,
-	}, s.users[1].GetID())
+		SortOrder: service.InvitationSortOrderDesc,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Len(list.Data, 1)
+	s.Equal(s.users[3].GetEmail(), list.Data[0].Owner.Email)
+	s.Equal(s.users[2].GetEmail(), list.Data[1].Owner.Email)
+	s.Equal(s.users[1].GetEmail(), list.Data[2].Owner.Email)
+}
+
+func (s *InvitationServiceSuite) TestListIncoming_Paginate() {
+	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
+		org, err := test.CreateOrganization(userID)
+		s.Require().NoError(err)
+		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+			OrganizationID: org.ID,
+			Emails:         []string{s.users[0].GetEmail()},
+		}, userID)
+		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
+	}
+
+	list, err := service.NewInvitationService().ListIncoming(service.InvitationListOptions{
+		Page: 1,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal(s.users[1].GetEmail(), list.Data[0].Owner.Email)
+	s.Equal(s.users[2].GetEmail(), list.Data[1].Owner.Email)
 
 	list, err = service.NewInvitationService().ListIncoming(service.InvitationListOptions{
-		Page:      2,
-		Size:      10,
-		SortBy:    service.InvitationSortByEmail,
-		SortOrder: service.InvitationSortOrderAsc,
-	}, s.users[1].GetID())
+		Page: 2,
+		Size: 2,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Empty(list.Data)
+	s.Equal(uint64(2), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal(s.users[3].GetEmail(), list.Data[0].Owner.Email)
 }
 
 func (s *InvitationServiceSuite) TestProbeIncoming() {
-	org, err := test.CreateOrganization(s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
-		OrganizationID: org.ID,
-		Emails:         []string{s.users[1].GetEmail()},
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
+	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
+		org, err := test.CreateOrganization(userID)
+		s.Require().NoError(err)
+		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+			OrganizationID: org.ID,
+			Emails:         []string{s.users[0].GetEmail()},
+		}, userID)
+		s.Require().NoError(err)
+	}
 
 	probe, err := service.NewInvitationService().ProbeIncoming(service.InvitationListOptions{
 		Page: 1,
 		Size: 10,
-	}, s.users[1].GetID())
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Equal(uint64(1), probe.TotalElements)
+	s.Equal(uint64(3), probe.TotalElements)
+	s.Equal(uint64(1), probe.TotalPages)
 }
 
 func (s *InvitationServiceSuite) TestCountIncoming() {
-	org, err := test.CreateOrganization(s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
-		OrganizationID: org.ID,
-		Emails:         []string{s.users[1].GetEmail()},
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
+	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
+		org, err := test.CreateOrganization(userID)
+		s.Require().NoError(err)
+		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+			OrganizationID: org.ID,
+			Emails:         []string{s.users[0].GetEmail()},
+		}, userID)
+		s.Require().NoError(err)
+	}
 
-	count, err := service.NewInvitationService().CountIncoming(s.users[1].GetID())
+	count, err := service.NewInvitationService().CountIncoming(s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Equal(int64(1), *count)
+	s.Equal(int64(3), *count)
 }
 
 func (s *InvitationServiceSuite) TestListOutgoing() {
@@ -155,7 +220,7 @@ func (s *InvitationServiceSuite) TestListOutgoing() {
 	s.Require().NoError(err)
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
-		Emails:         []string{s.users[1].GetEmail()},
+		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -164,14 +229,67 @@ func (s *InvitationServiceSuite) TestListOutgoing() {
 		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Len(list.Data, 1)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(3), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal(strings.ToLower(s.users[1].GetEmail()), list.Data[0].Email)
+	s.Equal(strings.ToLower(s.users[2].GetEmail()), list.Data[1].Email)
+	s.Equal(strings.ToLower(s.users[3].GetEmail()), list.Data[2].Email)
+}
+
+func (s *InvitationServiceSuite) TestListOutgoing_SortByEmailDescending() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		OrganizationID: org.ID,
+		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	list, err := service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+		Page:      1,
+		Size:      3,
+		SortBy:    service.InvitationSortByEmail,
+		SortOrder: service.InvitationSortOrderDesc,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(strings.ToLower(s.users[3].GetEmail()), list.Data[0].Email)
+	s.Equal(strings.ToLower(s.users[2].GetEmail()), list.Data[1].Email)
+	s.Equal(strings.ToLower(s.users[1].GetEmail()), list.Data[2].Email)
+}
+
+func (s *InvitationServiceSuite) TestListOutgoing_Paginate() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		OrganizationID: org.ID,
+		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	list, err := service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+		Page: 1,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal(strings.ToLower(s.users[1].GetEmail()), list.Data[0].Email)
+	s.Equal(strings.ToLower(s.users[2].GetEmail()), list.Data[1].Email)
 
 	list, err = service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
 		Page: 2,
-		Size: 10,
+		Size: 2,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Empty(list.Data)
+	s.Equal(uint64(2), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal(strings.ToLower(s.users[3].GetEmail()), list.Data[0].Email)
 }
 
 func (s *InvitationServiceSuite) TestProbeOutgoing() {
@@ -179,7 +297,7 @@ func (s *InvitationServiceSuite) TestProbeOutgoing() {
 	s.Require().NoError(err)
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
-		Emails:         []string{s.users[1].GetEmail()},
+		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -188,7 +306,8 @@ func (s *InvitationServiceSuite) TestProbeOutgoing() {
 		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Equal(uint64(1), probe.TotalElements)
+	s.Equal(uint64(3), probe.TotalElements)
+	s.Equal(uint64(1), probe.TotalPages)
 }
 
 func (s *InvitationServiceSuite) TestAccept() {
