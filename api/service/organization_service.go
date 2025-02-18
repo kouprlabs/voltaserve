@@ -276,7 +276,7 @@ func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID str
 			return nil, err
 		}
 	} else {
-		hits, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{})
+		hits, err := svc.orgSearch.Query(opts.Query, infra.SearchQueryOptions{})
 		if err != nil {
 			return nil, err
 		}

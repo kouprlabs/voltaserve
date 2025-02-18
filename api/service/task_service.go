@@ -260,7 +260,7 @@ func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Ta
 			return nil, err
 		}
 	} else {
-		hits, err := svc.taskSearch.Query(opts.Query, infra.QueryOptions{})
+		hits, err := svc.taskSearch.Query(opts.Query, infra.SearchQueryOptions{})
 		if err != nil {
 			return nil, err
 		}

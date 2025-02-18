@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package test
+package service_test
 
 import (
 	"bytes"
@@ -23,7 +23,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/service"
-	"github.com/kouprlabs/voltaserve/api/test/test_helper"
+	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 type FileServiceTestSuite struct {
@@ -34,17 +34,17 @@ type FileServiceTestSuite struct {
 
 func (s *FileServiceTestSuite) SetupTest() {
 	var err error
-	s.users, err = test_helper.CreateUsers(2)
+	s.users, err = test.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := test_helper.CreateOrganization(s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.workspace, err = test_helper.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.workspace, err = test.CreateWorkspace(org.ID, s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 	}
@@ -337,7 +337,10 @@ func (s *FileServiceTestSuite) TestProbe() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	probe, err := service.NewFileService().Probe(folder.ID, service.FileListOptions{Page: 1, Size: 10}, s.users[0].GetID())
+	probe, err := service.NewFileService().Probe(folder.ID, service.FileListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(uint64(1), probe.TotalElements)
 	s.Equal(uint64(1), probe.TotalPages)
@@ -359,7 +362,10 @@ func (s *FileServiceTestSuite) TestList() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	list, err := service.NewFileService().List(folder.ID, service.FileListOptions{Page: 1, Size: 10}, s.users[0].GetID())
+	list, err := service.NewFileService().List(folder.ID, service.FileListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Len(list.Data, 1)
 	s.Equal(file.ID, list.Data[0].ID)

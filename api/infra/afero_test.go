@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package test
+package infra_test
 
 import (
 	"bytes"
@@ -26,7 +26,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/service"
-	"github.com/kouprlabs/voltaserve/api/test/test_helper"
+	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 type AferoSuite struct {
@@ -41,17 +41,17 @@ func TestAferoSuite(t *testing.T) {
 }
 
 func (s *AferoSuite) SetupTest() {
-	users, err := test_helper.CreateUsers(1)
+	users, err := test.CreateUsers(1)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := test_helper.CreateOrganization(users[0].GetID())
+	org, err := test.CreateOrganization(users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	workspace, err := test_helper.CreateWorkspace(org.ID, users[0].GetID())
+	workspace, err := test.CreateWorkspace(org.ID, users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
@@ -62,7 +62,7 @@ func (s *AferoSuite) SetupTest() {
 }
 
 func (s *AferoSuite) TestUploadAndDownload() {
-	emptyFile, err := test_helper.CreateFile(s.workspace.ID, s.workspace.RootID, s.users[0].GetID())
+	emptyFile, err := test.CreateFile(s.workspace.ID, s.workspace.RootID, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	filePath := path.Join("fixtures", "files", "file.txt")

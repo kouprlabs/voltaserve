@@ -272,7 +272,7 @@ func (svc *UserService) search(opts UserListOptions) ([]model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	users, err := svc.userSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+	users, err := svc.userSearch.Query(opts.Query, infra.SearchQueryOptions{Limit: count})
 	if err != nil {
 		return nil, err
 	}

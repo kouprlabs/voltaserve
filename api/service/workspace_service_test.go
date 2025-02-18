@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package test
+package service_test
 
 import (
 	"testing"
@@ -21,7 +21,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/service"
-	"github.com/kouprlabs/voltaserve/api/test/test_helper"
+	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 const (
@@ -41,12 +41,12 @@ func TestWorkspaceServiceSuite(t *testing.T) {
 
 func (s *WorkspaceServiceSuite) SetupTest() {
 	var err error
-	s.users, err = test_helper.CreateUsers(2)
+	s.users, err = test.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.org, err = test_helper.CreateOrganization(s.users[0].GetID())
+	s.org, err = test.CreateOrganization(s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return

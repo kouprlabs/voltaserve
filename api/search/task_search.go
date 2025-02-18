@@ -86,7 +86,7 @@ func (s *TaskSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (s *TaskSearch) Query(query string, opts infra.QueryOptions) ([]model.Task, error) {
+func (s *TaskSearch) Query(query string, opts infra.SearchQueryOptions) ([]model.Task, error) {
 	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err

@@ -50,7 +50,7 @@ func newMeilisearchManager() *meilisearchManager {
 	return mgr
 }
 
-func (mgr *meilisearchManager) Query(index string, query string, opts QueryOptions) ([]interface{}, error) {
+func (mgr *meilisearchManager) Query(index string, query string, opts SearchQueryOptions) ([]interface{}, error) {
 	res, err := meilisearchClient.Index(index).Search(query, &meilisearch.SearchRequest{
 		Limit:  opts.Limit,
 		Filter: opts.Filter,

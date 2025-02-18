@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package test
+package service_test
 
 import (
 	"testing"
@@ -22,7 +22,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
-	"github.com/kouprlabs/voltaserve/api/test/test_helper"
+	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 type SnapshotServiceSuite struct {
@@ -39,22 +39,22 @@ func TestSnapshotServiceSuite(t *testing.T) {
 
 func (s *SnapshotServiceSuite) SetupTest() {
 	var err error
-	s.users, err = test_helper.CreateUsers(1)
+	s.users, err = test.CreateUsers(1)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.org, err = test_helper.CreateOrganization(s.users[0].GetID())
+	s.org, err = test.CreateOrganization(s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.workspace, err = test_helper.CreateWorkspace(s.org.ID, s.users[0].GetID())
+	s.workspace, err = test.CreateWorkspace(s.org.ID, s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.file, err = test_helper.CreateFile(s.workspace.ID, s.workspace.RootID, s.users[0].GetID())
+	s.file, err = test.CreateFile(s.workspace.ID, s.workspace.RootID, s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
