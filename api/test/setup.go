@@ -12,7 +12,9 @@ package test
 
 import (
 	"fmt"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"os"
+	"path"
 
 	"github.com/alicebob/miniredis/v2"
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
@@ -29,7 +31,11 @@ func SetupPostgres(port uint32) (*embeddedpostgres.EmbeddedPostgres, error) {
 	if err := os.Setenv("POSTGRES_URL", url); err != nil {
 		return nil, err
 	}
-	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().Port(port).Logger(nil))
+	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().
+		Port(port).
+		Logger(nil).
+		RuntimePath(path.Join(os.TempDir(), helper.NewID())),
+	)
 	if err := postgres.Start(); err != nil {
 		return nil, err
 	}

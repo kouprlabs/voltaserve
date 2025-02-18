@@ -1364,7 +1364,7 @@ func newFileDownload() *fileDownload {
 type DownloadResult struct {
 	File          model.File
 	Snapshot      model.Snapshot
-	RangeInterval *infra.RangeInterval
+	RangeInterval *helper.RangeInterval
 }
 
 func (svc *fileDownload) downloadOriginalBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
@@ -1459,15 +1459,15 @@ func (svc *fileDownload) check(file model.File) error {
 	return nil
 }
 
-func (svc *fileDownload) downloadS3Object(s3Object *model.S3Object, rangeHeader string, buf *bytes.Buffer) (*infra.RangeInterval, error) {
+func (svc *fileDownload) downloadS3Object(s3Object *model.S3Object, rangeHeader string, buf *bytes.Buffer) (*helper.RangeInterval, error) {
 	objectInfo, err := svc.s3.StatObject(s3Object.Key, s3Object.Bucket, minio.StatObjectOptions{})
 	if err != nil {
 		return nil, err
 	}
 	opts := minio.GetObjectOptions{}
-	var rangeInterval *infra.RangeInterval
+	var rangeInterval *helper.RangeInterval
 	if rangeHeader != "" {
-		rangeInterval = infra.NewRangeInterval(rangeHeader, objectInfo.Size)
+		rangeInterval = helper.NewRangeInterval(rangeHeader, objectInfo.Size)
 		if err := rangeInterval.ApplyToMinIOGetObjectOptions(&opts); err != nil {
 			return nil, err
 		}
