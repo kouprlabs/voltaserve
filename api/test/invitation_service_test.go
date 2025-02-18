@@ -24,9 +24,8 @@ import (
 
 type InvitationServiceSuite struct {
 	suite.Suite
-	invitationSvc *service.InvitationService
-	users         []model.User
-	org           *service.Organization
+	users []model.User
+	org   *service.Organization
 }
 
 func TestInvitationServiceTestSuite(t *testing.T) {
@@ -34,19 +33,17 @@ func TestInvitationServiceTestSuite(t *testing.T) {
 }
 
 func (s *InvitationServiceSuite) SetupTest() {
-	users, err := test_helper.CreateUsers(2)
+	var err error
+	s.users, err = test_helper.CreateUsers(2)
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := test_helper.CreateOrganization(users[0].GetID())
+	s.org, err = test_helper.CreateOrganization(s.users[0].GetID())
 	if err != nil {
 		s.Fail(err.Error())
 		return
 	}
-	s.invitationSvc = service.NewInvitationService()
-	s.users = users
-	s.org = org
 }
 
 func (s *InvitationServiceSuite) TestCreateInvitation() {
@@ -55,24 +52,24 @@ func (s *InvitationServiceSuite) TestCreateInvitation() {
 		OrganizationID: s.org.ID,
 		Emails:         []string{"test1@example.com", "test2@example.com"},
 	}
-	invitations, err := s.invitationSvc.Create(opts, s.users[0].GetID())
+	invitations, err := service.NewInvitationService().Create(opts, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Len(invitations, 2)
 
 	// Test duplicate emails should not create new invitations
-	invitations, err = s.invitationSvc.Create(opts, s.users[0].GetID())
+	invitations, err = service.NewInvitationService().Create(opts, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Empty(invitations)
 
 	// Test invalid organization ID
 	opts.OrganizationID = "invalid-org"
-	_, err = s.invitationSvc.Create(opts, s.users[0].GetID())
+	_, err = service.NewInvitationService().Create(opts, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(nil).Error(), err.Error())
 
 	// Test user not authorized to create invitations
 	opts.OrganizationID = s.org.ID
-	_, err = s.invitationSvc.Create(opts, s.users[1].GetID())
+	_, err = service.NewInvitationService().Create(opts, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(nil).Error(), err.Error())
 }
@@ -83,7 +80,7 @@ func (s *InvitationServiceSuite) TestListIncomingInvitations() {
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}
-	_, err := s.invitationSvc.Create(opts, s.users[0].GetID())
+	_, err := service.NewInvitationService().Create(opts, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test listing incoming invitations
@@ -93,81 +90,81 @@ func (s *InvitationServiceSuite) TestListIncomingInvitations() {
 		SortBy:    service.InvitationSortByEmail,
 		SortOrder: service.InvitationSortOrderAsc,
 	}
-	list, err := s.invitationSvc.ListIncoming(listOpts, s.users[1].GetID())
+	list, err := service.NewInvitationService().ListIncoming(listOpts, s.users[1].GetID())
 	s.Require().NoError(err)
 	s.Len(list.Data, 1)
 
 	// Test pagination
 	listOpts.Page = 2
-	list, err = s.invitationSvc.ListIncoming(listOpts, s.users[1].GetID())
+	list, err = service.NewInvitationService().ListIncoming(listOpts, s.users[1].GetID())
 	s.Require().NoError(err)
 	s.Empty(list.Data)
 }
 
 func (s *InvitationServiceSuite) TestProbeIncomingInvitations() {
 	// Create some invitations
-	_, err := s.invitationSvc.Create(service.InvitationCreateOptions{
+	_, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test probe incoming invitations
-	probe, err := s.invitationSvc.ProbeIncoming(service.InvitationListOptions{Page: 1, Size: 10}, s.users[1].GetID())
+	probe, err := service.NewInvitationService().ProbeIncoming(service.InvitationListOptions{Page: 1, Size: 10}, s.users[1].GetID())
 	s.Require().NoError(err)
 	s.Equal(uint64(1), probe.TotalElements)
 }
 
 func (s *InvitationServiceSuite) TestCountIncomingInvitations() {
 	// Create some invitations
-	_, err := s.invitationSvc.Create(service.InvitationCreateOptions{
+	_, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test count incoming invitations
-	count, err := s.invitationSvc.CountIncoming(s.users[1].GetID())
+	count, err := service.NewInvitationService().CountIncoming(s.users[1].GetID())
 	s.Require().NoError(err)
 	s.Equal(int64(1), *count)
 }
 
 func (s *InvitationServiceSuite) TestListOutgoingInvitations() {
 	// Create some invitations
-	_, err := s.invitationSvc.Create(service.InvitationCreateOptions{
+	_, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// List outgoing invitations
-	list, err := s.invitationSvc.ListOutgoing(s.org.ID, service.InvitationListOptions{Page: 1, Size: 10}, s.users[0].GetID())
+	list, err := service.NewInvitationService().ListOutgoing(s.org.ID, service.InvitationListOptions{Page: 1, Size: 10}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Len(list.Data, 1)
 
 	// Test pagination
-	list, err = s.invitationSvc.ListOutgoing(s.org.ID, service.InvitationListOptions{Page: 2, Size: 10}, s.users[0].GetID())
+	list, err = service.NewInvitationService().ListOutgoing(s.org.ID, service.InvitationListOptions{Page: 2, Size: 10}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Empty(list.Data)
 }
 
 func (s *InvitationServiceSuite) TestProbeOutgoingInvitations() {
 	// Create some invitations
-	_, err := s.invitationSvc.Create(service.InvitationCreateOptions{
+	_, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Test probe outgoing invitations
-	probe, err := s.invitationSvc.ProbeOutgoing(s.org.ID, service.InvitationListOptions{Page: 1, Size: 10}, s.users[0].GetID())
+	probe, err := service.NewInvitationService().ProbeOutgoing(s.org.ID, service.InvitationListOptions{Page: 1, Size: 10}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(uint64(1), probe.TotalElements)
 }
 
 func (s *InvitationServiceSuite) TestAcceptInvitation() {
 	// Create an invitation
-	invitations, err := s.invitationSvc.Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -175,11 +172,11 @@ func (s *InvitationServiceSuite) TestAcceptInvitation() {
 	invitationID := invitations[0].ID
 
 	// Test accept invitation
-	err = s.invitationSvc.Accept(invitationID, s.users[1].GetID())
+	err = service.NewInvitationService().Accept(invitationID, s.users[1].GetID())
 	s.Require().NoError(err)
 
 	// Test cannot accept already accepted invitation
-	err = s.invitationSvc.Accept(invitationID, s.users[1].GetID())
+	err = service.NewInvitationService().Accept(invitationID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(
 		errorpkg.NewCannotAcceptNonPendingInvitationError(
@@ -189,7 +186,7 @@ func (s *InvitationServiceSuite) TestAcceptInvitation() {
 	)
 
 	// Create another invitation
-	invitations, err = s.invitationSvc.Create(service.InvitationCreateOptions{
+	invitations, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -197,7 +194,7 @@ func (s *InvitationServiceSuite) TestAcceptInvitation() {
 	s.Require().NoError(err)
 
 	// Test user not allowed to accept invitation
-	err = s.invitationSvc.Accept(invitationID, s.users[0].GetID())
+	err = service.NewInvitationService().Accept(invitationID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(
 		errorpkg.NewUserNotAllowedToAcceptInvitationError(
@@ -210,7 +207,7 @@ func (s *InvitationServiceSuite) TestAcceptInvitation() {
 
 func (s *InvitationServiceSuite) TestDeclineInvitation() {
 	// Create an invitation
-	invitations, err := s.invitationSvc.Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -218,11 +215,11 @@ func (s *InvitationServiceSuite) TestDeclineInvitation() {
 	invitationID := invitations[0].ID
 
 	// Test decline invitation
-	err = s.invitationSvc.Decline(invitationID, s.users[1].GetID())
+	err = service.NewInvitationService().Decline(invitationID, s.users[1].GetID())
 	s.Require().NoError(err)
 
 	// Test cannot decline already declined invitation
-	err = s.invitationSvc.Decline(invitationID, s.users[1].GetID())
+	err = service.NewInvitationService().Decline(invitationID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(
 		errorpkg.NewCannotDeclineNonPendingInvitationError(
@@ -232,7 +229,7 @@ func (s *InvitationServiceSuite) TestDeclineInvitation() {
 	)
 
 	// Create another invitation
-	invitations, err = s.invitationSvc.Create(service.InvitationCreateOptions{
+	invitations, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -240,7 +237,7 @@ func (s *InvitationServiceSuite) TestDeclineInvitation() {
 	invitationID = invitations[0].ID
 
 	// Test user not allowed to decline invitation
-	err = s.invitationSvc.Decline(invitationID, s.users[0].GetID())
+	err = service.NewInvitationService().Decline(invitationID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(
 		errorpkg.NewUserNotAllowedToDeclineInvitationError(
@@ -253,7 +250,7 @@ func (s *InvitationServiceSuite) TestDeclineInvitation() {
 
 func (s *InvitationServiceSuite) TestResendInvitation() {
 	// Create an invitation
-	invitations, err := s.invitationSvc.Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -261,13 +258,13 @@ func (s *InvitationServiceSuite) TestResendInvitation() {
 	invitationID := invitations[0].ID
 
 	// Test resend invitation
-	err = s.invitationSvc.Resend(invitationID, s.users[0].GetID())
+	err = service.NewInvitationService().Resend(invitationID, s.users[0].GetID())
 	s.Require().NoError(err)
 }
 
 func (s *InvitationServiceSuite) TestDeleteInvitation() {
 	// Create an invitation
-	invitations, err := s.invitationSvc.Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -275,11 +272,11 @@ func (s *InvitationServiceSuite) TestDeleteInvitation() {
 	invitationID := invitations[0].ID
 
 	// Test delete invitation
-	err = s.invitationSvc.Delete(invitationID, s.users[0].GetID())
+	err = service.NewInvitationService().Delete(invitationID, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	// Create another invitation
-	invitations, err = s.invitationSvc.Create(service.InvitationCreateOptions{
+	invitations, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -287,7 +284,7 @@ func (s *InvitationServiceSuite) TestDeleteInvitation() {
 	invitationID = invitations[0].ID
 
 	// Test user not allowed to delete invitation
-	err = s.invitationSvc.Delete(invitationID, s.users[1].GetID())
+	err = service.NewInvitationService().Delete(invitationID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(
 		errorpkg.NewUserNotAllowedToDeleteInvitationError(
