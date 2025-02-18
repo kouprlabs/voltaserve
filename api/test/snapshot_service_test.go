@@ -67,12 +67,12 @@ func (s *SnapshotServiceSuite) TestList() {
 		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 			ID:         helper.NewID(),
 			Version:    1,
-			CreateTime: time.Now().Format(time.RFC3339),
+			CreateTime: helper.NewTimeString(),
 		}),
 		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 			ID:         helper.NewID(),
 			Version:    2,
-			CreateTime: time.Now().Add(-time.Hour).Format(time.RFC3339),
+			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
 		}),
 	}
 	for _, snapshot := range snapshots {
@@ -104,12 +104,12 @@ func (s *SnapshotServiceSuite) TestProbe() {
 		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 			ID:         helper.NewID(),
 			Version:    1,
-			CreateTime: time.Now().Format(time.RFC3339),
+			CreateTime: helper.NewTimeString(),
 		}),
 		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 			ID:         helper.NewID(),
 			Version:    2,
-			CreateTime: time.Now().Add(-time.Hour).Format(time.RFC3339),
+			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
 		}),
 	}
 	for _, snapshot := range snapshots {
@@ -138,7 +138,7 @@ func (s *SnapshotServiceSuite) TestActivate() {
 	snapshot := repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 		ID:         helper.NewID(),
 		Version:    1,
-		CreateTime: time.Now().Format(time.RFC3339),
+		CreateTime: helper.NewTimeString(),
 	})
 	err := repo.NewSnapshotRepo().Insert(snapshot)
 	s.Require().NoError(err)
@@ -158,7 +158,7 @@ func (s *SnapshotServiceSuite) TestDetach() {
 	snapshot := repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 		ID:         helper.NewID(),
 		Version:    1,
-		CreateTime: time.Now().Format(time.RFC3339),
+		CreateTime: helper.NewTimeString(),
 	})
 	err := repo.NewSnapshotRepo().Insert(snapshot)
 	s.Require().NoError(err)
@@ -182,7 +182,7 @@ func (s *SnapshotServiceSuite) TestPatch() {
 	snapshot := repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 		ID:         helper.NewID(),
 		Version:    1,
-		CreateTime: time.Now().Format(time.RFC3339),
+		CreateTime: helper.NewTimeString(),
 	})
 	err := repo.NewSnapshotRepo().Insert(snapshot)
 	s.Require().NoError(err)

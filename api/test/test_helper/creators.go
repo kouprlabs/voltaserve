@@ -30,7 +30,7 @@ func CreateUsers(count int) ([]model.User, error) {
 	for i := range count {
 		id := helper.NewID()
 		db = db.Exec("INSERT INTO \"user\" (id, full_name, username, email, password_hash, create_time) VALUES (?, ?, ?, ?, ?, ?)",
-			id, fmt.Sprintf("user %d", i), id+"@voltaserve.com", id+"@voltaserve.com", "", helper.NewTimestamp())
+			id, fmt.Sprintf("user %d", i), id+"@voltaserve.com", id+"@voltaserve.com", "", helper.NewTimeString())
 		if db.Error != nil {
 			return nil, db.Error
 		}

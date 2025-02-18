@@ -12,7 +12,6 @@ package test
 
 import (
 	"fmt"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"testing"
 	"time"
 
@@ -20,6 +19,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test/test_helper"
@@ -54,14 +54,13 @@ func (s *WorkspaceServiceSuite) SetupTest() {
 	}
 }
 
-func (s *WorkspaceServiceSuite) TestCreate_Successful() {
+func (s *WorkspaceServiceSuite) TestCreate() {
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(workspace)
 	s.Equal("workspace", workspace.Name)
 	s.Equal(int64(1*GB), workspace.StorageCapacity)
 }
@@ -76,7 +75,7 @@ func (s *WorkspaceServiceSuite) TestCreate_NonExistentOrganization() {
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
-func (s *WorkspaceServiceSuite) TestFind_Successful() {
+func (s *WorkspaceServiceSuite) TestFind() {
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
@@ -86,7 +85,6 @@ func (s *WorkspaceServiceSuite) TestFind_Successful() {
 
 	found, err := service.NewWorkspaceService().Find(workspace.ID, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(found)
 	s.Equal(workspace.ID, found.ID)
 }
 
@@ -109,7 +107,7 @@ func (s *WorkspaceServiceSuite) TestFind_UnauthorizedUser() {
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
-func (s *WorkspaceServiceSuite) TestList_All() {
+func (s *WorkspaceServiceSuite) TestList() {
 	for i := range 5 {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 			Name:            fmt.Sprintf("workspace %d", i),
@@ -122,7 +120,6 @@ func (s *WorkspaceServiceSuite) TestList_All() {
 
 	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{Page: 1, Size: 10}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(list)
 	s.GreaterOrEqual(len(list.Data), 5)
 }
 
@@ -139,7 +136,6 @@ func (s *WorkspaceServiceSuite) TestList_Pagination() {
 
 	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{Page: 2, Size: 2}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(list)
 	s.Len(list.Data, 2)
 }
 
@@ -161,7 +157,6 @@ func (s *WorkspaceServiceSuite) TestList_SortByName() {
 		SortOrder: service.WorkspaceSortOrderAsc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(list)
 	s.Less(list.Data[0].Name, list.Data[1].Name)
 }
 
@@ -183,13 +178,10 @@ func (s *WorkspaceServiceSuite) TestList_SortByDateCreated() {
 		SortOrder: service.WorkspaceSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(list)
-	firstCreateTime, _ := time.Parse(time.RFC3339, list.Data[0].CreateTime)
-	secondCreateTime, _ := time.Parse(time.RFC3339, list.Data[1].CreateTime)
-	s.True(firstCreateTime.After(secondCreateTime))
+	s.True(helper.StringToTime(list.Data[0].CreateTime).After(helper.StringToTime(list.Data[1].CreateTime)))
 }
 
-func (s *WorkspaceServiceSuite) TestPatchName_Successful() {
+func (s *WorkspaceServiceSuite) TestPatchName() {
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
@@ -197,9 +189,9 @@ func (s *WorkspaceServiceSuite) TestPatchName_Successful() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	workspace, err = service.NewWorkspaceService().PatchName(workspace.ID, "workspace (edit)", s.users[0].GetID())
+	patched, err := service.NewWorkspaceService().PatchName(workspace.ID, "workspace (edit)", s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(workspace)
+	s.Equal(workspace.ID, patched.ID)
 	s.Equal("workspace (edit)", workspace.Name)
 }
 
@@ -211,18 +203,18 @@ func (s *WorkspaceServiceSuite) TestPatchName_UnauthorisedUser() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewWorkspaceService().PatchName(workspace.ID, "workspace", s.users[1].GetID())
+	_, err = service.NewWorkspaceService().PatchName(workspace.ID, "workspace (edit)", s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
 func (s *WorkspaceServiceSuite) TestPatchName_NonExistentWorkspace() {
-	_, err := service.NewWorkspaceService().PatchName(uuid.NewString(), "workspace", s.users[0].GetID())
+	_, err := service.NewWorkspaceService().PatchName(uuid.NewString(), "workspace (edit)", s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
-func (s *WorkspaceServiceSuite) TestPatchStorageCapacity_Successful() {
+func (s *WorkspaceServiceSuite) TestPatchStorageCapacity() {
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,
@@ -232,7 +224,6 @@ func (s *WorkspaceServiceSuite) TestPatchStorageCapacity_Successful() {
 
 	workspace, err = service.NewWorkspaceService().PatchStorageCapacity(workspace.ID, int64(2*GB), s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(workspace)
 	s.Equal(int64(2*GB), workspace.StorageCapacity)
 }
 
@@ -255,7 +246,7 @@ func (s *WorkspaceServiceSuite) TestPatchStorageCapacity_NonExistentWorkspace() 
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
-func (s *WorkspaceServiceSuite) TestDelete_Successful() {
+func (s *WorkspaceServiceSuite) TestDelete() {
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  s.org.ID,

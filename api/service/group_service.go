@@ -14,7 +14,6 @@ import (
 	"errors"
 	"slices"
 	"sort"
-	"time"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
@@ -442,8 +441,8 @@ func (svc *GroupService) sort(data []model.Group, sortBy string, sortOrder strin
 		return data
 	} else if sortBy == GroupSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
-			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
-			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			a := helper.StringToTime(data[i].GetCreateTime())
+			b := helper.StringToTime(data[j].GetCreateTime())
 			if sortOrder == GroupSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
@@ -454,8 +453,8 @@ func (svc *GroupService) sort(data []model.Group, sortBy string, sortOrder strin
 	} else if sortBy == GroupSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
-				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
-				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				a := helper.StringToTime(*data[i].GetUpdateTime())
+				b := helper.StringToTime(*data[j].GetUpdateTime())
 				if sortOrder == GroupSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {

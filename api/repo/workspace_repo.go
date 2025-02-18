@@ -39,13 +39,12 @@ func (*workspaceEntity) TableName() string {
 }
 
 func (w *workspaceEntity) BeforeCreate(*gorm.DB) (err error) {
-	w.CreateTime = helper.NewTimestamp()
+	w.CreateTime = helper.NewTimeString()
 	return nil
 }
 
 func (w *workspaceEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := helper.NewTimestamp()
-	w.UpdateTime = &timeNow
+	w.UpdateTime = helper.ToPtr(helper.NewTimeString())
 	return nil
 }
 
@@ -355,7 +354,7 @@ func (repo *WorkspaceRepo) GrantUserPermission(id string, userID string, permiss
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               VALUES (?, ?, ?, ?, ?)
               ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, helper.NewTimestamp(), permission)
+			helper.NewID(), userID, id, permission, helper.NewTimeString(), permission)
 	if db.Error != nil {
 		return db.Error
 	}

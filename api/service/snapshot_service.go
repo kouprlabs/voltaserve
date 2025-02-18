@@ -13,7 +13,6 @@ package service
 import (
 	"path/filepath"
 	"sort"
-	"time"
 
 	"github.com/minio/minio-go/v7"
 
@@ -22,6 +21,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
@@ -319,8 +319,8 @@ func (svc *SnapshotService) sort(data []model.Snapshot, sortBy string, sortOrder
 		return data
 	} else if sortBy == SnapshotSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
-			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
-			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			a := helper.StringToTime(data[i].GetCreateTime())
+			b := helper.StringToTime(data[j].GetCreateTime())
 			if sortOrder == SnapshotSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
@@ -331,8 +331,8 @@ func (svc *SnapshotService) sort(data []model.Snapshot, sortBy string, sortOrder
 	} else if sortBy == SnapshotSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
-				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
-				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				a := helper.StringToTime(*data[i].GetUpdateTime())
+				b := helper.StringToTime(*data[j].GetUpdateTime())
 				if sortOrder == SnapshotSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {

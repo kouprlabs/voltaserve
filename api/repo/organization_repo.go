@@ -36,13 +36,12 @@ func (*organizationEntity) TableName() string {
 }
 
 func (o *organizationEntity) BeforeCreate(*gorm.DB) (err error) {
-	o.CreateTime = helper.NewTimestamp()
+	o.CreateTime = helper.NewTimeString()
 	return nil
 }
 
 func (o *organizationEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := helper.NewTimestamp()
-	o.UpdateTime = &timeNow
+	o.UpdateTime = helper.ToPtr(helper.NewTimeString())
 	return nil
 }
 
@@ -305,7 +304,7 @@ func (repo *OrganizationRepo) GrantUserPermission(id string, userID string, perm
 	db := repo.db.
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, helper.NewTimestamp(), permission)
+			helper.NewID(), userID, id, permission, helper.NewTimeString(), permission)
 	if db.Error != nil {
 		return db.Error
 	}

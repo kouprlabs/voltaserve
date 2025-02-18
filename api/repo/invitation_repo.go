@@ -36,13 +36,12 @@ func (*invitationEntity) TableName() string {
 }
 
 func (i *invitationEntity) BeforeCreate(*gorm.DB) (err error) {
-	i.CreateTime = helper.NewTimestamp()
+	i.CreateTime = helper.NewTimeString()
 	return nil
 }
 
 func (i *invitationEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := helper.NewTimestamp()
-	i.UpdateTime = &timeNow
+	i.UpdateTime = helper.ToPtr(helper.NewTimeString())
 	return nil
 }
 

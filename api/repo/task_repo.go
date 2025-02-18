@@ -42,13 +42,12 @@ func (*taskEntity) TableName() string {
 }
 
 func (e *taskEntity) BeforeCreate(*gorm.DB) (err error) {
-	e.CreateTime = helper.NewTimestamp()
+	e.CreateTime = helper.NewTimeString()
 	return nil
 }
 
 func (e *taskEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := helper.NewTimestamp()
-	e.UpdateTime = &timeNow
+	e.UpdateTime = helper.ToPtr(helper.NewTimeString())
 	return nil
 }
 
