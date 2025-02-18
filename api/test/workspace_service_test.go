@@ -192,7 +192,7 @@ func (s *WorkspaceServiceSuite) TestPatchName() {
 	patched, err := service.NewWorkspaceService().PatchName(workspace.ID, "workspace (edit)", s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(workspace.ID, patched.ID)
-	s.Equal("workspace (edit)", workspace.Name)
+	s.Equal("workspace (edit)", patched.Name)
 }
 
 func (s *WorkspaceServiceSuite) TestPatchName_UnauthorisedUser() {

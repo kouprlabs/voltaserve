@@ -50,12 +50,12 @@ jobs:
           go-version: 1.22
 
       - name: Run tests
-        working-directory: api
-        run: |
-          go test ./... -v
+        uses: robherley/go-test-action@v0
+        with:
+          moduleDirectory: api
 
   build:
-    needs: lint
+    needs: test
     strategy:
       matrix:
         platform: ["arm64", "amd64"]
