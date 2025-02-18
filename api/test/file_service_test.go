@@ -96,6 +96,14 @@ func (s *FileServiceTestSuite) TestCreate_DuplicateName() {
 		Type:        model.FileTypeFile,
 		ParentID:    s.workspace.RootID,
 	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	_, err = service.NewFileService().Create(service.FileCreateOptions{
+		WorkspaceID: s.workspace.ID,
+		Name:        "file.txt",
+		Type:        model.FileTypeFile,
+		ParentID:    s.workspace.RootID,
+	}, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFileWithSimilarNameExistsError().Error(), err.Error())
 }
