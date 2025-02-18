@@ -62,7 +62,6 @@ func (s *SnapshotServiceSuite) SetupTest() {
 }
 
 func (s *SnapshotServiceSuite) TestList() {
-	// Create snapshots
 	snapshots := []model.Snapshot{
 		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 			ID:         helper.NewID(),
@@ -84,7 +83,6 @@ func (s *SnapshotServiceSuite) TestList() {
 		s.Require().NoError(err)
 	}
 
-	// Test listing snapshots
 	list, err := service.NewSnapshotService().List(s.file.ID, service.SnapshotListOptions{
 		Page:      1,
 		Size:      10,
@@ -99,7 +97,6 @@ func (s *SnapshotServiceSuite) TestList() {
 }
 
 func (s *SnapshotServiceSuite) TestProbe() {
-	// Create snapshots
 	snapshots := []model.Snapshot{
 		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 			ID:         helper.NewID(),
@@ -121,7 +118,6 @@ func (s *SnapshotServiceSuite) TestProbe() {
 		s.Require().NoError(err)
 	}
 
-	// Test probing snapshots
 	opts := service.SnapshotListOptions{
 		Page:      1,
 		Size:      10,
@@ -134,7 +130,6 @@ func (s *SnapshotServiceSuite) TestProbe() {
 }
 
 func (s *SnapshotServiceSuite) TestActivate() {
-	// Create a snapshot
 	snapshot := repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 		ID:         helper.NewID(),
 		Version:    1,
@@ -147,14 +142,12 @@ func (s *SnapshotServiceSuite) TestActivate() {
 	err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), s.file.ID)
 	s.Require().NoError(err)
 
-	// Activate the snapshot
 	file, err := service.NewSnapshotService().Activate(snapshot.GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().Equal(snapshot.GetID(), file.Snapshot.ID)
 }
 
 func (s *SnapshotServiceSuite) TestDetach() {
-	// Create a snapshot
 	snapshot := repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 		ID:         helper.NewID(),
 		Version:    1,
@@ -167,18 +160,15 @@ func (s *SnapshotServiceSuite) TestDetach() {
 	err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), s.file.ID)
 	s.Require().NoError(err)
 
-	// Detach the snapshot
 	err = service.NewSnapshotService().Detach(snapshot.GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 
-	// Verify the snapshot is detached
 	file, err := cache.NewFileCache().Get(s.file.ID)
 	s.Require().NoError(err)
 	s.Require().Nil(file.GetSnapshotID())
 }
 
 func (s *SnapshotServiceSuite) TestPatch() {
-	// Create a snapshot
 	snapshot := repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
 		ID:         helper.NewID(),
 		Version:    1,
@@ -189,12 +179,11 @@ func (s *SnapshotServiceSuite) TestPatch() {
 	err = cache.NewSnapshotCache().Set(snapshot)
 	s.Require().NoError(err)
 
-	// Test successful patch
-	patchedSnapshot, err := service.NewSnapshotService().Patch(snapshot.GetID(), service.SnapshotPatchOptions{
+	patched, err := service.NewSnapshotService().Patch(snapshot.GetID(), service.SnapshotPatchOptions{
 		Options: conversion_client.PipelineRunOptions{SnapshotID: snapshot.GetID()},
 		Fields:  []string{repo.SnapshotFieldStatus},
 		Status:  helper.ToPtr(model.SnapshotStatusProcessing),
 	})
 	s.Require().NoError(err)
-	s.Require().Equal(model.SnapshotStatusProcessing, patchedSnapshot.Status)
+	s.Require().Equal(model.SnapshotStatusProcessing, patched.Status)
 }

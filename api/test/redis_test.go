@@ -39,6 +39,7 @@ func (s *RedisSuite) TestSetAndGet() {
 	}
 	err := cache.NewFileCache().Set(repo.NewFileModelWithOptions(opts))
 	s.Require().NoError(err)
+
 	file, err := cache.NewFileCache().Get(opts.ID)
 	s.Require().NoError(err)
 	s.Equal(opts.ID, file.GetID())

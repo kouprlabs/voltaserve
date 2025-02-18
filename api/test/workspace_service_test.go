@@ -11,7 +11,6 @@
 package test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -108,77 +107,112 @@ func (s *WorkspaceServiceSuite) TestFind_UnauthorizedUser() {
 }
 
 func (s *WorkspaceServiceSuite) TestList() {
-	for i := range 5 {
+	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
-			Name:            fmt.Sprintf("workspace %d", i),
+			Name:            name,
 			OrganizationID:  s.org.ID,
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
-		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{Page: 1, Size: 10}, s.users[0].GetID())
+	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.GreaterOrEqual(len(list.Data), 5)
+	s.Equal(uint64(3), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("workspace A", list.Data[0].Name)
+	s.Equal("workspace B", list.Data[1].Name)
+	s.Equal("workspace C", list.Data[2].Name)
 }
 
 func (s *WorkspaceServiceSuite) TestList_Pagination() {
-	for i := range 5 {
+	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
-			Name:            fmt.Sprintf("workspace %d", i),
+			Name:            name,
 			OrganizationID:  s.org.ID,
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
-		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{Page: 2, Size: 2}, s.users[0].GetID())
+	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
+		Page: 1,
+		Size: 2,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Len(list.Data, 2)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal("workspace A", list.Data[0].Name)
+	s.Equal("workspace B", list.Data[1].Name)
 }
 
 func (s *WorkspaceServiceSuite) TestList_SortByName() {
-	for i := range 5 {
+	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
-			Name:            fmt.Sprintf("workspace %d", i),
+			Name:            name,
 			OrganizationID:  s.org.ID,
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
-		time.Sleep(1 * time.Second)
 	}
 
 	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
 		Page:      1,
-		Size:      10,
+		Size:      3,
 		SortBy:    service.WorkspaceSortByName,
-		SortOrder: service.WorkspaceSortOrderAsc,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	s.Less(list.Data[0].Name, list.Data[1].Name)
-}
-
-func (s *WorkspaceServiceSuite) TestList_SortByDateCreated() {
-	for i := range 5 {
-		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
-			Name:            fmt.Sprintf("workspace %d", i),
-			OrganizationID:  s.org.ID,
-			StorageCapacity: 1 * GB,
-		}, s.users[0].GetID())
-		s.Require().NoError(err)
-		time.Sleep(1 * time.Second)
-	}
-
-	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
-		Page:      1,
-		Size:      10,
-		SortBy:    service.WorkspaceSortByDateCreated,
 		SortOrder: service.WorkspaceSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.True(helper.StringToTime(list.Data[0].CreateTime).After(helper.StringToTime(list.Data[1].CreateTime)))
+	s.Equal("workspace C", list.Data[0].Name)
+	s.Equal("workspace B", list.Data[1].Name)
+	s.Equal("workspace A", list.Data[2].Name)
+}
+
+func (s *WorkspaceServiceSuite) TestList_SortByDateCreated() {
+	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
+		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
+			Name:            name,
+			OrganizationID:  s.org.ID,
+			StorageCapacity: 1 * GB,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
+	}
+
+	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
+		Page:      1,
+		Size:      3,
+		SortBy:    service.WorkspaceSortByDateCreated,
+		SortOrder: service.WorkspaceSortOrderAsc,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal("workspace A", list.Data[0].Name)
+	s.Equal("workspace B", list.Data[1].Name)
+	s.Equal("workspace C", list.Data[2].Name)
+}
+
+func (s *WorkspaceServiceSuite) TestProbe() {
+	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
+		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
+			Name:            name,
+			OrganizationID:  s.org.ID,
+			StorageCapacity: 1 * GB,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
+	probe, err := service.NewWorkspaceService().Probe(service.WorkspaceListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(3), probe.TotalElements)
+	s.Equal(uint64(1), probe.TotalPages)
 }
 
 func (s *WorkspaceServiceSuite) TestPatchName() {

@@ -102,8 +102,7 @@ func (s *AferoSuite) uploadFile(path string, size int64, bucket string, fileID s
 		SnapshotID:  snapshotID,
 		ContentType: infra.DetectMIMEFromPath(path),
 	}
-	s3Manager := infra.NewS3Manager()
-	if err := s3Manager.PutFile(s3Reference.Key, path, s3Reference.ContentType, s3Reference.Bucket, minio.PutObjectOptions{}); err != nil {
+	if err := infra.NewS3Manager().PutFile(s3Reference.Key, path, s3Reference.ContentType, s3Reference.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
 	res, err := service.NewFileService().Store(fileID, service.FileStoreOptions{S3Reference: s3Reference}, userID)
