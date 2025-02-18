@@ -12,7 +12,6 @@ package test
 
 import (
 	"fmt"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"os"
 	"path"
 
@@ -21,6 +20,8 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+
+	"github.com/kouprlabs/voltaserve/api/helper"
 )
 
 func SetupPostgres(port uint32) (*embeddedpostgres.EmbeddedPostgres, error) {
