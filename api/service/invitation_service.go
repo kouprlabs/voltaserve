@@ -84,6 +84,10 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 	if err != nil {
 		return nil, err
 	}
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
 		return nil, err
 	}
@@ -95,7 +99,7 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 	if err != nil {
 		return nil, err
 	}
-	emails := svc.getEmailsFromNonMembersAndOutgoing(opts.Emails, orgMembers, outgoing)
+	emails := svc.getValidOutboundEmails(opts.Emails, user.GetEmail(), orgMembers, outgoing)
 	invitations, err := svc.invitationRepo.Insert(repo.InvitationInsertOptions{
 		UserID:         userID,
 		OrganizationID: opts.OrganizationID,
@@ -351,7 +355,7 @@ func (svc *InvitationService) IsValidSortOrder(value string) bool {
 	return value == "" || value == InvitationSortOrderAsc || value == InvitationSortOrderDesc
 }
 
-func (svc *InvitationService) getEmailsFromNonMembersAndOutgoing(emails []string, orgMembers []model.User, outgoing []model.Invitation) []string {
+func (svc *InvitationService) getValidOutboundEmails(emails []string, ownerEmail string, orgMembers []model.User, outgoing []model.Invitation) []string {
 	var res []string
 	for _, email := range emails {
 		existing := false
@@ -367,7 +371,7 @@ func (svc *InvitationService) getEmailsFromNonMembersAndOutgoing(emails []string
 				break
 			}
 		}
-		if !existing {
+		if !existing && !strings.EqualFold(email, ownerEmail) {
 			res = append(res, email)
 		}
 	}
