@@ -92,6 +92,7 @@ func (s *GroupServiceSuite) TestList() {
 			OrganizationID: s.org.ID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
 	}
 
 	list, err := service.NewGroupService().List(service.GroupListOptions{
@@ -114,6 +115,7 @@ func (s *GroupServiceSuite) TestList_Pagination() {
 			OrganizationID: s.org.ID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
 	}
 
 	list, err := service.NewGroupService().List(service.GroupListOptions{
@@ -128,7 +130,7 @@ func (s *GroupServiceSuite) TestList_Pagination() {
 	s.Equal("group B", list.Data[1].Name)
 }
 
-func (s *GroupServiceSuite) TestList_SortByName() {
+func (s *GroupServiceSuite) TestList_SortByNameDescending() {
 	for _, name := range []string{"group A", "group B", "group C"} {
 		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
 			Name:           name,
@@ -147,28 +149,6 @@ func (s *GroupServiceSuite) TestList_SortByName() {
 	s.Equal("group C", list.Data[0].Name)
 	s.Equal("group B", list.Data[1].Name)
 	s.Equal("group A", list.Data[2].Name)
-}
-
-func (s *GroupServiceSuite) TestList_SortByDateCreated() {
-	for _, name := range []string{"group A", "group B", "group C"} {
-		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
-			Name:           name,
-			OrganizationID: s.org.ID,
-		}, s.users[0].GetID())
-		s.Require().NoError(err)
-		time.Sleep(1 * time.Second)
-	}
-
-	list, err := service.NewGroupService().List(service.GroupListOptions{
-		Page:      1,
-		Size:      3,
-		SortBy:    service.WorkspaceSortByDateCreated,
-		SortOrder: service.WorkspaceSortOrderAsc,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	s.Equal("group A", list.Data[0].Name)
-	s.Equal("group B", list.Data[1].Name)
-	s.Equal("group C", list.Data[2].Name)
 }
 
 func (s *GroupServiceSuite) TestProbe() {

@@ -17,29 +17,42 @@ import (
 	"strings"
 
 	"github.com/blevesearch/bleve/v2"
-	bleve_query "github.com/blevesearch/bleve/v2/search/query"
-	bleve_index "github.com/blevesearch/bleve_index_api"
+	blevequery "github.com/blevesearch/bleve/v2/search/query"
+	bleveindex "github.com/blevesearch/bleve_index_api"
 )
 
-type bleveSearchManager struct {
-	indexes map[string]bleve.Index
-}
+var indices map[string]bleve.Index
+
+type bleveSearchManager struct{}
 
 func newBleveSearchManager() SearchManager {
-	manager := &bleveSearchManager{
-		indexes: make(map[string]bleve.Index),
+	mgr := &bleveSearchManager{}
+	if indices == nil {
+		indices = make(map[string]bleve.Index)
+		if err := mgr.createIndex(FileSearchIndex); err != nil {
+			panic(err)
+		}
+		if err := mgr.createIndex(GroupSearchIndex); err != nil {
+			panic(err)
+		}
+		if err := mgr.createIndex(WorkspaceSearchIndex); err != nil {
+			panic(err)
+		}
+		if err := mgr.createIndex(OrganizationSearchIndex); err != nil {
+			panic(err)
+		}
+		if err := mgr.createIndex(UserSearchIndex); err != nil {
+			panic(err)
+		}
+		if err := mgr.createIndex(TaskSearchIndex); err != nil {
+			panic(err)
+		}
 	}
-	manager.createIndex(FileSearchIndex)
-	manager.createIndex(GroupSearchIndex)
-	manager.createIndex(WorkspaceSearchIndex)
-	manager.createIndex(OrganizationSearchIndex)
-	manager.createIndex(UserSearchIndex)
-	manager.createIndex(TaskSearchIndex)
-	return manager
+	return mgr
 }
 
 func (mgr *bleveSearchManager) Query(indexName string, query string, opts QueryOptions) ([]interface{}, error) {
-	index, ok := mgr.indexes[indexName]
+	index, ok := indices[indexName]
 	if !ok {
 		return nil, errors.New("index not found")
 	}
@@ -74,7 +87,7 @@ func (mgr *bleveSearchManager) Query(indexName string, query string, opts QueryO
 }
 
 func (mgr *bleveSearchManager) Index(indexName string, models []SearchModel) error {
-	index, ok := mgr.indexes[indexName]
+	index, ok := indices[indexName]
 	if !ok {
 		return errors.New("index not found")
 	}
@@ -92,7 +105,7 @@ func (mgr *bleveSearchManager) Update(indexName string, models []SearchModel) er
 }
 
 func (mgr *bleveSearchManager) Delete(indexName string, ids []string) error {
-	index, ok := mgr.indexes[indexName]
+	index, ok := indices[indexName]
 	if !ok {
 		return errors.New("index not found")
 	}
@@ -103,16 +116,17 @@ func (mgr *bleveSearchManager) Delete(indexName string, ids []string) error {
 	return index.Batch(batch)
 }
 
-func (mgr *bleveSearchManager) createIndex(indexName string) {
+func (mgr *bleveSearchManager) createIndex(indexName string) error {
 	index, err := bleve.NewMemOnly(bleve.NewIndexMapping())
 	if err != nil {
-		panic(err)
+		return err
 	}
-	mgr.indexes[indexName] = index
+	indices[indexName] = index
+	return nil
 }
 
-func (mgr *bleveSearchManager) buildFilter(filter interface{}) []*bleve_query.MatchQuery {
-	res := make([]*bleve_query.MatchQuery, 0)
+func (mgr *bleveSearchManager) buildFilter(filter interface{}) []*blevequery.MatchQuery {
+	res := make([]*blevequery.MatchQuery, 0)
 	expression, ok := filter.(string)
 	if !ok {
 		return nil
@@ -128,20 +142,20 @@ func (mgr *bleveSearchManager) buildFilter(filter interface{}) []*bleve_query.Ma
 	return res
 }
 
-func (mgr *bleveSearchManager) documentToMap(doc bleve_index.Document) map[string]interface{} {
+func (mgr *bleveSearchManager) documentToMap(doc bleveindex.Document) map[string]interface{} {
 	res := make(map[string]interface{})
-	doc.VisitFields(func(field bleve_index.Field) {
+	doc.VisitFields(func(field bleveindex.Field) {
 		fieldName := field.Name()
 		fieldValue := field.Value()
 		switch field.(type) {
-		case bleve_index.TextField:
+		case bleveindex.TextField:
 			res[fieldName] = string(fieldValue)
-		case bleve_index.NumericField:
+		case bleveindex.NumericField:
 			num, err := strconv.ParseFloat(string(fieldValue), 64)
 			if err == nil {
 				res[fieldName] = num
 			}
-		case bleve_index.BooleanField:
+		case bleveindex.BooleanField:
 			boolVal, err := strconv.ParseBool(string(fieldValue))
 			if err == nil {
 				res[fieldName] = boolVal

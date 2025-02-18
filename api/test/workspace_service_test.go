@@ -114,6 +114,7 @@ func (s *WorkspaceServiceSuite) TestList() {
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
 	}
 
 	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
@@ -137,6 +138,7 @@ func (s *WorkspaceServiceSuite) TestList_Pagination() {
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
 	}
 
 	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
@@ -151,7 +153,7 @@ func (s *WorkspaceServiceSuite) TestList_Pagination() {
 	s.Equal("workspace B", list.Data[1].Name)
 }
 
-func (s *WorkspaceServiceSuite) TestList_SortByName() {
+func (s *WorkspaceServiceSuite) TestList_SortByNameDescending() {
 	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 			Name:            name,
@@ -171,29 +173,6 @@ func (s *WorkspaceServiceSuite) TestList_SortByName() {
 	s.Equal("workspace C", list.Data[0].Name)
 	s.Equal("workspace B", list.Data[1].Name)
 	s.Equal("workspace A", list.Data[2].Name)
-}
-
-func (s *WorkspaceServiceSuite) TestList_SortByDateCreated() {
-	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
-		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
-			Name:            name,
-			OrganizationID:  s.org.ID,
-			StorageCapacity: 1 * GB,
-		}, s.users[0].GetID())
-		s.Require().NoError(err)
-		time.Sleep(1 * time.Second)
-	}
-
-	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
-		Page:      1,
-		Size:      3,
-		SortBy:    service.WorkspaceSortByDateCreated,
-		SortOrder: service.WorkspaceSortOrderAsc,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	s.Equal("workspace A", list.Data[0].Name)
-	s.Equal("workspace B", list.Data[1].Name)
-	s.Equal("workspace C", list.Data[2].Name)
 }
 
 func (s *WorkspaceServiceSuite) TestProbe() {

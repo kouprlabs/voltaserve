@@ -88,6 +88,7 @@ func (s *OrganizationServiceSuite) TestList() {
 			Name: name,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
 	}
 
 	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
@@ -109,6 +110,7 @@ func (s *OrganizationServiceSuite) TestList_Pagination() {
 			Name: name,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
 	}
 
 	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
@@ -123,7 +125,7 @@ func (s *OrganizationServiceSuite) TestList_Pagination() {
 	s.Equal("organization B", list.Data[1].Name)
 }
 
-func (s *OrganizationServiceSuite) TestList_SortByName() {
+func (s *OrganizationServiceSuite) TestList_SortByNameDescending() {
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
 		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 			Name: name,
@@ -141,27 +143,6 @@ func (s *OrganizationServiceSuite) TestList_SortByName() {
 	s.Equal("organization C", list.Data[0].Name)
 	s.Equal("organization B", list.Data[1].Name)
 	s.Equal("organization A", list.Data[2].Name)
-}
-
-func (s *OrganizationServiceSuite) TestList_SortByDateCreated() {
-	for _, name := range []string{"organization A", "organization B", "organization C"} {
-		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
-			Name: name,
-		}, s.users[0].GetID())
-		s.Require().NoError(err)
-		time.Sleep(1 * time.Second)
-	}
-
-	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
-		Page:      1,
-		Size:      3,
-		SortBy:    service.OrganizationSortByDateCreated,
-		SortOrder: service.OrganizationSortOrderAsc,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	s.Equal("organization A", list.Data[0].Name)
-	s.Equal("organization B", list.Data[1].Name)
-	s.Equal("organization C", list.Data[2].Name)
 }
 
 func (s *OrganizationServiceSuite) TestProbe() {
