@@ -13,7 +13,6 @@ package service
 import (
 	"errors"
 	"sort"
-	"time"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
@@ -399,8 +398,8 @@ func (svc *OrganizationService) sort(data []model.Organization, sortBy string, s
 		return data
 	} else if sortBy == OrganizationSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
-			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
-			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			a := helper.StringToTime(data[i].GetCreateTime())
+			b := helper.StringToTime(data[j].GetCreateTime())
 			if sortOrder == OrganizationSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
@@ -411,8 +410,8 @@ func (svc *OrganizationService) sort(data []model.Organization, sortBy string, s
 	} else if sortBy == OrganizationSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
-				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
-				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				a := helper.StringToTime(*data[i].GetUpdateTime())
+				b := helper.StringToTime(*data[j].GetUpdateTime())
 				if sortOrder == OrganizationSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {

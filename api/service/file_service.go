@@ -19,7 +19,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/gosimple/slug"
 	"github.com/minio/minio-go/v7"
@@ -38,34 +37,36 @@ import (
 )
 
 type FileService struct {
-	fileCreate     *fileCreate
-	fileStore      *fileStore
-	fileDelete     *fileDelete
-	fileMove       *fileMove
-	fileCopy       *fileCopy
-	fileDownload   *fileDownload
-	fileFetch      *fileFetch
-	fileList       *fileList
-	fileReprocess  *fileReprocess
-	filePermission *filePermission
-	fileCompute    *fileCompute
-	filePatch      *filePatch
+	fileCreate      *fileCreate
+	fileStore       *fileStore
+	fileDelete      *fileDelete
+	fileMove        *fileMove
+	fileCopy        *fileCopy
+	fileDownload    *fileDownload
+	fileFetch       *fileFetch
+	fileList        *fileList
+	fileSortService *fileSortService
+	fileReprocess   *fileReprocess
+	filePermission  *filePermission
+	fileCompute     *fileCompute
+	filePatch       *filePatch
 }
 
 func NewFileService() *FileService {
 	return &FileService{
-		fileCreate:     newFileCreate(),
-		fileStore:      newFileStore(),
-		fileDelete:     newFileDelete(),
-		fileMove:       newFileMove(),
-		fileCopy:       newFileCopy(),
-		fileDownload:   newFileDownload(),
-		fileFetch:      newFileFetch(),
-		fileList:       newFileList(),
-		fileReprocess:  newFileReprocess(),
-		filePermission: newFilePermission(),
-		fileCompute:    newFileCompute(),
-		filePatch:      newFilePatch(),
+		fileCreate:      newFileCreate(),
+		fileStore:       newFileStore(),
+		fileDelete:      newFileDelete(),
+		fileMove:        newFileMove(),
+		fileCopy:        newFileCopy(),
+		fileDownload:    newFileDownload(),
+		fileFetch:       newFileFetch(),
+		fileList:        newFileList(),
+		fileSortService: newFileSortService(),
+		fileReprocess:   newFileReprocess(),
+		filePermission:  newFilePermission(),
+		fileCompute:     newFileCompute(),
+		filePatch:       newFilePatch(),
 	}
 }
 
@@ -115,6 +116,14 @@ func (svc *FileService) FindPath(id string, userID string) ([]*File, error) {
 	return svc.fileFetch.findPath(id, userID)
 }
 
+func (svc *FileService) GetPathString(files []*File) string {
+	return svc.fileFetch.getPathString(files)
+}
+
+func (svc *FileService) GetPathStringWithoutWorkspace(files []*File) string {
+	return svc.fileFetch.getPathStringWithoutWorkspace(files)
+}
+
 func (svc *FileService) Probe(id string, opts FileListOptions, userID string) (*FileProbe, error) {
 	return svc.fileList.probe(id, opts, userID)
 }
@@ -124,16 +133,11 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 }
 
 func (svc *FileService) IsValidSortBy(value string) bool {
-	return value == "" ||
-		value == FileSortByName ||
-		value == FileSortByKind ||
-		value == FileSortBySize ||
-		value == FileSortByDateCreated ||
-		value == FileSortByDateModified
+	return svc.fileSortService.isValidSortBy(value)
 }
 
 func (svc *FileService) IsValidSortOrder(value string) bool {
-	return value == "" || value == FileSortOrderAsc || value == FileSortOrderDesc
+	return svc.fileSortService.isValidSortOrder(value)
 }
 
 func (svc *FileService) ComputeSize(id string, userID string) (*int64, error) {
@@ -492,6 +496,22 @@ func (svc *fileFetch) findPath(id string, userID string) ([]*File, error) {
 		res = append([]*File{f}, res...)
 	}
 	return res, nil
+}
+
+func (svc *fileFetch) getPathString(files []*File) string {
+	return strings.Join(svc.getPathStrings(files), "/")
+}
+
+func (svc *fileFetch) getPathStringWithoutWorkspace(files []*File) string {
+	return strings.Join(svc.getPathStrings(files)[1:], "/")
+}
+
+func (svc *fileFetch) getPathStrings(files []*File) []string {
+	var components []string
+	for _, f := range files {
+		components = append(components, f.Name)
+	}
+	return components
 }
 
 func (svc *fileFetch) getWorkspacesAsFiles(userID string) ([]*File, error) {
@@ -1074,7 +1094,7 @@ func (svc *fileCopy) newClone(file model.File) model.File {
 	f.SetSnapshotID(file.GetSnapshotID())
 	f.SetType(file.GetType())
 	f.SetName(file.GetName())
-	f.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+	f.SetCreateTime(helper.NewTimeString())
 	return f
 }
 
@@ -1084,7 +1104,7 @@ func (svc *fileCopy) newUserPermission(file model.File, userID string) model.Use
 	p.SetUserID(userID)
 	p.SetResourceID(file.GetID())
 	p.SetPermission(model.PermissionOwner)
-	p.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+	p.SetCreateTime(helper.NewTimeString())
 	return p
 }
 
@@ -1132,7 +1152,7 @@ func (svc *fileCopy) index(clones []model.File) {
 }
 
 func (svc *fileCopy) refreshUpdateTime(target model.File) error {
-	now := helper.NewTimestamp()
+	now := helper.NewTimeString()
 	target.SetUpdateTime(&now)
 	if err := svc.fileRepo.Save(target); err != nil {
 		return err
@@ -1599,7 +1619,7 @@ func (svc *fileMove) check(source model.File, target model.File, userID string) 
 }
 
 func (svc *fileMove) refreshUpdateAndCreateTime(source model.File, target model.File) error {
-	now := time.Now().UTC().Format(time.RFC3339)
+	now := helper.NewTimeString()
 	source.SetUpdateTime(&now)
 	if err := svc.fileRepo.Save(source); err != nil {
 		return err
@@ -2595,16 +2615,15 @@ func (svc *fileFilterService) filterWithQuery(data []model.File, opts FileQuery,
 		}).
 		Filter(func(v interface{}) bool {
 			if opts.CreateTimeBefore != nil {
-				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return t.UnixMilli() >= *opts.CreateTimeAfter
+				return helper.StringToTime(v.(model.File).GetCreateTime()).UnixMilli() >= *opts.CreateTimeAfter
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
 			if opts.CreateTimeBefore != nil {
-				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return t.UnixMilli() <= *opts.CreateTimeBefore
+				file := v.(model.File)
+				return helper.StringToTime(file.GetCreateTime()).UnixMilli() <= *opts.CreateTimeBefore
 			} else {
 				return true
 			}
@@ -2612,8 +2631,7 @@ func (svc *fileFilterService) filterWithQuery(data []model.File, opts FileQuery,
 		Filter(func(v interface{}) bool {
 			if opts.UpdateTimeAfter != nil {
 				file := v.(model.File)
-				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return file.GetUpdateTime() != nil && t.UnixMilli() >= *opts.UpdateTimeAfter
+				return file.GetUpdateTime() != nil && helper.StringToTime(*file.GetUpdateTime()).UnixMilli() >= *opts.UpdateTimeAfter
 			} else {
 				return true
 			}
@@ -2621,8 +2639,7 @@ func (svc *fileFilterService) filterWithQuery(data []model.File, opts FileQuery,
 		Filter(func(v interface{}) bool {
 			if opts.UpdateTimeBefore != nil {
 				file := v.(model.File)
-				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return file.GetUpdateTime() != nil && t.UnixMilli() <= *opts.UpdateTimeBefore
+				return file.GetUpdateTime() != nil && helper.StringToTime(*file.GetUpdateTime()).UnixMilli() <= *opts.UpdateTimeBefore
 			} else {
 				return true
 			}
@@ -2702,8 +2719,8 @@ func (svc *fileSortService) sortBySize(data []model.File, sortOrder string, user
 
 func (svc *fileSortService) sortByDateCreated(data []model.File, sortOrder string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
-		a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
-		b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+		a := helper.StringToTime(data[i].GetCreateTime())
+		b := helper.StringToTime(data[j].GetCreateTime())
 		if sortOrder == FileSortOrderDesc {
 			return a.UnixMilli() > b.UnixMilli()
 		} else {
@@ -2716,8 +2733,8 @@ func (svc *fileSortService) sortByDateCreated(data []model.File, sortOrder strin
 func (svc *fileSortService) sortByDateModified(data []model.File, sortOrder string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
 		if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
-			a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
-			b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+			a := helper.StringToTime(*data[i].GetUpdateTime())
+			b := helper.StringToTime(*data[j].GetUpdateTime())
 			if sortOrder == FileSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
@@ -2743,6 +2760,19 @@ func (svc *fileSortService) sortByKind(data []model.File, userID string) []model
 	res = append(res, svc.fileFilterSvc.filterTexts(files, userID)...)
 	res = append(res, svc.fileFilterSvc.filterOthers(files, userID)...)
 	return res
+}
+
+func (svc *fileSortService) isValidSortBy(value string) bool {
+	return value == "" ||
+		value == FileSortByName ||
+		value == FileSortByKind ||
+		value == FileSortBySize ||
+		value == FileSortByDateCreated ||
+		value == FileSortByDateModified
+}
+
+func (svc *fileSortService) isValidSortOrder(value string) bool {
+	return value == "" || value == FileSortOrderAsc || value == FileSortOrderDesc
 }
 
 type fileMapper struct {

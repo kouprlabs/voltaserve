@@ -13,12 +13,12 @@ package service
 import (
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
@@ -411,8 +411,8 @@ func (svc *InvitationService) sort(data []model.Invitation, sortBy string, sortO
 		return data
 	} else if sortBy == InvitationSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
-			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
-			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			a := helper.StringToTime(data[i].GetCreateTime())
+			b := helper.StringToTime(data[j].GetCreateTime())
 			if sortOrder == InvitationSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
@@ -423,8 +423,8 @@ func (svc *InvitationService) sort(data []model.Invitation, sortBy string, sortO
 	} else if sortBy == InvitationSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
-				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
-				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				a := helper.StringToTime(*data[i].GetUpdateTime())
+				b := helper.StringToTime(*data[j].GetUpdateTime())
 				if sortOrder == InvitationSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {

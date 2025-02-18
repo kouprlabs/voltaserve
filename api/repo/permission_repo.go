@@ -31,7 +31,7 @@ func (*userPermissionEntity) TableName() string {
 }
 
 func (u *userPermissionEntity) BeforeCreate(*gorm.DB) (err error) {
-	u.CreateTime = helper.NewTimestamp()
+	u.CreateTime = helper.NewTimeString()
 	return nil
 }
 
@@ -88,7 +88,7 @@ func (*groupPermissionEntity) TableName() string {
 }
 
 func (g *groupPermissionEntity) BeforeCreate(*gorm.DB) (err error) {
-	g.CreateTime = helper.NewTimestamp()
+	g.CreateTime = helper.NewTimeString()
 	return nil
 }
 

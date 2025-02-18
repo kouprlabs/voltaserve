@@ -32,23 +32,22 @@ func TestBleveSuite(t *testing.T) {
 }
 
 func (s *BleveSuite) TestQuery() {
-	orgSearch := search.NewOrganizationSearch()
 	values := []repo.OrganizationNewModelOptions{
 		{ID: "org_a", Name: "foo bar"},
 		{ID: "org_b", Name: "hello world"},
 	}
 	for _, v := range values {
-		err := orgSearch.Index([]model.Organization{repo.NewOrganizationModelWithOptions(v)})
+		err := search.NewOrganizationSearch().Index([]model.Organization{repo.NewOrganizationModelWithOptions(v)})
 		s.Require().NoError(err)
 	}
 
-	hits, err := orgSearch.Query("foo", infra.QueryOptions{Limit: 10})
+	hits, err := search.NewOrganizationSearch().Query("foo", infra.QueryOptions{Limit: 10})
 	s.Require().NoError(err)
 	if s.Len(hits, 1) {
 		s.Equal("org_a", hits[0].GetID())
 	}
 
-	hits, err = orgSearch.Query("world", infra.QueryOptions{Limit: 10})
+	hits, err = search.NewOrganizationSearch().Query("world", infra.QueryOptions{Limit: 10})
 	s.Require().NoError(err)
 	if s.Len(hits, 1) {
 		s.Equal("org_b", hits[0].GetID())
@@ -56,7 +55,6 @@ func (s *BleveSuite) TestQuery() {
 }
 
 func (s *BleveSuite) TestFilter() {
-	fileSearch := search.NewFileSearch()
 	values := []repo.FileNewModelOptions{
 		{
 			ID:          "file_a",
@@ -81,11 +79,11 @@ func (s *BleveSuite) TestFilter() {
 		},
 	}
 	for _, v := range values {
-		err := fileSearch.Index([]model.File{repo.NewFileModelWithOptions(v)})
+		err := search.NewFileSearch().Index([]model.File{repo.NewFileModelWithOptions(v)})
 		s.Require().NoError(err)
 	}
 
-	hits, err := fileSearch.Query("exercitation", infra.QueryOptions{
+	hits, err := search.NewFileSearch().Query("exercitation", infra.QueryOptions{
 		Limit:  10,
 		Filter: fmt.Sprintf("workspaceId=\"workspace_b\" AND type=\"%s\"", model.FileTypeFile),
 	})

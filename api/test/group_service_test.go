@@ -12,11 +12,13 @@ package test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test/test_helper"
@@ -46,195 +48,199 @@ func (s *GroupServiceSuite) SetupTest() {
 	}
 }
 
-func (s *GroupServiceSuite) TestCreateGroup() {
-	// Test creating a group with valid options
+func (s *GroupServiceSuite) TestCreate() {
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: s.org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(group)
 	s.Equal("group", group.Name)
 	s.Equal(s.org.ID, group.Organization.ID)
+}
 
-	// Test creating a group with a non-existent organization
-	group, err = service.NewGroupService().Create(service.GroupCreateOptions{
+func (s *GroupServiceSuite) TestCreate_NonExistentOrganization() {
+	_, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "another group",
 		OrganizationID: "non-existent-org-id",
 	}, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(nil).Error(), err.Error())
-	s.Nil(group)
 }
 
-func (s *GroupServiceSuite) TestFindGroup() {
-	// Create a group to find
+func (s *GroupServiceSuite) TestFind() {
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: s.org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	// Test finding the created group
-	foundGroup, err := service.NewGroupService().Find(group.ID, s.users[0].GetID())
+	found, err := service.NewGroupService().Find(group.ID, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(foundGroup)
-	s.Equal(group.ID, foundGroup.ID)
+	s.Equal(group.ID, found.ID)
+}
 
-	// Test finding a non-existent group
-	foundGroup, err = service.NewGroupService().Find("non-existent-group-id", s.users[0].GetID())
+func (s *GroupServiceSuite) TestFind_NonExistentGroup() {
+	_, err := service.NewGroupService().Find(helper.NewID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewGroupNotFoundError(nil).Error(), err.Error())
-	s.Nil(foundGroup)
 }
 
-func (s *GroupServiceSuite) TestListGroups() {
-	// Create multiple groups to list
-	_, err := service.NewGroupService().Create(service.GroupCreateOptions{
-		Name:           "group A",
-		OrganizationID: s.org.ID,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = service.NewGroupService().Create(service.GroupCreateOptions{
-		Name:           "group B",
-		OrganizationID: s.org.ID,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
+func (s *GroupServiceSuite) TestList() {
+	for _, name := range []string{"group A", "group B", "group C"} {
+		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
+			Name:           name,
+			OrganizationID: s.org.ID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
+	}
 
-	// Test listing groups with default options
 	list, err := service.NewGroupService().List(service.GroupListOptions{
-		OrganizationID: s.org.ID,
-		Page:           1,
-		Size:           10,
+		Page: 1,
+		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(list)
-	s.Equal(uint64(2), list.TotalElements)
-
-	// Test listing groups with pagination
-	list, err = service.NewGroupService().List(service.GroupListOptions{
-		OrganizationID: s.org.ID,
-		Page:           1,
-		Size:           1,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	s.NotNil(list)
-	s.Equal(uint64(1), list.Size)
-	s.Equal(uint64(2), list.TotalElements)
-
-	// Test listing groups with sorting
-	list, err = service.NewGroupService().List(service.GroupListOptions{
-		OrganizationID: s.org.ID,
-		Page:           1,
-		Size:           10,
-		SortBy:         service.GroupSortByName,
-		SortOrder:      service.GroupSortOrderDesc,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	s.NotNil(list)
-	s.Equal("group B", list.Data[0].Name)
+	s.Equal(uint64(3), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("group A", list.Data[0].Name)
+	s.Equal("group B", list.Data[1].Name)
+	s.Equal("group C", list.Data[2].Name)
 }
 
-func (s *GroupServiceSuite) TestProbeGroups() {
-	// Create multiple groups to probe
-	_, err := service.NewGroupService().Create(service.GroupCreateOptions{
-		Name:           "group A",
-		OrganizationID: s.org.ID,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = service.NewGroupService().Create(service.GroupCreateOptions{
-		Name:           "group B",
-		OrganizationID: s.org.ID,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
+func (s *GroupServiceSuite) TestList_Pagination() {
+	for _, name := range []string{"group A", "group B", "group C"} {
+		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
+			Name:           name,
+			OrganizationID: s.org.ID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+		time.Sleep(1 * time.Second)
+	}
 
-	// Test probing groups
+	list, err := service.NewGroupService().List(service.GroupListOptions{
+		Page: 1,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal("group A", list.Data[0].Name)
+	s.Equal("group B", list.Data[1].Name)
+}
+
+func (s *GroupServiceSuite) TestList_SortByNameDescending() {
+	for _, name := range []string{"group A", "group B", "group C"} {
+		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
+			Name:           name,
+			OrganizationID: s.org.ID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
+	list, err := service.NewGroupService().List(service.GroupListOptions{
+		Page:      1,
+		Size:      3,
+		SortBy:    service.WorkspaceSortByName,
+		SortOrder: service.WorkspaceSortOrderDesc,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal("group C", list.Data[0].Name)
+	s.Equal("group B", list.Data[1].Name)
+	s.Equal("group A", list.Data[2].Name)
+}
+
+func (s *GroupServiceSuite) TestProbe() {
+	for _, name := range []string{"group A", "group B", "group C"} {
+		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
+			Name:           name,
+			OrganizationID: s.org.ID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
 	probe, err := service.NewGroupService().Probe(service.GroupListOptions{
-		OrganizationID: s.org.ID,
-		Page:           1,
-		Size:           10,
+		Page: 1,
+		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(probe)
-	s.Equal(uint64(2), probe.TotalElements)
+	s.Equal(uint64(3), probe.TotalElements)
+	s.Equal(uint64(1), probe.TotalPages)
 }
 
-func (s *GroupServiceSuite) TestPatchGroupName() {
-	// Create a group to patch
+func (s *GroupServiceSuite) TestPatchName() {
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: s.org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	// Test patching the group name
 	group, err = service.NewGroupService().PatchName(group.ID, "group (edit)", s.users[0].GetID())
 	s.Require().NoError(err)
-	s.NotNil(group)
 	s.Equal("group (edit)", group.Name)
-
-	// Test patching a non-existent group
-	group, err = service.NewGroupService().PatchName("non-existent-group-id", "group", s.users[0].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewGroupNotFoundError(nil).Error(), err.Error())
-	s.Nil(group)
 }
 
-func (s *GroupServiceSuite) TestDeleteGroup() {
-	// Create a group to delete
+func (s *GroupServiceSuite) TestPatchName_NonExistentGroup() {
+	_, err := service.NewGroupService().PatchName(helper.NewID(), "group", s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewGroupNotFoundError(nil).Error(), err.Error())
+}
+
+func (s *GroupServiceSuite) TestDelete() {
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: s.org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	// Test deleting the group
 	err = service.NewGroupService().Delete(group.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	// Test finding the deleted group
-	group, err = service.NewGroupService().Find(group.ID, s.users[0].GetID())
+	_, err = service.NewGroupService().Find(group.ID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewGroupNotFoundError(nil).Error(), err.Error())
-	s.Nil(group)
+}
 
-	// Test deleting a non-existent group
-	err = service.NewGroupService().Delete("non-existent-group-id", s.users[0].GetID())
+func (s *GroupServiceSuite) TestDelete_NonExistentGroup() {
+	err := service.NewGroupService().Delete(helper.NewID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewGroupNotFoundError(nil).Error(), err.Error())
 }
 
 func (s *GroupServiceSuite) TestAddMember() {
-	// Create a group and a user to add as a member
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: s.org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	// Add user to organization
-	invitationSvc := service.NewInvitationService()
-	invitations, err := invitationSvc.Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().Len(invitations, 1)
-	err = invitationSvc.Accept(invitations[0].ID, s.users[1].GetID())
+	err = service.NewInvitationService().Accept(invitations[0].ID, s.users[1].GetID())
 	s.Require().NoError(err)
 
-	// Test adding a member to the group
 	err = service.NewGroupService().AddMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
+}
 
-	// Test adding a non-existent member
+func (s *GroupServiceSuite) TestAddMember_NonMemberOfOrganization() {
+	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+		Name:           "group",
+		OrganizationID: s.org.ID,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
 	err = service.NewGroupService().AddMember(group.ID, s.users[2].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewUserNotMemberOfOrganizationError().Error(), err.Error())
 }
 
 func (s *GroupServiceSuite) TestRemoveMember() {
-	// Create a group and a user to add as a member
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: s.org.ID,
@@ -242,21 +248,17 @@ func (s *GroupServiceSuite) TestRemoveMember() {
 	s.Require().NoError(err)
 	s.Require().NoError(err)
 
-	// Add user to organization
-	invitationSvc := service.NewInvitationService()
-	invitations, err := invitationSvc.Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: s.org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Require().Len(invitations, 1)
-	err = invitationSvc.Accept(invitations[0].ID, s.users[1].GetID())
+	err = service.NewInvitationService().Accept(invitations[0].ID, s.users[1].GetID())
 	s.Require().NoError(err)
 
 	err = service.NewGroupService().AddMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 
-	// Test removing the member from the group
 	err = service.NewGroupService().RemoveMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 	memberList, err := service.NewUserService().List(service.UserListOptions{
@@ -267,8 +269,24 @@ func (s *GroupServiceSuite) TestRemoveMember() {
 	s.Require().NoError(err)
 	s.Len(memberList.Data, 1)
 	s.Equal(memberList.Data[0].ID, s.users[0].GetID())
+}
 
-	// Test removing the last owner of the group
+func (s *GroupServiceSuite) TestRemoveMember_LastOwnerOfGroup() {
+	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+		Name:           "group",
+		OrganizationID: s.org.ID,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Require().NoError(err)
+
+	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+		OrganizationID: s.org.ID,
+		Emails:         []string{s.users[1].GetEmail()},
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	err = service.NewInvitationService().Accept(invitations[0].ID, s.users[1].GetID())
+	s.Require().NoError(err)
+
 	err = service.NewGroupService().RemoveMember(group.ID, s.users[0].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(
@@ -277,8 +295,16 @@ func (s *GroupServiceSuite) TestRemoveMember() {
 		).Error(),
 		err.Error(),
 	)
+}
 
-	// Test removing a non-existent member
+func (s *GroupServiceSuite) TestRemoveMember_NonMemberOfOrganization() {
+	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+		Name:           "group",
+		OrganizationID: s.org.ID,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Require().NoError(err)
+
 	err = service.NewGroupService().RemoveMember(group.ID, s.users[2].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewUserNotMemberOfOrganizationError().Error(), err.Error())

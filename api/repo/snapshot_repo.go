@@ -47,13 +47,12 @@ func (*snapshotEntity) TableName() string {
 }
 
 func (s *snapshotEntity) BeforeCreate(*gorm.DB) (err error) {
-	s.CreateTime = helper.NewTimestamp()
+	s.CreateTime = helper.NewTimeString()
 	return nil
 }
 
 func (s *snapshotEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := helper.NewTimestamp()
-	s.UpdateTime = &timeNow
+	s.UpdateTime = helper.ToPtr(helper.NewTimeString())
 	return nil
 }
 
@@ -381,7 +380,7 @@ func (*SnapshotFileEntity) TableName() string {
 }
 
 func (s *SnapshotFileEntity) BeforeCreate(*gorm.DB) (err error) {
-	s.CreateTime = helper.NewTimestamp()
+	s.CreateTime = helper.NewTimeString()
 	return nil
 }
 
@@ -530,7 +529,7 @@ func (repo *SnapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 }
 
 func (repo *SnapshotRepo) MapWithFile(id string, fileID string) error {
-	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id, create_time) VALUES (?, ?, ?)", id, fileID, helper.NewTimestamp()); db.Error != nil {
+	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id, create_time) VALUES (?, ?, ?)", id, fileID, helper.NewTimeString()); db.Error != nil {
 		return db.Error
 	}
 	return nil
@@ -724,7 +723,7 @@ func (repo *SnapshotRepo) Attach(sourceFileID string, targetFileID string) error
 		Exec(`INSERT INTO snapshot_file (snapshot_id, file_id, create_time) SELECT s.id, ?, ?
               FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id
               WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1`,
-			targetFileID, helper.NewTimestamp(), sourceFileID); db.Error != nil {
+			targetFileID, helper.NewTimeString(), sourceFileID); db.Error != nil {
 		return db.Error
 	}
 	return nil

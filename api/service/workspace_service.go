@@ -14,7 +14,6 @@ import (
 	"errors"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -455,8 +454,8 @@ func (svc *WorkspaceService) sort(data []model.Workspace, sortBy string, sortOrd
 		return data
 	} else if sortBy == WorkspaceSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
-			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
-			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			a := helper.StringToTime(data[i].GetCreateTime())
+			b := helper.StringToTime(data[j].GetCreateTime())
 			if sortOrder == WorkspaceSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
@@ -467,8 +466,8 @@ func (svc *WorkspaceService) sort(data []model.Workspace, sortBy string, sortOrd
 	} else if sortBy == WorkspaceSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
-				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
-				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				a := helper.StringToTime(*data[i].GetUpdateTime())
+				b := helper.StringToTime(*data[j].GetUpdateTime())
 				if sortOrder == WorkspaceSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {

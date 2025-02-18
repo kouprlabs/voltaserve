@@ -44,15 +44,14 @@ func (s *PostgresSuite) TestInsertAndFind() {
 	})
 	s.Require().NoError(err)
 
-	fileRepo := repo.NewFileRepo()
-	file, err := fileRepo.Insert(repo.FileInsertOptions{
+	file, err := repo.NewFileRepo().Insert(repo.FileInsertOptions{
 		Name:        "file",
 		Type:        model.FileTypeFile,
 		WorkspaceID: workspace.GetID(),
 	})
 	s.Require().NoError(err)
 
-	foundFile, err := fileRepo.Find(file.GetID())
+	foundFile, err := repo.NewFileRepo().Find(file.GetID())
 	s.Require().NoError(err)
 	s.Equal(file.GetID(), foundFile.GetID())
 }
