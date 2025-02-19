@@ -163,96 +163,105 @@ func (s *TaskServiceSuite) TestFind_UnauthorizedUser() {
 }
 
 func (s *TaskServiceSuite) TestList() {
-	_, err := service.NewTaskService().Create(service.TaskCreateOptions{
-		Name:   "task A",
-		UserID: s.users[0].GetID(),
-		Status: model.TaskStatusWaiting,
-	})
-	s.Require().NoError(err)
-	_, err = service.NewTaskService().Create(service.TaskCreateOptions{
-		Name:   "task B",
-		UserID: s.users[0].GetID(),
-		Status: model.TaskStatusRunning,
-	})
-	s.Require().NoError(err)
+	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
+	for i, name := range []string{"task A", "task B", "task C"} {
+		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+			Name:   name,
+			UserID: s.users[0].GetID(),
+			Status: statuses[i],
+		})
+		s.Require().NoError(err)
+	}
 
 	list, err := service.NewTaskService().List(service.TaskListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Len(list.Data, 2)
-	s.Equal(uint64(2), list.TotalElements)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(3), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("task A", list.Data[0].Name)
+	s.Equal("task B", list.Data[1].Name)
+	s.Equal("task C", list.Data[2].Name)
 }
 
 func (s *TaskServiceSuite) TestList_Paginate() {
-	_, err := service.NewTaskService().Create(service.TaskCreateOptions{
-		Name:   "task A",
-		UserID: s.users[0].GetID(),
-		Status: model.TaskStatusWaiting,
-	})
-	s.Require().NoError(err)
-	_, err = service.NewTaskService().Create(service.TaskCreateOptions{
-		Name:   "task B",
-		UserID: s.users[0].GetID(),
-		Status: model.TaskStatusRunning,
-	})
-	s.Require().NoError(err)
+	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
+	for i, name := range []string{"task A", "task B", "task C"} {
+		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+			Name:   name,
+			UserID: s.users[0].GetID(),
+			Status: statuses[i],
+		})
+		s.Require().NoError(err)
+	}
 
 	list, err := service.NewTaskService().List(service.TaskListOptions{
 		Page: 1,
-		Size: 1,
+		Size: 2,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Len(list.Data, 1)
-	s.Equal(uint64(2), list.TotalElements)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal("task A", list.Data[0].Name)
+	s.Equal("task B", list.Data[1].Name)
+
+	list, err = service.NewTaskService().List(service.TaskListOptions{
+		Page: 2,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(2), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal("task C", list.Data[0].Name)
 }
 
-func (s *TaskServiceSuite) TestList_SortByName() {
-	_, err := service.NewTaskService().Create(service.TaskCreateOptions{
-		Name:   "task A",
-		UserID: s.users[0].GetID(),
-		Status: model.TaskStatusWaiting,
-	})
-	s.Require().NoError(err)
-	_, err = service.NewTaskService().Create(service.TaskCreateOptions{
-		Name:   "task B",
-		UserID: s.users[0].GetID(),
-		Status: model.TaskStatusRunning,
-	})
-	s.Require().NoError(err)
+func (s *TaskServiceSuite) TestList_SortByStatusDescending() {
+	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
+	for i, name := range []string{"task A", "task B", "task C"} {
+		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+			Name:   name,
+			UserID: s.users[0].GetID(),
+			Status: statuses[i],
+		})
+		s.Require().NoError(err)
+	}
 
 	list, err := service.NewTaskService().List(service.TaskListOptions{
 		Page:      1,
-		Size:      10,
-		SortBy:    service.TaskSortByName,
+		Size:      3,
+		SortBy:    service.TaskSortByStatus,
 		SortOrder: service.TaskSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal("task B", list.Data[0].Name)
 	s.Equal("task A", list.Data[1].Name)
+	s.Equal("task C", list.Data[2].Name)
 }
 
 func (s *TaskServiceSuite) TestProbe() {
-	_, err := service.NewTaskService().Create(service.TaskCreateOptions{
-		Name:   "task A",
-		UserID: s.users[0].GetID(),
-		Status: model.TaskStatusWaiting,
-	})
-	s.Require().NoError(err)
-	_, err = service.NewTaskService().Create(service.TaskCreateOptions{
-		Name:   "task B",
-		UserID: s.users[0].GetID(),
-		Status: model.TaskStatusRunning,
-	})
-	s.Require().NoError(err)
+	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
+	for i, name := range []string{"task A", "task B", "task C"} {
+		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+			Name:   name,
+			UserID: s.users[0].GetID(),
+			Status: statuses[i],
+		})
+		s.Require().NoError(err)
+	}
 
 	probe, err := service.NewTaskService().Probe(service.TaskListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Equal(uint64(2), probe.TotalElements)
+	s.Equal(uint64(3), probe.TotalElements)
 	s.Equal(uint64(1), probe.TotalPages)
 }
 
