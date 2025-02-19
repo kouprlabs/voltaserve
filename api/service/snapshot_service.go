@@ -184,46 +184,54 @@ func (svc *SnapshotService) Activate(id string, userID string) (*File, error) {
 	return res, nil
 }
 
-func (svc *SnapshotService) Detach(id string, userID string) error {
+func (svc *SnapshotService) Detach(id string, userID string) (*File, error) {
 	fileID, err := svc.snapshotRepo.FindFileID(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
-		return err
+		return nil, err
 	}
 	snapshot, err := svc.snapshotCache.Get(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err := svc.snapshotRepo.Detach(id, file.GetID()); err != nil {
-		return err
+		return nil, err
 	}
 	associationCount, err := svc.snapshotRepo.CountAssociations(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if associationCount == 0 {
 		if snapshot.GetTaskID() != nil {
 			if err := svc.taskRepo.Delete(*snapshot.GetTaskID()); err != nil {
-				return err
+				return nil, err
 			}
 			if err := svc.taskCache.Delete(*snapshot.GetTaskID()); err != nil {
-				return err
+				return nil, err
 			}
 		}
 		if err := svc.snapshotRepo.Delete(id); err != nil {
-			return err
+			return nil, err
 		}
 		if err := svc.snapshotCache.Delete(id); err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	file, err = svc.fileCache.Refresh(file.GetID())
+	if err != nil {
+		return nil, err
+	}
+	res, err := svc.fileMapper.mapOne(file, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapshot, error) {

@@ -2634,15 +2634,14 @@ func (svc *fileFilterService) filterWithQuery(data []model.File, opts FileQuery,
 		}).
 		Filter(func(v interface{}) bool {
 			if opts.CreateTimeBefore != nil {
-				return helper.StringToTime(v.(model.File).GetCreateTime()).UnixMilli() >= *opts.CreateTimeAfter
+				return helper.StringToTimestamp(v.(model.File).GetCreateTime()) >= *opts.CreateTimeAfter
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
 			if opts.CreateTimeBefore != nil {
-				file := v.(model.File)
-				return helper.StringToTime(file.GetCreateTime()).UnixMilli() <= *opts.CreateTimeBefore
+				return helper.StringToTimestamp(v.(model.File).GetCreateTime()) <= *opts.CreateTimeBefore
 			} else {
 				return true
 			}
@@ -2650,7 +2649,7 @@ func (svc *fileFilterService) filterWithQuery(data []model.File, opts FileQuery,
 		Filter(func(v interface{}) bool {
 			if opts.UpdateTimeAfter != nil {
 				file := v.(model.File)
-				return file.GetUpdateTime() != nil && helper.StringToTime(*file.GetUpdateTime()).UnixMilli() >= *opts.UpdateTimeAfter
+				return file.GetUpdateTime() != nil && helper.StringToTimestamp(*file.GetUpdateTime()) >= *opts.UpdateTimeAfter
 			} else {
 				return true
 			}
@@ -2658,7 +2657,7 @@ func (svc *fileFilterService) filterWithQuery(data []model.File, opts FileQuery,
 		Filter(func(v interface{}) bool {
 			if opts.UpdateTimeBefore != nil {
 				file := v.(model.File)
-				return file.GetUpdateTime() != nil && helper.StringToTime(*file.GetUpdateTime()).UnixMilli() <= *opts.UpdateTimeBefore
+				return file.GetUpdateTime() != nil && helper.StringToTimestamp(*file.GetUpdateTime()) <= *opts.UpdateTimeBefore
 			} else {
 				return true
 			}
@@ -2738,12 +2737,12 @@ func (svc *fileSortService) sortBySize(data []model.File, sortOrder string, user
 
 func (svc *fileSortService) sortByDateCreated(data []model.File, sortOrder string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
-		a := helper.StringToTime(data[i].GetCreateTime())
-		b := helper.StringToTime(data[j].GetCreateTime())
+		a := helper.StringToTimestamp(data[i].GetCreateTime())
+		b := helper.StringToTimestamp(data[j].GetCreateTime())
 		if sortOrder == FileSortOrderDesc {
-			return a.UnixMilli() > b.UnixMilli()
+			return a > b
 		} else {
-			return a.UnixMilli() < b.UnixMilli()
+			return a < b
 		}
 	})
 	return data
@@ -2752,12 +2751,12 @@ func (svc *fileSortService) sortByDateCreated(data []model.File, sortOrder strin
 func (svc *fileSortService) sortByDateModified(data []model.File, sortOrder string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
 		if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
-			a := helper.StringToTime(*data[i].GetUpdateTime())
-			b := helper.StringToTime(*data[j].GetUpdateTime())
+			a := helper.StringToTimestamp(*data[i].GetUpdateTime())
+			b := helper.StringToTimestamp(*data[j].GetUpdateTime())
 			if sortOrder == FileSortOrderDesc {
-				return a.UnixMilli() > b.UnixMilli()
+				return a > b
 			} else {
-				return a.UnixMilli() < b.UnixMilli()
+				return a < b
 			}
 		} else {
 			return false

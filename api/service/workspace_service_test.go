@@ -31,7 +31,6 @@ const (
 
 type WorkspaceServiceSuite struct {
 	suite.Suite
-	org   *service.Organization
 	users []model.User
 }
 
@@ -46,17 +45,14 @@ func (s *WorkspaceServiceSuite) SetupTest() {
 		s.Fail(err.Error())
 		return
 	}
-	s.org, err = test.CreateOrganization(s.users[0].GetID())
-	if err != nil {
-		s.Fail(err.Error())
-		return
-	}
 }
 
 func (s *WorkspaceServiceSuite) TestCreate() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -75,9 +71,11 @@ func (s *WorkspaceServiceSuite) TestCreate_NonExistentOrganization() {
 }
 
 func (s *WorkspaceServiceSuite) TestFind() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -94,9 +92,11 @@ func (s *WorkspaceServiceSuite) TestFind_NonExistentWorkspace() {
 }
 
 func (s *WorkspaceServiceSuite) TestFind_UnauthorizedUser() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -107,10 +107,12 @@ func (s *WorkspaceServiceSuite) TestFind_UnauthorizedUser() {
 }
 
 func (s *WorkspaceServiceSuite) TestList() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 			Name:            name,
-			OrganizationID:  s.org.ID,
+			OrganizationID:  org.ID,
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
@@ -132,10 +134,12 @@ func (s *WorkspaceServiceSuite) TestList() {
 }
 
 func (s *WorkspaceServiceSuite) TestList_Paginate() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 			Name:            name,
-			OrganizationID:  s.org.ID,
+			OrganizationID:  org.ID,
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
@@ -167,10 +171,12 @@ func (s *WorkspaceServiceSuite) TestList_Paginate() {
 }
 
 func (s *WorkspaceServiceSuite) TestList_SortByNameDescending() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 			Name:            name,
-			OrganizationID:  s.org.ID,
+			OrganizationID:  org.ID,
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
@@ -189,10 +195,12 @@ func (s *WorkspaceServiceSuite) TestList_SortByNameDescending() {
 }
 
 func (s *WorkspaceServiceSuite) TestList_Query() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 			Name:            name,
-			OrganizationID:  s.org.ID,
+			OrganizationID:  org.ID,
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
@@ -212,10 +220,12 @@ func (s *WorkspaceServiceSuite) TestList_Query() {
 }
 
 func (s *WorkspaceServiceSuite) TestProbe() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 			Name:            name,
-			OrganizationID:  s.org.ID,
+			OrganizationID:  org.ID,
 			StorageCapacity: 1 * GB,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
@@ -231,9 +241,11 @@ func (s *WorkspaceServiceSuite) TestProbe() {
 }
 
 func (s *WorkspaceServiceSuite) TestPatchName() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -245,9 +257,11 @@ func (s *WorkspaceServiceSuite) TestPatchName() {
 }
 
 func (s *WorkspaceServiceSuite) TestPatchName_UnauthorisedUser() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -264,9 +278,11 @@ func (s *WorkspaceServiceSuite) TestPatchName_NonExistentWorkspace() {
 }
 
 func (s *WorkspaceServiceSuite) TestPatchStorageCapacity() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -277,9 +293,11 @@ func (s *WorkspaceServiceSuite) TestPatchStorageCapacity() {
 }
 
 func (s *WorkspaceServiceSuite) TestPatchStorageCapacity_UnauthorisedUser() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -296,9 +314,11 @@ func (s *WorkspaceServiceSuite) TestPatchStorageCapacity_NonExistentWorkspace() 
 }
 
 func (s *WorkspaceServiceSuite) TestDelete() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -308,9 +328,11 @@ func (s *WorkspaceServiceSuite) TestDelete() {
 }
 
 func (s *WorkspaceServiceSuite) TestDelete_NonExistentWorkspace() {
-	_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -321,9 +343,11 @@ func (s *WorkspaceServiceSuite) TestDelete_NonExistentWorkspace() {
 }
 
 func (s *WorkspaceServiceSuite) TestDelete_UnauthorizedUser() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -334,9 +358,11 @@ func (s *WorkspaceServiceSuite) TestDelete_UnauthorizedUser() {
 }
 
 func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_EnoughSpace() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -347,9 +373,11 @@ func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_EnoughSpace() {
 }
 
 func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_NotEnoughSpace() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
-		OrganizationID:  s.org.ID,
+		OrganizationID:  org.ID,
 		StorageCapacity: 1 * GB,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
