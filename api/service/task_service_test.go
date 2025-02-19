@@ -245,6 +245,30 @@ func (s *TaskServiceSuite) TestList_SortByStatusDescending() {
 	s.Equal("task C", list.Data[2].Name)
 }
 
+func (s *TaskServiceSuite) TestList_Query() {
+	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
+	for i, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
+		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+			Name:   name,
+			UserID: s.users[0].GetID(),
+			Status: statuses[i],
+		})
+		s.Require().NoError(err)
+	}
+
+	list, err := service.NewTaskService().List(service.TaskListOptions{
+		Query: "world",
+		Page:  1,
+		Size:  10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(1), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("hello world", list.Data[0].Name)
+}
+
 func (s *TaskServiceSuite) TestProbe() {
 	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
 	for i, name := range []string{"task A", "task B", "task C"} {

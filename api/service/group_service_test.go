@@ -164,6 +164,28 @@ func (s *GroupServiceSuite) TestList_SortByNameDescending() {
 	s.Equal("group A", list.Data[2].Name)
 }
 
+func (s *GroupServiceSuite) TestList_Query() {
+	for _, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
+		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
+			Name:           name,
+			OrganizationID: s.org.ID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
+	list, err := service.NewGroupService().List(service.GroupListOptions{
+		Query: "world",
+		Page:  1,
+		Size:  10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(1), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("hello world", list.Data[0].Name)
+}
+
 func (s *GroupServiceSuite) TestProbe() {
 	for _, name := range []string{"group A", "group B", "group C"} {
 		_, err := service.NewGroupService().Create(service.GroupCreateOptions{

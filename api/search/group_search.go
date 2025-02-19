@@ -49,11 +49,11 @@ func (s *GroupSearch) Index(groups []model.Group) error {
 	if len(groups) == 0 {
 		return nil
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, g := range groups {
-		res = append(res, s.mapEntity(g))
+		models = append(models, s.mapEntity(g))
 	}
-	if err := s.search.Index(s.index, res); err != nil {
+	if err := s.search.Index(s.index, models); err != nil {
 		return err
 	}
 	return nil
@@ -63,11 +63,11 @@ func (s *GroupSearch) Update(groups []model.Group) error {
 	if len(groups) == 0 {
 		return nil
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, g := range groups {
-		res = append(res, s.mapEntity(g))
+		models = append(models, s.mapEntity(g))
 	}
-	if err := s.search.Update(s.index, res); err != nil {
+	if err := s.search.Update(s.index, models); err != nil {
 		return err
 	}
 	return nil

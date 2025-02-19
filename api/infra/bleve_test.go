@@ -61,21 +61,21 @@ func (s *BleveSuite) TestFilter() {
 			WorkspaceID: "workspace_a",
 			Name:        "lorem_ipsum.txt",
 			Type:        model.FileTypeFile,
-			Text:        helper.ToPtr("exercitation ullamco laboris"),
+			Text:        helper.ToPtr("red apple"),
 		},
 		{
 			ID:          "file_b",
 			WorkspaceID: "workspace_b",
 			Name:        "lorem_ipsum.txt",
 			Type:        model.FileTypeFile,
-			Text:        helper.ToPtr("exercitation ullamco laboris"),
+			Text:        helper.ToPtr("pink strawberry"),
 		},
 		{
 			ID:          "file_c",
 			WorkspaceID: "workspace_c",
 			Name:        "dolor_sit_amet.pdf",
 			Type:        model.FileTypeFile,
-			Text:        helper.ToPtr("sed et class dis libero"),
+			Text:        helper.ToPtr("yellow pineapple"),
 		},
 	}
 	for _, v := range values {
@@ -83,7 +83,7 @@ func (s *BleveSuite) TestFilter() {
 		s.Require().NoError(err)
 	}
 
-	hits, err := search.NewFileSearch().Query("exercitation", infra.SearchQueryOptions{
+	hits, err := search.NewFileSearch().Query("strawberry", infra.SearchQueryOptions{
 		Limit:  10,
 		Filter: fmt.Sprintf("workspaceId=\"workspace_b\" AND type=\"%s\"", model.FileTypeFile),
 	})

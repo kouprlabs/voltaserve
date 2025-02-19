@@ -247,7 +247,11 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	if err := svc.orgRepo.RevokeUserPermission(id, memberID); err != nil {
 		return err
 	}
-	if _, err := svc.orgCache.Refresh(org.GetID()); err != nil {
+	org, err = svc.orgRepo.Find(org.GetID())
+	if err != nil {
+		return err
+	}
+	if err := svc.sync(org); err != nil {
 		return err
 	}
 	return nil
@@ -266,38 +270,61 @@ func (svc *OrganizationService) IsValidSortOrder(value string) bool {
 
 func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
 	var res []model.Organization
+	var err error
 	if opts.Query == "" {
-		ids, err := svc.orgRepo.FindIDs()
-		if err != nil {
-			return nil, err
-		}
-		res, err = svc.authorizeIDs(ids, userID)
+		res, err = svc.load(userID)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		hits, err := svc.orgSearch.Query(opts.Query, infra.SearchQueryOptions{})
+		res, err = svc.search(opts, userID)
 		if err != nil {
 			return nil, err
 		}
-		var orgs []model.Organization
-		for _, hit := range hits {
-			org, err := svc.orgCache.Get(hit.GetID())
-			if err != nil {
-				var e *errorpkg.ErrorResponse
-				// We don't want to break if the search engine contains organizations that shouldn't be there
-				if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
-					continue
-				} else {
-					return nil, err
-				}
+	}
+	return res, nil
+}
+
+func (svc *OrganizationService) load(userID string) ([]model.Organization, error) {
+	var res []model.Organization
+	ids, err := svc.orgRepo.FindIDs()
+	if err != nil {
+		return nil, err
+	}
+	res, err = svc.authorizeIDs(ids, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *OrganizationService) search(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
+	var res []model.Organization
+	count, err := svc.orgRepo.Count()
+	if err != nil {
+		return nil, err
+	}
+	hits, err := svc.orgSearch.Query(opts.Query, infra.SearchQueryOptions{Limit: count})
+	if err != nil {
+		return nil, err
+	}
+	var orgs []model.Organization
+	for _, hit := range hits {
+		org, err := svc.orgCache.Get(hit.GetID())
+		if err != nil {
+			var e *errorpkg.ErrorResponse
+			// We don't want to break if the search engine contains organizations that shouldn't be there
+			if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
 			}
-			orgs = append(orgs, org)
 		}
-		res, err = svc.authorize(orgs, userID)
-		if err != nil {
-			return nil, err
-		}
+		orgs = append(orgs, org)
+	}
+	res, err = svc.authorize(orgs, userID)
+	if err != nil {
+		return nil, err
 	}
 	return res, nil
 }

@@ -31,6 +31,7 @@ type InvitationService struct {
 	invitationMapper *invitationMapper
 	orgCache         *cache.OrganizationCache
 	orgGuard         *guard.OrganizationGuard
+	orgSvc           *OrganizationService
 	userRepo         *repo.UserRepo
 	mailTmpl         infra.MailTemplate
 	config           *config.Config
@@ -41,6 +42,7 @@ func NewInvitationService() *InvitationService {
 		orgRepo:          repo.NewOrganizationRepo(),
 		orgCache:         cache.NewOrganizationCache(),
 		orgGuard:         guard.NewOrganizationGuard(),
+		orgSvc:           NewOrganizationService(),
 		invitationRepo:   repo.NewInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
 		userRepo:         repo.NewUserRepo(),
@@ -264,7 +266,11 @@ func (svc *InvitationService) Accept(id string, userID string) error {
 	if err := svc.orgRepo.GrantUserPermission(invitation.GetOrganizationID(), userID, model.PermissionViewer); err != nil {
 		return err
 	}
-	if _, err := svc.orgCache.Refresh(invitation.GetOrganizationID()); err != nil {
+	org, err = svc.orgRepo.Find(org.GetID())
+	if err != nil {
+		return err
+	}
+	if err := svc.orgSvc.sync(org); err != nil {
 		return err
 	}
 	return nil

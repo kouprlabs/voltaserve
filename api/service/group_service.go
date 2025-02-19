@@ -364,7 +364,11 @@ func (svc *GroupService) load(opts GroupListOptions, userID string) ([]model.Gro
 
 func (svc *GroupService) search(opts GroupListOptions, userID string) ([]model.Group, error) {
 	var res []model.Group
-	hits, err := svc.groupSearch.Query(opts.Query, infra.SearchQueryOptions{})
+	count, err := svc.groupRepo.Count()
+	if err != nil {
+		return nil, err
+	}
+	hits, err := svc.groupSearch.Query(opts.Query, infra.SearchQueryOptions{Limit: count})
 	if err != nil {
 		return nil, err
 	}

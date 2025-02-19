@@ -248,44 +248,6 @@ func (svc *TaskService) IsValidSortOrder(value string) bool {
 	return value == "" || value == TaskSortOrderAsc || value == TaskSortOrderDesc
 }
 
-func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Task, error) {
-	var res []model.Task
-	if opts.Query == "" {
-		ids, err := svc.taskRepo.FindIDs(userID)
-		if err != nil {
-			return nil, err
-		}
-		res, err = svc.authorizeIDs(ids, userID)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		hits, err := svc.taskSearch.Query(opts.Query, infra.SearchQueryOptions{})
-		if err != nil {
-			return nil, err
-		}
-		var tasks []model.Task
-		for _, hit := range hits {
-			task, err := svc.taskCache.Get(hit.GetID())
-			if err != nil {
-				var e *errorpkg.ErrorResponse
-				// We don't want to break if the search engine contains tasks that shouldn't be there
-				if errors.As(err, &e) && e.Code == errorpkg.NewTaskNotFoundError(nil).Code {
-					continue
-				} else {
-					return nil, err
-				}
-			}
-			tasks = append(tasks, task)
-		}
-		res, err = svc.authorize(tasks, userID)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
 func (svc *TaskService) Count(userID string) (*int64, error) {
 	var res int64
 	var err error
@@ -341,6 +303,67 @@ func (svc *TaskService) DismissAll(userID string) (*TaskDismissAllResult, error)
 
 func (svc *TaskService) Delete(id string) error {
 	return svc.deleteAndSync(id)
+}
+
+func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Task, error) {
+	var res []model.Task
+	var err error
+	if opts.Query == "" {
+		res, err = svc.load(userID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		res, err = svc.search(opts, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (svc *TaskService) load(userID string) ([]model.Task, error) {
+	var res []model.Task
+	ids, err := svc.taskRepo.FindIDs(userID)
+	if err != nil {
+		return nil, err
+	}
+	res, err = svc.authorizeIDs(ids, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *TaskService) search(opts TaskListOptions, userID string) ([]model.Task, error) {
+	var res []model.Task
+	count, err := svc.taskRepo.Count()
+	if err != nil {
+		return nil, err
+	}
+	hits, err := svc.taskSearch.Query(opts.Query, infra.SearchQueryOptions{Limit: count})
+	if err != nil {
+		return nil, err
+	}
+	var tasks []model.Task
+	for _, hit := range hits {
+		task, err := svc.taskCache.Get(hit.GetID())
+		if err != nil {
+			var e *errorpkg.ErrorResponse
+			// We don't want to break if the search engine contains tasks that shouldn't be there
+			if errors.As(err, &e) && e.Code == errorpkg.NewTaskNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+		tasks = append(tasks, task)
+	}
+	res, err = svc.authorize(tasks, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (svc *TaskService) authorize(data []model.Task, userID string) ([]model.Task, error) {

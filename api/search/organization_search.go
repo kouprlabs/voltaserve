@@ -48,11 +48,11 @@ func (s *OrganizationSearch) Index(orgs []model.Organization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, o := range orgs {
-		res = append(res, s.mapEntity(o))
+		models = append(models, s.mapEntity(o))
 	}
-	if err := s.search.Index(s.index, res); err != nil {
+	if err := s.search.Index(s.index, models); err != nil {
 		return err
 	}
 	return nil
@@ -62,11 +62,11 @@ func (s *OrganizationSearch) Update(orgs []model.Organization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, o := range orgs {
-		res = append(res, s.mapEntity(o))
+		models = append(models, s.mapEntity(o))
 	}
-	if err := s.search.Update(s.index, res); err != nil {
+	if err := s.search.Update(s.index, models); err != nil {
 		return err
 	}
 	return nil
