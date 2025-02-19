@@ -57,6 +57,17 @@ func CreateOrganization(userID string) (*service.Organization, error) {
 	return org, nil
 }
 
+func CreateGroup(orgID string, userID string) (*service.Group, error) {
+	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+		Name:           "group",
+		OrganizationID: orgID,
+	}, userID)
+	if err != nil {
+		return nil, err
+	}
+	return group, nil
+}
+
 func CreateWorkspace(orgID string, userID string) (*service.Workspace, error) {
 	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
