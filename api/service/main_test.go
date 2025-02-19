@@ -19,25 +19,15 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	if err := os.Setenv("TEST", "true"); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := os.Setenv("LIMITS_FILE_PROCESSING_MB", "video:10000,*:1000"); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := test.SetupRedis(); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-	postgres, err := test.SetupPostgres(25432)
-	if err != nil {
+	setup := test.NewSetup(m)
+	if err := setup.Up(test.SetupOptions{
+		Postgres: test.PostgresOptions{Port: 25432},
+	}); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 	code := m.Run()
-	if err := postgres.Stop(); err != nil {
+	if err := setup.Down(); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}

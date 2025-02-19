@@ -11,51 +11,48 @@
 package test
 
 import (
-	"fmt"
-	"os"
-	"path"
+	"testing"
 
-	"github.com/alicebob/miniredis/v2"
-	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-
-	"github.com/kouprlabs/voltaserve/api/helper"
 )
 
-func SetupPostgres(port uint32) (*embeddedpostgres.EmbeddedPostgres, error) {
-	if err := os.Setenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB", "100000"); err != nil {
-		return nil, err
-	}
-	url := fmt.Sprintf("postgres://postgres:postgres@localhost:%d/postgres?sslmode=disable", port)
-	if err := os.Setenv("POSTGRES_URL", url); err != nil {
-		return nil, err
-	}
-	postgres := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().
-		Port(port).
-		Logger(nil).
-		RuntimePath(path.Join(os.TempDir(), helper.NewID())),
-	)
-	if err := postgres.Start(); err != nil {
-		return nil, err
-	}
-	m, err := migrate.New("file://fixtures/migrations", url)
-	if err != nil {
-		return nil, err
-	}
-	if err := m.Up(); err != nil {
-		return nil, err
-	}
-	return postgres, nil
+type Setup struct {
+	env      *Env
+	redis    *Redis
+	postgres *Postgres
+	m        *testing.M
 }
 
-func SetupRedis() error {
-	s, err := miniredis.Run()
+func NewSetup(m *testing.M) *Setup {
+	return &Setup{
+		m:        m,
+		env:      NewEnv(),
+		redis:    NewRedis(),
+		postgres: NewPostgres(),
+	}
+}
+
+type SetupOptions struct {
+	Postgres PostgresOptions
+}
+
+func (s *Setup) Up(opts SetupOptions) error {
+	if err := s.env.Apply(); err != nil {
+		return err
+	}
+	if err := s.redis.Start(); err != nil {
+		return err
+	}
+	err := s.postgres.Start(opts.Postgres)
 	if err != nil {
 		return err
 	}
-	if err := os.Setenv("REDIS_ADDRESS", s.Addr()); err != nil {
+	return nil
+}
+
+func (s *Setup) Down() error {
+	if err := s.postgres.Stop(); err != nil {
 		return err
 	}
 	return nil
