@@ -769,7 +769,10 @@ func (svc *fileList) search(query *FileQuery, workspace model.Workspace) ([]mode
 	if query.Type != nil {
 		filter += fmt.Sprintf(" AND type=\"%s\"", *query.Type)
 	}
-	hits, err := svc.fileSearch.Query(*query.Text, infra.SearchQueryOptions{Limit: count, Filter: filter})
+	hits, err := svc.fileSearch.Query(*query.Text, infra.SearchQueryOptions{
+		Limit:  count,
+		Filter: filter,
+	})
 	if err != nil {
 		return nil, err
 	}
