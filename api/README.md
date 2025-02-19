@@ -7,6 +7,7 @@ Prerequisites:
 - [golangci-lint](https://github.com/golangci/golangci-lint/releases/tag/v1.61.0) (v1.61.0)
 - [gci](https://github.com/daixiang0/gci)
 - [gofumpt](https://github.com/mvdan/gofumpt)
+- [gotestsum](https://github.com/gotestyourself/gotestsum)
 - [swag](https://github.com/swaggo/swag)
 
 Run for development:
@@ -38,6 +39,12 @@ gofmt -s -w . && \
 goimports -w . && \
 golangci-lint run --fix && \
 swag fmt
+```
+
+Run tests:
+
+```shell
+gotestsum --format testdox --packages="./..."
 ```
 
 Build Docker image:

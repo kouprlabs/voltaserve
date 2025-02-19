@@ -26,7 +26,6 @@ import (
 
 type GroupServiceSuite struct {
 	suite.Suite
-	org   *service.Organization
 	users []model.User
 }
 
@@ -41,21 +40,18 @@ func (s *GroupServiceSuite) SetupTest() {
 		s.Fail(err.Error())
 		return
 	}
-	s.org, err = test.CreateOrganization(s.users[0].GetID())
-	if err != nil {
-		s.Fail(err.Error())
-		return
-	}
 }
 
 func (s *GroupServiceSuite) TestCreate() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal("group", group.Name)
-	s.Equal(s.org.ID, group.Organization.ID)
+	s.Equal(org.ID, group.Organization.ID)
 }
 
 func (s *GroupServiceSuite) TestCreate_NonExistentOrganization() {
@@ -68,9 +64,11 @@ func (s *GroupServiceSuite) TestCreate_NonExistentOrganization() {
 }
 
 func (s *GroupServiceSuite) TestFind() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -86,10 +84,12 @@ func (s *GroupServiceSuite) TestFind_NonExistentGroup() {
 }
 
 func (s *GroupServiceSuite) TestList() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"group A", "group B", "group C"} {
 		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
 			Name:           name,
-			OrganizationID: s.org.ID,
+			OrganizationID: org.ID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 		time.Sleep(1 * time.Second)
@@ -110,10 +110,12 @@ func (s *GroupServiceSuite) TestList() {
 }
 
 func (s *GroupServiceSuite) TestList_Paginate() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"group A", "group B", "group C"} {
 		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
 			Name:           name,
-			OrganizationID: s.org.ID,
+			OrganizationID: org.ID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 		time.Sleep(1 * time.Second)
@@ -144,10 +146,12 @@ func (s *GroupServiceSuite) TestList_Paginate() {
 }
 
 func (s *GroupServiceSuite) TestList_SortByNameDescending() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"group A", "group B", "group C"} {
 		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
 			Name:           name,
-			OrganizationID: s.org.ID,
+			OrganizationID: org.ID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
@@ -165,10 +169,12 @@ func (s *GroupServiceSuite) TestList_SortByNameDescending() {
 }
 
 func (s *GroupServiceSuite) TestList_Query() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
 		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
 			Name:           name,
-			OrganizationID: s.org.ID,
+			OrganizationID: org.ID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
@@ -187,10 +193,12 @@ func (s *GroupServiceSuite) TestList_Query() {
 }
 
 func (s *GroupServiceSuite) TestProbe() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"group A", "group B", "group C"} {
 		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
 			Name:           name,
-			OrganizationID: s.org.ID,
+			OrganizationID: org.ID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
@@ -205,9 +213,11 @@ func (s *GroupServiceSuite) TestProbe() {
 }
 
 func (s *GroupServiceSuite) TestPatchName() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -223,9 +233,11 @@ func (s *GroupServiceSuite) TestPatchName_NonExistentGroup() {
 }
 
 func (s *GroupServiceSuite) TestDelete() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -244,14 +256,16 @@ func (s *GroupServiceSuite) TestDelete_NonExistentGroup() {
 }
 
 func (s *GroupServiceSuite) TestAddMember() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -264,9 +278,11 @@ func (s *GroupServiceSuite) TestAddMember() {
 }
 
 func (s *GroupServiceSuite) TestAddMember_NonMemberOfOrganization() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -276,15 +292,17 @@ func (s *GroupServiceSuite) TestAddMember_NonMemberOfOrganization() {
 }
 
 func (s *GroupServiceSuite) TestRemoveMember() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NoError(err)
 
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -307,15 +325,17 @@ func (s *GroupServiceSuite) TestRemoveMember() {
 }
 
 func (s *GroupServiceSuite) TestRemoveMember_LastOwnerOfGroup() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NoError(err)
 
 	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -333,9 +353,11 @@ func (s *GroupServiceSuite) TestRemoveMember_LastOwnerOfGroup() {
 }
 
 func (s *GroupServiceSuite) TestRemoveMember_NonMemberOfOrganization() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.org.ID,
+		OrganizationID: org.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().NoError(err)

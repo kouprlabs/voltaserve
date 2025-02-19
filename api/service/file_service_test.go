@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 
@@ -28,8 +29,7 @@ import (
 
 type FileServiceTestSuite struct {
 	suite.Suite
-	workspace *service.Workspace
-	users     []model.User
+	users []model.User
 }
 
 func (s *FileServiceTestSuite) SetupTest() {
@@ -39,15 +39,6 @@ func (s *FileServiceTestSuite) SetupTest() {
 		s.Fail(err.Error())
 		return
 	}
-	org, err := test.CreateOrganization(s.users[0].GetID())
-	if err != nil {
-		s.Fail(err.Error())
-		return
-	}
-	s.workspace, err = test.CreateWorkspace(org.ID, s.users[0].GetID())
-	if err != nil {
-		s.Fail(err.Error())
-	}
 }
 
 func TestFileServiceSuite(t *testing.T) {
@@ -55,11 +46,15 @@ func TestFileServiceSuite(t *testing.T) {
 }
 
 func (s *FileServiceTestSuite) TestCreate_File() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal("file.txt", file.Name)
@@ -67,11 +62,15 @@ func (s *FileServiceTestSuite) TestCreate_File() {
 }
 
 func (s *FileServiceTestSuite) TestCreate_Folder() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal("folder", folder.Name)
@@ -79,8 +78,12 @@ func (s *FileServiceTestSuite) TestCreate_Folder() {
 }
 
 func (s *FileServiceTestSuite) TestCreate_NonExistentParent() {
-	_, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewFileService().Create(service.FileCreateOptions{
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    "non-existent-parent",
@@ -90,30 +93,38 @@ func (s *FileServiceTestSuite) TestCreate_NonExistentParent() {
 }
 
 func (s *FileServiceTestSuite) TestCreate_DuplicateName() {
-	_, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewFileService().Create(service.FileCreateOptions{
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	_, err = service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFileWithSimilarNameExistsError().Error(), err.Error())
 }
 
 func (s *FileServiceTestSuite) TestCreate_DuplicateNameUsingPath() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "a/b/c/file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	files, err := service.NewFileService().FindPath(file.ID, s.users[0].GetID())
@@ -122,11 +133,15 @@ func (s *FileServiceTestSuite) TestCreate_DuplicateNameUsingPath() {
 }
 
 func (s *FileServiceTestSuite) TestFind() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -143,170 +158,206 @@ func (s *FileServiceTestSuite) TestFind_NonExistentFile() {
 }
 
 func (s *FileServiceTestSuite) TestFindByPath() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	found, err := service.NewFileService().FindByPath(fmt.Sprintf("/%s/folder/file.txt", s.workspace.ID), s.users[0].GetID())
+	found, err := service.NewFileService().FindByPath(fmt.Sprintf("/%s/folder/file.txt", workspace.ID), s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(file.ID, found.ID)
 }
 
 func (s *FileServiceTestSuite) TestFindByPath_NonExistentPath() {
-	_, err := service.NewFileService().FindByPath(fmt.Sprintf("/%s/non-existent-path", s.workspace.ID), s.users[0].GetID())
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewFileService().FindByPath(fmt.Sprintf("/%s/non-existent-path", workspace.ID), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
 }
 
 func (s *FileServiceTestSuite) TestFindByPath_FileWithoutLeadingSlash() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewFileService().FindByPath(fmt.Sprintf("%s/folder/file.txt", s.workspace.ID), s.users[0].GetID())
+	_, err = service.NewFileService().FindByPath(fmt.Sprintf("%s/folder/file.txt", workspace.ID), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFilePathMissingLeadingSlash().Error(), err.Error())
 }
 
 func (s *FileServiceTestSuite) TestFindByPath_FileWithoutTrailingSlash() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewFileService().FindByPath(fmt.Sprintf("/%s/folder/file.txt/", s.workspace.ID), s.users[0].GetID())
+	_, err = service.NewFileService().FindByPath(fmt.Sprintf("/%s/folder/file.txt/", workspace.ID), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFilePathOfTypeFileHasTrailingSlash().Error(), err.Error())
 }
 
 func (s *FileServiceTestSuite) TestListByPath_Folder() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	files, err := service.NewFileService().ListByPath(fmt.Sprintf("/%s/folder", s.workspace.ID), s.users[0].GetID())
+	files, err := service.NewFileService().ListByPath(fmt.Sprintf("/%s/folder", workspace.ID), s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Len(files, 1)
 	s.Equal(file.ID, files[0].ID)
 }
 
 func (s *FileServiceTestSuite) TestListByPath_File() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	files, err := service.NewFileService().ListByPath(fmt.Sprintf("/%s/folder/file.txt", s.workspace.ID), s.users[0].GetID())
+	files, err := service.NewFileService().ListByPath(fmt.Sprintf("/%s/folder/file.txt", workspace.ID), s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Len(files, 1)
 	s.Equal(file.ID, files[0].ID)
 }
 
 func (s *FileServiceTestSuite) TestListByPath_ListFolderWithoutLeadingSlash() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewFileService().ListByPath(fmt.Sprintf("%s/folder", s.workspace.ID), s.users[0].GetID())
+	_, err = service.NewFileService().ListByPath(fmt.Sprintf("%s/folder", workspace.ID), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFilePathMissingLeadingSlash().Error(), err.Error())
 }
 
 func (s *FileServiceTestSuite) TestListByPath_ListFileWithoutTrailingSlash() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewFileService().ListByPath(fmt.Sprintf("/%s/folder/file.txt/", s.workspace.ID), s.users[0].GetID())
+	_, err = service.NewFileService().ListByPath(fmt.Sprintf("/%s/folder/file.txt/", workspace.ID), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFilePathOfTypeFileHasTrailingSlash().Error(), err.Error())
 }
 
 func (s *FileServiceTestSuite) TestFindPath() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
@@ -316,23 +367,27 @@ func (s *FileServiceTestSuite) TestFindPath() {
 	path, err := service.NewFileService().FindPath(file.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Len(path, 3)
-	s.Equal(s.workspace.RootID, path[0].ID)
+	s.Equal(workspace.RootID, path[0].ID)
 	s.Equal(folder.ID, path[1].ID)
 	s.Equal(file.ID, path[2].ID)
 }
 
 func (s *FileServiceTestSuite) TestList() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"file A", "file B", "file C"} {
 		_, err := service.NewFileService().Create(service.FileCreateOptions{
-			WorkspaceID: s.workspace.ID,
+			WorkspaceID: workspace.ID,
 			Name:        name,
 			Type:        model.FileTypeFile,
-			ParentID:    s.workspace.RootID,
+			ParentID:    workspace.RootID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -347,17 +402,21 @@ func (s *FileServiceTestSuite) TestList() {
 }
 
 func (s *FileServiceTestSuite) TestList_Paginate() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"file A", "file B", "file C"} {
 		_, err := service.NewFileService().Create(service.FileCreateOptions{
-			WorkspaceID: s.workspace.ID,
+			WorkspaceID: workspace.ID,
 			Name:        name,
 			Type:        model.FileTypeFile,
-			ParentID:    s.workspace.RootID,
+			ParentID:    workspace.RootID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -369,7 +428,7 @@ func (s *FileServiceTestSuite) TestList_Paginate() {
 	s.Equal("file A", list.Data[0].Name)
 	s.Equal("file B", list.Data[1].Name)
 
-	list, err = service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
+	list, err = service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -382,17 +441,21 @@ func (s *FileServiceTestSuite) TestList_Paginate() {
 }
 
 func (s *FileServiceTestSuite) TestList_SortByNameDescending() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"file A", "file B", "file C"} {
 		_, err := service.NewFileService().Create(service.FileCreateOptions{
-			WorkspaceID: s.workspace.ID,
+			WorkspaceID: workspace.ID,
 			Name:        name,
 			Type:        model.FileTypeFile,
-			ParentID:    s.workspace.RootID,
+			ParentID:    workspace.RootID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page:      1,
 		Size:      3,
 		SortBy:    service.FileSortByName,
@@ -404,18 +467,22 @@ func (s *FileServiceTestSuite) TestList_SortByNameDescending() {
 	s.Equal("file A", list.Data[2].Name)
 }
 
-func (s *FileServiceTestSuite) TestList_Query() {
+func (s *FileServiceTestSuite) TestList_QueryText() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	for _, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
 		_, err := service.NewFileService().Create(service.FileCreateOptions{
-			WorkspaceID: s.workspace.ID,
+			WorkspaceID: workspace.ID,
 			Name:        name,
 			Type:        model.FileTypeFile,
-			ParentID:    s.workspace.RootID,
+			ParentID:    workspace.RootID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Query: &service.FileQuery{
 			Text: helper.ToPtr("world"),
 		},
@@ -430,18 +497,142 @@ func (s *FileServiceTestSuite) TestList_Query() {
 	s.Equal("hello world", list.Data[0].Name)
 }
 
-func (s *FileServiceTestSuite) TestProbe() {
-	for _, name := range []string{"file A", "file B", "file C"} {
+func (s *FileServiceTestSuite) TestList_QueryType() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	types := []string{model.FileTypeFile, model.FileTypeFile, model.FileTypeFolder}
+	for i, name := range []string{"file A", "file B", "folder"} {
 		_, err := service.NewFileService().Create(service.FileCreateOptions{
-			WorkspaceID: s.workspace.ID,
+			WorkspaceID: workspace.ID,
 			Name:        name,
-			Type:        model.FileTypeFile,
-			ParentID:    s.workspace.RootID,
+			Type:        types[i],
+			ParentID:    workspace.RootID,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewFileService().Probe(s.workspace.RootID, service.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
+		Query: &service.FileQuery{
+			Type: helper.ToPtr(model.FileTypeFolder),
+		},
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(1), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("folder", list.Data[0].Name)
+
+	list, err = service.NewFileService().List(workspace.RootID, service.FileListOptions{
+		Query: &service.FileQuery{
+			Type: helper.ToPtr(model.FileTypeFile),
+		},
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(2), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("file A", list.Data[0].Name)
+	s.Equal("file B", list.Data[1].Name)
+}
+
+func (s *FileServiceTestSuite) TestList_QueryCreateTimeAfterBefore() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	var checkpoints []time.Time
+	for _, name := range []string{"file A", "file B", "file C"} {
+		checkpoints = append(checkpoints, time.Now())
+		time.Sleep(1 * time.Second)
+		_, err := service.NewFileService().Create(service.FileCreateOptions{
+			WorkspaceID: workspace.ID,
+			Name:        name,
+			Type:        model.FileTypeFile,
+			ParentID:    workspace.RootID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+	time.Sleep(1 * time.Second)
+	checkpoints = append(checkpoints, time.Now())
+
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
+		Query: &service.FileQuery{
+			CreateTimeAfter:  helper.ToPtr(helper.TimeToTimestamp(checkpoints[1])),
+			CreateTimeBefore: helper.ToPtr(helper.TimeToTimestamp(checkpoints[3])),
+		},
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(2), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("file B", list.Data[0].Name)
+	s.Equal("file C", list.Data[1].Name)
+}
+
+func (s *FileServiceTestSuite) TestList_QueryUpdateTimeAfterBefore() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	var checkpoints []time.Time
+	for _, name := range []string{"file A", "file B", "file C"} {
+		checkpoints = append(checkpoints, time.Now())
+		time.Sleep(1 * time.Second)
+		_, err := service.NewFileService().Create(service.FileCreateOptions{
+			WorkspaceID: workspace.ID,
+			Name:        name,
+			Type:        model.FileTypeFile,
+			ParentID:    workspace.RootID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+	time.Sleep(1 * time.Second)
+	checkpoints = append(checkpoints, time.Now())
+
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
+		Query: &service.FileQuery{
+			UpdateTimeAfter:  helper.ToPtr(helper.TimeToTimestamp(checkpoints[1])),
+			UpdateTimeBefore: helper.ToPtr(helper.TimeToTimestamp(checkpoints[3])),
+		},
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(2), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("file B", list.Data[0].Name)
+	s.Equal("file C", list.Data[1].Name)
+}
+
+func (s *FileServiceTestSuite) TestProbe() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	for _, name := range []string{"file A", "file B", "file C"} {
+		_, err := service.NewFileService().Create(service.FileCreateOptions{
+			WorkspaceID: workspace.ID,
+			Name:        name,
+			Type:        model.FileTypeFile,
+			ParentID:    workspace.RootID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
+	probe, err := service.NewFileService().Probe(workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -451,11 +642,15 @@ func (s *FileServiceTestSuite) TestProbe() {
 }
 
 func (s *FileServiceTestSuite) TestComputeSize() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -466,15 +661,19 @@ func (s *FileServiceTestSuite) TestComputeSize() {
 }
 
 func (s *FileServiceTestSuite) TestCount() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	_, err = service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folder.ID,
@@ -488,18 +687,22 @@ func (s *FileServiceTestSuite) TestCount() {
 }
 
 func (s *FileServiceTestSuite) TestCopy() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -511,11 +714,15 @@ func (s *FileServiceTestSuite) TestCopy() {
 }
 
 func (s *FileServiceTestSuite) TestDelete() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -528,11 +735,15 @@ func (s *FileServiceTestSuite) TestDelete() {
 }
 
 func (s *FileServiceTestSuite) TestDownloadOriginalBuffer() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -549,23 +760,27 @@ func (s *FileServiceTestSuite) TestDownloadOriginalBuffer() {
 }
 
 func (s *FileServiceTestSuite) TestMove() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	folderA, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder A",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	folderB, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "folder B",
 		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
 		ParentID:    folderA.ID,
@@ -578,11 +793,15 @@ func (s *FileServiceTestSuite) TestMove() {
 }
 
 func (s *FileServiceTestSuite) TestPatchName() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -593,11 +812,15 @@ func (s *FileServiceTestSuite) TestPatchName() {
 }
 
 func (s *FileServiceTestSuite) TestGrantUserPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -606,11 +829,15 @@ func (s *FileServiceTestSuite) TestGrantUserPermission() {
 }
 
 func (s *FileServiceTestSuite) TestRevokeUserPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -622,16 +849,20 @@ func (s *FileServiceTestSuite) TestRevokeUserPermission() {
 }
 
 func (s *FileServiceTestSuite) TestGrantGroupPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.workspace.Organization.ID,
+		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -640,16 +871,20 @@ func (s *FileServiceTestSuite) TestGrantGroupPermission() {
 }
 
 func (s *FileServiceTestSuite) TestRevokeGroupPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
-		OrganizationID: s.workspace.Organization.ID,
+		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
@@ -661,11 +896,15 @@ func (s *FileServiceTestSuite) TestRevokeGroupPermission() {
 }
 
 func (s *FileServiceTestSuite) TestReprocess() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
+		WorkspaceID: workspace.ID,
 		Name:        "file.txt",
 		Type:        model.FileTypeFile,
-		ParentID:    s.workspace.RootID,
+		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 

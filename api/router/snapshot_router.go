@@ -11,7 +11,6 @@
 package router
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -174,10 +173,11 @@ func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id}/detach [post]
 func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
-	if err := r.snapshotSvc.Detach(c.Params("id"), helper.GetUserID(c)); err != nil {
+	res, err := r.snapshotSvc.Detach(c.Params("id"), helper.GetUserID(c))
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // Patch godoc
