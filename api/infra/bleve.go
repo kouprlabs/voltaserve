@@ -17,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/blevesearch/bleve/v2"
+	blevemapping "github.com/blevesearch/bleve/v2/mapping"
 	blevequery "github.com/blevesearch/bleve/v2/search/query"
 	bleveindex "github.com/blevesearch/bleve_index_api"
 )
@@ -29,22 +30,22 @@ func newBleveSearchManager() SearchManager {
 	mgr := &bleveSearchManager{}
 	if indices == nil {
 		indices = make(map[string]bleve.Index)
-		if err := mgr.createIndex(FileSearchIndex); err != nil {
+		if err := mgr.createFileIndex(); err != nil {
 			panic(err)
 		}
-		if err := mgr.createIndex(GroupSearchIndex); err != nil {
+		if err := mgr.createGroupIndex(); err != nil {
 			panic(err)
 		}
-		if err := mgr.createIndex(WorkspaceSearchIndex); err != nil {
+		if err := mgr.createWorkspaceIndex(); err != nil {
 			panic(err)
 		}
-		if err := mgr.createIndex(OrganizationSearchIndex); err != nil {
+		if err := mgr.createOrganizationIndex(); err != nil {
 			panic(err)
 		}
-		if err := mgr.createIndex(UserSearchIndex); err != nil {
+		if err := mgr.createUserIndex(); err != nil {
 			panic(err)
 		}
-		if err := mgr.createIndex(TaskSearchIndex); err != nil {
+		if err := mgr.createTaskIndex(); err != nil {
 			panic(err)
 		}
 	}
@@ -116,13 +117,84 @@ func (mgr *bleveSearchManager) Delete(indexName string, ids []string) error {
 	return index.Batch(batch)
 }
 
-func (mgr *bleveSearchManager) createIndex(indexName string) error {
-	index, err := bleve.NewMemOnly(bleve.NewIndexMapping())
+func (mgr *bleveSearchManager) createFileIndex() error {
+	mapping := bleve.NewIndexMapping()
+	mgr.appendCommonFields(mapping)
+	index, err := bleve.NewMemOnly(mapping)
 	if err != nil {
 		return err
 	}
-	indices[indexName] = index
+	indices[FileSearchIndex] = index
 	return nil
+}
+
+func (mgr *bleveSearchManager) createGroupIndex() error {
+	mapping := bleve.NewIndexMapping()
+	mgr.appendCommonFields(mapping)
+	mgr.disableField("members", mapping)
+	index, err := bleve.NewMemOnly(mapping)
+	if err != nil {
+		return err
+	}
+	indices[GroupSearchIndex] = index
+	return nil
+}
+
+func (mgr *bleveSearchManager) createWorkspaceIndex() error {
+	mapping := bleve.NewIndexMapping()
+	mgr.appendCommonFields(mapping)
+	index, err := bleve.NewMemOnly(mapping)
+	if err != nil {
+		return err
+	}
+	indices[WorkspaceSearchIndex] = index
+	return nil
+}
+
+func (mgr *bleveSearchManager) createOrganizationIndex() error {
+	mapping := bleve.NewIndexMapping()
+	mgr.appendCommonFields(mapping)
+	mgr.disableField("members", mapping)
+	index, err := bleve.NewMemOnly(mapping)
+	if err != nil {
+		return err
+	}
+	indices[OrganizationSearchIndex] = index
+	return nil
+}
+
+func (mgr *bleveSearchManager) createUserIndex() error {
+	mapping := bleve.NewIndexMapping()
+	mgr.appendCommonFields(mapping)
+	index, err := bleve.NewMemOnly(mapping)
+	if err != nil {
+		return err
+	}
+	indices[UserSearchIndex] = index
+	return nil
+}
+
+func (mgr *bleveSearchManager) createTaskIndex() error {
+	mapping := bleve.NewIndexMapping()
+	mgr.appendCommonFields(mapping)
+	index, err := bleve.NewMemOnly(mapping)
+	if err != nil {
+		return err
+	}
+	indices[TaskSearchIndex] = index
+	return nil
+}
+
+func (mgr *bleveSearchManager) appendCommonFields(mapping *blevemapping.IndexMappingImpl) {
+	mapping.DefaultMapping.AddFieldMappingsAt("createTime", bleve.NewTextFieldMapping())
+	mapping.DefaultMapping.AddFieldMappingsAt("updateTime", bleve.NewTextFieldMapping())
+}
+
+func (mgr *bleveSearchManager) disableField(name string, mapping *blevemapping.IndexMappingImpl) {
+	fieldMapping := bleve.NewTextFieldMapping()
+	fieldMapping.Index = false
+	fieldMapping.Store = false
+	mapping.DefaultMapping.AddFieldMappingsAt(name, fieldMapping)
 }
 
 func (mgr *bleveSearchManager) buildFilter(filter interface{}) []*blevequery.MatchQuery {
@@ -151,17 +223,15 @@ func (mgr *bleveSearchManager) documentToMap(doc bleveindex.Document) map[string
 		case bleveindex.TextField:
 			res[fieldName] = string(fieldValue)
 		case bleveindex.NumericField:
-			num, err := strconv.ParseFloat(string(fieldValue), 64)
+			parsedValue, err := strconv.ParseFloat(string(fieldValue), 64)
 			if err == nil {
-				res[fieldName] = num
+				res[fieldName] = parsedValue
 			}
 		case bleveindex.BooleanField:
-			boolVal, err := strconv.ParseBool(string(fieldValue))
+			parsedValue, err := strconv.ParseBool(string(fieldValue))
 			if err == nil {
-				res[fieldName] = boolVal
+				res[fieldName] = parsedValue
 			}
-		default:
-			res[fieldName] = string(fieldValue)
 		}
 	})
 	return res

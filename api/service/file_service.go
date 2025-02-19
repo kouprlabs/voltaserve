@@ -351,32 +351,34 @@ func (svc *fileCreate) validateParent(id string, userID string) error {
 }
 
 type fileFetch struct {
-	fileCache      *cache.FileCache
-	fileRepo       *repo.FileRepo
-	fileSearch     *search.FileSearch
-	fileGuard      *guard.FileGuard
-	fileMapper     *fileMapper
-	fileCoreSvc    *fileCoreService
-	fileIdent      *infra.FileIdentifier
-	userRepo       *repo.UserRepo
-	workspaceRepo  *repo.WorkspaceRepo
-	workspaceSvc   *WorkspaceService
-	workspaceGuard *guard.WorkspaceGuard
+	fileCache       *cache.FileCache
+	fileRepo        *repo.FileRepo
+	fileSearch      *search.FileSearch
+	fileGuard       *guard.FileGuard
+	fileMapper      *fileMapper
+	fileCoreSvc     *fileCoreService
+	fileIdent       *infra.FileIdentifier
+	userRepo        *repo.UserRepo
+	workspaceRepo   *repo.WorkspaceRepo
+	workspaceSvc    *WorkspaceService
+	workspaceGuard  *guard.WorkspaceGuard
+	workspaceMapper *workspaceMapper
 }
 
 func newFileFetch() *fileFetch {
 	return &fileFetch{
-		fileCache:      cache.NewFileCache(),
-		fileRepo:       repo.NewFileRepo(),
-		fileSearch:     search.NewFileSearch(),
-		fileGuard:      guard.NewFileGuard(),
-		fileMapper:     newFileMapper(),
-		fileCoreSvc:    newFileCoreService(),
-		fileIdent:      infra.NewFileIdentifier(),
-		userRepo:       repo.NewUserRepo(),
-		workspaceRepo:  repo.NewWorkspaceRepo(),
-		workspaceSvc:   NewWorkspaceService(),
-		workspaceGuard: guard.NewWorkspaceGuard(),
+		fileCache:       cache.NewFileCache(),
+		fileRepo:        repo.NewFileRepo(),
+		fileSearch:      search.NewFileSearch(),
+		fileGuard:       guard.NewFileGuard(),
+		fileMapper:      newFileMapper(),
+		fileCoreSvc:     newFileCoreService(),
+		fileIdent:       infra.NewFileIdentifier(),
+		userRepo:        repo.NewUserRepo(),
+		workspaceRepo:   repo.NewWorkspaceRepo(),
+		workspaceSvc:    NewWorkspaceService(),
+		workspaceGuard:  guard.NewWorkspaceGuard(),
+		workspaceMapper: newWorkspaceMapper(),
 	}
 }
 
@@ -515,12 +517,16 @@ func (svc *fileFetch) getPathStrings(files []*File) []string {
 }
 
 func (svc *fileFetch) getWorkspacesAsFiles(userID string) ([]*File, error) {
-	workspaces, err := svc.workspaceSvc.findAll(userID)
+	loaded, err := svc.workspaceSvc.load(userID)
+	if err != nil {
+		return nil, err
+	}
+	mapped, err := svc.workspaceMapper.mapMany(loaded, userID)
 	if err != nil {
 		return nil, err
 	}
 	res := make([]*File, 0)
-	for _, w := range workspaces {
+	for _, w := range mapped {
 		res = append(res, svc.getWorkspaceAsFile(w))
 	}
 	return res, nil
@@ -755,11 +761,18 @@ func (svc *fileList) list(id string, opts FileListOptions, userID string) (*File
 
 func (svc *fileList) search(query *FileQuery, workspace model.Workspace) ([]model.File, error) {
 	var res []model.File
+	count, err := svc.fileRepo.Count()
+	if err != nil {
+		return nil, err
+	}
 	filter := fmt.Sprintf("workspaceId=\"%s\"", workspace.GetID())
 	if query.Type != nil {
 		filter += fmt.Sprintf(" AND type=\"%s\"", *query.Type)
 	}
-	hits, err := svc.fileSearch.Query(*query.Text, infra.SearchQueryOptions{Filter: filter})
+	hits, err := svc.fileSearch.Query(*query.Text, infra.SearchQueryOptions{
+		Limit:  count,
+		Filter: filter,
+	})
 	if err != nil {
 		return nil, err
 	}

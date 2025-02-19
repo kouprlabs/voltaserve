@@ -59,11 +59,11 @@ func (s *FileSearch) Index(files []model.File) (err error) {
 	if err = s.populateTextField(files); err != nil {
 		return err
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, f := range files {
-		res = append(res, s.mapEntity(f))
+		models = append(models, s.mapEntity(f))
 	}
-	if err := s.search.Index(s.index, res); err != nil {
+	if err := s.search.Index(s.index, models); err != nil {
 		return err
 	}
 	return nil
@@ -76,11 +76,11 @@ func (s *FileSearch) Update(files []model.File) (err error) {
 	if err = s.populateTextField(files); err != nil {
 		return err
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, f := range files {
-		res = append(res, s.mapEntity(f))
+		models = append(models, s.mapEntity(f))
 	}
-	if err := s.search.Update(s.index, res); err != nil {
+	if err := s.search.Update(s.index, models); err != nil {
 		return err
 	}
 	return nil

@@ -51,11 +51,11 @@ func (s *WorkspaceSearch) Index(workspaces []model.Workspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, w := range workspaces {
-		res = append(res, s.mapEntity(w))
+		models = append(models, s.mapEntity(w))
 	}
-	if err := s.search.Index(s.index, res); err != nil {
+	if err := s.search.Index(s.index, models); err != nil {
 		return err
 	}
 	return nil
@@ -65,11 +65,11 @@ func (s *WorkspaceSearch) Update(workspaces []model.Workspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, w := range workspaces {
-		res = append(res, s.mapEntity(w))
+		models = append(models, s.mapEntity(w))
 	}
-	if err := s.search.Update(s.index, res); err != nil {
+	if err := s.search.Update(s.index, models); err != nil {
 		return err
 	}
 	return nil

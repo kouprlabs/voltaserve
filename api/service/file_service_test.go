@@ -404,6 +404,32 @@ func (s *FileServiceTestSuite) TestList_SortByNameDescending() {
 	s.Equal("file A", list.Data[2].Name)
 }
 
+func (s *FileServiceTestSuite) TestList_Query() {
+	for _, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
+		_, err := service.NewFileService().Create(service.FileCreateOptions{
+			WorkspaceID: s.workspace.ID,
+			Name:        name,
+			Type:        model.FileTypeFile,
+			ParentID:    s.workspace.RootID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
+	list, err := service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
+		Query: &service.FileQuery{
+			Text: helper.ToPtr("world"),
+		},
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(1), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("hello world", list.Data[0].Name)
+}
+
 func (s *FileServiceTestSuite) TestProbe() {
 	for _, name := range []string{"file A", "file B", "file C"} {
 		_, err := service.NewFileService().Create(service.FileCreateOptions{

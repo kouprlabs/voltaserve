@@ -52,11 +52,11 @@ func (s *TaskSearch) Index(tasks []model.Task) error {
 	if len(tasks) == 0 {
 		return nil
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, t := range tasks {
-		res = append(res, s.mapEntity(t))
+		models = append(models, s.mapEntity(t))
 	}
-	if err := s.search.Index(s.index, res); err != nil {
+	if err := s.search.Index(s.index, models); err != nil {
 		return err
 	}
 	return nil
@@ -66,11 +66,11 @@ func (s *TaskSearch) Update(orgs []model.Task) error {
 	if len(orgs) == 0 {
 		return nil
 	}
-	var res []infra.SearchModel
+	var models []infra.SearchModel
 	for _, t := range orgs {
-		res = append(res, s.mapEntity(t))
+		models = append(models, s.mapEntity(t))
 	}
-	if err := s.search.Update(s.index, res); err != nil {
+	if err := s.search.Update(s.index, models); err != nil {
 		return err
 	}
 	return nil

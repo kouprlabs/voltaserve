@@ -188,6 +188,29 @@ func (s *WorkspaceServiceSuite) TestList_SortByNameDescending() {
 	s.Equal("workspace A", list.Data[2].Name)
 }
 
+func (s *WorkspaceServiceSuite) TestList_Query() {
+	for _, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
+		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
+			Name:            name,
+			OrganizationID:  s.org.ID,
+			StorageCapacity: 1 * GB,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
+	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
+		Query: "world",
+		Page:  1,
+		Size:  10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(1), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("hello world", list.Data[0].Name)
+}
+
 func (s *WorkspaceServiceSuite) TestProbe() {
 	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{

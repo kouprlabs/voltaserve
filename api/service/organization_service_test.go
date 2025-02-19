@@ -158,6 +158,27 @@ func (s *OrganizationServiceSuite) TestList_SortByNameDescending() {
 	s.Equal("organization A", list.Data[2].Name)
 }
 
+func (s *OrganizationServiceSuite) TestList_Query() {
+	for _, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
+		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+			Name: name,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
+	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
+		Query: "world",
+		Page:  1,
+		Size:  10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(1), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("hello world", list.Data[0].Name)
+}
+
 func (s *OrganizationServiceSuite) TestProbe() {
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
 		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
