@@ -8,28 +8,30 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package infra_test
+package test
 
 import (
-	"fmt"
 	"os"
-	"testing"
 
-	"github.com/kouprlabs/voltaserve/api/test"
+	"github.com/alicebob/miniredis/v2"
 )
 
-func TestMain(m *testing.M) {
-	setup := test.NewSetup(m)
-	if err := setup.Up(test.SetupOptions{
-		Postgres: test.PostgresOptions{Port: 15432},
-	}); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+type Redis struct {
+	miniredis *miniredis.Miniredis
+}
+
+func NewRedis() *Redis {
+	return &Redis{}
+}
+
+func (r *Redis) Start() error {
+	var err error
+	r.miniredis, err = miniredis.Run()
+	if err != nil {
+		return err
 	}
-	code := m.Run()
-	if err := setup.Down(); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+	if err := os.Setenv("REDIS_ADDRESS", r.miniredis.Addr()); err != nil {
+		return err
 	}
-	os.Exit(code)
+	return nil
 }

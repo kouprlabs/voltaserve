@@ -321,54 +321,107 @@ func (s *FileServiceTestSuite) TestFindPath() {
 	s.Equal(file.ID, path[2].ID)
 }
 
-func (s *FileServiceTestSuite) TestProbe() {
-	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
-		Name:        "folder",
-		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
-		Name:        "file.txt",
-		Type:        model.FileTypeFile,
-		ParentID:    folder.ID,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
+func (s *FileServiceTestSuite) TestList() {
+	for _, name := range []string{"file A", "file B", "file C"} {
+		_, err := service.NewFileService().Create(service.FileCreateOptions{
+			WorkspaceID: s.workspace.ID,
+			Name:        name,
+			Type:        model.FileTypeFile,
+			ParentID:    s.workspace.RootID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
 
-	probe, err := service.NewFileService().Probe(folder.ID, service.FileListOptions{
+	list, err := service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Equal(uint64(1), probe.TotalElements)
-	s.Equal(uint64(1), probe.TotalPages)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(3), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("file A", list.Data[0].Name)
+	s.Equal("file B", list.Data[1].Name)
+	s.Equal("file C", list.Data[2].Name)
 }
 
-func (s *FileServiceTestSuite) TestList() {
-	folder, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
-		Name:        "folder",
-		Type:        model.FileTypeFolder,
-		ParentID:    s.workspace.RootID,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-	file, err := service.NewFileService().Create(service.FileCreateOptions{
-		WorkspaceID: s.workspace.ID,
-		Name:        "file.txt",
-		Type:        model.FileTypeFile,
-		ParentID:    folder.ID,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
+func (s *FileServiceTestSuite) TestList_Paginate() {
+	for _, name := range []string{"file A", "file B", "file C"} {
+		_, err := service.NewFileService().Create(service.FileCreateOptions{
+			WorkspaceID: s.workspace.ID,
+			Name:        name,
+			Type:        model.FileTypeFile,
+			ParentID:    s.workspace.RootID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
 
-	list, err := service.NewFileService().List(folder.ID, service.FileListOptions{
+	list, err := service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
+		Page: 1,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal("file A", list.Data[0].Name)
+	s.Equal("file B", list.Data[1].Name)
+
+	list, err = service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
+		Page: 2,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(2), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal("file C", list.Data[0].Name)
+}
+
+func (s *FileServiceTestSuite) TestList_SortByNameDescending() {
+	for _, name := range []string{"file A", "file B", "file C"} {
+		_, err := service.NewFileService().Create(service.FileCreateOptions{
+			WorkspaceID: s.workspace.ID,
+			Name:        name,
+			Type:        model.FileTypeFile,
+			ParentID:    s.workspace.RootID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
+	list, err := service.NewFileService().List(s.workspace.RootID, service.FileListOptions{
+		Page:      1,
+		Size:      3,
+		SortBy:    service.FileSortByName,
+		SortOrder: service.FileSortOrderDesc,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal("file C", list.Data[0].Name)
+	s.Equal("file B", list.Data[1].Name)
+	s.Equal("file A", list.Data[2].Name)
+}
+
+func (s *FileServiceTestSuite) TestProbe() {
+	for _, name := range []string{"file A", "file B", "file C"} {
+		_, err := service.NewFileService().Create(service.FileCreateOptions{
+			WorkspaceID: s.workspace.ID,
+			Name:        name,
+			Type:        model.FileTypeFile,
+			ParentID:    s.workspace.RootID,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+	}
+
+	probe, err := service.NewFileService().Probe(s.workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Len(list.Data, 1)
-	s.Equal(file.ID, list.Data[0].ID)
+	s.Equal(uint64(3), probe.TotalElements)
+	s.Equal(uint64(1), probe.TotalPages)
 }
 
 func (s *FileServiceTestSuite) TestComputeSize() {

@@ -100,6 +100,7 @@ func (s *GroupServiceSuite) TestList() {
 		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
 	s.Equal(uint64(3), list.Size)
 	s.Equal(uint64(3), list.TotalElements)
 	s.Equal(uint64(1), list.TotalPages)
@@ -108,7 +109,7 @@ func (s *GroupServiceSuite) TestList() {
 	s.Equal("group C", list.Data[2].Name)
 }
 
-func (s *GroupServiceSuite) TestList_Pagination() {
+func (s *GroupServiceSuite) TestList_Paginate() {
 	for _, name := range []string{"group A", "group B", "group C"} {
 		_, err := service.NewGroupService().Create(service.GroupCreateOptions{
 			Name:           name,
@@ -123,11 +124,23 @@ func (s *GroupServiceSuite) TestList_Pagination() {
 		Size: 2,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
 	s.Equal(uint64(2), list.Size)
 	s.Equal(uint64(3), list.TotalElements)
 	s.Equal(uint64(2), list.TotalPages)
 	s.Equal("group A", list.Data[0].Name)
 	s.Equal("group B", list.Data[1].Name)
+
+	list, err = service.NewGroupService().List(service.GroupListOptions{
+		Page: 2,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(2), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal("group C", list.Data[0].Name)
 }
 
 func (s *GroupServiceSuite) TestList_SortByNameDescending() {

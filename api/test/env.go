@@ -8,28 +8,25 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package infra_test
+package test
 
-import (
-	"fmt"
-	"os"
-	"testing"
+import "os"
 
-	"github.com/kouprlabs/voltaserve/api/test"
-)
+type Env struct{}
 
-func TestMain(m *testing.M) {
-	setup := test.NewSetup(m)
-	if err := setup.Up(test.SetupOptions{
-		Postgres: test.PostgresOptions{Port: 15432},
-	}); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+func NewEnv() *Env {
+	return &Env{}
+}
+
+func (e *Env) Apply() error {
+	if err := os.Setenv("TEST", "true"); err != nil {
+		return err
 	}
-	code := m.Run()
-	if err := setup.Down(); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+	if err := os.Setenv("LIMITS_FILE_PROCESSING_MB", "video:10000,*:1000"); err != nil {
+		return err
 	}
-	os.Exit(code)
+	if err := os.Setenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB", "100000"); err != nil {
+		return err
+	}
+	return nil
 }

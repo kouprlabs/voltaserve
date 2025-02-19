@@ -29,8 +29,9 @@ func CreateUsers(count int) ([]model.User, error) {
 	var ids []string
 	for i := range count {
 		id := helper.NewID()
+		email := fmt.Sprintf("%d.%s@voltaserve.com", i, id)
 		db = db.Exec("INSERT INTO \"user\" (id, full_name, username, email, password_hash, create_time) VALUES (?, ?, ?, ?, ?, ?)",
-			id, fmt.Sprintf("user %d", i), id+"@voltaserve.com", id+"@voltaserve.com", "", helper.NewTimeString())
+			id, fmt.Sprintf("user %d", i), email, email, "", helper.NewTimeString())
 		if db.Error != nil {
 			return nil, db.Error
 		}

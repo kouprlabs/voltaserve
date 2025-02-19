@@ -122,6 +122,7 @@ func (s *WorkspaceServiceSuite) TestList() {
 		Size: 10,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
 	s.Equal(uint64(3), list.Size)
 	s.Equal(uint64(3), list.TotalElements)
 	s.Equal(uint64(1), list.TotalPages)
@@ -130,7 +131,7 @@ func (s *WorkspaceServiceSuite) TestList() {
 	s.Equal("workspace C", list.Data[2].Name)
 }
 
-func (s *WorkspaceServiceSuite) TestList_Pagination() {
+func (s *WorkspaceServiceSuite) TestList_Paginate() {
 	for _, name := range []string{"workspace A", "workspace B", "workspace C"} {
 		_, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 			Name:            name,
@@ -146,11 +147,23 @@ func (s *WorkspaceServiceSuite) TestList_Pagination() {
 		Size: 2,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
 	s.Equal(uint64(2), list.Size)
 	s.Equal(uint64(3), list.TotalElements)
 	s.Equal(uint64(2), list.TotalPages)
 	s.Equal("workspace A", list.Data[0].Name)
 	s.Equal("workspace B", list.Data[1].Name)
+
+	list, err = service.NewWorkspaceService().List(service.WorkspaceListOptions{
+		Page: 2,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(2), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal("workspace C", list.Data[0].Name)
 }
 
 func (s *WorkspaceServiceSuite) TestList_SortByNameDescending() {

@@ -73,6 +73,103 @@ func (s *SnapshotServiceSuite) TestList() {
 			Version:    2,
 			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
 		}),
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    3,
+			CreateTime: helper.TimeToString(time.Now().Add(-2 * time.Hour)),
+		}),
+	}
+	for _, snapshot := range snapshots {
+		err := repo.NewSnapshotRepo().Insert(snapshot)
+		s.Require().NoError(err)
+		err = cache.NewSnapshotCache().Set(snapshot)
+		s.Require().NoError(err)
+		err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), s.file.ID)
+		s.Require().NoError(err)
+	}
+
+	list, err := service.NewSnapshotService().List(s.file.ID, service.SnapshotListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(3), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal(snapshots[0].GetID(), list.Data[0].ID)
+	s.Equal(snapshots[1].GetID(), list.Data[1].ID)
+	s.Equal(snapshots[2].GetID(), list.Data[2].ID)
+}
+
+func (s *SnapshotServiceSuite) TestList_Paginate() {
+	snapshots := []model.Snapshot{
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    1,
+			CreateTime: helper.NewTimeString(),
+		}),
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    2,
+			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
+		}),
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    3,
+			CreateTime: helper.TimeToString(time.Now().Add(-2 * time.Hour)),
+		}),
+	}
+	for _, snapshot := range snapshots {
+		err := repo.NewSnapshotRepo().Insert(snapshot)
+		s.Require().NoError(err)
+		err = cache.NewSnapshotCache().Set(snapshot)
+		s.Require().NoError(err)
+		err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), s.file.ID)
+		s.Require().NoError(err)
+	}
+
+	list, err := service.NewSnapshotService().List(s.file.ID, service.SnapshotListOptions{
+		Page: 1,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal(snapshots[0].GetID(), list.Data[0].ID)
+	s.Equal(snapshots[1].GetID(), list.Data[1].ID)
+
+	list, err = service.NewSnapshotService().List(s.file.ID, service.SnapshotListOptions{
+		Page: 2,
+		Size: 2,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(2), list.Page)
+	s.Equal(uint64(1), list.Size)
+	s.Equal(uint64(3), list.TotalElements)
+	s.Equal(uint64(2), list.TotalPages)
+	s.Equal(snapshots[2].GetID(), list.Data[0].ID)
+}
+
+func (s *SnapshotServiceSuite) TestList_SortByVersionDescending() {
+	snapshots := []model.Snapshot{
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    1,
+			CreateTime: helper.NewTimeString(),
+		}),
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    2,
+			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
+		}),
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    3,
+			CreateTime: helper.TimeToString(time.Now().Add(-2 * time.Hour)),
+		}),
 	}
 	for _, snapshot := range snapshots {
 		err := repo.NewSnapshotRepo().Insert(snapshot)
@@ -85,15 +182,14 @@ func (s *SnapshotServiceSuite) TestList() {
 
 	list, err := service.NewSnapshotService().List(s.file.ID, service.SnapshotListOptions{
 		Page:      1,
-		Size:      10,
+		Size:      3,
 		SortBy:    service.SnapshotSortByVersion,
 		SortOrder: service.SnapshotSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Len(list.Data, 2)
-	s.Equal(uint64(2), list.TotalElements)
-	s.Equal(snapshots[1].GetID(), list.Data[0].ID)
-	s.Equal(snapshots[0].GetID(), list.Data[1].ID)
+	s.Equal(snapshots[2].GetID(), list.Data[0].ID)
+	s.Equal(snapshots[1].GetID(), list.Data[1].ID)
+	s.Equal(snapshots[0].GetID(), list.Data[2].ID)
 }
 
 func (s *SnapshotServiceSuite) TestProbe() {
@@ -108,6 +204,11 @@ func (s *SnapshotServiceSuite) TestProbe() {
 			Version:    2,
 			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
 		}),
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    3,
+			CreateTime: helper.TimeToString(time.Now().Add(-2 * time.Hour)),
+		}),
 	}
 	for _, snapshot := range snapshots {
 		err := repo.NewSnapshotRepo().Insert(snapshot)
@@ -118,15 +219,13 @@ func (s *SnapshotServiceSuite) TestProbe() {
 		s.Require().NoError(err)
 	}
 
-	opts := service.SnapshotListOptions{
-		Page:      1,
-		Size:      10,
-		SortBy:    service.SnapshotSortByVersion,
-		SortOrder: service.SnapshotSortOrderAsc,
-	}
-	probe, err := service.NewSnapshotService().Probe(s.file.ID, opts, s.users[0].GetID())
+	probe, err := service.NewSnapshotService().Probe(s.file.ID, service.SnapshotListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.Require().Equal(uint64(2), probe.TotalElements)
+	s.Equal(uint64(3), probe.TotalElements)
+	s.Equal(uint64(1), probe.TotalPages)
 }
 
 func (s *SnapshotServiceSuite) TestActivate() {
