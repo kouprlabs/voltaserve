@@ -78,7 +78,7 @@ func (s *InvitationServiceSuite) TestCreate_NonExistentOrganization() {
 		Emails:         []string{"test@voltaserve.com"},
 	}, s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *InvitationServiceSuite) TestCreate_UnauthorizedUser() {
@@ -90,7 +90,7 @@ func (s *InvitationServiceSuite) TestCreate_UnauthorizedUser() {
 		Emails:         []string{"test@voltaserve.com"},
 	}, s.users[1].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *InvitationServiceSuite) TestListIncoming() {

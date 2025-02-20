@@ -78,7 +78,7 @@ func (s *GroupServiceSuite) TestCreate_NonExistentOrganization() {
 		OrganizationID: "non-existent-org-id",
 	}, s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *GroupServiceSuite) TestFind() {
@@ -117,7 +117,7 @@ func (s *GroupServiceSuite) TestFind_MissingPermission() {
 func (s *GroupServiceSuite) TestFind_NonExistentGroup() {
 	_, err := service.NewGroupService().Find(helper.NewID(), s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewGroupNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewGroupNotFoundError(err).Error(), err.Error())
 }
 
 func (s *GroupServiceSuite) TestList() {
@@ -370,7 +370,7 @@ func (s *GroupServiceSuite) TestPatchName_InsufficientPermission() {
 func (s *GroupServiceSuite) TestPatchName_NonExistentGroup() {
 	_, err := service.NewGroupService().PatchName(helper.NewID(), "group", s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewGroupNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewGroupNotFoundError(err).Error(), err.Error())
 }
 
 func (s *GroupServiceSuite) TestDelete() {
@@ -387,7 +387,7 @@ func (s *GroupServiceSuite) TestDelete() {
 
 	_, err = service.NewGroupService().Find(group.ID, s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewGroupNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewGroupNotFoundError(err).Error(), err.Error())
 }
 
 func (s *GroupServiceSuite) TestDelete_MissingPermission() {
@@ -438,7 +438,7 @@ func (s *GroupServiceSuite) TestDelete_InsufficientPermission() {
 func (s *GroupServiceSuite) TestDelete_NonExistentGroup() {
 	err := service.NewGroupService().Delete(helper.NewID(), s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewGroupNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewGroupNotFoundError(err).Error(), err.Error())
 }
 
 func (s *GroupServiceSuite) TestAddMember() {

@@ -327,9 +327,12 @@ func (svc *WorkspaceService) Delete(id string, userID string) error {
 	return nil
 }
 
-func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64) (*bool, error) {
+func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64, userID string) (*bool, error) {
 	workspace, err := svc.workspaceRepo.Find(id)
 	if err != nil {
+		return nil, err
+	}
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	root, err := svc.fileRepo.Find(workspace.GetRootID())
