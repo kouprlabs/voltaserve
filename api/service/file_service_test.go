@@ -109,6 +109,51 @@ func (s *FileServiceTestSuite) TestCreate_NonExistentWorkspace() {
 	s.Require().Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
+func (s *FileServiceTestSuite) TestCreate_MissingWorkspacePermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	err = repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewFileService().Create(service.FileCreateOptions{
+		WorkspaceID: workspace.ID,
+		Name:        "file.txt",
+		Type:        model.FileTypeFile,
+		ParentID:    workspace.RootID,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Require().Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
+}
+
+func (s *FileServiceTestSuite) TestCreate_MissingParentPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	err = repo.NewFileRepo().RevokeUserPermission(
+		[]model.File{cache.NewFileCache().GetOrNil(workspace.RootID)},
+		s.users[0].GetID(),
+	)
+	s.Require().NoError(err)
+	_, err = cache.NewFileCache().Refresh(workspace.RootID)
+	s.Require().NoError(err)
+
+	_, err = service.NewFileService().Create(service.FileCreateOptions{
+		WorkspaceID: workspace.ID,
+		Name:        "file.txt",
+		Type:        model.FileTypeFile,
+		ParentID:    workspace.RootID,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Require().Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
+}
+
 func (s *FileServiceTestSuite) TestCreate_InsufficientParentPermission() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)

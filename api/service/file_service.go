@@ -256,6 +256,9 @@ func (svc *fileCreate) create(opts FileCreateOptions, userID string) (*File, err
 	if err != nil {
 		return nil, err
 	}
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
+		return nil, err
+	}
 	if len(opts.ParentID) > 0 {
 		if err := svc.validateParent(opts.ParentID, userID); err != nil {
 			return nil, err
@@ -741,9 +744,10 @@ func (svc *fileList) probe(id string, opts FileListOptions, userID string) (*Fil
 	if err != nil {
 		return nil, err
 	}
+	totalElements := uint64(len(authorized))
 	return &FileProbe{
-		TotalElements: uint64(len(authorized)),                               // #nosec G115 integer overflow conversion
-		TotalPages:    (uint64(len(authorized)) + opts.Size - 1) / opts.Size, // #nosec G115 integer overflow conversion
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
 }
 
