@@ -15,8 +15,11 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
@@ -59,6 +62,23 @@ func (s *UserServiceSuite) TestList_GroupMembers() {
 	s.Equal(s.users[0].GetID(), list.Data[0].ID)
 	s.Equal(s.users[1].GetID(), list.Data[1].ID)
 	s.Equal(s.users[2].GetID(), list.Data[2].ID)
+}
+
+func (s *UserServiceSuite) TestList_GroupMembers_MissingGroupPermission() {
+	group := s.createGroup()
+
+	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewGroupCache().Refresh(group.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewUserService().List(service.UserListOptions{
+		Page:    1,
+		Size:    10,
+		GroupID: group.ID,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewGroupNotFoundError(err).Error(), err.Error())
 }
 
 func (s *UserServiceSuite) TestList_GroupMembersPaginate() {
@@ -141,6 +161,23 @@ func (s *UserServiceSuite) TestList_OrganizationMembers() {
 	s.Equal(s.users[2].GetID(), list.Data[2].ID)
 }
 
+func (s *UserServiceSuite) TestList_OrganizationMembers_MissingOrganizationPermission() {
+	org := s.createOrganization()
+
+	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewUserService().List(service.UserListOptions{
+		Page:           1,
+		Size:           10,
+		OrganizationID: org.ID,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
+}
+
 func (s *UserServiceSuite) TestList_OrganizationMembersPaginate() {
 	org := s.createOrganization()
 
@@ -216,6 +253,23 @@ func (s *UserServiceSuite) TestProbe_GroupMembers() {
 	s.Equal(uint64(1), probe.TotalPages)
 }
 
+func (s *UserServiceSuite) TestProbe_GroupMembers_MissingGroupPermission() {
+	group := s.createGroup()
+
+	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewGroupCache().Refresh(group.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewUserService().Probe(service.UserListOptions{
+		Page:    1,
+		Size:    10,
+		GroupID: group.ID,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewGroupNotFoundError(err).Error(), err.Error())
+}
+
 func (s *UserServiceSuite) TestProbe_OrganizationMembers() {
 	org := s.createOrganization()
 
@@ -227,6 +281,23 @@ func (s *UserServiceSuite) TestProbe_OrganizationMembers() {
 	s.Require().NoError(err)
 	s.Equal(uint64(3), probe.TotalElements)
 	s.Equal(uint64(1), probe.TotalPages)
+}
+
+func (s *UserServiceSuite) TestProbe_OrganizationMembers_MissingOrganizationPermission() {
+	org := s.createOrganization()
+
+	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewUserService().Probe(service.UserListOptions{
+		Page:           1,
+		Size:           10,
+		OrganizationID: org.ID,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *UserServiceSuite) createGroup() *service.Group {
