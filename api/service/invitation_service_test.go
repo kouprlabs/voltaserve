@@ -17,6 +17,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
@@ -55,6 +56,23 @@ func (s *InvitationServiceSuite) TestCreate() {
 	s.Len(invitations, 2)
 }
 
+func (s *InvitationServiceSuite) TestCreate_MissingOrganizationPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+
+	err = repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		OrganizationID: org.ID,
+		Emails:         []string{"test-a@voltaserve.com", "test-b@voltaserve.com"},
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
+}
+
 func (s *InvitationServiceSuite) TestCreate_DuplicateEmails() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
@@ -77,18 +95,6 @@ func (s *InvitationServiceSuite) TestCreate_NonExistentOrganization() {
 		OrganizationID: helper.NewID(),
 		Emails:         []string{"test@voltaserve.com"},
 	}, s.users[0].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-}
-
-func (s *InvitationServiceSuite) TestCreate_UnauthorizedUser() {
-	org, err := test.CreateOrganization(s.users[0].GetID())
-	s.Require().NoError(err)
-
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
-		OrganizationID: org.ID,
-		Emails:         []string{"test@voltaserve.com"},
-	}, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
@@ -238,6 +244,57 @@ func (s *InvitationServiceSuite) TestListOutgoing() {
 	s.Equal(strings.ToLower(s.users[3].GetEmail()), list.Data[2].Email)
 }
 
+func (s *InvitationServiceSuite) TestListOutgoing_MissingOrganizationPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		OrganizationID: org.ID,
+		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	err = repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
+}
+
+func (s *InvitationServiceSuite) TestListOutgoing_InsufficientOrganizationPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		OrganizationID: org.ID,
+		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[0].GetID(), model.PermissionViewer)
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(
+		errorpkg.NewOrganizationPermissionError(
+			s.users[0].GetID(),
+			cache.NewOrganizationCache().GetOrNil(org.ID),
+			model.PermissionOwner,
+		).Error(),
+		err.Error(),
+	)
+}
+
 func (s *InvitationServiceSuite) TestListOutgoing_SortByEmailDescending() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
@@ -308,6 +365,57 @@ func (s *InvitationServiceSuite) TestProbeOutgoing() {
 	s.Require().NoError(err)
 	s.Equal(uint64(3), probe.TotalElements)
 	s.Equal(uint64(1), probe.TotalPages)
+}
+
+func (s *InvitationServiceSuite) TestProbeOutgoing_MissingOrganizationPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		OrganizationID: org.ID,
+		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	err = repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewInvitationService().ProbeOutgoing(org.ID, service.InvitationListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
+}
+
+func (s *InvitationServiceSuite) TestProbeOutgoing_InsufficientOrganizationPermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		OrganizationID: org.ID,
+		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[0].GetID(), model.PermissionViewer)
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+
+	_, err = service.NewInvitationService().ProbeOutgoing(org.ID, service.InvitationListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(
+		errorpkg.NewOrganizationPermissionError(
+			s.users[0].GetID(),
+			cache.NewOrganizationCache().GetOrNil(org.ID),
+			model.PermissionOwner,
+		).Error(),
+		err.Error(),
+	)
 }
 
 func (s *InvitationServiceSuite) TestAccept() {

@@ -198,6 +198,13 @@ func (svc *InvitationService) CountIncoming(userID string) (*int64, error) {
 }
 
 func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationList, error) {
+	org, err := svc.orgCache.Get(orgID)
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
+		return nil, err
+	}
 	all, err := svc.invitationRepo.FindOutgoing(orgID, userID)
 	if err != nil {
 		return nil, err
@@ -224,6 +231,13 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOpti
 }
 
 func (svc *InvitationService) ProbeOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationProbe, error) {
+	org, err := svc.orgCache.Get(orgID)
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
+		return nil, err
+	}
 	all, err := svc.invitationRepo.FindOutgoing(orgID, userID)
 	totalElements := uint64(len(all))
 	if err != nil {

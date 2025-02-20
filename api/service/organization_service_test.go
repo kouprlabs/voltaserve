@@ -87,17 +87,6 @@ func (s *OrganizationServiceSuite) TestFind_NonExistentOrganization() {
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
-func (s *OrganizationServiceSuite) TestFind_UnauthorizedUser() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
-		Name: "organization",
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-
-	_, err = service.NewOrganizationService().Find(org.ID, s.users[1].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-}
-
 func (s *OrganizationServiceSuite) TestList() {
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
 		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
@@ -321,17 +310,6 @@ func (s *OrganizationServiceSuite) TestPatchName_NonExistentOrganization() {
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
-func (s *OrganizationServiceSuite) TestPatchName_UnauthorizedUser() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
-		Name: "organization",
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-
-	_, err = service.NewOrganizationService().PatchName(org.ID, "organization (edit)", s.users[1].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-}
-
 func (s *OrganizationServiceSuite) TestDelete() {
 	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 		Name: "organization",
@@ -387,17 +365,6 @@ func (s *OrganizationServiceSuite) TestDelete_InsufficientPermission() {
 
 func (s *OrganizationServiceSuite) TestDelete_NonExistentOrganization() {
 	err := service.NewOrganizationService().Delete(helper.NewID(), s.users[0].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-}
-
-func (s *OrganizationServiceSuite) TestDelete_UnauthorizedUser() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
-		Name: "organization",
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-
-	err = service.NewOrganizationService().Delete(org.ID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }

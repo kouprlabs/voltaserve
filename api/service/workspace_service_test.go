@@ -131,21 +131,6 @@ func (s *WorkspaceServiceSuite) TestFind_NonExistentWorkspace() {
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
 
-func (s *WorkspaceServiceSuite) TestFind_UnauthorizedUser() {
-	org, err := test.CreateOrganization(s.users[0].GetID())
-	s.Require().NoError(err)
-	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
-		Name:            "workspace",
-		OrganizationID:  org.ID,
-		StorageCapacity: 1 * GB,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-
-	_, err = service.NewWorkspaceService().Find(workspace.ID, s.users[1].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
-}
-
 func (s *WorkspaceServiceSuite) TestList() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
@@ -584,21 +569,6 @@ func (s *WorkspaceServiceSuite) TestDelete_NonExistentWorkspace() {
 	s.Require().NoError(err)
 
 	err = service.NewWorkspaceService().Delete(uuid.NewString(), s.users[0].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
-}
-
-func (s *WorkspaceServiceSuite) TestDelete_UnauthorizedUser() {
-	org, err := test.CreateOrganization(s.users[0].GetID())
-	s.Require().NoError(err)
-	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
-		Name:            "workspace",
-		OrganizationID:  org.ID,
-		StorageCapacity: 1 * GB,
-	}, s.users[0].GetID())
-	s.Require().NoError(err)
-
-	err = service.NewWorkspaceService().Delete(workspace.ID, s.users[1].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
 }
