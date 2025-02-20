@@ -59,10 +59,7 @@ func (s *GroupServiceSuite) TestCreate_MissingOrganizationPermission() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForOrganization(org, s.users[0])
 
 	_, err = service.NewGroupService().Create(service.GroupCreateOptions{
 		Name:           "group",
@@ -104,10 +101,7 @@ func (s *GroupServiceSuite) TestFind_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(group, s.users[0])
 
 	_, err = service.NewGroupService().Find(group.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -160,10 +154,7 @@ func (s *GroupServiceSuite) TestList_MissingPermission() {
 		time.Sleep(1 * time.Second)
 	}
 
-	err = repo.NewGroupRepo().RevokeUserPermission(groups[1].ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(groups[1].ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(groups[1], s.users[0])
 
 	list, err := service.NewGroupService().List(service.GroupListOptions{
 		Page: 1,
@@ -294,10 +285,7 @@ func (s *GroupServiceSuite) TestProbe_MissingPermission() {
 		groups = append(groups, g)
 	}
 
-	err = repo.NewGroupRepo().RevokeUserPermission(groups[1].ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(groups[1].ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(groups[1], s.users[0])
 
 	probe, err := service.NewGroupService().Probe(service.GroupListOptions{
 		Page: 1,
@@ -331,10 +319,7 @@ func (s *GroupServiceSuite) TestPatchName_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(group, s.users[0])
 
 	_, err = service.NewGroupService().PatchName(group.ID, "group (edit)", s.users[0].GetID())
 	s.Require().Error(err)
@@ -350,10 +335,7 @@ func (s *GroupServiceSuite) TestPatchName_InsufficientPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().GrantUserPermission(group.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForGroup(group, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewGroupService().PatchName(group.ID, "group (edit)", s.users[0].GetID())
 	s.Require().Error(err)
@@ -399,10 +381,7 @@ func (s *GroupServiceSuite) TestDelete_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(group, s.users[0])
 
 	err = service.NewGroupService().Delete(group.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -418,10 +397,7 @@ func (s *GroupServiceSuite) TestDelete_InsufficientPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().GrantUserPermission(group.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForGroup(group, s.users[0], model.PermissionViewer)
 
 	err = service.NewGroupService().Delete(group.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -481,10 +457,7 @@ func (s *GroupServiceSuite) TestAddMember_MissingPermission() {
 	err = service.NewInvitationService().Accept(invitations[0].ID, s.users[1].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(group, s.users[0])
 
 	err = service.NewGroupService().AddMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
@@ -509,10 +482,7 @@ func (s *GroupServiceSuite) TestAddMember_InsufficientPermission() {
 	err = service.NewInvitationService().Accept(invitations[0].ID, s.users[1].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().GrantUserPermission(group.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForGroup(group, s.users[0], model.PermissionViewer)
 
 	err = service.NewGroupService().AddMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
@@ -563,6 +533,7 @@ func (s *GroupServiceSuite) TestRemoveMember() {
 
 	err = service.NewGroupService().RemoveMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
+
 	memberList, err := service.NewUserService().List(service.UserListOptions{
 		GroupID: group.ID,
 		Page:    1,
@@ -594,10 +565,7 @@ func (s *GroupServiceSuite) TestRemoveMember_MissingPermission() {
 	err = service.NewGroupService().AddMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(group, s.users[0])
 
 	err = service.NewGroupService().RemoveMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
@@ -625,10 +593,7 @@ func (s *GroupServiceSuite) TestRemoveMember_InsufficientPermission() {
 	err = service.NewGroupService().AddMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().GrantUserPermission(group.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForGroup(group, s.users[0], model.PermissionViewer)
 
 	err = service.NewGroupService().RemoveMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
@@ -683,4 +648,25 @@ func (s *GroupServiceSuite) TestRemoveMember_NonMemberOfOrganization() {
 	err = service.NewGroupService().RemoveMember(group.ID, s.users[2].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewUserNotMemberOfOrganizationError().Error(), err.Error())
+}
+
+func (s *GroupServiceSuite) grantUserPermissionForGroup(group *service.Group, user model.User, permission string) {
+	err := repo.NewGroupRepo().GrantUserPermission(group.ID, user.GetID(), permission)
+	s.Require().NoError(err)
+	_, err = cache.NewGroupCache().Refresh(group.ID)
+	s.Require().NoError(err)
+}
+
+func (s *GroupServiceSuite) revokeUserPermissionForGroup(group *service.Group, user model.User) {
+	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewGroupCache().Refresh(group.ID)
+	s.Require().NoError(err)
+}
+
+func (s *GroupServiceSuite) revokeUserPermissionForOrganization(org *service.Organization, user model.User) {
+	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
 }

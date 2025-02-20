@@ -66,10 +66,7 @@ func (s *WorkspaceServiceSuite) TestCreate_MissingOrganizationPermission() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForOrganization(org, s.users[0])
 
 	_, err = service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
 		Name:            "workspace",
@@ -115,10 +112,7 @@ func (s *WorkspaceServiceSuite) TestFind_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForWorkspace(workspace, s.users[0])
 
 	_, err = service.NewWorkspaceService().Find(workspace.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -173,10 +167,7 @@ func (s *WorkspaceServiceSuite) TestList_MissingPermission() {
 		time.Sleep(1 * time.Second)
 	}
 
-	err = repo.NewWorkspaceRepo().RevokeUserPermission(workspaces[1].ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspaces[1].ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForWorkspace(workspaces[1], s.users[0])
 
 	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
 		Page: 1,
@@ -312,10 +303,7 @@ func (s *WorkspaceServiceSuite) TestProbe_MissingPermission() {
 		workspaces = append(workspaces, w)
 	}
 
-	err = repo.NewWorkspaceRepo().RevokeUserPermission(workspaces[1].ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspaces[1].ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForWorkspace(workspaces[1], s.users[0])
 
 	probe, err := service.NewWorkspaceService().Probe(service.WorkspaceListOptions{
 		Page: 1,
@@ -352,10 +340,7 @@ func (s *WorkspaceServiceSuite) TestPatchName_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForWorkspace(workspace, s.users[0])
 
 	_, err = service.NewWorkspaceService().PatchName(workspace.ID, "workspace (edit)", s.users[0].GetID())
 	s.Require().Error(err)
@@ -372,10 +357,7 @@ func (s *WorkspaceServiceSuite) TestPatchName_InsufficientPermissions() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewWorkspaceRepo().GrantUserPermission(workspace.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForWorkspace(workspace, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewWorkspaceService().PatchName(workspace.ID, "workspace (edit)", s.users[0].GetID())
 	s.Require().Error(err)
@@ -435,10 +417,7 @@ func (s *WorkspaceServiceSuite) TestPatchStorageCapacity_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForWorkspace(workspace, s.users[0])
 
 	_, err = service.NewWorkspaceService().PatchStorageCapacity(workspace.ID, int64(2*GB), s.users[0].GetID())
 	s.Require().Error(err)
@@ -455,10 +434,7 @@ func (s *WorkspaceServiceSuite) TestPatchStorageCapacity_InsufficientPermission(
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewWorkspaceRepo().GrantUserPermission(workspace.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForWorkspace(workspace, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewWorkspaceService().PatchStorageCapacity(workspace.ID, int64(2*GB), s.users[0].GetID())
 	s.Require().Error(err)
@@ -521,10 +497,7 @@ func (s *WorkspaceServiceSuite) TestDelete_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForWorkspace(workspace, s.users[0])
 
 	err = service.NewWorkspaceService().Delete(workspace.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -541,10 +514,7 @@ func (s *WorkspaceServiceSuite) TestDelete_InsufficientPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewWorkspaceRepo().GrantUserPermission(workspace.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForWorkspace(workspace, s.users[0], model.PermissionViewer)
 
 	err = service.NewWorkspaceService().Delete(workspace.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -598,10 +568,7 @@ func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_MissingPermission(
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForWorkspace(workspace, s.users[0])
 
 	_, err = service.NewWorkspaceService().HasEnoughSpaceForByteSize(workspace.ID, 512*MB, s.users[0].GetID())
 	s.Require().Error(err)
@@ -627,4 +594,25 @@ func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_NonExistentWorkspa
 	_, err := service.NewWorkspaceService().HasEnoughSpaceForByteSize(uuid.NewString(), 512*1024*1024, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewWorkspaceNotFoundError(err).Error(), err.Error())
+}
+
+func (s *WorkspaceServiceSuite) grantUserPermissionForWorkspace(workspace *service.Workspace, user model.User, permission string) {
+	err := repo.NewWorkspaceRepo().GrantUserPermission(workspace.ID, user.GetID(), permission)
+	s.Require().NoError(err)
+	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
+	s.Require().NoError(err)
+}
+
+func (s *WorkspaceServiceSuite) revokeUserPermissionForWorkspace(workspace *service.Workspace, user model.User) {
+	err := repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
+	s.Require().NoError(err)
+}
+
+func (s *WorkspaceServiceSuite) revokeUserPermissionForOrganization(org *service.Organization, user model.User) {
+	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
 }

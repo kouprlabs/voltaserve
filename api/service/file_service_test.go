@@ -115,10 +115,7 @@ func (s *FileServiceTestSuite) TestCreate_MissingWorkspacePermission() {
 	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForWorkspace(workspace, s.users[0])
 
 	_, err = service.NewFileService().Create(service.FileCreateOptions{
 		WorkspaceID: workspace.ID,
@@ -135,14 +132,10 @@ func (s *FileServiceTestSuite) TestCreate_MissingParentPermission() {
 	s.Require().NoError(err)
 	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
 	s.Require().NoError(err)
+	root, err := service.NewFileService().Find([]string{workspace.RootID}, s.users[0].GetID())
+	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(workspace.RootID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(workspace.RootID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(root[0], s.users[0])
 
 	_, err = service.NewFileService().Create(service.FileCreateOptions{
 		WorkspaceID: workspace.ID,
@@ -245,13 +238,7 @@ func (s *FileServiceTestSuite) TestFind_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().Find([]string{file.ID}, s.users[0].GetID())
 	s.Require().Error(err)
@@ -309,13 +296,7 @@ func (s *FileServiceTestSuite) TestFindByPath_MissingFolderPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(folder.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(folder.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(folder, s.users[0])
 
 	_, err = service.NewFileService().FindByPath(fmt.Sprintf("/%s/folder/file.txt", workspace.ID), s.users[0].GetID())
 	s.Require().Error(err)
@@ -342,13 +323,7 @@ func (s *FileServiceTestSuite) TestFindByPath_MissingLeafPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().FindByPath(fmt.Sprintf("/%s/folder/file.txt", workspace.ID), s.users[0].GetID())
 	s.Require().Error(err)
@@ -537,13 +512,7 @@ func (s *FileServiceTestSuite) TestListByPath_MissingFolderPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(folder.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(folder.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(folder, s.users[0])
 
 	_, err = service.NewFileService().ListByPath(fmt.Sprintf("/%s/folder/file.txt", workspace.ID), s.users[0].GetID())
 	s.Require().Error(err)
@@ -570,13 +539,7 @@ func (s *FileServiceTestSuite) TestListByPath_MissingLeafPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().ListByPath(fmt.Sprintf("/%s/folder/file.txt", workspace.ID), s.users[0].GetID())
 	s.Require().Error(err)
@@ -631,13 +594,7 @@ func (s *FileServiceTestSuite) TestFindPath_MissingFolderPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(folder.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(folder.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(folder, s.users[0])
 
 	_, err = service.NewFileService().FindPath(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -664,13 +621,7 @@ func (s *FileServiceTestSuite) TestFindPath_MissingLeafPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().FindPath(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -723,13 +674,7 @@ func (s *FileServiceTestSuite) TestList_MissingPermission() {
 		files = append(files, f)
 	}
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(files[1].ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(files[1].ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(files[1], s.users[0])
 
 	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page: 1,
@@ -1001,13 +946,7 @@ func (s *FileServiceTestSuite) TestProbe_MissingPermission() {
 		files = append(files, f)
 	}
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(files[1].ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(files[1].ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(files[1], s.users[0])
 
 	probe, err := service.NewFileService().Probe(workspace.RootID, service.FileListOptions{
 		Page: 1,
@@ -1049,13 +988,7 @@ func (s *FileServiceTestSuite) TestComputeSize_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().ComputeSize(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1132,13 +1065,7 @@ func (s *FileServiceTestSuite) TestCount_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(folder.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(folder.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(folder, s.users[0])
 
 	_, err = service.NewFileService().Count(folder.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1192,13 +1119,7 @@ func (s *FileServiceTestSuite) TestCopy_MissingSourcePermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().Copy(file.ID, folder.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1225,10 +1146,7 @@ func (s *FileServiceTestSuite) TestCopy_InsufficientSourcePermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(file.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(file, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewFileService().Copy(file.ID, folder.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1262,13 +1180,7 @@ func (s *FileServiceTestSuite) TestCopy_MissingTargetPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(folder.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(folder.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(folder, s.users[0])
 
 	_, err = service.NewFileService().Copy(file.ID, folder.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1295,10 +1207,7 @@ func (s *FileServiceTestSuite) TestCopy_InsufficientTargetPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(folder.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(folder.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(folder, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewFileService().Copy(file.ID, folder.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1346,13 +1255,7 @@ func (s *FileServiceTestSuite) TestDelete_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	err = service.NewFileService().Delete(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1372,10 +1275,7 @@ func (s *FileServiceTestSuite) TestDelete_InsufficientPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(file.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(file, s.users[0], model.PermissionViewer)
 
 	err = service.NewFileService().Delete(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1432,13 +1332,7 @@ func (s *FileServiceTestSuite) TestDownloadOriginalBuffer_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().DownloadOriginalBuffer(file.ID, "", new(bytes.Buffer), s.users[0].GetID())
 	s.Require().Error(err)
@@ -1504,13 +1398,7 @@ func (s *FileServiceTestSuite) TestMove_MissingSourcePermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().Move(file.ID, folderB.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1544,10 +1432,7 @@ func (s *FileServiceTestSuite) TestMove_InsufficientSourcePermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(file.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(file, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewFileService().Move(file.ID, folderB.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1588,13 +1473,7 @@ func (s *FileServiceTestSuite) TestMove_MissingTargetPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(folderB.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(folderB.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(folderB, s.users[0])
 
 	_, err = service.NewFileService().Move(file.ID, folderB.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1628,10 +1507,7 @@ func (s *FileServiceTestSuite) TestMove_InsufficientTargetPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(folderB.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(folderB.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(folderB, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewFileService().Move(file.ID, folderB.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1677,13 +1553,7 @@ func (s *FileServiceTestSuite) TestPatchName_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().PatchName(file.ID, "file (edit).txt", s.users[0].GetID())
 	s.Require().Error(err)
@@ -1703,10 +1573,7 @@ func (s *FileServiceTestSuite) TestPatchName_InsufficientPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(file.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(file, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewFileService().PatchName(file.ID, "file (edit).txt", s.users[0].GetID())
 	s.Require().Error(err)
@@ -1750,13 +1617,7 @@ func (s *FileServiceTestSuite) TestGrantUserPermission_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	err = service.NewFileService().GrantUserPermission([]string{file.ID}, s.users[1].GetID(), model.PermissionViewer, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1776,10 +1637,7 @@ func (s *FileServiceTestSuite) TestGrantUserPermission_InsufficientPermission() 
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(file.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(file, s.users[0], model.PermissionViewer)
 
 	err = service.NewFileService().GrantUserPermission([]string{file.ID}, s.users[1].GetID(), model.PermissionViewer, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1829,13 +1687,7 @@ func (s *FileServiceTestSuite) TestRevokeUserPermission_MissingPermission() {
 	err = service.NewFileService().GrantUserPermission([]string{file.ID}, s.users[1].GetID(), model.PermissionViewer, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	err = service.NewFileService().RevokeUserPermission([]string{file.ID}, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
@@ -1858,10 +1710,7 @@ func (s *FileServiceTestSuite) TestRevokeUserPermission_InsufficientPermission()
 	err = service.NewFileService().GrantUserPermission([]string{file.ID}, s.users[1].GetID(), model.PermissionViewer, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(file.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(file, s.users[0], model.PermissionViewer)
 
 	err = service.NewFileService().RevokeUserPermission([]string{file.ID}, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
@@ -1915,10 +1764,7 @@ func (s *FileServiceTestSuite) TestGrantGroupPermission_MissingGroupPermission()
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(group, s.users[0])
 
 	err = service.NewFileService().GrantGroupPermission([]string{file.ID}, group.ID, model.PermissionViewer, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1943,13 +1789,7 @@ func (s *FileServiceTestSuite) TestGrantGroupPermission_MissingFilePermission() 
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	err = service.NewFileService().GrantGroupPermission([]string{file.ID}, group.ID, model.PermissionViewer, s.users[0].GetID())
 	s.Require().Error(err)
@@ -1974,10 +1814,7 @@ func (s *FileServiceTestSuite) TestGrantGroupPermission_InsufficientFilePermissi
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(file.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(file, s.users[0], model.PermissionViewer)
 
 	err = service.NewFileService().GrantGroupPermission([]string{file.ID}, group.ID, model.PermissionViewer, s.users[0].GetID())
 	s.Require().Error(err)
@@ -2037,10 +1874,7 @@ func (s *FileServiceTestSuite) TestRevokeGroupPermission_MissingGroupPermission(
 	err = service.NewFileService().GrantGroupPermission([]string{file.ID}, group.ID, model.PermissionViewer, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(group, s.users[0])
 
 	err = service.NewFileService().RevokeGroupPermission([]string{file.ID}, group.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -2065,13 +1899,7 @@ func (s *FileServiceTestSuite) TestRevokeGroupPermission_MissingFilePermission()
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	err = service.NewFileService().RevokeGroupPermission([]string{file.ID}, group.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -2096,10 +1924,7 @@ func (s *FileServiceTestSuite) TestRevokeGroupPermission_InsufficientFilePermiss
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(file.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(file, s.users[0], model.PermissionViewer)
 
 	err = service.NewFileService().RevokeGroupPermission([]string{file.ID}, group.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -2166,13 +1991,7 @@ func (s *FileServiceTestSuite) TestReprocess_MissingPermission() {
 	})
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
-		s.users[0].GetID(),
-	)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewFileService().Reprocess(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -2203,10 +2022,7 @@ func (s *FileServiceTestSuite) TestReprocess_InsufficientPermission() {
 	})
 	s.Require().NoError(err)
 
-	err = repo.NewFileRepo().GrantUserPermission(file.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForFile(file, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewFileService().Reprocess(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
@@ -2218,4 +2034,35 @@ func (s *FileServiceTestSuite) TestReprocess_InsufficientPermission() {
 		).Error(),
 		err.Error(),
 	)
+}
+
+func (s *FileServiceTestSuite) grantUserPermissionForFile(file *service.File, user model.User, permission string) {
+	err := repo.NewFileRepo().GrantUserPermission(file.ID, user.GetID(), permission)
+	s.Require().NoError(err)
+	_, err = cache.NewFileCache().Refresh(file.ID)
+	s.Require().NoError(err)
+}
+
+func (s *FileServiceTestSuite) revokeUserPermissionForFile(file *service.File, user model.User) {
+	err := repo.NewFileRepo().RevokeUserPermission(
+		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
+		user.GetID(),
+	)
+	s.Require().NoError(err)
+	_, err = cache.NewFileCache().Refresh(file.ID)
+	s.Require().NoError(err)
+}
+
+func (s *FileServiceTestSuite) revokeUserPermissionForGroup(group *service.Group, user model.User) {
+	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewGroupCache().Refresh(group.ID)
+	s.Require().NoError(err)
+}
+
+func (s *FileServiceTestSuite) revokeUserPermissionForWorkspace(workspace *service.Workspace, user model.User) {
+	err := repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
+	s.Require().NoError(err)
 }

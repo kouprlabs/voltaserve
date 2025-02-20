@@ -67,12 +67,9 @@ func (s *UserServiceSuite) TestList_GroupMembers() {
 func (s *UserServiceSuite) TestList_GroupMembers_MissingGroupPermission() {
 	group := s.createGroup()
 
-	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(group, s.users[0])
 
-	_, err = service.NewUserService().List(service.UserListOptions{
+	_, err := service.NewUserService().List(service.UserListOptions{
 		Page:    1,
 		Size:    10,
 		GroupID: group.ID,
@@ -164,12 +161,9 @@ func (s *UserServiceSuite) TestList_OrganizationMembers() {
 func (s *UserServiceSuite) TestList_OrganizationMembers_MissingOrganizationPermission() {
 	org := s.createOrganization()
 
-	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForOrganization(org, s.users[0])
 
-	_, err = service.NewUserService().List(service.UserListOptions{
+	_, err := service.NewUserService().List(service.UserListOptions{
 		Page:           1,
 		Size:           10,
 		OrganizationID: org.ID,
@@ -256,12 +250,9 @@ func (s *UserServiceSuite) TestProbe_GroupMembers() {
 func (s *UserServiceSuite) TestProbe_GroupMembers_MissingGroupPermission() {
 	group := s.createGroup()
 
-	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForGroup(group, s.users[0])
 
-	_, err = service.NewUserService().Probe(service.UserListOptions{
+	_, err := service.NewUserService().Probe(service.UserListOptions{
 		Page:    1,
 		Size:    10,
 		GroupID: group.ID,
@@ -286,12 +277,9 @@ func (s *UserServiceSuite) TestProbe_OrganizationMembers() {
 func (s *UserServiceSuite) TestProbe_OrganizationMembers_MissingOrganizationPermission() {
 	org := s.createOrganization()
 
-	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForOrganization(org, s.users[0])
 
-	_, err = service.NewUserService().Probe(service.UserListOptions{
+	_, err := service.NewUserService().Probe(service.UserListOptions{
 		Page:           1,
 		Size:           10,
 		OrganizationID: org.ID,
@@ -347,4 +335,18 @@ func (s *UserServiceSuite) createOrganization() *service.Organization {
 	s.Require().NoError(err)
 
 	return org
+}
+
+func (s *UserServiceSuite) revokeUserPermissionForOrganization(org *service.Organization, user model.User) {
+	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+}
+
+func (s *UserServiceSuite) revokeUserPermissionForGroup(group *service.Group, user model.User) {
+	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewGroupCache().Refresh(group.ID)
+	s.Require().NoError(err)
 }

@@ -76,10 +76,7 @@ func (s *SnapshotServiceSuite) TestList_MissingFilePermission() {
 	s.Require().NoError(err)
 	_ = s.createSnapshots(file.ID)
 
-	err = repo.NewFileRepo().RevokeUserPermission([]model.File{cache.NewFileCache().GetOrNil(file.ID)}, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
 		Page: 1,
@@ -170,10 +167,7 @@ func (s *SnapshotServiceSuite) TestProbe_MissingFilePermission() {
 	s.Require().NoError(err)
 	_ = s.createSnapshots(file.ID)
 
-	err = repo.NewFileRepo().RevokeUserPermission([]model.File{cache.NewFileCache().GetOrNil(file.ID)}, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewSnapshotService().Probe(file.ID, service.SnapshotListOptions{
 		Page: 1,
@@ -206,10 +200,7 @@ func (s *SnapshotServiceSuite) TestActivate_MissingFilePermission() {
 	s.Require().NoError(err)
 	snapshot := s.createSnapshot(file.ID)
 
-	err = repo.NewFileRepo().RevokeUserPermission([]model.File{cache.NewFileCache().GetOrNil(file.ID)}, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewSnapshotService().Activate(snapshot.GetID(), s.users[0].GetID())
 	s.Require().Error(err)
@@ -239,10 +230,7 @@ func (s *SnapshotServiceSuite) TestDetach_MissingFilePermission() {
 	s.Require().NoError(err)
 	snapshot := s.createSnapshot(file.ID)
 
-	err = repo.NewFileRepo().RevokeUserPermission([]model.File{cache.NewFileCache().GetOrNil(file.ID)}, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForFile(file, s.users[0])
 
 	_, err = service.NewSnapshotService().Detach(snapshot.GetID(), s.users[0].GetID())
 	s.Require().Error(err)
@@ -311,4 +299,14 @@ func (s *SnapshotServiceSuite) createSnapshot(fileID string) model.Snapshot {
 	err = repo.NewSnapshotRepo().MapWithFile(res.GetID(), fileID)
 	s.Require().NoError(err)
 	return res
+}
+
+func (s *SnapshotServiceSuite) revokeUserPermissionForFile(file *service.File, user model.User) {
+	err := repo.NewFileRepo().RevokeUserPermission(
+		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
+		user.GetID(),
+	)
+	s.Require().NoError(err)
+	_, err = cache.NewFileCache().Refresh(file.ID)
+	s.Require().NoError(err)
 }

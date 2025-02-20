@@ -60,10 +60,7 @@ func (s *InvitationServiceSuite) TestCreate_MissingOrganizationPermission() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForOrganization(org, s.users[0])
 
 	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
 		OrganizationID: org.ID,
@@ -253,10 +250,7 @@ func (s *InvitationServiceSuite) TestListOutgoing_MissingOrganizationPermission(
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForOrganization(org, s.users[0])
 
 	_, err = service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
 		Page: 1,
@@ -275,10 +269,7 @@ func (s *InvitationServiceSuite) TestListOutgoing_InsufficientOrganizationPermis
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForOrganization(org, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
 		Page: 1,
@@ -376,10 +367,7 @@ func (s *InvitationServiceSuite) TestProbeOutgoing_MissingOrganizationPermission
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().RevokeUserPermission(org.ID, s.users[0].GetID())
-	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
-	s.Require().NoError(err)
+	s.revokeUserPermissionForOrganization(org, s.users[0])
 
 	_, err = service.NewInvitationService().ProbeOutgoing(org.ID, service.InvitationListOptions{
 		Page: 1,
@@ -398,10 +386,7 @@ func (s *InvitationServiceSuite) TestProbeOutgoing_InsufficientOrganizationPermi
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[0].GetID(), model.PermissionViewer)
-	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
-	s.Require().NoError(err)
+	s.grantUserPermissionForOrganization(org, s.users[0], model.PermissionViewer)
 
 	_, err = service.NewInvitationService().ProbeOutgoing(org.ID, service.InvitationListOptions{
 		Page: 1,
@@ -572,4 +557,18 @@ func (s *InvitationServiceSuite) TestDelete_UnauthorizedUser() {
 		).Error(),
 		err.Error(),
 	)
+}
+
+func (s *InvitationServiceSuite) grantUserPermissionForOrganization(org *service.Organization, user model.User, permission string) {
+	err := repo.NewOrganizationRepo().GrantUserPermission(org.ID, user.GetID(), permission)
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+}
+
+func (s *InvitationServiceSuite) revokeUserPermissionForOrganization(org *service.Organization, user model.User) {
+	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
 }
