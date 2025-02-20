@@ -56,12 +56,12 @@ func (c *TaskCache) Get(id string) (model.Task, error) {
 	return task, nil
 }
 
-func (c *TaskCache) GetOrNil(id string) (model.Task, error) {
+func (c *TaskCache) GetOrNil(id string) model.Task {
 	res, err := c.Get(id)
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	return res, nil
+	return res
 }
 
 func (c *TaskCache) Refresh(id string) (model.Task, error) {

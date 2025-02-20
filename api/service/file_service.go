@@ -221,22 +221,26 @@ func (svc *FileService) Store(id string, opts FileStoreOptions, userID string) (
 }
 
 type fileCreate struct {
-	fileRepo    *repo.FileRepo
-	fileSearch  *search.FileSearch
-	fileCache   *cache.FileCache
-	fileGuard   *guard.FileGuard
-	fileMapper  *fileMapper
-	fileCoreSvc *fileCoreService
+	fileRepo       *repo.FileRepo
+	fileSearch     *search.FileSearch
+	fileCache      *cache.FileCache
+	fileGuard      *guard.FileGuard
+	fileMapper     *fileMapper
+	fileCoreSvc    *fileCoreService
+	workspaceCache *cache.WorkspaceCache
+	workspaceGuard *guard.WorkspaceGuard
 }
 
 func newFileCreate() *fileCreate {
 	return &fileCreate{
-		fileRepo:    repo.NewFileRepo(),
-		fileSearch:  search.NewFileSearch(),
-		fileCache:   cache.NewFileCache(),
-		fileGuard:   guard.NewFileGuard(),
-		fileMapper:  newFileMapper(),
-		fileCoreSvc: newFileCoreService(),
+		fileRepo:       repo.NewFileRepo(),
+		fileSearch:     search.NewFileSearch(),
+		fileCache:      cache.NewFileCache(),
+		fileGuard:      guard.NewFileGuard(),
+		fileMapper:     newFileMapper(),
+		fileCoreSvc:    newFileCoreService(),
+		workspaceCache: cache.NewWorkspaceCache(),
+		workspaceGuard: guard.NewWorkspaceGuard(),
 	}
 }
 
@@ -248,6 +252,19 @@ type FileCreateOptions struct {
 }
 
 func (svc *fileCreate) create(opts FileCreateOptions, userID string) (*File, error) {
+	workspace, err := svc.workspaceCache.Get(opts.WorkspaceID)
+	if err != nil {
+		return nil, err
+	}
+	if len(opts.ParentID) > 0 {
+		if err := svc.validateParent(opts.ParentID, userID); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := svc.validateParent(workspace.GetRootID(), userID); err != nil {
+			return nil, err
+		}
+	}
 	path := helper.PathFromFilename(opts.Name)
 	parentID := opts.ParentID
 	if len(path) > 1 {
@@ -291,9 +308,6 @@ func (svc *fileCreate) createDirectoriesForPath(path []string, parentID string, 
 
 func (svc *fileCreate) performCreate(opts FileCreateOptions, failOnDuplicateName bool, userID string) (*File, error) {
 	if len(opts.ParentID) > 0 {
-		if err := svc.validateParent(opts.ParentID, userID); err != nil {
-			return nil, err
-		}
 		existing, err := svc.fileCoreSvc.getChildWithName(opts.ParentID, opts.Name)
 		if err != nil {
 			return nil, err
@@ -490,8 +504,11 @@ func (svc *fileFetch) findPath(id string, userID string) ([]*File, error) {
 		return nil, err
 	}
 	res := make([]*File, 0)
-	for _, file := range path {
-		f, err := svc.fileMapper.mapOne(file, userID)
+	for _, leaf := range path {
+		if err = svc.fileGuard.Authorize(userID, leaf, model.PermissionViewer); err != nil {
+			return nil, err
+		}
+		f, err := svc.fileMapper.mapOne(leaf, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -716,13 +733,17 @@ func (svc *fileList) probe(id string, opts FileListOptions, userID string) (*Fil
 	if file.GetType() != model.FileTypeFolder {
 		return nil, errorpkg.NewFileIsNotAFolderError(file)
 	}
-	totalElements, err := svc.fileRepo.CountChildren(id)
+	children, err := svc.getChildren(id)
+	if err != nil {
+		return nil, err
+	}
+	authorized, err := svc.fileCoreSvc.authorize(userID, children, model.PermissionViewer)
 	if err != nil {
 		return nil, err
 	}
 	return &FileProbe{
-		TotalElements: uint64(totalElements),                               // #nosec G115 integer overflow conversion
-		TotalPages:    (uint64(totalElements) + opts.Size - 1) / opts.Size, // #nosec G115 integer overflow conversion
+		TotalElements: uint64(len(authorized)),                               // #nosec G115 integer overflow conversion
+		TotalPages:    (uint64(len(authorized)) + opts.Size - 1) / opts.Size, // #nosec G115 integer overflow conversion
 	}, nil
 }
 
@@ -898,6 +919,9 @@ func (svc *fileCompute) count(id string, userID string) (*int64, error) {
 	}
 	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
+	}
+	if file.GetType() != model.FileTypeFolder {
+		return nil, errorpkg.NewFileIsNotAFolderError(file)
 	}
 	res, err := svc.fileRepo.CountItems(id)
 	if err != nil {
@@ -1679,6 +1703,9 @@ func (svc *filePatch) patchName(id string, name string, userID string) (*File, e
 	if err != nil {
 		return nil, err
 	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+		return nil, err
+	}
 	if file.GetParentID() != nil {
 		existing, err := svc.fileCoreSvc.getChildWithName(*file.GetParentID(), name)
 		if err != nil {
@@ -1687,9 +1714,6 @@ func (svc *filePatch) patchName(id string, name string, userID string) (*File, e
 		if existing != nil {
 			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
-		return nil, err
 	}
 	file.SetName(name)
 	if err = svc.fileRepo.Save(file); err != nil {
@@ -2023,6 +2047,9 @@ func (svc *fileReprocess) reprocess(id string, userID string) (*FileReprocessRes
 	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return nil, err
 	}
 	tree, err := svc.getTree(file, userID)
