@@ -18,6 +18,7 @@ import (
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
@@ -50,31 +51,7 @@ func (s *SnapshotServiceSuite) TestList() {
 	s.Require().NoError(err)
 	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
 	s.Require().NoError(err)
-	snapshots := []model.Snapshot{
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    1,
-			CreateTime: helper.NewTimeString(),
-		}),
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    2,
-			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
-		}),
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    3,
-			CreateTime: helper.TimeToString(time.Now().Add(-2 * time.Hour)),
-		}),
-	}
-	for _, snapshot := range snapshots {
-		err := repo.NewSnapshotRepo().Insert(snapshot)
-		s.Require().NoError(err)
-		err = cache.NewSnapshotCache().Set(snapshot)
-		s.Require().NoError(err)
-		err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), file.ID)
-		s.Require().NoError(err)
-	}
+	snapshots := s.createSnapshots(file.ID)
 
 	list, err := service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
 		Page: 1,
@@ -90,6 +67,25 @@ func (s *SnapshotServiceSuite) TestList() {
 	s.Equal(snapshots[2].GetID(), list.Data[2].ID)
 }
 
+func (s *SnapshotServiceSuite) TestList_MissingFilePermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_ = s.createSnapshots(file.ID)
+
+	s.revokeUserPermissionForFile(file, s.users[0])
+
+	_, err = service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
+}
+
 func (s *SnapshotServiceSuite) TestList_Paginate() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
@@ -97,31 +93,7 @@ func (s *SnapshotServiceSuite) TestList_Paginate() {
 	s.Require().NoError(err)
 	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
 	s.Require().NoError(err)
-	snapshots := []model.Snapshot{
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    1,
-			CreateTime: helper.NewTimeString(),
-		}),
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    2,
-			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
-		}),
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    3,
-			CreateTime: helper.TimeToString(time.Now().Add(-2 * time.Hour)),
-		}),
-	}
-	for _, snapshot := range snapshots {
-		err := repo.NewSnapshotRepo().Insert(snapshot)
-		s.Require().NoError(err)
-		err = cache.NewSnapshotCache().Set(snapshot)
-		s.Require().NoError(err)
-		err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), file.ID)
-		s.Require().NoError(err)
-	}
+	snapshots := s.createSnapshots(file.ID)
 
 	list, err := service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
 		Page: 1,
@@ -154,31 +126,7 @@ func (s *SnapshotServiceSuite) TestList_SortByVersionDescending() {
 	s.Require().NoError(err)
 	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
 	s.Require().NoError(err)
-	snapshots := []model.Snapshot{
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    1,
-			CreateTime: helper.NewTimeString(),
-		}),
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    2,
-			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
-		}),
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    3,
-			CreateTime: helper.TimeToString(time.Now().Add(-2 * time.Hour)),
-		}),
-	}
-	for _, snapshot := range snapshots {
-		err := repo.NewSnapshotRepo().Insert(snapshot)
-		s.Require().NoError(err)
-		err = cache.NewSnapshotCache().Set(snapshot)
-		s.Require().NoError(err)
-		err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), file.ID)
-		s.Require().NoError(err)
-	}
+	snapshots := s.createSnapshots(file.ID)
 
 	list, err := service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
 		Page:      1,
@@ -199,31 +147,7 @@ func (s *SnapshotServiceSuite) TestProbe() {
 	s.Require().NoError(err)
 	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
 	s.Require().NoError(err)
-	snapshots := []model.Snapshot{
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    1,
-			CreateTime: helper.NewTimeString(),
-		}),
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    2,
-			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
-		}),
-		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-			ID:         helper.NewID(),
-			Version:    3,
-			CreateTime: helper.TimeToString(time.Now().Add(-2 * time.Hour)),
-		}),
-	}
-	for _, snapshot := range snapshots {
-		err := repo.NewSnapshotRepo().Insert(snapshot)
-		s.Require().NoError(err)
-		err = cache.NewSnapshotCache().Set(snapshot)
-		s.Require().NoError(err)
-		err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), file.ID)
-		s.Require().NoError(err)
-	}
+	_ = s.createSnapshots(file.ID)
 
 	probe, err := service.NewSnapshotService().Probe(file.ID, service.SnapshotListOptions{
 		Page: 1,
@@ -234,6 +158,25 @@ func (s *SnapshotServiceSuite) TestProbe() {
 	s.Equal(uint64(1), probe.TotalPages)
 }
 
+func (s *SnapshotServiceSuite) TestProbe_MissingFilePermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
+	s.Require().NoError(err)
+	_ = s.createSnapshots(file.ID)
+
+	s.revokeUserPermissionForFile(file, s.users[0])
+
+	_, err = service.NewSnapshotService().Probe(file.ID, service.SnapshotListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
+}
+
 func (s *SnapshotServiceSuite) TestActivate() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
@@ -241,21 +184,27 @@ func (s *SnapshotServiceSuite) TestActivate() {
 	s.Require().NoError(err)
 	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
 	s.Require().NoError(err)
-	snapshot := repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-		ID:         helper.NewID(),
-		Version:    1,
-		CreateTime: helper.NewTimeString(),
-	})
-	err = repo.NewSnapshotRepo().Insert(snapshot)
-	s.Require().NoError(err)
-	err = cache.NewSnapshotCache().Set(snapshot)
-	s.Require().NoError(err)
-	err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), file.ID)
-	s.Require().NoError(err)
+	snapshot := s.createSnapshot(file.ID)
 
 	file, err = service.NewSnapshotService().Activate(snapshot.GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().Equal(snapshot.GetID(), file.Snapshot.ID)
+}
+
+func (s *SnapshotServiceSuite) TestActivate_MissingFilePermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
+	s.Require().NoError(err)
+	snapshot := s.createSnapshot(file.ID)
+
+	s.revokeUserPermissionForFile(file, s.users[0])
+
+	_, err = service.NewSnapshotService().Activate(snapshot.GetID(), s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
 }
 
 func (s *SnapshotServiceSuite) TestDetach() {
@@ -265,21 +214,27 @@ func (s *SnapshotServiceSuite) TestDetach() {
 	s.Require().NoError(err)
 	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
 	s.Require().NoError(err)
-	snapshot := repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
-		ID:         helper.NewID(),
-		Version:    1,
-		CreateTime: helper.NewTimeString(),
-	})
-	err = repo.NewSnapshotRepo().Insert(snapshot)
-	s.Require().NoError(err)
-	err = cache.NewSnapshotCache().Set(snapshot)
-	s.Require().NoError(err)
-	err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), file.ID)
-	s.Require().NoError(err)
+	snapshot := s.createSnapshot(file.ID)
 
 	file, err = service.NewSnapshotService().Detach(snapshot.GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Require().Nil(file.Snapshot)
+}
+
+func (s *SnapshotServiceSuite) TestDetach_MissingFilePermission() {
+	org, err := test.CreateOrganization(s.users[0].GetID())
+	s.Require().NoError(err)
+	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
+	s.Require().NoError(err)
+	file, err := test.CreateFile(workspace.ID, workspace.RootID, s.users[0].GetID())
+	s.Require().NoError(err)
+	snapshot := s.createSnapshot(file.ID)
+
+	s.revokeUserPermissionForFile(file, s.users[0])
+
+	_, err = service.NewSnapshotService().Detach(snapshot.GetID(), s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
 }
 
 func (s *SnapshotServiceSuite) TestPatch() {
@@ -300,4 +255,58 @@ func (s *SnapshotServiceSuite) TestPatch() {
 	})
 	s.Require().NoError(err)
 	s.Require().Equal(model.SnapshotStatusProcessing, patched.Status)
+}
+
+func (s *SnapshotServiceSuite) createSnapshots(fileID string) []model.Snapshot {
+	res := []model.Snapshot{
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    1,
+			CreateTime: helper.NewTimeString(),
+		}),
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    2,
+			CreateTime: helper.TimeToString(time.Now().Add(-time.Hour)),
+		}),
+		repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+			ID:         helper.NewID(),
+			Version:    3,
+			CreateTime: helper.TimeToString(time.Now().Add(-2 * time.Hour)),
+		}),
+	}
+	for _, snapshot := range res {
+		err := repo.NewSnapshotRepo().Insert(snapshot)
+		s.Require().NoError(err)
+		err = cache.NewSnapshotCache().Set(snapshot)
+		s.Require().NoError(err)
+		err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), fileID)
+		s.Require().NoError(err)
+	}
+	return res
+}
+
+func (s *SnapshotServiceSuite) createSnapshot(fileID string) model.Snapshot {
+	res := repo.NewSnapshotModelWithOptions(repo.SnapshotNewModelOptions{
+		ID:         helper.NewID(),
+		Version:    1,
+		CreateTime: helper.NewTimeString(),
+	})
+	err := repo.NewSnapshotRepo().Insert(res)
+	s.Require().NoError(err)
+	err = cache.NewSnapshotCache().Set(res)
+	s.Require().NoError(err)
+	err = repo.NewSnapshotRepo().MapWithFile(res.GetID(), fileID)
+	s.Require().NoError(err)
+	return res
+}
+
+func (s *SnapshotServiceSuite) revokeUserPermissionForFile(file *service.File, user model.User) {
+	err := repo.NewFileRepo().RevokeUserPermission(
+		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
+		user.GetID(),
+	)
+	s.Require().NoError(err)
+	_, err = cache.NewFileCache().Refresh(file.ID)
+	s.Require().NoError(err)
 }

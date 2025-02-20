@@ -159,7 +159,7 @@ func (s *TaskServiceSuite) TestFind_UnauthorizedUser() {
 
 	_, err = service.NewTaskService().Find(task.ID, s.users[1].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewTaskNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewTaskNotFoundError(err).Error(), err.Error())
 }
 
 func (s *TaskServiceSuite) TestList() {
@@ -371,7 +371,7 @@ func (s *TaskServiceSuite) TestDelete() {
 
 	_, err = service.NewTaskService().Find(task.ID, s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewTaskNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewTaskNotFoundError(err).Error(), err.Error())
 }
 
 func (s *TaskServiceSuite) TestCount() {

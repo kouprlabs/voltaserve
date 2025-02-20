@@ -56,12 +56,12 @@ func (c *SnapshotCache) Get(id string) (model.Snapshot, error) {
 	return res, nil
 }
 
-func (c *SnapshotCache) GetOrNil(id string) (model.Snapshot, error) {
+func (c *SnapshotCache) GetOrNil(id string) model.Snapshot {
 	res, err := c.Get(id)
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	return res, nil
+	return res
 }
 
 func (c *SnapshotCache) Refresh(id string) (model.Snapshot, error) {

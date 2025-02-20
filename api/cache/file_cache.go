@@ -56,12 +56,12 @@ func (c *FileCache) Get(id string) (model.File, error) {
 	return res, nil
 }
 
-func (c *FileCache) GetOrNil(id string) (model.File, error) {
+func (c *FileCache) GetOrNil(id string) model.File {
 	res, err := c.Get(id)
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	return res, nil
+	return res
 }
 
 func (c *FileCache) Refresh(id string) (model.File, error) {

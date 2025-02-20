@@ -65,21 +65,23 @@ func (s *OrganizationServiceSuite) TestFind() {
 	s.Equal(org.Name, found.Name)
 }
 
-func (s *OrganizationServiceSuite) TestFind_NonExistentOrganization() {
-	_, err := service.NewOrganizationService().Find(helper.NewID(), s.users[0].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(nil).Error(), err.Error())
-}
-
-func (s *OrganizationServiceSuite) TestFind_UnauthorizedUser() {
+func (s *OrganizationServiceSuite) TestFind_MissingPermission() {
 	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewOrganizationService().Find(org.ID, s.users[1].GetID())
+	s.revokeUserPermissionForOrganization(org, s.users[0])
+
+	_, err = service.NewOrganizationService().Find(org.ID, s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(nil).Error(), err.Error())
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
+}
+
+func (s *OrganizationServiceSuite) TestFind_NonExistentOrganization() {
+	_, err := service.NewOrganizationService().Find(helper.NewID(), s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *OrganizationServiceSuite) TestList() {
@@ -103,6 +105,32 @@ func (s *OrganizationServiceSuite) TestList() {
 	s.Equal("organization A", list.Data[0].Name)
 	s.Equal("organization B", list.Data[1].Name)
 	s.Equal("organization C", list.Data[2].Name)
+}
+
+func (s *OrganizationServiceSuite) TestList_MissingPermission() {
+	var orgs []*service.Organization
+	for _, name := range []string{"organization A", "organization B", "organization C"} {
+		o, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+			Name: name,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+		orgs = append(orgs, o)
+		time.Sleep(1 * time.Second)
+	}
+
+	s.revokeUserPermissionForOrganization(orgs[1], s.users[0])
+
+	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(1), list.Page)
+	s.Equal(uint64(2), list.Size)
+	s.Equal(uint64(2), list.TotalElements)
+	s.Equal(uint64(1), list.TotalPages)
+	s.Equal("organization A", list.Data[0].Name)
+	s.Equal("organization C", list.Data[1].Name)
 }
 
 func (s *OrganizationServiceSuite) TestList_Paginate() {
@@ -196,6 +224,27 @@ func (s *OrganizationServiceSuite) TestProbe() {
 	s.Equal(uint64(1), probe.TotalPages)
 }
 
+func (s *OrganizationServiceSuite) TestProbe_MissingPermission() {
+	var orgs []*service.Organization
+	for _, name := range []string{"organization A", "organization B", "organization C"} {
+		o, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+			Name: name,
+		}, s.users[0].GetID())
+		s.Require().NoError(err)
+		orgs = append(orgs, o)
+	}
+
+	s.revokeUserPermissionForOrganization(orgs[1], s.users[0])
+
+	probe, err := service.NewOrganizationService().Probe(service.OrganizationListOptions{
+		Page: 1,
+		Size: 10,
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+	s.Equal(uint64(2), probe.TotalElements)
+	s.Equal(uint64(1), probe.TotalPages)
+}
+
 func (s *OrganizationServiceSuite) TestPatchName() {
 	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 		Name: "organization",
@@ -207,22 +256,43 @@ func (s *OrganizationServiceSuite) TestPatchName() {
 	s.Equal("organization (edit)", org.Name)
 }
 
-func (s *OrganizationServiceSuite) TestPatchName_NonExistentOrganization() {
-	_, err := service.NewOrganizationService().PatchName(helper.NewID(), "organization (edit)", s.users[0].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-}
-
-func (s *OrganizationServiceSuite) TestPatchName_UnauthorizedUser() {
+func (s *OrganizationServiceSuite) TestPatchName_MissingPermission() {
 	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	org, err = service.NewOrganizationService().PatchName(org.ID, "organization (edit)", s.users[1].GetID())
+	s.revokeUserPermissionForOrganization(org, s.users[0])
+
+	_, err = service.NewOrganizationService().PatchName(org.ID, "organization (edit)", s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-	s.Nil(org)
+}
+
+func (s *OrganizationServiceSuite) TestPatchName_InsufficientPermission() {
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	s.grantUserPermissionForOrganization(org, s.users[0], model.PermissionViewer)
+
+	_, err = service.NewOrganizationService().PatchName(org.ID, "organization (edit)", s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(
+		errorpkg.NewOrganizationPermissionError(
+			s.users[0].GetID(),
+			cache.NewOrganizationCache().GetOrNil(org.ID),
+			model.PermissionEditor,
+		).Error(),
+		err.Error(),
+	)
+}
+
+func (s *OrganizationServiceSuite) TestPatchName_NonExistentOrganization() {
+	_, err := service.NewOrganizationService().PatchName(helper.NewID(), "organization (edit)", s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
 func (s *OrganizationServiceSuite) TestDelete() {
@@ -239,19 +309,41 @@ func (s *OrganizationServiceSuite) TestDelete() {
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
 
-func (s *OrganizationServiceSuite) TestDelete_NonExistentOrganization() {
-	err := service.NewOrganizationService().Delete(helper.NewID(), s.users[0].GetID())
-	s.Require().Error(err)
-	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
-}
-
-func (s *OrganizationServiceSuite) TestDelete_UnauthorizedUser() {
+func (s *OrganizationServiceSuite) TestDelete_MissingPermission() {
 	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = service.NewOrganizationService().Delete(org.ID, s.users[1].GetID())
+	s.revokeUserPermissionForOrganization(org, s.users[0])
+
+	err = service.NewOrganizationService().Delete(org.ID, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
+}
+
+func (s *OrganizationServiceSuite) TestDelete_InsufficientPermission() {
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	s.grantUserPermissionForOrganization(org, s.users[0], model.PermissionViewer)
+
+	err = service.NewOrganizationService().Delete(org.ID, s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(
+		errorpkg.NewOrganizationPermissionError(
+			s.users[0].GetID(),
+			cache.NewOrganizationCache().GetOrNil(org.ID),
+			model.PermissionOwner,
+		).Error(),
+		err.Error(),
+	)
+}
+
+func (s *OrganizationServiceSuite) TestDelete_NonExistentOrganization() {
+	err := service.NewOrganizationService().Delete(helper.NewID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
 }
@@ -268,6 +360,45 @@ func (s *OrganizationServiceSuite) TestRemoveMember() {
 	err = service.NewOrganizationService().RemoveMember(org.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 	s.False(guard.NewOrganizationGuard().IsAuthorized(s.users[1].GetID(), cache.NewOrganizationCache().GetOrNil(org.ID), model.PermissionEditor))
+}
+
+func (s *OrganizationServiceSuite) TestRemoveMember_MissingPermission() {
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
+	s.Require().NoError(err)
+
+	s.revokeUserPermissionForOrganization(org, s.users[0])
+
+	err = service.NewOrganizationService().RemoveMember(org.ID, s.users[1].GetID(), s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(errorpkg.NewOrganizationNotFoundError(err).Error(), err.Error())
+}
+
+func (s *OrganizationServiceSuite) TestRemoveMember_InsufficientPermission() {
+	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		Name: "organization",
+	}, s.users[0].GetID())
+	s.Require().NoError(err)
+
+	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
+	s.Require().NoError(err)
+
+	s.grantUserPermissionForOrganization(org, s.users[0], model.PermissionViewer)
+
+	err = service.NewOrganizationService().RemoveMember(org.ID, s.users[1].GetID(), s.users[0].GetID())
+	s.Require().Error(err)
+	s.Equal(
+		errorpkg.NewOrganizationPermissionError(
+			s.users[0].GetID(),
+			cache.NewOrganizationCache().GetOrNil(org.ID),
+			model.PermissionOwner,
+		).Error(),
+		err.Error(),
+	)
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember_NonExistentMember() {
@@ -290,4 +421,18 @@ func (s *OrganizationServiceSuite) TestRemoveMember_LastOwnerOfOrganization() {
 	err = service.NewOrganizationService().RemoveMember(org.ID, s.users[0].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(cache.NewOrganizationCache().GetOrNil(org.ID)).Error(), err.Error())
+}
+
+func (s *OrganizationServiceSuite) grantUserPermissionForOrganization(org *service.Organization, user model.User, permission string) {
+	err := repo.NewOrganizationRepo().GrantUserPermission(org.ID, user.GetID(), permission)
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
+}
+
+func (s *OrganizationServiceSuite) revokeUserPermissionForOrganization(org *service.Organization, user model.User) {
+	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	s.Require().NoError(err)
+	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	s.Require().NoError(err)
 }
