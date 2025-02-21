@@ -26,7 +26,7 @@ Build Docker image:
 docker build -t voltaserve/idp .
 ```
 
-Preview (will be served at [http://localhost:7777](http://localhost:7777)):
+Preview (will be served at [http://localhost:19091](http://localhost:19091)):
 
 ```shell
 deno -A npm:@redocly/cli preview-docs --port 7777 ./docs/swagger.json
