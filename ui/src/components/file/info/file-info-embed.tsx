@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import cx from 'classnames'
-import { File } from '@/client/api/file'
+import { File, FileType } from '@/client/api/file'
 import FileInfoItemCount from '@/components/file/info/file-info-item-count'
 import FileInfoCreateTime from './file-info-create-time'
 import FileInfoExtension from './file-info-extension'
@@ -27,7 +27,7 @@ const FileInfoEmbed = ({ file }: FileInfoEmbedProps) => (
     <FileInfoName file={file} />
     <FileInfoImage file={file} />
     <FileInfoExtension file={file} />
-    <FileInfoItemCount file={file} />
+    {file.type === FileType.Folder ? <FileInfoItemCount file={file} /> : null}
     <FileInfoStorage file={file} />
     <FileInfoPermission file={file} />
     <FileInfoCreateTime file={file} />

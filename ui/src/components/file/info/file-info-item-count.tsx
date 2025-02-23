@@ -1,6 +1,6 @@
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import cx from 'classnames'
-import { FileAPI, File, FileType } from '@/client/api/file'
+import { FileAPI, File } from '@/client/api/file'
 
 export type FileInfoItemCountProps = {
   file: File
@@ -8,10 +8,6 @@ export type FileInfoItemCountProps = {
 
 const FileInfoItemCount = ({ file }: FileInfoItemCountProps) => {
   const { data: count, error } = FileAPI.useGetCount(file.id)
-
-  if (file.type !== FileType.Folder) {
-    return null
-  }
 
   return (
     <Stat>
