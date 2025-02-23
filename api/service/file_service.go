@@ -736,11 +736,11 @@ func (svc *fileList) probe(id string, opts FileListOptions, userID string) (*Fil
 	if file.GetType() != model.FileTypeFolder {
 		return nil, errorpkg.NewFileIsNotAFolderError(file)
 	}
-	children, err := svc.getChildren(id)
+	data, err := svc.getChildren(id)
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.fileCoreSvc.authorize(userID, children, model.PermissionViewer)
+	authorized, err := svc.fileCoreSvc.authorize(userID, data, model.PermissionViewer)
 	if err != nil {
 		return nil, err
 	}
@@ -2801,7 +2801,6 @@ func (svc *fileSortService) sortByKind(data []model.File, userID string) []model
 	folders := svc.fileFilterSvc.filterFolders(data)
 	files := svc.fileFilterSvc.filterFiles(data)
 	res = append(res, folders...)
-	res = append(res, files...)
 	res = append(res, svc.fileFilterSvc.filterImages(files, userID)...)
 	res = append(res, svc.fileFilterSvc.filterPDFs(files, userID)...)
 	res = append(res, svc.fileFilterSvc.filterDocuments(files, userID)...)
