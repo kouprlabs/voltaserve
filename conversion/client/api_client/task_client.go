@@ -92,7 +92,11 @@ func (cl *TaskClient) Patch(id string, opts TaskPatchOptions) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.config.APIURL, id, cl.config.Security.APIKey), bytes.NewBuffer(body))
+	req, err := http.NewRequest(
+		"PATCH",
+		fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.config.APIURL, id, cl.config.Security.APIKey),
+		bytes.NewBuffer(body),
+	)
 	if err != nil {
 		return err
 	}
@@ -111,7 +115,11 @@ func (cl *TaskClient) Patch(id string, opts TaskPatchOptions) error {
 }
 
 func (cl *TaskClient) Delete(id string) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.config.APIURL, id, cl.config.Security.APIKey), nil)
+	req, err := http.NewRequest(
+		"DELETE",
+		fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.config.APIURL, id, cl.config.Security.APIKey),
+		nil,
+	)
 	if err != nil {
 		return err
 	}

@@ -21,6 +21,7 @@ export type Snapshot = {
   text?: SnapshotDownloadable
   thumbnail?: SnapshotDownloadable
   summary?: string
+  intent?: string
   language?: string
   capabilities: SnapshotCapabilities
   isActive: boolean

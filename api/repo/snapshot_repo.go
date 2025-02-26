@@ -36,7 +36,7 @@ type snapshotEntity struct {
 	Mosaic     datatypes.JSON `gorm:"column:mosaic"      json:"mosaic,omitempty"`
 	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
 	Summary    *string        `gorm:"column:summary"     json:"summary,omitempty"`
-	Intent     *string        `gorm:"column:summary"     json:"intent,omitempty"`
+	Intent     *string        `gorm:"column:intent"      json:"intent,omitempty"`
 	Status     string         `gorm:"column,status"      json:"status,omitempty"`
 	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
 	TaskID     *string        `gorm:"column:task_id"     json:"taskId,omitempty"`
@@ -152,6 +152,10 @@ func (s *snapshotEntity) GetThumbnail() *model.S3Object {
 
 func (s *snapshotEntity) GetSummary() *string {
 	return s.Summary
+}
+
+func (s *snapshotEntity) GetIntent() *string {
+	return s.Intent
 }
 
 func (s *snapshotEntity) GetStatus() string {
@@ -319,6 +323,10 @@ func (s *snapshotEntity) SetSummary(summary *string) {
 	s.Summary = summary
 }
 
+func (s *snapshotEntity) SetIntent(intent *string) {
+	s.Intent = intent
+}
+
 func (s *snapshotEntity) SetStatus(status string) {
 	s.Status = status
 }
@@ -353,8 +361,10 @@ type SnapshotNewModelOptions struct {
 	Entities   *model.S3Object
 	Mosaic     *model.S3Object
 	Thumbnail  *model.S3Object
+	Summary    *string
+	Intent     *string
 	Status     string
-	Language   string
+	Language   *string
 	TaskID     *string
 	CreateTime string
 	UpdateTime *string
@@ -366,6 +376,9 @@ func NewSnapshotModelWithOptions(opts SnapshotNewModelOptions) model.Snapshot {
 		Version:    opts.Version,
 		Status:     opts.Status,
 		TaskID:     opts.TaskID,
+		Language:   opts.Language,
+		Summary:    opts.Summary,
+		Intent:     opts.Intent,
 		CreateTime: opts.CreateTime,
 		UpdateTime: opts.UpdateTime,
 	}

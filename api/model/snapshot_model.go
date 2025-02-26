@@ -31,6 +31,7 @@ type Snapshot interface {
 	GetMosaic() *S3Object
 	GetThumbnail() *S3Object
 	GetSummary() *string
+	GetIntent() *string
 	GetTaskID() *string
 	HasOriginal() bool
 	HasPreview() bool
@@ -53,6 +54,7 @@ type Snapshot interface {
 	SetMosaic(*S3Object)
 	SetThumbnail(*S3Object)
 	SetSummary(*string)
+	SetIntent(*string)
 	SetStatus(string)
 	SetLanguage(*string)
 	SetTaskID(*string)

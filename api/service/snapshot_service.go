@@ -90,6 +90,7 @@ type Snapshot struct {
 	Text         *SnapshotDownloadable `json:"text,omitempty"`
 	Thumbnail    *SnapshotDownloadable `json:"thumbnail,omitempty"`
 	Summary      *string               `json:"summary,omitempty"`
+	Intent       *string               `json:"intent,omitempty"`
 	Language     *string               `json:"language,omitempty"`
 	Capabilities SnapshotCapabilities  `json:"capabilities"`
 	Status       string                `json:"status,omitempty"`
@@ -567,6 +568,7 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 		Status:     m.GetStatus(),
 		Language:   m.GetLanguage(),
 		Summary:    m.GetSummary(),
+		Intent:     m.GetIntent(),
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
 	}
