@@ -17,9 +17,11 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
+	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
-	"github.com/kouprlabs/voltaserve/api/client/language_client"
+	"github.com/kouprlabs/voltaserve/api/client/conversionclient"
+	"github.com/kouprlabs/voltaserve/api/client/languageclient"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
@@ -37,8 +39,8 @@ type EntityService struct {
 	taskSvc        *TaskService
 	taskMapper     *taskMapper
 	s3             infra.S3Manager
-	languageClient *language_client.LanguageClient
-	pipelineClient conversion_client.PipelineClient
+	languageClient *languageclient.LanguageClient
+	pipelineClient conversionclient.PipelineClient
 	fileIdent      *infra.FileIdentifier
 }
 
@@ -51,8 +53,8 @@ func NewEntityService() *EntityService {
 		taskSvc:        NewTaskService(),
 		taskMapper:     newTaskMapper(),
 		s3:             infra.NewS3Manager(),
-		languageClient: language_client.NewLanguageClient(),
-		pipelineClient: conversion_client.NewPipelineClient(),
+		languageClient: languageclient.NewLanguageClient(),
+		pipelineClient: conversionclient.NewPipelineClient(),
 		fileIdent:      infra.NewFileIdentifier(),
 	}
 }
@@ -164,11 +166,11 @@ type EntityListOptions struct {
 }
 
 type EntityList struct {
-	Data          []*language_client.Entity `json:"data"`
-	TotalPages    uint64                    `json:"totalPages"`
-	TotalElements uint64                    `json:"totalElements"`
-	Page          uint64                    `json:"page"`
-	Size          uint64                    `json:"size"`
+	Data          []*languageclient.Entity `json:"data"`
+	TotalPages    uint64                   `json:"totalPages"`
+	TotalElements uint64                   `json:"totalElements"`
+	Page          uint64                   `json:"page"`
+	Size          uint64                   `json:"size"`
 }
 
 func (svc *EntityService) List(fileID string, opts EntityListOptions, userID string) (*EntityList, error) {
@@ -221,8 +223,8 @@ func (svc *EntityService) runPipeline(snapshot model.Snapshot, task model.Task) 
 	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
 		key = snapshot.GetPreview().Key
 	}
-	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
-		PipelineID: helper.ToPtr(conversion_client.PipelineEntity),
+	if err := svc.pipelineClient.Run(&conversionmodel.PipelineRunOptions{
+		PipelineID: helper.ToPtr(conversionmodel.PipelineEntity),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetPreview().Bucket,
@@ -288,7 +290,7 @@ func (svc *EntityService) delete(task model.Task, snapshot model.Snapshot) {
 	}
 }
 
-func (svc *EntityService) findAll(fileID string, opts EntityListOptions, userID string) ([]*language_client.Entity, error) {
+func (svc *EntityService) findAll(fileID string, opts EntityListOptions, userID string) ([]*languageclient.Entity, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
@@ -310,18 +312,18 @@ func (svc *EntityService) findAll(fileID string, opts EntityListOptions, userID 
 	if err != nil {
 		return nil, err
 	}
-	var entities []*language_client.Entity
+	var entities []*languageclient.Entity
 	if err := json.Unmarshal([]byte(text), &entities); err != nil {
 		return nil, err
 	}
 	return svc.doFiltering(entities, opts.Query), nil
 }
 
-func (svc *EntityService) doFiltering(data []*language_client.Entity, query string) []*language_client.Entity {
+func (svc *EntityService) doFiltering(data []*languageclient.Entity, query string) []*languageclient.Entity {
 	if query == "" {
 		return data
 	}
-	filtered := make([]*language_client.Entity, 0)
+	filtered := make([]*languageclient.Entity, 0)
 	for _, entity := range data {
 		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
 			filtered = append(filtered, entity)
@@ -330,7 +332,7 @@ func (svc *EntityService) doFiltering(data []*language_client.Entity, query stri
 	return filtered
 }
 
-func (svc *EntityService) doSorting(data []*language_client.Entity, sortBy string, sortOrder string) []*language_client.Entity {
+func (svc *EntityService) doSorting(data []*languageclient.Entity, sortBy string, sortOrder string) []*languageclient.Entity {
 	if sortBy == EntitySortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == EntitySortOrderDesc {
@@ -348,11 +350,11 @@ func (svc *EntityService) doSorting(data []*language_client.Entity, sortBy strin
 	return data
 }
 
-func (svc *EntityService) doPagination(data []*language_client.Entity, page, size uint64) (pageData []*language_client.Entity, totalElements uint64, totalPages uint64) {
+func (svc *EntityService) doPagination(data []*languageclient.Entity, page, size uint64) (pageData []*languageclient.Entity, totalElements uint64, totalPages uint64) {
 	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
-		return []*language_client.Entity{}, totalElements, totalPages
+		return []*languageclient.Entity{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size

@@ -10,15 +10,6 @@
 
 package model
 
-import (
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
-)
-
-type Pipeline interface {
-	Run(api_client.PipelineRunOptions) error
-	RunFromLocalPath(string, api_client.PipelineRunOptions) error
-}
-
 type Builder interface {
-	Build(api_client.PipelineRunOptions) error
+	Build(PipelineRunOptions) error
 }

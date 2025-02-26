@@ -116,40 +116,30 @@ type TaskPatchOptions struct {
 	Payload         map[string]string `json:"payload"`
 }
 
-const (
-	TaskFieldName            = "name"
-	TaskFieldError           = "error"
-	TaskFieldPercentage      = "percentage"
-	TaskFieldIsIndeterminate = "isIndeterminate"
-	TaskFieldUserID          = "userId"
-	TaskFieldStatus          = "status"
-	TaskFieldPayload         = "payload"
-)
-
 func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if slices.Contains(opts.Fields, TaskFieldName) {
+	if slices.Contains(opts.Fields, model.TaskFieldName) {
 		task.SetName(*opts.Name)
 	}
-	if slices.Contains(opts.Fields, TaskFieldError) {
+	if slices.Contains(opts.Fields, model.TaskFieldError) {
 		task.SetError(opts.Error)
 	}
-	if slices.Contains(opts.Fields, TaskFieldPercentage) {
+	if slices.Contains(opts.Fields, model.TaskFieldPercentage) {
 		task.SetPercentage(opts.Percentage)
 	}
-	if slices.Contains(opts.Fields, TaskFieldIsIndeterminate) {
+	if slices.Contains(opts.Fields, model.TaskFieldIsIndeterminate) {
 		task.SetIsIndeterminate(true)
 	}
-	if slices.Contains(opts.Fields, TaskFieldUserID) {
+	if slices.Contains(opts.Fields, model.TaskFieldUserID) {
 		task.SetUserID(*opts.UserID)
 	}
-	if slices.Contains(opts.Fields, TaskFieldStatus) {
+	if slices.Contains(opts.Fields, model.TaskFieldStatus) {
 		task.SetStatus(*opts.Status)
 	}
-	if slices.Contains(opts.Fields, TaskFieldPayload) {
+	if slices.Contains(opts.Fields, model.TaskFieldPayload) {
 		task.SetPayload(opts.Payload)
 	}
 	if err := svc.saveAndSync(task); err != nil {

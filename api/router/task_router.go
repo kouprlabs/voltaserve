@@ -53,8 +53,8 @@ func (r *TaskRouter) AppendNonJWTRoutes(g fiber.Router) {
 
 // Get godoc
 //
-//	@Summary		Read
-//	@Description	Read
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Tasks
 //	@Id				tasks_get
 //	@Produce		json

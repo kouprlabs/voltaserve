@@ -33,7 +33,7 @@ func (r *VersionRouter) AppendRoutes(g fiber.Router) {
 //	@Produce		json
 //	@Success		200	{string}	string	"{Version}"
 //	@Failure		503	{object}	errorpkg.ErrorResponse
-//	@Router			/health [get]
+//	@Router			/version [get]
 func (r *VersionRouter) GetVersion(c *fiber.Ctx) error {
 	return c.JSON(map[string]string{
 		"version": "3.0.0",

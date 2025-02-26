@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package api_client
+package apiclient
 
 import (
 	"bytes"
@@ -24,11 +24,9 @@ import (
 	"github.com/kouprlabs/voltaserve/webdav/config"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
-)
 
-const (
-	FileTypeFile   = "file"
-	FileTypeFolder = "folder"
+	"github.com/kouprlabs/voltaserve/api/router"
+	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 type FileClient struct {
@@ -43,45 +41,6 @@ func NewFileClient(token *infra.Token) *FileClient {
 	}
 }
 
-type File struct {
-	ID          string    `json:"id"`
-	WorkspaceID string    `json:"workspaceId"`
-	Name        string    `json:"name"`
-	Type        string    `json:"type"`
-	ParentID    string    `json:"parentId"`
-	Permission  string    `json:"permission"`
-	IsShared    bool      `json:"isShared"`
-	Snapshot    *Snapshot `json:"snapshot,omitempty"`
-	CreateTime  string    `json:"createTime"`
-	UpdateTime  *string   `json:"updateTime,omitempty"`
-}
-
-type Snapshot struct {
-	Version   int        `json:"version"`
-	Original  *Download  `json:"original,omitempty"`
-	Preview   *Download  `json:"preview,omitempty"`
-	OCR       *Download  `json:"ocr,omitempty"`
-	Text      *Download  `json:"text,omitempty"`
-	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
-}
-
-type Download struct {
-	Extension string      `json:"extension"`
-	Size      int64       `json:"size"`
-	Image     *ImageProps `json:"image,omitempty"`
-}
-
-type ImageProps struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
-type Thumbnail struct {
-	Base64 string `json:"base64"`
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
-}
-
 type FileCreateFolderOptions struct {
 	Type        string
 	WorkspaceID string
@@ -89,7 +48,7 @@ type FileCreateFolderOptions struct {
 	Name        string
 }
 
-func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*File, error) {
+func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*service.File, error) {
 	params := url.Values{}
 	params.Set("type", opts.Type)
 	params.Set("workspace_id", opts.WorkspaceID)
@@ -117,7 +76,7 @@ func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*File, error) 
 	if err != nil {
 		return nil, err
 	}
-	var file File
+	var file service.File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
@@ -140,8 +99,8 @@ type FileCreateFromS3Options struct {
 	S3Reference S3Reference
 }
 
-func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*File, error) {
-	body, err := json.Marshal(opts)
+func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*service.File, error) {
+	body, err := json.Marshal(opts) //nolint:musttag // Not needed
 	if err != nil {
 		return nil, err
 	}
@@ -157,16 +116,15 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*File, error) 
 		"content_type": []string{opts.S3Reference.ContentType},
 		"size":         []string{strconv.FormatInt(opts.S3Reference.Size, 10)},
 	}
-	reqUrl := cl.config.APIURL + "/v3/files/create_from_s3?" + args.Encode()
 	req, err := http.NewRequest("POST",
-		reqUrl,
+		cl.config.APIURL+"/v3/files/create_from_s3?"+args.Encode(),
 		bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -176,14 +134,12 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*File, error) 
 			infra.GetLogger().Error(err.Error())
 			return
 		}
-	}(res.Body)
-
-	body, err = cl.jsonResponseOrThrow(res)
+	}(resp.Body)
+	body, err = cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-
-	var file File
+	var file service.File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
@@ -196,8 +152,8 @@ type FilePatchFromS3Options struct {
 	S3Reference S3Reference
 }
 
-func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*File, error) {
-	body, err := json.Marshal(opts)
+func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*service.File, error) {
+	b, err := json.Marshal(opts) //nolint:musttag // Not needed
 	if err != nil {
 		return nil, err
 	}
@@ -211,16 +167,15 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*File, error) {
 		"content_type": []string{opts.S3Reference.ContentType},
 		"size":         []string{strconv.FormatInt(opts.S3Reference.Size, 10)},
 	}
-	reqUrl := cl.config.APIURL + "/v3/files/" + opts.ID + "/patch_from_s3?" + args.Encode()
 	req, err := http.NewRequest("PATCH",
-		reqUrl,
-		bytes.NewBuffer(body))
+		cl.config.APIURL+"/v3/files/"+opts.ID+"/patch_from_s3?"+args.Encode(),
+		bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -229,22 +184,24 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*File, error) {
 			infra.GetLogger().Error(err.Error())
 			return
 		}
-	}(res.Body)
-
-	body, err = cl.jsonResponseOrThrow(res)
+	}(resp.Body)
+	b, err = cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-
-	var file File
-	if err = json.Unmarshal(body, &file); err != nil {
+	var file service.File
+	if err = json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
 }
 
-func (cl *FileClient) GetByPath(path string) (*File, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/files?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)), nil)
+func (cl *FileClient) GetByPath(path string) (*service.File, error) {
+	req, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("%s/v3/files?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)),
+		nil,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -265,15 +222,19 @@ func (cl *FileClient) GetByPath(path string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
-	var file File
+	var file service.File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
 }
 
-func (cl *FileClient) ListByPath(path string) ([]File, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/files/list?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)), nil)
+func (cl *FileClient) ListByPath(path string) ([]service.File, error) {
+	req, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("%s/v3/files/list?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)),
+		nil,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -290,18 +251,18 @@ func (cl *FileClient) ListByPath(path string) ([]File, error) {
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := cl.jsonResponseOrThrow(resp)
+	b, err := cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-	var files []File
-	if err = json.Unmarshal(body, &files); err != nil {
+	var files []service.File
+	if err = json.Unmarshal(b, &files); err != nil {
 		return nil, err
 	}
 	return files, nil
 }
 
-func (cl *FileClient) CopyOne(id string, targetID string) (*File, error) {
+func (cl *FileClient) CopyOne(id string, targetID string) (*service.File, error) {
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files/%s/copy/%s", cl.config.APIURL, id, targetID), nil)
 	if err != nil {
 		return nil, err
@@ -319,12 +280,12 @@ func (cl *FileClient) CopyOne(id string, targetID string) (*File, error) {
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := cl.jsonResponseOrThrow(resp)
+	b, err := cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-	var file *File
-	if err = json.Unmarshal(body, &file); err != nil {
+	var file *service.File
+	if err = json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
 	return file, nil
@@ -351,11 +312,7 @@ func (cl *FileClient) MoveOne(id string, targetID string) error {
 	return cl.successfulResponseOrThrow(resp)
 }
 
-type FilePatchNameOptions struct {
-	Name string `json:"name"`
-}
-
-func (cl *FileClient) PatchName(id string, opts FilePatchNameOptions) (*File, error) {
+func (cl *FileClient) PatchName(id string, opts router.FilePatchNameOptions) (*service.File, error) {
 	b, err := json.Marshal(opts)
 	if err != nil {
 		return nil, err
@@ -377,12 +334,12 @@ func (cl *FileClient) PatchName(id string, opts FilePatchNameOptions) (*File, er
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := cl.jsonResponseOrThrow(resp)
+	b, err = cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-	var file File
-	if err = json.Unmarshal(body, &file); err != nil {
+	var file service.File
+	if err = json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
@@ -409,8 +366,15 @@ func (cl *FileClient) DeleteOne(id string) error {
 	return cl.successfulResponseOrThrow(resp)
 }
 
-func (cl *FileClient) DownloadOriginal(file *File, w io.Writer, rangeHeader *string) error {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/files/%s/original%s?access_token=%s", cl.config.APIURL, file.ID, file.Snapshot.Original.Extension, cl.token.AccessToken), nil)
+func (cl *FileClient) DownloadOriginal(file *service.File, w io.Writer, rangeHeader *string) error {
+	req, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf(
+			"%s/v3/files/%s/original%s?access_token=%s",
+			cl.config.APIURL, file.ID, file.Snapshot.Original.Extension, cl.token.AccessToken,
+		),
+		nil,
+	)
 	if err != nil {
 		return err
 	}
@@ -435,7 +399,7 @@ func (cl *FileClient) DownloadOriginal(file *File, w io.Writer, rangeHeader *str
 }
 
 func (cl *FileClient) jsonResponseOrThrow(resp *http.Response) ([]byte, error) {
-	if strings.HasPrefix(resp.Header.Get("content-type"), "application/json") {
+	if strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err

@@ -16,7 +16,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
+	"github.com/kouprlabs/voltaserve/api/client/apiclient"
+	apirouter "github.com/kouprlabs/voltaserve/api/router"
+
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -37,7 +39,7 @@ func (h *Handler) methodMove(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	cl := api_client.NewFileClient(token)
+	cl := apiclient.NewFileClient(token)
 	sourcePath := helper.DecodeURIComponent(r.URL.Path)
 	targetPath := helper.DecodeURIComponent(helper.GetTargetPath(r))
 	sourceFile, err := cl.GetByPath(sourcePath)
@@ -61,7 +63,7 @@ func (h *Handler) methodMove(w http.ResponseWriter, r *http.Request) {
 		sourcePathParts := strings.Split(sourcePath, "/")
 		targetPathParts := strings.Split(targetPath, "/")
 		if len(sourcePathParts) == len(targetPathParts) && helper.Dirname(sourcePath) == helper.Dirname(targetPath) {
-			if _, err := cl.PatchName(sourceFile.ID, api_client.FilePatchNameOptions{
+			if _, err := cl.PatchName(sourceFile.ID, apirouter.FilePatchNameOptions{
 				Name: helper.DecodeURIComponent(path.Base(targetPath)),
 			}); err != nil {
 				infra.HandleError(err, w)

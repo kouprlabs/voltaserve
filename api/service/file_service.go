@@ -24,8 +24,11 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/reactivex/rxgo/v2"
 
+	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
+	"github.com/kouprlabs/voltaserve/api/client/conversionclient"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
@@ -2072,12 +2075,13 @@ type fileReprocess struct {
 	fileCache      *cache.FileCache
 	fileRepo       *repo.FileRepo
 	fileGuard      *guard.FileGuard
+	fileCoreSvc    *fileCoreService
 	snapshotCache  *cache.SnapshotCache
 	snapshotSvc    *SnapshotService
 	taskCache      *cache.TaskCache
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
-	pipelineClient conversion_client.PipelineClient
+	pipelineClient conversionclient.PipelineClient
 }
 
 func newFileReprocess() *fileReprocess {
@@ -2085,12 +2089,13 @@ func newFileReprocess() *fileReprocess {
 		fileCache:      cache.NewFileCache(),
 		fileRepo:       repo.NewFileRepo(),
 		fileGuard:      guard.NewFileGuard(),
+		fileCoreSvc:    newFileCoreService(),
 		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotSvc:    NewSnapshotService(),
 		taskCache:      cache.NewTaskCache(),
 		taskSvc:        NewTaskService(),
 		fileIdent:      infra.NewFileIdentifier(),
-		pipelineClient: conversion_client.NewPipelineClient(),
+		pipelineClient: conversionclient.NewPipelineClient(),
 	}
 }
 
@@ -2133,7 +2138,7 @@ func (svc *fileReprocess) reprocess(id string, userID string) (*FileReprocessRes
 		if err != nil {
 			return nil, err
 		}
-		if *snapshot.GetOriginal().Size <= helper.MegabyteToByte(svc.fileIdent.GetProcessingLimitMB(leaf.GetName())) {
+		if snapshot.GetOriginal().Size <= helper.MegabyteToByte(svc.fileCoreSvc.getProcessingLimitMB(leaf.GetName())) {
 			if svc.performReprocess(leaf, userID) {
 				resp.AppendAccepted(leaf.GetID())
 			} else {
@@ -2231,7 +2236,7 @@ func (svc *fileReprocess) runPipeline(file model.File, snapshot model.Snapshot, 
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return err
 	}
-	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
+	if err := svc.pipelineClient.Run(&conversionmodel.PipelineRunOptions{
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
@@ -2253,7 +2258,7 @@ type fileStore struct {
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
 	s3             infra.S3Manager
-	pipelineClient conversion_client.PipelineClient
+	pipelineClient conversionclient.PipelineClient
 }
 
 func newFileStore() *fileStore {
@@ -2268,7 +2273,7 @@ func newFileStore() *fileStore {
 		taskSvc:        NewTaskService(),
 		fileIdent:      infra.NewFileIdentifier(),
 		s3:             infra.NewS3Manager(),
-		pipelineClient: conversion_client.NewPipelineClient(),
+		pipelineClient: conversionclient.NewPipelineClient(),
 	}
 }
 
@@ -2331,7 +2336,7 @@ func (svc *fileStore) getProperties(file model.File, opts FileStoreOptions) (fil
 	} else {
 		props = svc.getPropertiesFromS3Reference(opts)
 	}
-	props.ExceedsProcessingLimit = props.Size > helper.MegabyteToByte(svc.fileIdent.GetProcessingLimitMB(props.Path))
+	props.ExceedsProcessingLimit = props.Size > helper.MegabyteToByte(svc.fileCoreSvc.getProcessingLimitMB(props.Path))
 	return props, nil
 }
 
@@ -2352,7 +2357,7 @@ func (svc *fileStore) getPropertiesFromPath(file model.File, opts FileStoreOptio
 		Original: model.S3Object{
 			Bucket: workspace.GetBucket(),
 			Key:    snapshotID + "/original" + strings.ToLower(filepath.Ext(*opts.Path)),
-			Size:   helper.ToPtr(stat.Size()),
+			Size:   stat.Size(),
 		},
 		Bucket:      workspace.GetBucket(),
 		ContentType: infra.DetectMIMEFromPath(*opts.Path),
@@ -2367,7 +2372,7 @@ func (svc *fileStore) getPropertiesFromS3Reference(opts FileStoreOptions) fileSt
 		Original: model.S3Object{
 			Bucket: opts.S3Reference.Bucket,
 			Key:    opts.S3Reference.Key,
-			Size:   helper.ToPtr(opts.S3Reference.Size),
+			Size:   opts.S3Reference.Size,
 		},
 		Bucket:      opts.S3Reference.Bucket,
 		ContentType: opts.S3Reference.ContentType,
@@ -2436,7 +2441,7 @@ func (svc *fileStore) runPipeline(file model.File, snapshot model.Snapshot, prop
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return err
 	}
-	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
+	if err := svc.pipelineClient.Run(&conversionmodel.PipelineRunOptions{
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     props.Original.Bucket,
@@ -2452,6 +2457,8 @@ type fileCoreService struct {
 	fileSearch *search.FileSearch
 	fileCache  *cache.FileCache
 	fileGuard  *guard.FileGuard
+	fileIdent  *infra.FileIdentifier
+	config     *config.Config
 }
 
 func newFileCoreService() *fileCoreService {
@@ -2460,6 +2467,8 @@ func newFileCoreService() *fileCoreService {
 		fileCache:  cache.NewFileCache(),
 		fileSearch: search.NewFileSearch(),
 		fileGuard:  guard.NewFileGuard(),
+		fileIdent:  infra.NewFileIdentifier(),
+		config:     config.GetConfig(),
 	}
 }
 
@@ -2524,6 +2533,32 @@ func (svc *fileCoreService) authorizeIDs(userID string, ids []string, permission
 		}
 	}
 	return res, nil
+}
+
+func (svc *fileCoreService) getProcessingLimitMB(path string) int {
+	var res int
+	if svc.fileIdent.IsAudio(path) {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypeAudio)
+	} else if svc.fileIdent.IsImage(path) {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypeImage)
+	} else if svc.fileIdent.IsOffice(path) {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypeOffice)
+	} else if svc.fileIdent.IsPDF(path) {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypePDF)
+	} else if svc.fileIdent.IsPlainText(path) {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypePlainText)
+	} else if svc.fileIdent.IsVideo(path) {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypeVideo)
+	} else if svc.fileIdent.IsGLB(path) {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypeGLB)
+	} else if svc.fileIdent.IsZIP(path) {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypeZIP)
+	} else if ok, err := svc.fileIdent.IsGLTF(path); ok && err != nil {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypeGLTF)
+	} else {
+		res = svc.config.Limits.GetFileProcessingMB(config.FileTypeEverythingElse)
+	}
+	return res
 }
 
 type fileFilterService struct {
@@ -2817,13 +2852,13 @@ func (svc *fileSortService) sortBySize(data []model.File, sortOrder string, user
 		if err != nil {
 			return false
 		}
-		var sizeA int64 = 0
+		var sizeA int64
 		if fileA.Snapshot != nil && fileA.Snapshot.Original != nil {
-			sizeA = *fileA.Snapshot.Original.Size
+			sizeA = fileA.Snapshot.Original.Size
 		}
-		var sizeB int64 = 0
+		var sizeB int64
 		if fileB.Snapshot != nil && fileB.Snapshot.Original != nil {
-			sizeB = *fileB.Snapshot.Original.Size
+			sizeB = fileB.Snapshot.Original.Size
 		}
 		if sortOrder == FileSortOrderDesc {
 			return sizeA > sizeB

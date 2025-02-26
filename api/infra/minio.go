@@ -146,6 +146,24 @@ func (mgr *minioManager) GetText(objectName string, bucketName string, opts mini
 	return buf.String(), nil
 }
 
+func (mgr *minioManager) ListObjects(bucketName string, options minio.ListObjectsOptions) ([]minio.ObjectInfo, error) {
+	if err := mgr.Connect(); err != nil {
+		return nil, err
+	}
+
+	objectCh := mgr.client.ListObjects(context.Background(), bucketName, options)
+
+	var objects []minio.ObjectInfo
+	for object := range objectCh {
+		if object.Err != nil {
+			return nil, object.Err
+		}
+		objects = append(objects, object)
+	}
+
+	return objects, nil
+}
+
 func (mgr *minioManager) RemoveObject(objectName string, bucketName string, opts minio.RemoveObjectOptions) error {
 	if err := mgr.Connect(); err != nil {
 		return err

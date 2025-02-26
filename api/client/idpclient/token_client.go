@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package idp_client
+package idpclient
 
 import (
 	"bytes"
@@ -60,7 +60,10 @@ func (cl *TokenClient) Exchange(options TokenExchangeOptions) (*infra.Token, err
 	if options.RefreshToken != "" {
 		form.Set("refresh_token", options.RefreshToken)
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/token", cl.config.IdPURL), bytes.NewBufferString(form.Encode()))
+	req, err := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/v3/token", cl.config.IdPURL), bytes.NewBufferString(form.Encode()),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +91,7 @@ func (cl *TokenClient) Exchange(options TokenExchangeOptions) (*infra.Token, err
 }
 
 func (cl *TokenClient) jsonResponseOrThrow(resp *http.Response) ([]byte, error) {
-	if strings.HasPrefix(resp.Header.Get("content-type"), "application/json") {
+	if strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err

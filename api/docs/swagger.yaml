@@ -1,22 +1,5 @@
 basePath: /v3
 definitions:
-  conversion_client.PipelineRunOptions:
-    properties:
-      bucket:
-        type: string
-      key:
-        type: string
-      payload:
-        additionalProperties:
-          type: string
-        type: object
-      pipelineId:
-        type: string
-      snapshotId:
-        type: string
-      taskId:
-        type: string
-    type: object
   errorpkg.ErrorResponse:
     properties:
       code:
@@ -30,7 +13,7 @@ definitions:
       userMessage:
         type: string
     type: object
-  language_client.Entity:
+  languageclient.Entity:
     properties:
       frequency:
         type: integer
@@ -60,64 +43,10 @@ definitions:
       extension:
         type: string
     type: object
-  model.S3Object:
-    properties:
-      bucket:
-        type: string
-      document:
-        $ref: '#/definitions/model.DocumentProps'
-      image:
-        $ref: '#/definitions/model.ImageProps'
-      key:
-        type: string
-      size:
-        type: integer
-    type: object
   model.ThumbnailsProps:
     properties:
       extension:
         type: string
-    type: object
-  mosaic_client.MosaicMetadata:
-    properties:
-      extension:
-        type: string
-      height:
-        type: integer
-      width:
-        type: integer
-      zoomLevels:
-        items:
-          $ref: '#/definitions/mosaic_client.MosaicZoomLevel'
-        type: array
-    type: object
-  mosaic_client.MosaicTile:
-    properties:
-      height:
-        type: integer
-      lastColWidth:
-        type: integer
-      lastRowHeight:
-        type: integer
-      width:
-        type: integer
-    type: object
-  mosaic_client.MosaicZoomLevel:
-    properties:
-      cols:
-        type: integer
-      height:
-        type: integer
-      index:
-        type: integer
-      rows:
-        type: integer
-      scaleDownPercentage:
-        type: number
-      tile:
-        $ref: '#/definitions/mosaic_client.MosaicTile'
-      width:
-        type: integer
     type: object
   router.FileGrantGroupPermissionOptions:
     properties:
@@ -246,7 +175,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/language_client.Entity'
+          $ref: '#/definitions/languageclient.Entity'
         type: array
       page:
         type: integer
@@ -659,31 +588,6 @@ definitions:
         type: integer
     type: object
   service.SnapshotPatchOptions:
-    properties:
-      entities:
-        $ref: '#/definitions/model.S3Object'
-      fields:
-        items:
-          type: string
-        type: array
-      mosaic:
-        $ref: '#/definitions/model.S3Object'
-      ocr:
-        $ref: '#/definitions/model.S3Object'
-      options:
-        $ref: '#/definitions/conversion_client.PipelineRunOptions'
-      original:
-        $ref: '#/definitions/model.S3Object'
-      preview:
-        $ref: '#/definitions/model.S3Object'
-      status:
-        type: string
-      taskId:
-        type: string
-      text:
-        $ref: '#/definitions/model.S3Object'
-      thumbnail:
-        $ref: '#/definitions/model.S3Object'
     type: object
   service.SnapshotProbe:
     properties:
@@ -1099,7 +1003,7 @@ paths:
       tags:
       - Files
     get:
-      description: Read by FindPath
+      description: Get by FindPath
       operationId: files_find_by_path
       parameters:
       - description: ID
@@ -1127,7 +1031,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read by FindPath
+      summary: Get by FindPath
       tags:
       - Files
     post:
@@ -1206,7 +1110,7 @@ paths:
       tags:
       - Files
     get:
-      description: Read
+      description: Get
       operationId: files_find
       parameters:
       - description: ID
@@ -1229,7 +1133,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Get
       tags:
       - Files
     patch:
@@ -1324,7 +1228,7 @@ paths:
       - Files
   /files/{id}/group_permissions:
     get:
-      description: Read Group Permissions
+      description: Get Group Permissions
       operationId: files_find_group_permissions
       parameters:
       - description: ID
@@ -1349,7 +1253,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read Group Permissions
+      summary: Get Group Permissions
       tags:
       - Files
   /files/{id}/list:
@@ -1762,7 +1666,7 @@ paths:
       - Files
   /files/{id}/size:
     get:
-      description: Read Compute Size
+      description: Get Compute Size
       operationId: files_compute_size
       parameters:
       - description: ID
@@ -1785,7 +1689,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read Compute Size
+      summary: Get Compute Size
       tags:
       - Files
   /files/{id}/text{ext}:
@@ -1858,7 +1762,7 @@ paths:
       - Files
   /files/{id}/user_permissions:
     get:
-      description: Read User Permissions
+      description: Get User Permissions
       operationId: files_find_user_permissions
       parameters:
       - description: ID
@@ -1883,7 +1787,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read User Permissions
+      summary: Get User Permissions
       tags:
       - Files
   /files/copy:
@@ -2237,7 +2141,7 @@ paths:
       tags:
       - Groups
     get:
-      description: Read
+      description: Get
       operationId: groups_find
       parameters:
       - description: ID
@@ -2260,7 +2164,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Get
       tags:
       - Groups
   /groups/{id}/members:
@@ -2397,8 +2301,8 @@ paths:
       - Groups
   /health:
     get:
-      description: Check
-      operationId: health_check
+      description: Get
+      operationId: health_get
       produces:
       - application/json
       responses:
@@ -2410,7 +2314,7 @@ paths:
           description: Service Unavailable
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Check
+      summary: Get
       tags:
       - Health
   /invitations:
@@ -2792,7 +2696,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/mosaic_client.MosaicMetadata'
+            type: object
         "404":
           description: Not Found
           schema:
@@ -2945,7 +2849,7 @@ paths:
       tags:
       - Organizations
     get:
-      description: Read
+      description: Get
       operationId: organizations_find
       parameters:
       - description: ID
@@ -2968,7 +2872,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Get
       tags:
       - Organizations
   /organizations/{id}/leave:
@@ -3457,7 +3361,7 @@ paths:
       tags:
       - Tasks
     get:
-      description: Read
+      description: Get
       operationId: tasks_get
       parameters:
       - description: ID
@@ -3480,7 +3384,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Get
       tags:
       - Tasks
     patch:
@@ -3744,8 +3648,8 @@ paths:
       - Users
   /version:
     get:
-      description: Read
-      operationId: version_read
+      description: Get
+      operationId: version_get
       produces:
       - application/json
       responses:
@@ -3757,7 +3661,7 @@ paths:
           description: Service Unavailable
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Get
       tags:
       - Version
   /workspaces:
@@ -3858,7 +3762,7 @@ paths:
       tags:
       - Workspaces
     get:
-      description: Read
+      description: Get
       operationId: workspaces_find
       parameters:
       - description: ID
@@ -3881,7 +3785,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Get
       tags:
       - Workspaces
   /workspaces/{id}/storage_capacity:

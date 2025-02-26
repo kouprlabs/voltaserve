@@ -16,8 +16,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
+	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
@@ -124,7 +125,7 @@ type SnapshotCapabilities struct {
 
 type SnapshotDownloadable struct {
 	Extension string               `json:"extension,omitempty"`
-	Size      *int64               `json:"size,omitempty"`
+	Size      int64                `json:"size,omitempty"`
 	Image     *model.ImageProps    `json:"image,omitempty"`
 	Document  *model.DocumentProps `json:"document,omitempty"`
 }
@@ -501,17 +502,17 @@ func (svc *SnapshotService) deleteFromRepo(snapshots []model.Snapshot) {
 }
 
 type SnapshotPatchOptions struct {
-	Options   conversion_client.PipelineRunOptions `json:"options"`
-	Fields    []string                             `json:"fields"`
-	Original  *model.S3Object                      `json:"original"`
-	Preview   *model.S3Object                      `json:"preview"`
-	Text      *model.S3Object                      `json:"text"`
-	OCR       *model.S3Object                      `json:"ocr"`
-	Entities  *model.S3Object                      `json:"entities"`
-	Mosaic    *model.S3Object                      `json:"mosaic"`
-	Thumbnail *model.S3Object                      `json:"thumbnail"`
-	Status    *string                              `json:"status"`
-	TaskID    *string                              `json:"taskId"`
+	Options   conversionmodel.PipelineRunOptions `json:"options"`
+	Fields    []string                           `json:"fields"`
+	Original  *model.S3Object                    `json:"original"`
+	Preview   *model.S3Object                    `json:"preview"`
+	Text      *model.S3Object                    `json:"text"`
+	OCR       *model.S3Object                    `json:"ocr"`
+	Entities  *model.S3Object                    `json:"entities"`
+	Mosaic    *model.S3Object                    `json:"mosaic"`
+	Thumbnail *model.S3Object                    `json:"thumbnail"`
+	Status    *string                            `json:"status"`
+	TaskID    *string                            `json:"taskId"`
 }
 
 func (svc *SnapshotService) isTaskPending(snapshot model.Snapshot) (bool, error) {

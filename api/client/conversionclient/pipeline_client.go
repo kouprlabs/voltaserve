@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package conversion_client
+package conversionclient
 
 import (
 	"bytes"
@@ -16,11 +16,13 @@ import (
 	"fmt"
 	"net/http"
 
+	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+
 	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type PipelineClient interface {
-	Run(opts *PipelineRunOptions) error
+	Run(opts *conversionmodel.PipelineRunOptions) error
 }
 
 func NewPipelineClient() PipelineClient {
@@ -41,21 +43,7 @@ func newPipelineClient() *pipelineClient {
 	}
 }
 
-const (
-	PipelineEntity = "entity"
-	PipelineMosaic = "mosaic"
-)
-
-type PipelineRunOptions struct {
-	PipelineID *string           `json:"pipelineId,omitempty"`
-	TaskID     string            `json:"taskId"`
-	SnapshotID string            `json:"snapshotId"`
-	Bucket     string            `json:"bucket"`
-	Key        string            `json:"key"`
-	Payload    map[string]string `json:"payload,omitempty"`
-}
-
-func (cl *pipelineClient) Run(opts *PipelineRunOptions) error {
+func (cl *pipelineClient) Run(opts *conversionmodel.PipelineRunOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
@@ -85,6 +73,6 @@ func newMockPipelineClient() *mockPipelineClient {
 	return &mockPipelineClient{}
 }
 
-func (m *mockPipelineClient) Run(_ *PipelineRunOptions) error {
+func (m *mockPipelineClient) Run(_ *conversionmodel.PipelineRunOptions) error {
 	return nil
 }

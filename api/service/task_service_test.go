@@ -64,7 +64,7 @@ func (s *TaskServiceSuite) TestPatch_Name() {
 	s.Require().NoError(err)
 
 	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
-		Fields: []string{service.TaskFieldName},
+		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("task (edit)"),
 	})
 	s.Require().NoError(err)
@@ -80,7 +80,7 @@ func (s *TaskServiceSuite) TestPatch_Status() {
 	s.Require().NoError(err)
 
 	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
-		Fields: []string{service.TaskFieldStatus},
+		Fields: []string{model.TaskFieldStatus},
 		Status: helper.ToPtr(model.TaskStatusRunning),
 	})
 	s.Require().NoError(err)
@@ -96,7 +96,7 @@ func (s *TaskServiceSuite) TestPatch_Error() {
 	s.Require().NoError(err)
 
 	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
-		Fields: []string{service.TaskFieldError},
+		Fields: []string{model.TaskFieldError},
 		Error:  helper.ToPtr("something went wrong"),
 	})
 	s.Require().NoError(err)
@@ -112,7 +112,7 @@ func (s *TaskServiceSuite) TestPatch_Percentage() {
 	s.Require().NoError(err)
 
 	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
-		Fields:     []string{service.TaskFieldPercentage},
+		Fields:     []string{model.TaskFieldPercentage},
 		Percentage: helper.ToPtr(50),
 	})
 	s.Require().NoError(err)
@@ -128,7 +128,7 @@ func (s *TaskServiceSuite) TestPatch_Payload() {
 	s.Require().NoError(err)
 
 	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
-		Fields:  []string{service.TaskFieldPayload},
+		Fields:  []string{model.TaskFieldPayload},
 		Payload: map[string]string{"key": "value"},
 	})
 	s.Require().NoError(err)

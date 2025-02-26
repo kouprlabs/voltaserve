@@ -44,8 +44,8 @@ func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 
 // Create godoc
 //
-//	@Summary		Create Mosaic
-//	@Description	Create Mosaic
+//	@Summary		Create
+//	@Description	Create
 //	@Tags			Mosaics
 //	@Id				mosaics_create
 //	@Accept			multipart/form-data
@@ -53,7 +53,7 @@ func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 //	@Param			file		formData	file	true	"File to upload"
 //	@Param			s3_key		formData	string	true	"S3 Key"
 //	@Param			s3_bucket	formData	string	true	"S3 Bucket"
-//	@Success		200			{object}	builder.Metadata
+//	@Success		200			{object}	model.Metadata
 //	@Failure		400			{string}	string	"Bad Request"
 //	@Failure		500			{string}	string	"Internal Server Error"
 //	@Router			/mosaics [post]
@@ -87,8 +87,8 @@ func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 
 // Delete godoc
 //
-//	@Summary		Delete Mosaic
-//	@Description	Delete Mosaic
+//	@Summary		Delete
+//	@Description	Delete
 //	@Tags			Mosaics
 //	@Id				mosaics_delete
 //	@Param			s3_bucket	path	string	true	"S3 Bucket"
@@ -114,7 +114,7 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 //	@Id				mosaics_get_metadata
 //	@Param			s3_bucket	path		string	true	"S3 Bucket"
 //	@Param			s3_key		path		string	true	"S3 Key"
-//	@Success		200			{object}	builder.Metadata
+//	@Success		200			{object}	model.Metadata
 //	@Failure		404			{string}	string	"Not Found"
 //	@Failure		500			{string}	string	"Internal Server Error"
 //	@Router			/mosaics/{s3_bucket}/{s3_key}/metadata [get]

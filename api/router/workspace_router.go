@@ -78,8 +78,8 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 
 // Find godoc
 //
-//	@Summary		Read
-//	@Description	Read
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Workspaces
 //	@Id				workspaces_find
 //	@Produce		json

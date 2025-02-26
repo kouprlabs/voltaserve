@@ -16,7 +16,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
+	"github.com/kouprlabs/voltaserve/api/client/apiclient"
+
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -37,7 +38,7 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	cl := api_client.NewFileClient(token)
+	cl := apiclient.NewFileClient(token)
 	inputPath := helper.DecodeURIComponent(r.URL.Path)
 	file, err := cl.GetByPath(inputPath)
 	if err != nil {

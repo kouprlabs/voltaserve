@@ -82,8 +82,8 @@ func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 
 // Find godoc
 //
-//	@Summary		Read
-//	@Description	Read
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Organizations
 //	@Id				organizations_find
 //	@Produce		json

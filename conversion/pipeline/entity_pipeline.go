@@ -18,10 +18,13 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
-	"github.com/kouprlabs/voltaserve/conversion/client/language_client"
+	"github.com/kouprlabs/voltaserve/api/client/apiclient"
+	"github.com/kouprlabs/voltaserve/api/client/languageclient"
+	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
+	apimodel "github.com/kouprlabs/voltaserve/api/model"
+	apiservice "github.com/kouprlabs/voltaserve/api/service"
+
 	"github.com/kouprlabs/voltaserve/conversion/helper"
-	"github.com/kouprlabs/voltaserve/conversion/identifier"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
 	"github.com/kouprlabs/voltaserve/conversion/model"
 	"github.com/kouprlabs/voltaserve/conversion/processor"
@@ -31,11 +34,11 @@ type entityPipeline struct {
 	imageProc      *processor.ImageProcessor
 	pdfProc        *processor.PDFProcessor
 	ocrProc        *processor.OCRProcessor
-	fileIdent      *identifier.FileIdentifier
-	s3             *infra.S3Manager
-	taskClient     *api_client.TaskClient
-	snapshotClient *api_client.SnapshotClient
-	languageClient *language_client.LanguageClient
+	fileIdent      *apiinfra.FileIdentifier
+	s3             apiinfra.S3Manager
+	taskClient     *apiclient.TaskClient
+	snapshotClient *apiclient.SnapshotClient
+	languageClient *languageclient.LanguageClient
 }
 
 func NewEntityPipeline() model.Pipeline {
@@ -43,15 +46,15 @@ func NewEntityPipeline() model.Pipeline {
 		imageProc:      processor.NewImageProcessor(),
 		pdfProc:        processor.NewPDFProcessor(),
 		ocrProc:        processor.NewOCRProcessor(),
-		fileIdent:      identifier.NewFileIdentifier(),
-		s3:             infra.NewS3Manager(),
-		taskClient:     api_client.NewTaskClient(),
-		snapshotClient: api_client.NewSnapshotClient(),
-		languageClient: language_client.NewLanguageClient(),
+		fileIdent:      apiinfra.NewFileIdentifier(),
+		s3:             apiinfra.NewS3Manager(),
+		taskClient:     apiclient.NewTaskClient(),
+		snapshotClient: apiclient.NewSnapshotClient(),
+		languageClient: languageclient.NewLanguageClient(),
 	}
 }
 
-func (p *entityPipeline) Run(opts api_client.PipelineRunOptions) error {
+func (p *entityPipeline) Run(opts model.PipelineRunOptions) error {
 	if opts.Payload == nil || opts.Payload["language"] == "" {
 		return errors.New("language is undefined")
 	}
@@ -69,9 +72,9 @@ func (p *entityPipeline) Run(opts api_client.PipelineRunOptions) error {
 	return p.RunFromLocalPath(inputPath, opts)
 }
 
-func (p *entityPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName},
+func (p *entityPipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunOptions) error {
+	if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
+		Fields: []string{apimodel.TaskFieldName},
 		Name:   helper.ToPtr("Extracting text."),
 	}); err != nil {
 		return err
@@ -80,8 +83,8 @@ func (p *entityPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipe
 	if err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName},
+	if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
+		Fields: []string{apimodel.TaskFieldName},
 		Name:   helper.ToPtr("Collecting entities."),
 	}); err != nil {
 		return err
@@ -89,17 +92,17 @@ func (p *entityPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipe
 	if err := p.collectEntities(*text, opts); err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName, api_client.TaskFieldStatus},
+	if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
+		Fields: []string{apimodel.TaskFieldName, apimodel.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(api_client.TaskStatusSuccess),
+		Status: helper.ToPtr(apimodel.TaskStatusSuccess),
 	}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *entityPipeline) extractText(inputPath string, opts api_client.PipelineRunOptions) (*string, error) {
+func (p *entityPipeline) extractText(inputPath string, opts model.PipelineRunOptions) (*string, error) {
 	/* Generate PDF/A */
 	var pdfPath string
 	if p.fileIdent.IsImage(opts.Key) {
@@ -137,17 +140,17 @@ func (p *entityPipeline) extractText(inputPath string, opts api_client.PipelineR
 		if err != nil {
 			return nil, err
 		}
-		s3Object := api_client.S3Object{
+		s3Object := apimodel.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.SnapshotID + "/ocr.pdf",
-			Size:   helper.ToPtr(stat.Size()),
+			Size:   stat.Size(),
 		}
 		if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 			return nil, err
 		}
-		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+		if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 			Options: opts,
-			Fields:  []string{api_client.SnapshotFieldOCR},
+			Fields:  []string{apimodel.SnapshotFieldOCR},
 			OCR:     &s3Object,
 		}); err != nil {
 			return nil, err
@@ -163,17 +166,17 @@ func (p *entityPipeline) extractText(inputPath string, opts api_client.PipelineR
 		return nil, err
 	}
 	/* Set text S3 object */
-	s3Object := api_client.S3Object{
+	s3Object := apimodel.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/text.txt",
-		Size:   helper.ToPtr(int64(len(*text))),
+		Size:   int64(len(*text)),
 	}
 	if err := p.s3.PutText(s3Object.Key, *text, "text/plain", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{api_client.SnapshotFieldText},
+		Fields:  []string{apimodel.SnapshotFieldText},
 		Text:    &s3Object,
 	}); err != nil {
 		return nil, err
@@ -181,14 +184,14 @@ func (p *entityPipeline) extractText(inputPath string, opts api_client.PipelineR
 	return text, nil
 }
 
-func (p *entityPipeline) collectEntities(text string, opts api_client.PipelineRunOptions) error {
+func (p *entityPipeline) collectEntities(text string, opts model.PipelineRunOptions) error {
 	if len(text) == 0 {
 		return errors.New("text is empty")
 	}
 	if len(text) > 1000000 {
 		return errors.New("text exceeds supported limit of 1000000 characters")
 	}
-	res, err := p.languageClient.GetEntities(language_client.GetEntitiesOptions{
+	res, err := p.languageClient.GetEntities(languageclient.GetEntitiesOptions{
 		Text:     text,
 		Language: opts.Payload["language"],
 	})
@@ -200,17 +203,17 @@ func (p *entityPipeline) collectEntities(text string, opts api_client.PipelineRu
 		return err
 	}
 	content := string(b)
-	s3Object := api_client.S3Object{
+	s3Object := apimodel.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/entities.json",
-		Size:   helper.ToPtr(int64(len(content))),
+		Size:   int64(len(content)),
 	}
 	if err := p.s3.PutText(s3Object.Key, content, "application/json", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 		Options:  opts,
-		Fields:   []string{api_client.SnapshotFieldEntities},
+		Fields:   []string{apimodel.SnapshotFieldEntities},
 		Entities: &s3Object,
 	}); err != nil {
 		return err

@@ -27,6 +27,7 @@ type S3Manager interface {
 	GetObject(objectName string, bucketName string, opts minio.GetObjectOptions) (*bytes.Buffer, *int64, error)
 	GetObjectWithBuffer(objectName string, bucketName string, buf *bytes.Buffer, opts minio.GetObjectOptions) (*int64, error)
 	GetText(objectName string, bucketName string, opts minio.GetObjectOptions) (string, error)
+	ListObjects(bucketName string, options minio.ListObjectsOptions) ([]minio.ObjectInfo, error)
 	RemoveObject(objectName string, bucketName string, opts minio.RemoveObjectOptions) error
 	RemoveFolder(objectName string, bucketName string, opts minio.RemoveObjectOptions) error
 	CreateBucket(bucketName string) error

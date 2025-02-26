@@ -84,7 +84,7 @@ func (s *AferoSuite) TestUploadAndDownload() {
 	s.Require().NoError(err)
 	s.NotNil(file.Snapshot)
 	s.Equal(snapshotID, file.Snapshot.ID)
-	s.Equal(stat.Size(), *file.Snapshot.Original.Size)
+	s.Equal(stat.Size(), file.Snapshot.Original.Size)
 	s.Equal(filepath.Ext(filePath), file.Snapshot.Original.Extension)
 	s.Equal(int64(1), file.Snapshot.Version)
 

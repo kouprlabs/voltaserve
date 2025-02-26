@@ -17,7 +17,11 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
+	"github.com/kouprlabs/voltaserve/api/client/apiclient"
+	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
+	apimodel "github.com/kouprlabs/voltaserve/api/model"
+	apiservice "github.com/kouprlabs/voltaserve/api/service"
+
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
@@ -28,9 +32,9 @@ import (
 type glbPipeline struct {
 	glbProc        *processor.GLBProcessor
 	imageProc      *processor.ImageProcessor
-	s3             *infra.S3Manager
-	taskClient     *api_client.TaskClient
-	snapshotClient *api_client.SnapshotClient
+	s3             apiinfra.S3Manager
+	taskClient     *apiclient.TaskClient
+	snapshotClient *apiclient.SnapshotClient
 	config         *config.Config
 }
 
@@ -38,14 +42,14 @@ func NewGLBPipeline() model.Pipeline {
 	return &glbPipeline{
 		glbProc:        processor.NewGLBProcessor(),
 		imageProc:      processor.NewImageProcessor(),
-		s3:             infra.NewS3Manager(),
-		taskClient:     api_client.NewTaskClient(),
-		snapshotClient: api_client.NewSnapshotClient(),
+		s3:             apiinfra.NewS3Manager(),
+		taskClient:     apiclient.NewTaskClient(),
+		snapshotClient: apiclient.NewSnapshotClient(),
 		config:         config.GetConfig(),
 	}
 }
 
-func (p *glbPipeline) Run(opts api_client.PipelineRunOptions) error {
+func (p *glbPipeline) Run(opts model.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
@@ -60,9 +64,9 @@ func (p *glbPipeline) Run(opts api_client.PipelineRunOptions) error {
 	return p.RunFromLocalPath(inputPath, opts)
 }
 
-func (p *glbPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName},
+func (p *glbPipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunOptions) error {
+	if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
+		Fields: []string{apimodel.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
@@ -75,33 +79,33 @@ func (p *glbPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipelin
 	return nil
 }
 
-func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts model.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
 	if filepath.Ext(inputPath) == filepath.Ext(opts.Key) {
 		/* The original is a .glb */
-		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+		if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 			Options: opts,
-			Fields:  []string{api_client.SnapshotFieldPreview},
-			Preview: &api_client.S3Object{
+			Fields:  []string{apimodel.SnapshotFieldPreview},
+			Preview: &apimodel.S3Object{
 				Bucket: opts.Bucket,
 				Key:    opts.Key,
-				Size:   helper.ToPtr(stat.Size()),
+				Size:   stat.Size(),
 			},
 		}); err != nil {
 			return err
 		}
 	} else {
 		/* The original is likely an .zip glTF file */
-		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+		if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 			Options: opts,
-			Fields:  []string{api_client.SnapshotFieldPreview},
-			Preview: &api_client.S3Object{
+			Fields:  []string{apimodel.SnapshotFieldPreview},
+			Preview: &apimodel.S3Object{
 				Bucket: opts.Bucket,
 				Key:    filepath.FromSlash(opts.SnapshotID + "/preview" + filepath.Ext(inputPath)),
-				Size:   helper.ToPtr(stat.Size()),
+				Size:   stat.Size(),
 			},
 		}); err != nil {
 			return err
@@ -110,7 +114,7 @@ func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts api_clien
 	return nil
 }
 
-func (p *glbPipeline) createThumbnail(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *glbPipeline) createThumbnail(inputPath string, opts model.PipelineRunOptions) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	defer func(path string) {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
@@ -128,18 +132,18 @@ func (p *glbPipeline) createThumbnail(inputPath string, opts api_client.Pipeline
 		if err != nil {
 			return err
 		}
-		s3Object := &api_client.S3Object{
+		s3Object := &apimodel.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(outputPath),
 			Image:  props,
-			Size:   helper.ToPtr(stat.Size()),
+			Size:   stat.Size(),
 		}
 		if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 			return err
 		}
-		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+		if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 			Options:   opts,
-			Fields:    []string{api_client.SnapshotFieldThumbnail},
+			Fields:    []string{apimodel.SnapshotFieldThumbnail},
 			Thumbnail: s3Object,
 		}); err != nil {
 			return err

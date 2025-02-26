@@ -14,13 +14,13 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
+	"github.com/kouprlabs/voltaserve/conversion/model"
 	"github.com/kouprlabs/voltaserve/conversion/pipeline"
 )
 
 type Scheduler struct {
-	pipelineQueue       [][]api_client.PipelineRunOptions
+	pipelineQueue       [][]model.PipelineRunOptions
 	pipelineWorkerCount int
 	activePipelineCount int
 	installer           *Installer
@@ -43,7 +43,7 @@ func NewDefaultSchedulerOptions() SchedulerOptions {
 
 func NewScheduler(opts SchedulerOptions) *Scheduler {
 	return &Scheduler{
-		pipelineQueue:       make([][]api_client.PipelineRunOptions, opts.PipelineWorkerCount),
+		pipelineQueue:       make([][]model.PipelineRunOptions, opts.PipelineWorkerCount),
 		pipelineWorkerCount: opts.PipelineWorkerCount,
 		installer:           opts.Installer,
 	}
@@ -58,7 +58,7 @@ func (s *Scheduler) Start() {
 	go s.pipelineWorkerStatus()
 }
 
-func (s *Scheduler) SchedulePipeline(opts *api_client.PipelineRunOptions) {
+func (s *Scheduler) SchedulePipeline(opts *model.PipelineRunOptions) {
 	index := s.choosePipeline()
 	infra.GetLogger().Named(infra.StrScheduler).Infow("👉  choosing", "pipeline", index)
 	s.pipelineQueue[index] = append(s.pipelineQueue[index], *opts)
@@ -79,7 +79,7 @@ func (s *Scheduler) choosePipeline() int {
 
 func (s *Scheduler) pipelineWorker(index int) {
 	dispatcher := pipeline.NewDispatcher()
-	s.pipelineQueue[index] = make([]api_client.PipelineRunOptions, 0)
+	s.pipelineQueue[index] = make([]model.PipelineRunOptions, 0)
 	infra.GetLogger().Named(infra.StrPipeline).Infow("⚙️  running", "worker", index)
 	for {
 		if len(s.pipelineQueue[index]) > 0 && !s.installer.IsRunning() {
@@ -90,9 +90,11 @@ func (s *Scheduler) pipelineWorker(index int) {
 			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
 			if err == nil {
-				infra.GetLogger().Named(infra.StrPipeline).Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
+				infra.GetLogger().Named(infra.StrPipeline).
+					Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
 			} else {
-				infra.GetLogger().Named(infra.StrPipeline).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key, "error", err.Error())
+				infra.GetLogger().Named(infra.StrPipeline).
+					Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key, "error", err.Error())
 			}
 			s.pipelineQueue[index] = s.pipelineQueue[index][1:]
 			s.activePipelineCount--
@@ -129,7 +131,8 @@ func (s *Scheduler) pipelineWorkerStatus() {
 			if s.activePipelineCount == 0 {
 				infra.GetLogger().Named(infra.StrWorkerStatus).Infow("🌤️  all idle", "type", "pipeline")
 			} else {
-				infra.GetLogger().Named(infra.StrWorkerStatus).Infow("🔥  active", "type", "pipeline", "count", s.activePipelineCount)
+				infra.GetLogger().Named(infra.StrWorkerStatus).
+					Infow("🔥  active", "type", "pipeline", "count", s.activePipelineCount)
 			}
 		}
 		previous = s.activePipelineCount

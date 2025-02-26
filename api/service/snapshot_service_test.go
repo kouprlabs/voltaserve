@@ -16,8 +16,9 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/model"
@@ -249,8 +250,8 @@ func (s *SnapshotServiceSuite) TestPatch() {
 	s.Require().NoError(err)
 
 	patched, err := service.NewSnapshotService().Patch(snapshot.GetID(), service.SnapshotPatchOptions{
-		Options: conversion_client.PipelineRunOptions{SnapshotID: snapshot.GetID()},
-		Fields:  []string{repo.SnapshotFieldStatus},
+		Options: conversionmodel.PipelineRunOptions{SnapshotID: snapshot.GetID()},
+		Fields:  []string{model.SnapshotFieldStatus},
 		Status:  helper.ToPtr(model.SnapshotStatusProcessing),
 	})
 	s.Require().NoError(err)

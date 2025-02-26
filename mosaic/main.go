@@ -48,13 +48,13 @@ func main() {
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 
+	versionRouter := router.NewVersionRouter()
+	versionRouter.AppendRoutes(app)
+
 	v3 := app.Group("v3")
 
 	healthRouter := router.NewHealthRouter()
 	healthRouter.AppendRoutes(v3)
-
-	version := router.NewVersionRouter()
-	version.AppendRoutes(app)
 
 	mosaicRouter := router.NewMosaicRouter()
 	mosaicRouter.AppendRoutes(v3.Group("mosaics"))

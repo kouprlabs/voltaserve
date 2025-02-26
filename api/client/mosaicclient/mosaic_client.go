@@ -8,20 +8,22 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package mosaic_client
+package mosaicclient
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 
-	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
+	mosaicmodel "github.com/kouprlabs/voltaserve/mosaic/model"
+
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 type MosaicClient struct {
@@ -34,45 +36,20 @@ func NewMosaicClient() *MosaicClient {
 	}
 }
 
-type MosaicMetadata struct {
-	IsOutdated bool              `json:"isOutdated"`
-	Width      int               `json:"width"`
-	Height     int               `json:"height"`
-	Extension  string            `json:"extension"`
-	ZoomLevels []MosaicZoomLevel `json:"zoomLevels"`
-}
-
-type MosaicZoomLevel struct {
-	Index               int        `json:"index"`
-	Width               int        `json:"width"`
-	Height              int        `json:"height"`
-	Rows                int        `json:"rows"`
-	Cols                int        `json:"cols"`
-	ScaleDownPercentage float32    `json:"scaleDownPercentage"`
-	Tile                MosaicTile `json:"tile"`
-}
-
-type MosaicTile struct {
-	Width         int `json:"width"`
-	Height        int `json:"height"`
-	LastColWidth  int `json:"lastColWidth"`
-	LastRowHeight int `json:"lastRowHeight"`
-}
-
 type MosaicCreateOptions struct {
 	Path     string
 	S3Key    string
 	S3Bucket string
 }
 
-func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error) {
+func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*mosaicmodel.Metadata, error) {
 	file, err := os.Open(opts.Path)
 	if err != nil {
 		return nil, err
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			infra.GetLogger().Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -105,7 +82,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			infra.GetLogger().Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -115,8 +92,42 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error
 	if err != nil {
 		return nil, err
 	}
-	var res MosaicMetadata
+	var res mosaicmodel.Metadata
 	if err = json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+type MosaicGetMetadataOptions struct {
+	S3Key    string `json:"s3Key"`
+	S3Bucket string `json:"s3Bucket"`
+}
+
+func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*mosaicmodel.Metadata, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/v3/mosaics/%s/%s/metadata", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key))
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, errorpkg.NewMosaicNotFoundError(nil)
+		} else {
+			return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
+		}
+	}
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var res mosaicmodel.Metadata
+	err = json.Unmarshal(b, &res)
+	if err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -139,10 +150,48 @@ func (cl *MosaicClient) Delete(opts MosaicDeleteOptions) error {
 	}
 	if resp.StatusCode != http.StatusNoContent {
 		if resp.StatusCode == http.StatusNotFound {
-			return errors.New("mosaic not found")
+			return errorpkg.NewMosaicNotFoundError(nil)
 		} else {
 			return fmt.Errorf("request failed with status %d", resp.StatusCode)
 		}
 	}
 	return nil
+}
+
+type MosaicDownloadTileOptions struct {
+	S3Key     string `json:"s3Key"`
+	S3Bucket  string `json:"s3Bucket"`
+	ZoomLevel int    `json:"zoomLevel"`
+	Row       int    `json:"row"`
+	Column    int    `json:"column"`
+	Extension string `json:"extension"`
+}
+
+func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) (*bytes.Buffer, error) {
+	resp, err := http.Get(
+		fmt.Sprintf(
+			"%s/v3/mosaics/%s/%s/zoom_level/%d/row/%d/column/%d/extension/%s",
+			cl.config.MosaicURL, opts.S3Bucket, opts.S3Key, opts.ZoomLevel, opts.Row, opts.Column, opts.Extension,
+		))
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, errorpkg.NewMosaicNotFoundError(nil)
+		} else {
+			return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
+		}
+	}
+	buf := &bytes.Buffer{}
+	_, err = io.Copy(buf, resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
 }

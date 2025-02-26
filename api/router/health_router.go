@@ -25,20 +25,20 @@ func NewHealthRouter() *HealthRouter {
 }
 
 func (r *HealthRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/health", r.Check)
+	g.Get("/health", r.Get)
 }
 
-// Check godoc
+// Get godoc
 //
-//	@Summary		Check
-//	@Description	Check
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Health
-//	@Id				health_check
+//	@Id				health_get
 //	@Produce		json
 //	@Success		200	{string}	string	"OK"
 //	@Failure		503	{object}	errorpkg.ErrorResponse
 //	@Router			/health [get]
-func (r *HealthRouter) Check(c *fiber.Ctx) error {
+func (r *HealthRouter) Get(c *fiber.Ctx) error {
 	if err := infra.NewPostgresManager().Connect(true); err != nil {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}

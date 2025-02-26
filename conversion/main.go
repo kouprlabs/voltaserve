@@ -59,15 +59,15 @@ func main() {
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 
+	versionRouter := router.NewVersionRouter()
+	versionRouter.AppendRoutes(app)
+
 	v3 := app.Group("v3")
 
 	healthRouter := router.NewHealthRouter(router.HealthRouterOptions{
 		Installer: installer,
 	})
 	healthRouter.AppendRoutes(v3)
-
-	version := router.NewVersionRouter()
-	version.AppendRoutes(app)
 
 	pipelineRouter := router.NewPipelineRouter(router.NewPipelineRouterOptions{
 		Scheduler: scheduler,

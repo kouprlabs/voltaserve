@@ -11,15 +11,17 @@
 package pipeline
 
 import (
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
+	"github.com/kouprlabs/voltaserve/api/client/apiclient"
+	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
+	apimodel "github.com/kouprlabs/voltaserve/api/model"
+	apiservice "github.com/kouprlabs/voltaserve/api/service"
+
 	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
-	"github.com/kouprlabs/voltaserve/conversion/identifier"
 	"github.com/kouprlabs/voltaserve/conversion/model"
 )
 
 type Dispatcher struct {
-	pipelineIdentifier *identifier.PipelineIdentifier
 	pdfPipeline        model.Pipeline
 	imagePipeline      model.Pipeline
 	officePipeline     model.Pipeline
@@ -28,13 +30,13 @@ type Dispatcher struct {
 	mosaicPipeline     model.Pipeline
 	glbPipeline        model.Pipeline
 	zipPipeline        model.Pipeline
-	taskClient         *api_client.TaskClient
-	snapshotClient     *api_client.SnapshotClient
+	taskClient         *apiclient.TaskClient
+	snapshotClient     *apiclient.SnapshotClient
+	fileIdent          *apiinfra.FileIdentifier
 }
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
-		pipelineIdentifier: identifier.NewPipelineIdentifier(),
 		pdfPipeline:        NewPDFPipeline(),
 		imagePipeline:      NewImagePipeline(),
 		officePipeline:     NewOfficePipeline(),
@@ -43,27 +45,28 @@ func NewDispatcher() *Dispatcher {
 		mosaicPipeline:     NewMosaicPipeline(),
 		glbPipeline:        NewGLBPipeline(),
 		zipPipeline:        NewZIPPipeline(),
-		taskClient:         api_client.NewTaskClient(),
-		snapshotClient:     api_client.NewSnapshotClient(),
+		taskClient:         apiclient.NewTaskClient(),
+		snapshotClient:     apiclient.NewSnapshotClient(),
+		fileIdent:          apiinfra.NewFileIdentifier(),
 	}
 }
 
-func (d *Dispatcher) Dispatch(opts api_client.PipelineRunOptions) error {
-	if err := d.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+func (d *Dispatcher) Dispatch(opts model.PipelineRunOptions) error {
+	if err := d.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{api_client.SnapshotFieldStatus},
-		Status:  helper.ToPtr(api_client.SnapshotStatusProcessing),
+		Fields:  []string{apimodel.SnapshotFieldStatus},
+		Status:  helper.ToPtr(apimodel.SnapshotStatusProcessing),
 	}); err != nil {
 		return err
 	}
-	if err := d.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
+	if err := d.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
 		Name:   helper.ToPtr("Processing."),
-		Fields: []string{api_client.TaskFieldStatus},
-		Status: helper.ToPtr(api_client.TaskStatusRunning),
+		Fields: []string{apimodel.TaskFieldStatus},
+		Status: helper.ToPtr(apimodel.TaskStatusRunning),
 	}); err != nil {
 		return err
 	}
-	id := d.pipelineIdentifier.Identify(opts)
+	id := d.identify(opts)
 	var err error
 	if id == model.PipelinePDF {
 		err = d.pdfPipeline.Run(opts)
@@ -83,26 +86,26 @@ func (d *Dispatcher) Dispatch(opts api_client.PipelineRunOptions) error {
 		err = d.zipPipeline.Run(opts)
 	}
 	if err != nil {
-		if err := d.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+		if err := d.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 			Options: opts,
-			Fields:  []string{api_client.SnapshotFieldStatus},
-			Status:  helper.ToPtr(api_client.SnapshotStatusError),
+			Fields:  []string{apimodel.SnapshotFieldStatus},
+			Status:  helper.ToPtr(apimodel.SnapshotStatusError),
 		}); err != nil {
 			return err
 		}
-		if err := d.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-			Fields: []string{api_client.TaskFieldStatus, api_client.TaskFieldError},
-			Status: helper.ToPtr(api_client.TaskStatusError),
+		if err := d.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
+			Fields: []string{apimodel.TaskFieldStatus, apimodel.TaskFieldError},
+			Status: helper.ToPtr(apimodel.TaskStatusError),
 			Error:  helper.ToPtr(errorpkg.GetUserFriendlyMessage(err.Error(), errorpkg.FallbackMessage)),
 		}); err != nil {
 			return err
 		}
 		return err
 	} else {
-		if err := d.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+		if err := d.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 			Options: opts,
-			Fields:  []string{api_client.SnapshotFieldStatus, api_client.SnapshotFieldTaskID},
-			Status:  helper.ToPtr(api_client.SnapshotStatusReady),
+			Fields:  []string{apimodel.SnapshotFieldStatus, apimodel.SnapshotFieldTaskID},
+			Status:  helper.ToPtr(apimodel.SnapshotStatusReady),
 		}); err != nil {
 			return err
 		}
@@ -111,4 +114,25 @@ func (d *Dispatcher) Dispatch(opts api_client.PipelineRunOptions) error {
 		}
 		return nil
 	}
+}
+
+func (d *Dispatcher) identify(opts model.PipelineRunOptions) string {
+	if opts.PipelineID != nil {
+		return *opts.PipelineID
+	} else {
+		if d.fileIdent.IsPDF(opts.Key) {
+			return model.PipelinePDF
+		} else if d.fileIdent.IsOffice(opts.Key) || d.fileIdent.IsPlainText(opts.Key) {
+			return model.PipelineOffice
+		} else if d.fileIdent.IsImage(opts.Key) {
+			return model.PipelineImage
+		} else if d.fileIdent.IsAudio(opts.Key) || d.fileIdent.IsVideo(opts.Key) {
+			return model.PipelineAudioVideo
+		} else if d.fileIdent.IsGLB(opts.Key) {
+			return model.PipelineGLB
+		} else if d.fileIdent.IsZIP(opts.Key) {
+			return model.PipelineZIP
+		}
+	}
+	return ""
 }

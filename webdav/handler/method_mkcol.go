@@ -16,7 +16,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
+	"github.com/kouprlabs/voltaserve/api/client/apiclient"
+	apimodel "github.com/kouprlabs/voltaserve/api/model"
+
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -37,7 +39,7 @@ func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	cl := api_client.NewFileClient(token)
+	cl := apiclient.NewFileClient(token)
 	rootPath := helper.DecodeURIComponent(getRootPath(r.URL.Path))
 	rootDir, err := cl.GetByPath(rootPath)
 	if err != nil {
@@ -45,8 +47,8 @@ func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if rootDir.Name != "/" && rootDir.WorkspaceID != "" {
-		if _, err = cl.CreateFolder(api_client.FileCreateFolderOptions{
-			Type:        api_client.FileTypeFolder,
+		if _, err = cl.CreateFolder(apiclient.FileCreateFolderOptions{
+			Type:        apimodel.FileTypeFolder,
 			WorkspaceID: rootDir.WorkspaceID,
 			ParentID:    rootDir.ID,
 			Name:        helper.DecodeURIComponent(getSubPath(r.URL.Path)),

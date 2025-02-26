@@ -252,8 +252,8 @@ type FileCreateFolderOptions struct {
 
 // Find godoc
 //
-//	@Summary		Read
-//	@Description	Read
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Files
 //	@Id				files_find
 //	@Produce		json
@@ -276,8 +276,8 @@ func (r *FileRouter) Find(c *fiber.Ctx) error {
 
 // FindByPath godoc
 //
-//	@Summary		Read by FindPath
-//	@Description	Read by FindPath
+//	@Summary		Get by FindPath
+//	@Description	Get by FindPath
 //	@Tags			Files
 //	@Id				files_find_by_path
 //	@Produce		json
@@ -620,8 +620,8 @@ func (r *FileRouter) DeleteMany(c *fiber.Ctx) error {
 
 // ComputeSize godoc
 //
-//	@Summary		Read Compute Size
-//	@Description	Read Compute Size
+//	@Summary		Get Compute Size
+//	@Description	Get Compute Size
 //	@Tags			Files
 //	@Id				files_compute_size
 //	@Produce		json
@@ -793,8 +793,8 @@ func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 
 // FindUserPermissions godoc
 //
-//	@Summary		Read User Permissions
-//	@Description	Read User Permissions
+//	@Summary		Get User Permissions
+//	@Description	Get User Permissions
 //	@Tags			Files
 //	@Id				files_find_user_permissions
 //	@Produce		json
@@ -814,8 +814,8 @@ func (r *FileRouter) FindUserPermissions(c *fiber.Ctx) error {
 
 // FindGroupPermissions godoc
 //
-//	@Summary		Read Group Permissions
-//	@Description	Read Group Permissions
+//	@Summary		Get Group Permissions
+//	@Description	Get Group Permissions
 //	@Tags			Files
 //	@Id				files_find_group_permissions
 //	@Produce		json

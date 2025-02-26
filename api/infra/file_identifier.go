@@ -17,18 +17,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/log"
 )
 
-type FileIdentifier struct {
-	config *config.Config
-}
+type FileIdentifier struct{}
 
 func NewFileIdentifier() *FileIdentifier {
-	return &FileIdentifier{
-		config: config.GetConfig(),
-	}
+	return &FileIdentifier{}
 }
 
 func (fi *FileIdentifier) IsPDF(path string) bool {
@@ -53,6 +48,9 @@ func (fi *FileIdentifier) IsOffice(path string) bool {
 		".otg",
 		".odf",
 		".odc",
+		".pages",
+		".numbers",
+		".key",
 		".rtf",
 	}
 	extension := filepath.Ext(path)
@@ -88,6 +86,7 @@ func (fi *FileIdentifier) IsPlainText(path string) bool {
 		".yaml",
 		".toml",
 		".md",
+		".csv",
 	}
 	extension := filepath.Ext(path)
 	for _, v := range extensions {
@@ -114,6 +113,44 @@ func (fi *FileIdentifier) IsImage(path string) bool {
 		".heif",
 		".xcf",
 		".svg",
+	}
+	extension := filepath.Ext(path)
+	for _, v := range extensions {
+		if strings.ToLower(extension) == v {
+			return true
+		}
+	}
+	return false
+}
+
+func (fi *FileIdentifier) IsJPEG(path string) bool {
+	path = strings.ToLower(path)
+	return filepath.Ext(path) == ".jpg" ||
+		filepath.Ext(path) == ".jpeg" ||
+		filepath.Ext(path) == ".jpe" ||
+		filepath.Ext(path) == ".jfif" ||
+		filepath.Ext(path) == ".jif"
+}
+
+func (fi *FileIdentifier) IsPNG(path string) bool {
+	path = strings.ToLower(path)
+	return filepath.Ext(path) == ".png"
+}
+
+func (fi *FileIdentifier) IsTIFF(path string) bool {
+	path = strings.ToLower(path)
+	return filepath.Ext(path) == ".tiff" ||
+		filepath.Ext(path) == ".tif"
+}
+
+func (fi *FileIdentifier) IsNonAlphaChannelImage(path string) bool {
+	extensions := []string{
+		".jpg",
+		".jpeg",
+		".gif",
+		".tiff",
+		".tif",
+		".bmp",
 	}
 	extension := filepath.Ext(path)
 	for _, v := range extensions {
@@ -254,31 +291,5 @@ func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 			}
 		}
 	}
-	return hasGLTF && (!hasBin || gltfFile != nil), nil
-}
-
-func (fi *FileIdentifier) GetProcessingLimitMB(path string) int {
-	var res int
-	if fi.IsAudio(path) {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypeAudio)
-	} else if fi.IsImage(path) {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypeImage)
-	} else if fi.IsOffice(path) {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypeOffice)
-	} else if fi.IsPDF(path) {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypePDF)
-	} else if fi.IsPlainText(path) {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypePlainText)
-	} else if fi.IsVideo(path) {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypeVideo)
-	} else if fi.IsGLB(path) {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypeGLB)
-	} else if fi.IsZIP(path) {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypeZIP)
-	} else if ok, err := fi.IsGLTF(path); ok && err != nil {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypeGLTF)
-	} else {
-		res = fi.config.Limits.GetFileProcessingMB(config.FileTypeEverythingElse)
-	}
-	return res
+	return hasGLTF && (!hasBin || (gltfFile != nil)), nil
 }

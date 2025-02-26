@@ -17,7 +17,11 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
+	"github.com/kouprlabs/voltaserve/api/client/apiclient"
+	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
+	apimodel "github.com/kouprlabs/voltaserve/api/model"
+	apiservice "github.com/kouprlabs/voltaserve/api/service"
+
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
@@ -29,10 +33,10 @@ type officePipeline struct {
 	pdfPipeline    model.Pipeline
 	officeProc     *processor.OfficeProcessor
 	pdfProc        *processor.PDFProcessor
-	s3             *infra.S3Manager
+	s3             apiinfra.S3Manager
 	config         *config.Config
-	taskClient     *api_client.TaskClient
-	snapshotClient *api_client.SnapshotClient
+	taskClient     *apiclient.TaskClient
+	snapshotClient *apiclient.SnapshotClient
 }
 
 func NewOfficePipeline() model.Pipeline {
@@ -40,14 +44,14 @@ func NewOfficePipeline() model.Pipeline {
 		pdfPipeline:    NewPDFPipeline(),
 		officeProc:     processor.NewOfficeProcessor(),
 		pdfProc:        processor.NewPDFProcessor(),
-		s3:             infra.NewS3Manager(),
+		s3:             apiinfra.NewS3Manager(),
 		config:         config.GetConfig(),
-		taskClient:     api_client.NewTaskClient(),
-		snapshotClient: api_client.NewSnapshotClient(),
+		taskClient:     apiclient.NewTaskClient(),
+		snapshotClient: apiclient.NewSnapshotClient(),
 	}
 }
 
-func (p *officePipeline) Run(opts api_client.PipelineRunOptions) error {
+func (p *officePipeline) Run(opts model.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
@@ -63,9 +67,9 @@ func (p *officePipeline) Run(opts api_client.PipelineRunOptions) error {
 	return p.RunFromLocalPath(inputPath, opts)
 }
 
-func (p *officePipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName},
+func (p *officePipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunOptions) error {
+	if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
+		Fields: []string{apimodel.TaskFieldName},
 		Name:   helper.ToPtr("Converting to PDF."),
 	}); err != nil {
 		return err
@@ -84,7 +88,7 @@ func (p *officePipeline) RunFromLocalPath(inputPath string, opts api_client.Pipe
 	return p.pdfPipeline.RunFromLocalPath(*pdfPath, opts)
 }
 
-func (p *officePipeline) convertToPDF(inputPath string, opts api_client.PipelineRunOptions) (*string, error) {
+func (p *officePipeline) convertToPDF(inputPath string, opts model.PipelineRunOptions) (*string, error) {
 	outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 	outputPath, err := p.officeProc.PDF(inputPath, outputDir)
 	if err != nil {
@@ -107,13 +111,13 @@ func (p *officePipeline) convertToPDF(inputPath string, opts api_client.Pipeline
 	if err := p.s3.PutFile(pdfKey, pdfPath, helper.DetectMimeFromFile(pdfPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{api_client.SnapshotFieldPreview},
-		Preview: &api_client.S3Object{
+		Fields:  []string{apimodel.SnapshotFieldPreview},
+		Preview: &apimodel.S3Object{
 			Bucket: opts.Bucket,
 			Key:    pdfKey,
-			Size:   helper.ToPtr(stat.Size()),
+			Size:   stat.Size(),
 		},
 	}); err != nil {
 		return nil, err

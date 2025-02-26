@@ -8,15 +8,15 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package api_client
+package apiclient
 
 import (
 	"fmt"
 	"io"
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/webdav/config"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type HealthClient struct {
@@ -30,14 +30,18 @@ func NewHealthClient() *HealthClient {
 }
 
 func (cl *HealthClient) Get() (string, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/v3/health", cl.config.IdPURL))
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/health", cl.config.APIURL), nil)
+	if err != nil {
+		return "", err
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			infra.GetLogger().Error(err.Error())
+		if err := Body.Close(); err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	body, err := io.ReadAll(resp.Body)

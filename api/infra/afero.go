@@ -18,6 +18,8 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/spf13/afero"
+
+	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 var aferoFs afero.Fs
@@ -35,12 +37,12 @@ func newAferoManager() *aferoManager {
 	}
 }
 
-func (am *aferoManager) Connect() error {
+func (mgr *aferoManager) Connect() error {
 	return nil
 }
 
-func (am *aferoManager) StatObject(objectName string, bucketName string, opts minio.StatObjectOptions) (minio.ObjectInfo, error) {
-	info, err := am.fs.Stat(am.getObjectPath(objectName, bucketName))
+func (mgr *aferoManager) StatObject(objectName string, bucketName string, _ minio.StatObjectOptions) (minio.ObjectInfo, error) {
+	info, err := mgr.fs.Stat(mgr.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return minio.ObjectInfo{}, err
 	}
@@ -50,12 +52,16 @@ func (am *aferoManager) StatObject(objectName string, bucketName string, opts mi
 	}, nil
 }
 
-func (am *aferoManager) GetFile(objectName string, filePath string, bucketName string, opts minio.GetObjectOptions) error {
-	file, err := am.fs.Open(am.getObjectPath(objectName, bucketName))
+func (mgr *aferoManager) GetFile(objectName string, filePath string, bucketName string, _ minio.GetObjectOptions) error {
+	file, err := mgr.fs.Open(mgr.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file afero.File) {
+		if err := file.Close(); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}(file)
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return err
@@ -63,24 +69,28 @@ func (am *aferoManager) GetFile(objectName string, filePath string, bucketName s
 	return os.WriteFile(filePath, data, 0o644) //nolint:gosec // Used for tests only
 }
 
-func (am *aferoManager) PutFile(objectName string, filePath string, contentType string, bucketName string, opts minio.PutObjectOptions) error {
+func (mgr *aferoManager) PutFile(objectName string, filePath string, _ string, bucketName string, _ minio.PutObjectOptions) error {
 	data, err := os.ReadFile(filePath) //nolint:gosec // Used for tests only
 	if err != nil {
 		return err
 	}
-	return afero.WriteFile(am.fs, am.getObjectPath(objectName, bucketName), data, 0o644)
+	return afero.WriteFile(mgr.fs, mgr.getObjectPath(objectName, bucketName), data, 0o644)
 }
 
-func (am *aferoManager) PutText(objectName string, text string, contentType string, bucketName string, opts minio.PutObjectOptions) error {
-	return afero.WriteFile(am.fs, am.getObjectPath(objectName, bucketName), []byte(text), 0o644)
+func (mgr *aferoManager) PutText(objectName string, text string, _ string, bucketName string, _ minio.PutObjectOptions) error {
+	return afero.WriteFile(mgr.fs, mgr.getObjectPath(objectName, bucketName), []byte(text), 0o644)
 }
 
-func (am *aferoManager) GetObject(objectName string, bucketName string, opts minio.GetObjectOptions) (*bytes.Buffer, *int64, error) {
-	file, err := am.fs.Open(am.getObjectPath(objectName, bucketName))
+func (mgr *aferoManager) GetObject(objectName string, bucketName string, _ minio.GetObjectOptions) (*bytes.Buffer, *int64, error) {
+	file, err := mgr.fs.Open(mgr.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return nil, nil, err
 	}
-	defer file.Close()
+	defer func(file afero.File) {
+		if err := file.Close(); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}(file)
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return nil, nil, err
@@ -90,12 +100,16 @@ func (am *aferoManager) GetObject(objectName string, bucketName string, opts min
 	return buf, &size, nil
 }
 
-func (am *aferoManager) GetObjectWithBuffer(objectName string, bucketName string, buf *bytes.Buffer, opts minio.GetObjectOptions) (*int64, error) {
-	file, err := am.fs.Open(am.getObjectPath(objectName, bucketName))
+func (mgr *aferoManager) GetObjectWithBuffer(objectName string, bucketName string, buf *bytes.Buffer, _ minio.GetObjectOptions) (*int64, error) {
+	file, err := mgr.fs.Open(mgr.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func(file afero.File) {
+		if err := file.Close(); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}(file)
 	if _, err = io.Copy(buf, file); err != nil {
 		return nil, err
 	}
@@ -103,12 +117,16 @@ func (am *aferoManager) GetObjectWithBuffer(objectName string, bucketName string
 	return &size, nil
 }
 
-func (am *aferoManager) GetText(objectName string, bucketName string, opts minio.GetObjectOptions) (string, error) {
-	file, err := am.fs.Open(am.getObjectPath(objectName, bucketName))
+func (mgr *aferoManager) GetText(objectName string, bucketName string, _ minio.GetObjectOptions) (string, error) {
+	file, err := mgr.fs.Open(mgr.getObjectPath(objectName, bucketName))
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func(file afero.File) {
+		if err := file.Close(); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}(file)
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return "", err
@@ -116,26 +134,51 @@ func (am *aferoManager) GetText(objectName string, bucketName string, opts minio
 	return string(data), nil
 }
 
-func (am *aferoManager) RemoveObject(objectName string, bucketName string, opts minio.RemoveObjectOptions) error {
-	return am.fs.Remove(am.getObjectPath(objectName, bucketName))
+func (mgr *aferoManager) ListObjects(bucketName string, _ minio.ListObjectsOptions) ([]minio.ObjectInfo, error) {
+	var objects []minio.ObjectInfo
+	bucketPath := mgr.getBucketPath(bucketName)
+	err := afero.Walk(mgr.fs, bucketPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			relPath, err := filepath.Rel(bucketPath, path)
+			if err != nil {
+				return err
+			}
+			objects = append(objects, minio.ObjectInfo{
+				Key:  relPath,
+				Size: info.Size(),
+			})
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return objects, nil
 }
 
-func (am *aferoManager) RemoveFolder(objectName string, bucketName string, opts minio.RemoveObjectOptions) error {
-	return am.fs.RemoveAll(am.getObjectPath(objectName, bucketName))
+func (mgr *aferoManager) RemoveObject(objectName string, bucketName string, _ minio.RemoveObjectOptions) error {
+	return mgr.fs.Remove(mgr.getObjectPath(objectName, bucketName))
 }
 
-func (am *aferoManager) CreateBucket(bucketName string) error {
-	return am.fs.MkdirAll(am.getBucketPath(bucketName), 0o755)
+func (mgr *aferoManager) RemoveFolder(objectName string, bucketName string, _ minio.RemoveObjectOptions) error {
+	return mgr.fs.RemoveAll(mgr.getObjectPath(objectName, bucketName))
 }
 
-func (am *aferoManager) RemoveBucket(bucketName string) error {
-	return am.fs.RemoveAll(am.getBucketPath(bucketName))
+func (mgr *aferoManager) CreateBucket(bucketName string) error {
+	return mgr.fs.MkdirAll(mgr.getBucketPath(bucketName), 0o755)
 }
 
-func (am *aferoManager) getObjectPath(objectName string, bucketName string) string {
-	return filepath.Join(am.getBucketPath(bucketName), objectName)
+func (mgr *aferoManager) RemoveBucket(bucketName string) error {
+	return mgr.fs.RemoveAll(mgr.getBucketPath(bucketName))
 }
 
-func (am *aferoManager) getBucketPath(bucketName string) string {
+func (mgr *aferoManager) getObjectPath(objectName string, bucketName string) string {
+	return filepath.Join(mgr.getBucketPath(bucketName), objectName)
+}
+
+func (mgr *aferoManager) getBucketPath(bucketName string) string {
 	return filepath.Join("/", bucketName)
 }

@@ -101,7 +101,7 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			file_id	path		string	true	"File ID"
-//	@Success		200		{object}	mosaic_client.MosaicMetadata
+//	@Success		200		{object}	any
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id}/metadata [get]

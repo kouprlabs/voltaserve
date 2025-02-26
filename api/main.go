@@ -55,13 +55,13 @@ func main() {
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
+	versionRouter := router.NewVersionRouter()
+	versionRouter.AppendRoutes(app)
+
 	v3 := app.Group("v3")
 
 	healthRouter := router.NewHealthRouter()
 	healthRouter.AppendRoutes(v3)
-
-	versionRouter := router.NewVersionRouter()
-	versionRouter.AppendRoutes(app)
 
 	fileGroup := v3.Group("files")
 	fileRouter := router.NewFileRouter()

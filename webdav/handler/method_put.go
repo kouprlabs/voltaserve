@@ -23,7 +23,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
+	"github.com/kouprlabs/voltaserve/api/client/apiclient"
+	apimodel "github.com/kouprlabs/voltaserve/api/model"
+
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -51,7 +53,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	cl := api_client.NewFileClient(token)
+	cl := apiclient.NewFileClient(token)
 	directory, err := cl.GetByPath(helper.DecodeURIComponent(helper.Dirname(r.URL.Path)))
 	if err != nil {
 		infra.HandleError(err, w)
@@ -85,7 +87,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 	}
 	snapshotID := helper.NewID()
 	key := snapshotID + "/original" + strings.ToLower(filepath.Ext(name))
-	if err = h.s3.PutFile(key, outputPath, infra.DetectMIMEFromPath(outputPath), workspace.Bucket, minio.PutObjectOptions{}); err != nil {
+	if err = h.s3.PutFile(key, outputPath, infra.DetectMIMEFromPath(outputPath), workspace.GetBucket(), minio.PutObjectOptions{}); err != nil {
 		infra.HandleError(err, w)
 		return
 	}
@@ -94,8 +96,8 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(err, w)
 		return
 	}
-	s3Reference := api_client.S3Reference{
-		Bucket:      workspace.Bucket,
+	s3Reference := apiclient.S3Reference{
+		Bucket:      workspace.GetBucket(),
 		Key:         key,
 		SnapshotID:  snapshotID,
 		Size:        stat.Size(),
@@ -103,7 +105,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 	}
 	existingFile, err := cl.GetByPath(r.URL.Path)
 	if err == nil {
-		if _, err = cl.PatchFromS3(api_client.FilePatchFromS3Options{
+		if _, err = cl.PatchFromS3(apiclient.FilePatchFromS3Options{
 			ID:          existingFile.ID,
 			Name:        name,
 			S3Reference: s3Reference,
@@ -114,8 +116,8 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 		return
 	} else {
-		if _, err = cl.CreateFromS3(api_client.FileCreateFromS3Options{
-			Type:        api_client.FileTypeFile,
+		if _, err = cl.CreateFromS3(apiclient.FileCreateFromS3Options{
+			Type:        apimodel.FileTypeFile,
 			WorkspaceID: directory.WorkspaceID,
 			ParentID:    directory.ID,
 			Name:        name,

@@ -1,46 +1,5 @@
 basePath: /v3
 definitions:
-  builder.Metadata:
-    properties:
-      extension:
-        type: string
-      height:
-        type: integer
-      width:
-        type: integer
-      zoomLevels:
-        items:
-          $ref: '#/definitions/builder.ZoomLevel'
-        type: array
-    type: object
-  builder.Tile:
-    properties:
-      height:
-        type: integer
-      lastColWidth:
-        type: integer
-      lastRowHeight:
-        type: integer
-      width:
-        type: integer
-    type: object
-  builder.ZoomLevel:
-    properties:
-      cols:
-        type: integer
-      height:
-        type: integer
-      index:
-        type: integer
-      rows:
-        type: integer
-      scaleDownPercentage:
-        type: number
-      tile:
-        $ref: '#/definitions/builder.Tile'
-      width:
-        type: integer
-    type: object
   errorpkg.ErrorResponse:
     properties:
       code:
@@ -54,6 +13,47 @@ definitions:
       userMessage:
         type: string
     type: object
+  model.Metadata:
+    properties:
+      extension:
+        type: string
+      height:
+        type: integer
+      width:
+        type: integer
+      zoomLevels:
+        items:
+          $ref: '#/definitions/model.ZoomLevel'
+        type: array
+    type: object
+  model.Tile:
+    properties:
+      height:
+        type: integer
+      lastColWidth:
+        type: integer
+      lastRowHeight:
+        type: integer
+      width:
+        type: integer
+    type: object
+  model.ZoomLevel:
+    properties:
+      cols:
+        type: integer
+      height:
+        type: integer
+      index:
+        type: integer
+      rows:
+        type: integer
+      scaleDownPercentage:
+        type: number
+      tile:
+        $ref: '#/definitions/model.Tile'
+      width:
+        type: integer
+    type: object
 info:
   contact: {}
   title: Voltaserve Mosaic
@@ -62,12 +62,12 @@ paths:
   /health:
     get:
       description: Get
-      operationId: get_version
+      operationId: health_get
       produces:
       - application/json
       responses:
         "200":
-          description: '{Version}'
+          description: OK
           schema:
             type: string
         "503":
@@ -76,12 +76,12 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get
       tags:
-      - Version
+      - Health
   /mosaics:
     post:
       consumes:
       - multipart/form-data
-      description: Create Mosaic
+      description: Create
       operationId: mosaics_create
       parameters:
       - description: File to upload
@@ -105,7 +105,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/builder.Metadata'
+            $ref: '#/definitions/model.Metadata'
         "400":
           description: Bad Request
           schema:
@@ -114,12 +114,12 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Create Mosaic
+      summary: Create
       tags:
       - Mosaics
   /mosaics/{s3_bucket}/{s3_key}:
     delete:
-      description: Delete Mosaic
+      description: Delete
       operationId: mosaics_delete
       parameters:
       - description: S3 Bucket
@@ -143,7 +143,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Delete Mosaic
+      summary: Delete
       tags:
       - Mosaics
   /mosaics/{s3_bucket}/{s3_key}/metadata:
@@ -165,7 +165,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/builder.Metadata'
+            $ref: '#/definitions/model.Metadata'
         "404":
           description: Not Found
           schema:
@@ -228,4 +228,22 @@ paths:
       summary: Download Tile
       tags:
       - Mosaics
+  /version:
+    get:
+      description: Get
+      operationId: version_get
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{Version}'
+          schema:
+            type: string
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get
+      tags:
+      - Version
 swagger: "2.0"

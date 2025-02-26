@@ -20,26 +20,28 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
+	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/mosaic/builder"
 	"github.com/kouprlabs/voltaserve/mosaic/config"
 	"github.com/kouprlabs/voltaserve/mosaic/errorpkg"
 	"github.com/kouprlabs/voltaserve/mosaic/helper"
 	"github.com/kouprlabs/voltaserve/mosaic/infra"
+	"github.com/kouprlabs/voltaserve/mosaic/model"
 )
 
 type MosaicService struct {
-	s3     *infra.S3Manager
+	s3     apiinfra.S3Manager
 	config *config.Config
 }
 
 func NewMosaicService() *MosaicService {
 	return &MosaicService{
-		s3:     infra.NewS3Manager(),
+		s3:     apiinfra.NewS3Manager(),
 		config: config.GetConfig(),
 	}
 }
 
-func (svc *MosaicService) Create(path, s3Key, s3Bucket string) (*builder.Metadata, error) {
+func (svc *MosaicService) Create(path, s3Key, s3Bucket string) (*model.Metadata, error) {
 	tmpDir := filepath.Join(os.TempDir(), helper.NewID())
 	defer func() {
 		if err := os.RemoveAll(tmpDir); err != nil {
@@ -114,13 +116,13 @@ func (svc *MosaicService) GetTileBuffer(s3Bucket, s3Key string, zoomLevel, row i
 	return buf, &contentType, nil
 }
 
-func (svc *MosaicService) GetMetadata(s3Bucket, s3Key string) (*builder.Metadata, error) {
+func (svc *MosaicService) GetMetadata(s3Bucket, s3Key string) (*model.Metadata, error) {
 	objectName := filepath.Join(s3Key, "mosaic", "mosaic.json")
 	text, err := svc.s3.GetText(objectName, s3Bucket, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, errorpkg.NewResourceNotFoundError(err)
 	}
-	var metadata builder.Metadata
+	var metadata model.Metadata
 	if err := json.Unmarshal([]byte(text), &metadata); err != nil {
 		return nil, err
 	}

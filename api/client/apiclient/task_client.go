@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package api_client
+package apiclient
 
 import (
 	"bytes"
@@ -19,6 +19,8 @@ import (
 
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
+
+	apiservice "github.com/kouprlabs/voltaserve/api/service"
 )
 
 type TaskClient struct {
@@ -31,28 +33,16 @@ func NewTaskClient() *TaskClient {
 	}
 }
 
-type TaskCreateOptions struct {
-	Name            string            `json:"name"`
-	Error           *string           `json:"error,omitempty"`
-	Percentage      *int              `json:"percentage,omitempty"`
-	IsIndeterminate bool              `json:"isIndeterminate"`
-	UserID          string            `json:"userId"`
-	Status          string            `json:"status"`
-	Payload         map[string]string `json:"payload,omitempty"`
-}
-
-const (
-	TaskStatusRunning = "running"
-	TaskStatusSuccess = "success"
-	TaskStatusError   = "error"
-)
-
-func (cl *TaskClient) Create(opts TaskCreateOptions) error {
+func (cl *TaskClient) Create(opts apiservice.TaskCreateOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/tasks?api_key=%s", cl.config.APIURL, cl.config.Security.APIKey), bytes.NewBuffer(body))
+	req, err := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/v3/tasks?api_key=%s", cl.config.APIURL, cl.config.Security.APIKey),
+		bytes.NewBuffer(body),
+	)
 	if err != nil {
 		return err
 	}
@@ -70,24 +60,7 @@ func (cl *TaskClient) Create(opts TaskCreateOptions) error {
 	return nil
 }
 
-type TaskPatchOptions struct {
-	Fields          []string          `json:"fields"`
-	Name            *string           `json:"name"`
-	Error           *string           `json:"error"`
-	Percentage      *int              `json:"percentage"`
-	IsIndeterminate *bool             `json:"isIndeterminate"`
-	UserID          *string           `json:"userId"`
-	Status          *string           `json:"status"`
-	Payload         map[string]string `json:"payload"`
-}
-
-const (
-	TaskFieldName   = "name"
-	TaskFieldError  = "error"
-	TaskFieldStatus = "status"
-)
-
-func (cl *TaskClient) Patch(id string, opts TaskPatchOptions) error {
+func (cl *TaskClient) Patch(id string, opts apiservice.TaskPatchOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err

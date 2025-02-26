@@ -386,8 +386,6 @@ func NewSnapshotModelWithOptions(opts SnapshotNewModelOptions) model.Snapshot {
 	res.SetPreview(opts.Preview)
 	res.SetText(opts.Text)
 	res.SetOCR(opts.OCR)
-	res.SetEntities(opts.Entities)
-	res.SetMosaic(opts.Mosaic)
 	res.SetThumbnail(opts.Thumbnail)
 	return res
 }
@@ -499,60 +497,45 @@ type SnapshotUpdateOptions struct {
 	TaskID    *string
 }
 
-const (
-	SnapshotFieldOriginal  = "original"
-	SnapshotFieldPreview   = "preview"
-	SnapshotFieldText      = "text"
-	SnapshotFieldOCR       = "ocr"
-	SnapshotFieldEntities  = "entities"
-	SnapshotFieldMosaic    = "mosaic"
-	SnapshotFieldThumbnail = "thumbnail"
-	SnapshotFieldStatus    = "status"
-	SnapshotFieldLanguage  = "language"
-	SnapshotFieldSummary   = "summary"
-	SnapshotFieldIntent    = "intent"
-	SnapshotFieldTaskID    = "taskId"
-)
-
 func (repo *SnapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	snapshot, err := repo.find(id)
 	if err != nil {
 		return err
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldOriginal) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldOriginal) {
 		snapshot.SetOriginal(opts.Original)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldPreview) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldPreview) {
 		snapshot.SetPreview(opts.Preview)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldText) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldText) {
 		snapshot.SetText(opts.Text)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldOCR) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldOCR) {
 		snapshot.SetOCR(opts.OCR)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldEntities) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldEntities) {
 		snapshot.SetEntities(opts.Entities)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldMosaic) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldMosaic) {
 		snapshot.SetMosaic(opts.Mosaic)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldThumbnail) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldThumbnail) {
 		snapshot.SetThumbnail(opts.Thumbnail)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldStatus) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldStatus) {
 		snapshot.SetStatus(*opts.Status)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldLanguage) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldLanguage) {
 		snapshot.SetLanguage(opts.Language)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldSummary) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldSummary) {
 		snapshot.SetSummary(opts.Summary)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldIntent) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldIntent) {
 		snapshot.SetSummary(opts.Intent)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldTaskID) {
+	if slices.Contains(opts.Fields, model.SnapshotFieldTaskID) {
 		snapshot.SetTaskID(opts.TaskID)
 	}
 	if db := repo.db.Save(&snapshot); db.Error != nil {

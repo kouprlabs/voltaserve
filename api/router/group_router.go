@@ -79,8 +79,8 @@ func (r *GroupRouter) Create(c *fiber.Ctx) error {
 
 // Find godoc
 //
-//	@Summary		Read
-//	@Description	Read
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Groups
 //	@Id				groups_find
 //	@Produce		json

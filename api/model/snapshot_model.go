@@ -14,6 +14,22 @@ const (
 	SnapshotStatusWaiting    = "waiting"
 	SnapshotStatusProcessing = "processing"
 	SnapshotStatusReady      = "ready"
+	SnapshotStatusError      = "error"
+)
+
+const (
+	SnapshotFieldOriginal  = "original"
+	SnapshotFieldPreview   = "preview"
+	SnapshotFieldText      = "text"
+	SnapshotFieldOCR       = "ocr"
+	SnapshotFieldEntities  = "entities"
+	SnapshotFieldMosaic    = "mosaic"
+	SnapshotFieldThumbnail = "thumbnail"
+	SnapshotFieldStatus    = "status"
+	SnapshotFieldLanguage  = "language"
+	SnapshotFieldSummary   = "summary"
+	SnapshotFieldIntent    = "intent"
+	SnapshotFieldTaskID    = "taskId"
 )
 
 const (
@@ -65,7 +81,7 @@ type Snapshot interface {
 type S3Object struct {
 	Bucket   string         `json:"bucket"`
 	Key      string         `json:"key"`
-	Size     *int64         `json:"size,omitempty"`
+	Size     int64          `json:"size,omitempty"`
 	Image    *ImageProps    `json:"image,omitempty"`
 	Document *DocumentProps `json:"document,omitempty"`
 }

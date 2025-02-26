@@ -1,6 +1,19 @@
 basePath: /v3
 definitions:
-  api_client.PipelineRunOptions:
+  errorpkg.ErrorResponse:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+      moreInfo:
+        type: string
+      status:
+        type: integer
+      userMessage:
+        type: string
+    type: object
+  model.PipelineRunOptions:
     properties:
       bucket:
         type: string
@@ -17,25 +30,55 @@ definitions:
       taskId:
         type: string
     type: object
-  errorpkg.ErrorResponse:
-    properties:
-      code:
-        type: string
-      message:
-        type: string
-      moreInfo:
-        type: string
-      status:
-        type: integer
-      userMessage:
-        type: string
-    type: object
 info:
   contact: {}
   title: Voltaserve Conversion
   version: 3.0.0
 paths:
   /health:
+    get:
+      description: Get
+      operationId: health_get
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get
+      tags:
+      - Health
+  /pipelines/run:
+    post:
+      consumes:
+      - application/json
+      description: Run
+      operationId: pipelines_run
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.PipelineRunOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Run
+      tags:
+      - Pipelines
+  /version:
     get:
       description: Get
       operationId: get_version
@@ -53,29 +96,4 @@ paths:
       summary: Get
       tags:
       - Version
-  /pipelines/run:
-    post:
-      consumes:
-      - application/json
-      description: Run
-      operationId: pipelines_run
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/api_client.PipelineRunOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      summary: Run
-      tags:
-      - Pipelines
 swagger: "2.0"

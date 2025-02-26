@@ -1957,7 +1957,7 @@ func (s *FileServiceTestSuite) TestReprocess() {
 	s.Require().NoError(err)
 
 	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, service.TaskPatchOptions{
-		Fields: []string{service.TaskFieldStatus},
+		Fields: []string{model.TaskFieldStatus},
 		Status: helper.ToPtr(model.TaskStatusError),
 	})
 	s.Require().NoError(err)
@@ -1986,7 +1986,7 @@ func (s *FileServiceTestSuite) TestReprocess_MissingPermission() {
 	s.Require().NoError(err)
 
 	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, service.TaskPatchOptions{
-		Fields: []string{service.TaskFieldStatus},
+		Fields: []string{model.TaskFieldStatus},
 		Status: helper.ToPtr(model.TaskStatusError),
 	})
 	s.Require().NoError(err)
@@ -2017,7 +2017,7 @@ func (s *FileServiceTestSuite) TestReprocess_InsufficientPermission() {
 	s.Require().NoError(err)
 
 	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, service.TaskPatchOptions{
-		Fields: []string{service.TaskFieldStatus},
+		Fields: []string{model.TaskFieldStatus},
 		Status: helper.ToPtr(model.TaskStatusError),
 	})
 	s.Require().NoError(err)

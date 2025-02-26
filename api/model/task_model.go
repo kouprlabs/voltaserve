@@ -13,7 +13,18 @@ package model
 const (
 	TaskStatusWaiting = "waiting"
 	TaskStatusRunning = "running"
+	TaskStatusSuccess = "success"
 	TaskStatusError   = "error"
+)
+
+const (
+	TaskFieldName            = "name"
+	TaskFieldError           = "error"
+	TaskFieldPercentage      = "percentage"
+	TaskFieldIsIndeterminate = "isIndeterminate"
+	TaskFieldUserID          = "userId"
+	TaskFieldStatus          = "status"
+	TaskFieldPayload         = "payload"
 )
 
 type Task interface {
