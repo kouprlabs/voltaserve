@@ -5,5 +5,4 @@ use (
 	./conversion
 	./mosaic
 	./webdav
-	./ui
 )
