@@ -32,12 +32,12 @@ func NewSnapshotCache() *SnapshotCache {
 	}
 }
 
-func (c *SnapshotCache) Set(file model.Snapshot) error {
-	b, err := json.Marshal(file)
+func (c *SnapshotCache) Set(snapshot model.Snapshot) error {
+	b, err := json.Marshal(snapshot)
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+file.GetID(), string(b))
+	err = c.redis.Set(c.keyPrefix+snapshot.GetID(), string(b))
 	if err != nil {
 		return err
 	}

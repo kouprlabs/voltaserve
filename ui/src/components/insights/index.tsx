@@ -17,11 +17,10 @@ import {
 } from '@chakra-ui/react'
 import { SectionError, SectionSpinner } from '@koupr/ui'
 import { FileAPI } from '@/client/api/file'
-import { InsightsAPI } from '@/client/api/insights'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, mutateInfoUpdated } from '@/store/ui/insights'
+import { modalDidClose } from '@/store/ui/insights'
 import InsightsCreate from './insights-create'
 import InsightsOverview from './insights-overview'
 
@@ -34,24 +33,11 @@ const Insights = () => {
   )
   const isModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
   const {
-    data: info,
-    error: infoError,
-    isLoading: infoIsLoading,
-    mutate: mutateInfo,
-  } = InsightsAPI.useGetInfo(id, swrConfig())
-  const {
     data: file,
     error: fileError,
     isLoading: fileIsLoading,
   } = FileAPI.useGet(id, swrConfig())
-  const infoIsReady = info && !infoError
   const fileIsReady = file && !fileError
-
-  useEffect(() => {
-    if (mutateInfo) {
-      dispatch(mutateInfoUpdated(mutateInfo))
-    }
-  }, [mutateInfo])
 
   useEffect(() => {
     if (file?.snapshot?.task?.isPending) {
@@ -74,15 +60,16 @@ const Insights = () => {
         {fileError ? <SectionError text={errorToString(fileError)} /> : null}
         {fileIsReady ? (
           <>
-            {infoIsLoading ? <SectionSpinner /> : null}
-            {infoError ? (
-              <SectionError text={errorToString(infoError)} />
+            {fileIsLoading ? <SectionSpinner /> : null}
+            {fileError ? (
+              <SectionError text={errorToString(fileError)} />
             ) : null}
-            {infoIsReady ? (
-              <>
-                {info?.isAvailable ? <InsightsOverview /> : <InsightsCreate />}
-              </>
-            ) : null}
+            {file.snapshot?.capabilities.entities ||
+            file.snapshot?.capabilities.summary ? (
+              <InsightsOverview />
+            ) : (
+              <InsightsCreate />
+            )}
           </>
         ) : null}
       </ModalContent>

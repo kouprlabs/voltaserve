@@ -120,7 +120,7 @@ const ListItem = ({
       file.type === 'file' &&
       ((file.snapshot?.preview &&
         file.snapshot?.status === SnapshotStatus.Ready) ||
-        file.snapshot?.mosaic)
+        file.snapshot?.capabilities.mosaic)
     ) {
       window.open(`/file/${file.id}`, '_blank')?.focus()
     }
@@ -218,7 +218,7 @@ const ListItem = ({
           </ChakraLink>
         ) : null}
         {file.type === 'file' &&
-        (file.snapshot?.preview || file.snapshot?.mosaic) ? (
+        (file.snapshot?.preview || file.snapshot?.capabilities.mosaic) ? (
           <ChakraLink
             className={cx('text-center', 'no-underline', {
               'hover:no-underline': isSelectionMode,
@@ -233,7 +233,7 @@ const ListItem = ({
         ) : null}
         {file.type === 'file' &&
         !file.snapshot?.preview &&
-        !file.snapshot?.mosaic ? (
+        !file.snapshot?.capabilities.mosaic ? (
           <Text
             className={cx('text-center')}
             noOfLines={noOfLines}

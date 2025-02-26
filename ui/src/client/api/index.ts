@@ -10,7 +10,7 @@
 
 export * from './file'
 export * from './group'
-export * from './insights'
+export * from './entity'
 export * from './invitation'
 export * from './mosaic'
 export * from './organization'

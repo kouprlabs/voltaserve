@@ -18,11 +18,7 @@ import {
   usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
-import {
-  InsightsAPI,
-  InsightsSortBy,
-  InsightsSortOrder,
-} from '@/client/api/insights'
+import { EntityAPI, EntitySortBy, EntitySortOrder } from '@/client/api/entity'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
@@ -35,21 +31,20 @@ const InsightsOverviewEntities = () => {
   )
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState<string | undefined>(undefined)
-  const { data: metadata } = InsightsAPI.useGetInfo(id, swrConfig())
   const size = 5
   const {
     data: list,
     error: listError,
     isLoading: listIsLoading,
     mutate,
-  } = InsightsAPI.useListEntities(
-    metadata ? id : undefined,
+  } = EntityAPI.useList(
+    id,
     {
       query,
       page,
       size,
-      sortBy: InsightsSortBy.Frequency,
-      sortOrder: InsightsSortOrder.Desc,
+      sortBy: EntitySortBy.Frequency,
+      sortOrder: EntitySortOrder.Desc,
     },
     swrConfig(),
   )

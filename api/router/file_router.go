@@ -93,6 +93,8 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original.:extension", r.DownloadOriginal)
 	g.Get("/:id/preview.:extension", r.DownloadPreview)
+	g.Get("/:id/text.:extension", r.DownloadText)
+	g.Get("/:id/ocr.:extension", r.DownloadOCR)
 	g.Get("/:id/thumbnail.:extension", r.DownloadThumbnail)
 	g.Post("/create_from_s3", r.CreateFromS3)
 	g.Patch("/:id/patch_from_s3", r.PatchFromS3)
@@ -139,11 +141,11 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, fh.Size, userID)
+		hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, fh.Size, userID)
 		if err != nil {
 			return err
 		}
-		if !*ok {
+		if !hasEnoughSpace {
 			return errorpkg.NewStorageLimitExceededError()
 		}
 		if name == "" {
@@ -158,8 +160,8 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
-		if err := c.SaveFile(fh, tmpPath); err != nil {
+		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+		if err := c.SaveFile(fh, path); err != nil {
 			return err
 		}
 		defer func(path string) {
@@ -168,8 +170,8 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 			} else if err != nil {
 				log.GetLogger().Error(err)
 			}
-		}(tmpPath)
-		file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
+		}(path)
+		file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &path}, userID)
 		if err != nil {
 			return err
 		}
@@ -217,15 +219,15 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, fh.Size, userID)
+	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, fh.Size, userID)
 	if err != nil {
 		return err
 	}
-	if !*ok {
+	if !hasEnoughSpace {
 		return errorpkg.NewStorageLimitExceededError()
 	}
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
-	if err := c.SaveFile(fh, tmpPath); err != nil {
+	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+	if err := c.SaveFile(fh, path); err != nil {
 		return err
 	}
 	defer func(path string) {
@@ -234,8 +236,8 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 		} else if err != nil {
 			log.GetLogger().Error(err)
 		}
-	}(tmpPath)
-	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
+	}(path)
+	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &path}, userID)
 	if err != nil {
 		return err
 	}
@@ -382,59 +384,6 @@ func (r *FileRouter) Probe(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
-}
-
-func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOptions, error) {
-	var err error
-	var page uint64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("page")
-		}
-	}
-	var size uint64
-	if c.Query("size") == "" {
-		size = FileDefaultPageSize
-	} else {
-		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("size")
-		}
-	}
-	if size == 0 {
-		return nil, errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !r.fileSvc.IsValidSortBy(sortBy) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !r.fileSvc.IsValidSortOrder(sortOrder) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	query, err := url.QueryUnescape(c.Query("query"))
-	if err != nil {
-		return nil, errorpkg.NewInvalidQueryParamError("query")
-	}
-	opts := service.FileListOptions{
-		Page:      page,
-		Size:      size,
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
-	}
-	if query != "" {
-		b, err := base64.StdEncoding.DecodeString(query + strings.Repeat("=", (4-len(query)%4)%4))
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("query")
-		}
-		if err := json.Unmarshal(b, &opts.Query); err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("query")
-		}
-	}
-	return &opts, nil
 }
 
 // FindPath godoc
@@ -605,7 +554,7 @@ func (r *FileRouter) PatchName(c *fiber.Ctx) error {
 //	@Id				files_reprocess
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.FileReprocessResponse
+//	@Success		200	{object}	service.FileReprocessResult
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/reprocess [post]
@@ -924,7 +873,7 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(res.Snapshot.GetOriginal().Key), ".") != extension {
+	if !strings.EqualFold(strings.TrimPrefix(filepath.Ext(res.Snapshot.GetOriginal().Key), "."), extension) {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
@@ -979,7 +928,7 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(res.Snapshot.GetPreview().Key), ".") != extension {
+	if !strings.EqualFold(strings.TrimPrefix(filepath.Ext(res.Snapshot.GetPreview().Key), "."), extension) {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
@@ -992,6 +941,104 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 		c.Status(http.StatusOK)
 	}
 	return c.Send(buf.Bytes())
+}
+
+// DownloadText godoc
+//
+//	@Summary		Download Text
+//	@Description	Download Text
+//	@Tags			Files
+//	@Id				files_download_text
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/text{ext} [get]
+func (r *FileRouter) DownloadText(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	extension := c.Params("extension")
+	if extension == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf := r.bufferPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer r.bufferPool.Put(buf)
+	res, err := r.fileSvc.DownloadTextBuffer(id, buf, userID)
+	if err != nil {
+		return err
+	}
+	if !strings.EqualFold(strings.TrimPrefix(filepath.Ext(res.Snapshot.GetText().Key), "."), extension) {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMIMEFromBytes(b))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())+extension))
+	return c.Send(b)
+}
+
+// DownloadOCR godoc
+//
+//	@Summary		Download OCR
+//	@Description	Download OCR
+//	@Tags			Files
+//	@Id				files_download_ocr
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/ocr{ext} [get]
+func (r *FileRouter) DownloadOCR(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	extension := c.Params("extension")
+	if extension == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf := r.bufferPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer r.bufferPool.Put(buf)
+	res, err := r.fileSvc.DownloadOCRBuffer(id, buf, userID)
+	if err != nil {
+		return err
+	}
+	if !strings.EqualFold(strings.TrimPrefix(filepath.Ext(res.Snapshot.GetOCR().Key), "."), extension) {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMIMEFromBytes(b))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())+extension))
+	return c.Send(b)
 }
 
 // DownloadThumbnail godoc
@@ -1034,7 +1081,7 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(snapshot.GetThumbnail().Key), ".") != extension {
+	if !strings.EqualFold(strings.TrimPrefix(filepath.Ext(snapshot.GetThumbnail().Key), "."), extension) {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
@@ -1055,8 +1102,8 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 //	@Param			workspace_id	query		string	true	"Workspace ID"
 //	@Param			parent_id		query		string	false	"Parent ID"
 //	@Param			name			query		string	false	"Name"
-//	@Param			s3_key			query		string	true	"S3 Key"
-//	@Param			s3_bucket		query		string	true	"S3 Bucket"
+//	@Param			key				query		string	true	"Key"
+//	@Param			bucket			query		string	true	"Bucket"
 //	@Param			size			query		string	true	"Size"
 //	@Success		200				{object}	service.File
 //	@Failure		404				{object}	errorpkg.ErrorResponse
@@ -1095,13 +1142,13 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	if name == "" {
 		return errorpkg.NewMissingQueryParamError("name")
 	}
-	s3Key := c.Query("s3_key")
-	if s3Key == "" {
-		return errorpkg.NewMissingQueryParamError("s3_key")
+	key := c.Query("key")
+	if key == "" {
+		return errorpkg.NewMissingQueryParamError("key")
 	}
-	s3Bucket := c.Query("s3_bucket")
-	if s3Bucket == "" {
-		return errorpkg.NewMissingQueryParamError("s3_bucket")
+	bucket := c.Query("bucket")
+	if bucket == "" {
+		return errorpkg.NewMissingQueryParamError("bucket")
 	}
 	snapshotID := c.Query("snapshot_id")
 	if snapshotID == "" {
@@ -1119,11 +1166,11 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, size, userID)
+	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, size, userID)
 	if err != nil {
 		return err
 	}
-	if !*ok {
+	if !hasEnoughSpace {
 		return errorpkg.NewStorageLimitExceededError()
 	}
 	file, err := r.fileSvc.Create(service.FileCreateOptions{
@@ -1137,8 +1184,8 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	}
 	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{
 		S3Reference: &model.S3Reference{
-			Key:         s3Key,
-			Bucket:      s3Bucket,
+			Key:         key,
+			Bucket:      bucket,
 			SnapshotID:  snapshotID,
 			Size:        size,
 			ContentType: contentType,
@@ -1160,8 +1207,8 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			api_key			query		string	true	"API Key"
 //	@Param			access_token	query		string	true	"Access Token"
-//	@Param			s3_key			query		string	true	"S3 Key"
-//	@Param			s3_bucket		query		string	true	"S3 Bucket"
+//	@Param			key				query		string	true	"Key"
+//	@Param			bucket			query		string	true	"Bucket"
 //	@Param			size			query		string	true	"Size"
 //	@Param			id				path		string	true	"ID"
 //	@Success		200				{object}	service.File
@@ -1190,13 +1237,13 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 		return err
 	}
 	file := files[0]
-	s3Key := c.Query("s3_key")
-	if s3Key == "" {
-		return errorpkg.NewMissingQueryParamError("s3_key")
+	key := c.Query("key")
+	if key == "" {
+		return errorpkg.NewMissingQueryParamError("key")
 	}
-	s3Bucket := c.Query("s3_bucket")
-	if s3Bucket == "" {
-		return errorpkg.NewMissingQueryParamError("s3_bucket")
+	bucket := c.Query("bucket")
+	if bucket == "" {
+		return errorpkg.NewMissingQueryParamError("bucket")
 	}
 	var size int64
 	if c.Query("size") == "" {
@@ -1214,17 +1261,17 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 	if contentType == "" {
 		return errorpkg.NewMissingQueryParamError("content_type")
 	}
-	ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, size, userID)
+	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, size, userID)
 	if err != nil {
 		return err
 	}
-	if !*ok {
+	if !hasEnoughSpace {
 		return errorpkg.NewStorageLimitExceededError()
 	}
 	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{
 		S3Reference: &model.S3Reference{
-			Key:         s3Key,
-			Bucket:      s3Bucket,
+			Key:         key,
+			Bucket:      bucket,
 			SnapshotID:  snapshotID,
 			Size:        size,
 			ContentType: contentType,
@@ -1254,4 +1301,57 @@ func (r *FileRouter) getUserIDFromAccessToken(accessToken string) (string, error
 	} else {
 		return "", errors.New("cannot find sub claim")
 	}
+}
+
+func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOptions, error) {
+	var err error
+	var page uint64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("page")
+		}
+	}
+	var size uint64
+	if c.Query("size") == "" {
+		size = FileDefaultPageSize
+	} else {
+		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("size")
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !r.fileSvc.IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !r.fileSvc.IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return nil, errorpkg.NewInvalidQueryParamError("query")
+	}
+	opts := service.FileListOptions{
+		Page:      page,
+		Size:      size,
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}
+	if query != "" {
+		b, err := base64.StdEncoding.DecodeString(query + strings.Repeat("=", (4-len(query)%4)%4))
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("query")
+		}
+		if err := json.Unmarshal(b, &opts.Query); err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("query")
+		}
+	}
+	return &opts, nil
 }

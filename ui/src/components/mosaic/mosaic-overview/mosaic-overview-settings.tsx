@@ -9,15 +9,11 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useMemo } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
-import { IconBolt, IconDelete, SectionError, SectionSpinner } from '@koupr/ui'
+import { IconDelete, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { FileAPI } from '@/client/api/file'
 import { MosaicAPI } from '@/client/api/mosaic'
-import {
-  geEditorPermission,
-  geOwnerPermission,
-  NONE_PERMISSION,
-} from '@/client/api/permission'
+import { geOwnerPermission, NONE_PERMISSION } from '@/client/api/permission'
 import { TaskAPI } from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
@@ -34,100 +30,53 @@ const MosaicOverviewSettings = () => {
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
   const {
-    data: info,
-    error: infoError,
-    isLoading: infoIsLoading,
-    mutate: mutateInfo,
-  } = MosaicAPI.useGetInfo(id, swrConfig())
-  const {
     data: file,
     error: fileError,
     isLoading: fileIsLoading,
     mutate: mutateFile,
   } = FileAPI.useGet(id, swrConfig())
   const fileIsReady = file && !fileError
-  const infoIsReady = info && !infoError
-
-  const handleUpdate = useCallback(async () => {
-    if (id) {
-      await MosaicAPI.create(id)
-      await mutateFile(await FileAPI.get(id))
-      await mutateInfo(await MosaicAPI.getInfo(id))
-      await mutateFiles?.()
-      await mutateTaskCount?.(await TaskAPI.getCount())
-      dispatch(modalDidClose())
-    }
-  }, [id, mutateFile, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
       await MosaicAPI.delete(id)
       await mutateFile(await FileAPI.get(id))
-      await mutateInfo(await MosaicAPI.getInfo(id))
       await mutateFiles?.()
       await mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
-
-  const canCreate = useMemo(() => {
-    return !!(
-      !file?.snapshot?.task?.isPending &&
-      info?.isOutdated &&
-      geEditorPermission(file?.permission ?? NONE_PERMISSION)
-    )
-  }, [info, file])
+  }, [id, mutateFiles, mutateTaskCount, dispatch])
 
   const canDelete = useMemo(() => {
     return (
       !file?.snapshot?.task?.isPending &&
-      !info?.isOutdated &&
       geOwnerPermission(file?.permission ?? NONE_PERMISSION)
     )
-  }, [info, file])
+  }, [file])
 
   return (
     <>
       {fileIsLoading ? <SectionSpinner /> : null}
       {fileError ? <SectionError text={errorToString(fileError)} /> : null}
       {fileIsReady ? (
-        <>
-          {infoIsLoading ? <SectionSpinner /> : null}
-          {infoError ? <SectionError text={errorToString(infoError)} /> : null}
-          {infoIsReady ? (
-            <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
-              <Card size="md" variant="outline" className={cx('w-[50%]')}>
-                <CardBody>
-                  <Text>Create a mosaic for the active snapshot.</Text>
-                </CardBody>
-                <CardFooter>
-                  <Button
-                    leftIcon={<IconBolt />}
-                    isDisabled={!canCreate}
-                    onClick={handleUpdate}
-                  >
-                    Create Mosaic
-                  </Button>
-                </CardFooter>
-              </Card>
-              <Card size="md" variant="outline" className={cx('w-[50%]')}>
-                <CardBody>
-                  <Text>Delete mosaic from the active snapshot.</Text>
-                </CardBody>
-                <CardFooter>
-                  <Button
-                    colorScheme="red"
-                    leftIcon={<IconDelete />}
-                    isDisabled={!canDelete}
-                    onClick={handleDelete}
-                  >
-                    Delete Mosaic
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          ) : null}
-        </>
+        <div className={cx('flex', 'flex-col', 'items-stretch', 'gap-1.5')}>
+          <Card size="md" variant="outline">
+            <CardBody>
+              <Text>Delete mosaic from the active snapshot.</Text>
+            </CardBody>
+            <CardFooter>
+              <Button
+                className={cx('w-full')}
+                colorScheme="red"
+                leftIcon={<IconDelete />}
+                isDisabled={!canDelete}
+                onClick={handleDelete}
+              >
+                Delete
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       ) : null}
     </>
   )

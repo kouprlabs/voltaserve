@@ -11,8 +11,8 @@ import { useCallback, useMemo } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import { IconBolt, IconDelete, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
+import { EntityAPI } from '@/client/api/entity'
 import { FileAPI } from '@/client/api/file'
-import { InsightsAPI } from '@/client/api/insights'
 import {
   geEditorPermission,
   geOwnerPermission,
@@ -34,99 +34,86 @@ const InsightsOverviewSettings = () => {
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
   const {
-    data: info,
-    error: infoError,
-    isLoading: infoIsLoading,
-    mutate: mutateInfo,
-  } = InsightsAPI.useGetInfo(id, swrConfig())
-  const {
     data: file,
     error: fileError,
     isLoading: fileIsLoading,
     mutate: mutateFile,
   } = FileAPI.useGet(id, swrConfig())
   const canCollect = useMemo(() => {
-    return !!(
+    return (
       !file?.snapshot?.task?.isPending &&
-      info?.isOutdated &&
       geEditorPermission(file?.permission ?? NONE_PERMISSION)
     )
-  }, [info, file])
-
+  }, [file])
   const canDelete = useMemo(() => {
     return (
       !file?.snapshot?.task?.isPending &&
-      !info?.isOutdated &&
       geOwnerPermission(file?.permission ?? NONE_PERMISSION)
     )
-  }, [info, file])
+  }, [file])
   const fileIsReady = file && !fileError
-  const infoIsReady = info && !infoError
 
-  const handleUpdate = useCallback(async () => {
-    if (id) {
-      await InsightsAPI.patch(id)
-      await mutateFile(await FileAPI.get(id))
-      await mutateInfo(await InsightsAPI.getInfo(id))
+  const handleCreate = useCallback(async () => {
+    if (file && file.snapshot?.language) {
+      await EntityAPI.create(file.id, { language: file.snapshot?.language })
+      await mutateFile(await FileAPI.get(file.id))
       await mutateFiles?.()
       await mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
+  }, [file, mutateFiles, mutateTaskCount, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
-      await InsightsAPI.delete(id)
+      await EntityAPI.delete(id)
       await mutateFile(await FileAPI.get(id))
-      await mutateInfo(await InsightsAPI.getInfo(id))
       await mutateFiles?.()
       await mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFile, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
+  }, [id, mutateFile, mutateFiles, mutateTaskCount, dispatch])
 
   return (
     <>
       {fileIsLoading ? <SectionSpinner /> : null}
       {fileError ? <SectionError text={errorToString(fileError)} /> : null}
       {fileIsReady ? (
-        <>
-          {infoIsLoading ? <SectionSpinner /> : null}
-          {infoError ? <SectionError text={errorToString(infoError)} /> : null}
-          {infoIsReady ? (
-            <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
-              <Card size="md" variant="outline" className={cx('w-[50%]')}>
-                <CardBody>
-                  <Text>Collect insights for the active snapshot.</Text>
-                </CardBody>
-                <CardFooter>
-                  <Button
-                    leftIcon={<IconBolt />}
-                    isDisabled={!canCollect}
-                    onClick={handleUpdate}
-                  >
-                    Collect Insights
-                  </Button>
-                </CardFooter>
-              </Card>
-              <Card size="md" variant="outline" className={cx('w-[50%]')}>
-                <CardBody>
-                  <Text>Delete insights from the active snapshot.</Text>
-                </CardBody>
-                <CardFooter>
-                  <Button
-                    colorScheme="red"
-                    leftIcon={<IconDelete />}
-                    isDisabled={!canDelete}
-                    onClick={handleDelete}
-                  >
-                    Delete Insights
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          ) : null}
-        </>
+        <div className={cx('flex', 'flex-col', 'items-stretch', 'gap-1.5')}>
+          {file.snapshot?.capabilities.entities ? (
+            <Card size="md" variant="outline">
+              <CardBody>
+                <Text>Delete entities from the active snapshot.</Text>
+              </CardBody>
+              <CardFooter>
+                <Button
+                  className={cx('w-full')}
+                  colorScheme="red"
+                  leftIcon={<IconDelete />}
+                  isDisabled={!canDelete}
+                  onClick={handleDelete}
+                >
+                  Delete Entities
+                </Button>
+              </CardFooter>
+            </Card>
+          ) : (
+            <Card size="md" variant="outline">
+              <CardBody>
+                <Text>Collect entities for the active snapshot.</Text>
+              </CardBody>
+              <CardFooter>
+                <Button
+                  className={cx('w-full')}
+                  leftIcon={<IconBolt />}
+                  isDisabled={!canCollect}
+                  onClick={handleCreate}
+                >
+                  Collect Entities
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+        </div>
       ) : null}
     </>
   )

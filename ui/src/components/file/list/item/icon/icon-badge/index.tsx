@@ -36,8 +36,11 @@ const IconBadge = ({ file, isLoading }: IconBadgeProps) => {
             <IconBadgeError />
           ) : null}
           {file.isShared ? <IconBadgeShared /> : null}
-          {file.snapshot?.entities ? <IconBadgeInsights /> : null}
-          {file.snapshot?.mosaic ? <IconBadgeMosaic /> : null}
+          {file.snapshot?.capabilities.entities ||
+          file.snapshot?.capabilities.summary ? (
+            <IconBadgeInsights />
+          ) : null}
+          {file.snapshot?.capabilities.mosaic ? <IconBadgeMosaic /> : null}
         </>
       ) : null}
       {file.type === 'folder' ? (

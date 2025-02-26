@@ -36,6 +36,7 @@ func NewSnapshotRouter() *SnapshotRouter {
 
 func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/languages", r.GetLanguages)
 	g.Get("/probe", r.Probe)
 	g.Post("/:id/activate", r.Activate)
 	g.Post("/:id/detach", r.Detach)
@@ -96,49 +97,6 @@ func (r *SnapshotRouter) Probe(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
-}
-
-func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotListOptions, error) {
-	var err error
-	fileID := c.Query("file_id")
-	if fileID == "" {
-		return nil, errorpkg.NewMissingQueryParamError("file_id")
-	}
-	var page uint64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("page")
-		}
-	}
-	var size uint64
-	if c.Query("size") == "" {
-		size = OrganizationDefaultPageSize
-	} else {
-		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("size")
-		}
-	}
-	if size == 0 {
-		return nil, errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !r.snapshotSvc.IsValidSortBy(sortBy) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !r.snapshotSvc.IsValidSortOrder(sortOrder) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	return &service.SnapshotListOptions{
-		Page:      page,
-		Size:      size,
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
-	}, err
 }
 
 // Activate godoc
@@ -214,4 +172,65 @@ func (r *SnapshotRouter) Patch(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(snapshot)
+}
+
+// GetLanguages godoc
+//
+//	@Summary		Get Languages
+//	@Description	Get Languages
+//	@Tags			Snapshots
+//	@Id				snapshots_get_languages
+//	@Produce		json
+//	@Success		200	{array}		service.SnapshotLanguage
+//	@Failure		503	{object}	errorpkg.ErrorResponse
+//	@Router			/snapshots/languages [get]
+func (r *SnapshotRouter) GetLanguages(c *fiber.Ctx) error {
+	res, err := r.snapshotSvc.GetLanguages()
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotListOptions, error) {
+	var err error
+	fileID := c.Query("file_id")
+	if fileID == "" {
+		return nil, errorpkg.NewMissingQueryParamError("file_id")
+	}
+	var page uint64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("page")
+		}
+	}
+	var size uint64
+	if c.Query("size") == "" {
+		size = OrganizationDefaultPageSize
+	} else {
+		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("size")
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !r.snapshotSvc.IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !r.snapshotSvc.IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	return &service.SnapshotListOptions{
+		Page:      page,
+		Size:      size,
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, err
 }

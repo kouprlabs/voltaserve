@@ -8,21 +8,22 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import useSWR, { SWRConfiguration } from 'swr'
-import { apiFetcher } from '../fetcher'
+import { apiFetcher } from '@/client/fetcher'
 import { File } from './file'
 
 export type Snapshot = {
   id: string
   version: number
   status: SnapshotStatus
-  original: SnapshotDownload
-  preview?: SnapshotDownload
-  ocr?: SnapshotDownload
-  text?: SnapshotDownload
-  entities?: SnapshotDownload
-  mosaic?: SnapshotDownload
-  thumbnail?: SnapshotDownload
+  original: SnapshotDownloadable
+  preview?: SnapshotDownloadable
+  ocr?: SnapshotDownloadable
+  text?: SnapshotDownloadable
+  thumbnail?: SnapshotDownloadable
+  summary?: string
+  intent?: string
   language?: string
+  capabilities: SnapshotCapabilities
   isActive: boolean
   task?: SnapshotTaskInfo
   createTime: string
@@ -70,48 +71,41 @@ export type SnapshotTaskInfo = {
   isPending: boolean
 }
 
-export type SnapshotDownload = {
+export type SnapshotCapabilities = {
+  original: boolean
+  preview: boolean
+  ocr: boolean
+  text: boolean
+  summary: boolean
+  entities: boolean
+  mosaic: boolean
+  thumbnail: boolean
+}
+
+export type SnapshotDownloadable = {
   extension?: string
   size?: number
-  image?: SnapshotImageProps
-  document?: SnapshotDocumentProps
+  image?: ImageProps
+  document?: DocumentProps
 }
 
-export type SnapshotImageProps = {
+export type ImageProps = {
   width: number
   height: number
-  zoomLevels?: SnapshotZoomLevel[]
 }
 
-export type SnapshotDocumentProps = {
-  pages?: SnapshotPagesProps
-  thumbnails?: SnapshotThumbnailsProps
+export type DocumentProps = {
+  pages?: PagesProps
+  thumbnails?: ThumbnailsProps
 }
 
-export type SnapshotPagesProps = {
+export type PagesProps = {
   count: number
   extension: string
 }
 
-export type SnapshotThumbnailsProps = {
+export type ThumbnailsProps = {
   extension: string
-}
-
-export type SnapshotTile = {
-  width: number
-  height: number
-  lastColWidth: number
-  lastRowHeight: number
-}
-
-export type SnapshotZoomLevel = {
-  index: number
-  width: number
-  height: number
-  rows: number
-  cols: number
-  scaleDownPercentage: number
-  tile: SnapshotTile
 }
 
 export type SnapshotListQueryParams = {
@@ -121,6 +115,12 @@ export type SnapshotListQueryParams = {
   sort_by?: string
   sort_order?: string
   query?: string
+}
+
+export type SnapshotLanguage = {
+  id: string
+  iso6393: string
+  name: string
 }
 
 export class SnapshotAPI {
@@ -136,6 +136,15 @@ export class SnapshotAPI {
     return useSWR<SnapshotList | undefined>(
       url,
       () => apiFetcher({ url, method: 'GET' }),
+      swrOptions,
+    )
+  }
+
+  static useGetLanguages(swrOptions?: SWRConfiguration) {
+    const url = `/snapshots/languages`
+    return useSWR<SnapshotLanguage[]>(
+      url,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<SnapshotLanguage[]>,
       swrOptions,
     )
   }

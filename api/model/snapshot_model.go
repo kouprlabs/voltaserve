@@ -16,6 +16,10 @@ const (
 	SnapshotStatusReady      = "ready"
 )
 
+const (
+	SnapshotIntentDocument = "document"
+)
+
 type Snapshot interface {
 	GetID() string
 	GetVersion() int64
@@ -26,6 +30,8 @@ type Snapshot interface {
 	GetEntities() *S3Object
 	GetMosaic() *S3Object
 	GetThumbnail() *S3Object
+	GetSummary() *string
+	GetIntent() *string
 	GetTaskID() *string
 	HasOriginal() bool
 	HasPreview() bool
@@ -47,8 +53,10 @@ type Snapshot interface {
 	SetEntities(*S3Object)
 	SetMosaic(*S3Object)
 	SetThumbnail(*S3Object)
+	SetSummary(*string)
+	SetIntent(*string)
 	SetStatus(string)
-	SetLanguage(string)
+	SetLanguage(*string)
 	SetTaskID(*string)
 	SetCreateTime(string)
 	SetUpdateTime(*string)
@@ -63,9 +71,8 @@ type S3Object struct {
 }
 
 type ImageProps struct {
-	Width      int         `json:"width"`
-	Height     int         `json:"height"`
-	ZoomLevels []ZoomLevel `json:"zoomLevels,omitempty"`
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
 type DocumentProps struct {
@@ -80,23 +87,6 @@ type PagesProps struct {
 
 type ThumbnailsProps struct {
 	Extension string `json:"extension"`
-}
-
-type ZoomLevel struct {
-	Index               int     `json:"index"`
-	Width               int     `json:"width"`
-	Height              int     `json:"height"`
-	Rows                int     `json:"rows"`
-	Cols                int     `json:"cols"`
-	ScaleDownPercentage float32 `json:"scaleDownPercentage"`
-	Tile                Tile    `json:"tile"`
-}
-
-type Tile struct {
-	Width         int `json:"width"`
-	Height        int `json:"height"`
-	LastColWidth  int `json:"lastColWidth"`
-	LastRowHeight int `json:"lastRowHeight"`
 }
 
 type S3Reference struct {

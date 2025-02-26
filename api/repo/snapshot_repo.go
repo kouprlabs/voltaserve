@@ -35,6 +35,8 @@ type snapshotEntity struct {
 	Entities   datatypes.JSON `gorm:"column:entities"    json:"entities,omitempty"`
 	Mosaic     datatypes.JSON `gorm:"column:mosaic"      json:"mosaic,omitempty"`
 	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
+	Summary    *string        `gorm:"column:summary"     json:"summary,omitempty"`
+	Intent     *string        `gorm:"column:intent"      json:"intent,omitempty"`
 	Status     string         `gorm:"column,status"      json:"status,omitempty"`
 	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
 	TaskID     *string        `gorm:"column:task_id"     json:"taskId,omitempty"`
@@ -146,6 +148,14 @@ func (s *snapshotEntity) GetThumbnail() *model.S3Object {
 		return nil
 	}
 	return &res
+}
+
+func (s *snapshotEntity) GetSummary() *string {
+	return s.Summary
+}
+
+func (s *snapshotEntity) GetIntent() *string {
+	return s.Intent
 }
 
 func (s *snapshotEntity) GetStatus() string {
@@ -309,12 +319,20 @@ func (s *snapshotEntity) SetThumbnail(m *model.S3Object) {
 	}
 }
 
+func (s *snapshotEntity) SetSummary(summary *string) {
+	s.Summary = summary
+}
+
+func (s *snapshotEntity) SetIntent(intent *string) {
+	s.Intent = intent
+}
+
 func (s *snapshotEntity) SetStatus(status string) {
 	s.Status = status
 }
 
-func (s *snapshotEntity) SetLanguage(language string) {
-	s.Language = &language
+func (s *snapshotEntity) SetLanguage(language *string) {
+	s.Language = language
 }
 
 func (s *snapshotEntity) SetTaskID(taskID *string) {
@@ -343,8 +361,10 @@ type SnapshotNewModelOptions struct {
 	Entities   *model.S3Object
 	Mosaic     *model.S3Object
 	Thumbnail  *model.S3Object
+	Summary    *string
+	Intent     *string
 	Status     string
-	Language   string
+	Language   *string
 	TaskID     *string
 	CreateTime string
 	UpdateTime *string
@@ -356,6 +376,9 @@ func NewSnapshotModelWithOptions(opts SnapshotNewModelOptions) model.Snapshot {
 		Version:    opts.Version,
 		Status:     opts.Status,
 		TaskID:     opts.TaskID,
+		Language:   opts.Language,
+		Summary:    opts.Summary,
+		Intent:     opts.Intent,
 		CreateTime: opts.CreateTime,
 		UpdateTime: opts.UpdateTime,
 	}
@@ -471,6 +494,8 @@ type SnapshotUpdateOptions struct {
 	Thumbnail *model.S3Object
 	Status    *string
 	Language  *string
+	Summary   *string
+	Intent    *string
 	TaskID    *string
 }
 
@@ -484,6 +509,8 @@ const (
 	SnapshotFieldThumbnail = "thumbnail"
 	SnapshotFieldStatus    = "status"
 	SnapshotFieldLanguage  = "language"
+	SnapshotFieldSummary   = "summary"
+	SnapshotFieldIntent    = "intent"
 	SnapshotFieldTaskID    = "taskId"
 )
 
@@ -517,7 +544,13 @@ func (repo *SnapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 		snapshot.SetStatus(*opts.Status)
 	}
 	if slices.Contains(opts.Fields, SnapshotFieldLanguage) {
-		snapshot.SetLanguage(*opts.Language)
+		snapshot.SetLanguage(opts.Language)
+	}
+	if slices.Contains(opts.Fields, SnapshotFieldSummary) {
+		snapshot.SetSummary(opts.Summary)
+	}
+	if slices.Contains(opts.Fields, SnapshotFieldIntent) {
+		snapshot.SetSummary(opts.Intent)
 	}
 	if slices.Contains(opts.Fields, SnapshotFieldTaskID) {
 		snapshot.SetTaskID(opts.TaskID)
@@ -529,7 +562,10 @@ func (repo *SnapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 }
 
 func (repo *SnapshotRepo) MapWithFile(id string, fileID string) error {
-	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id, create_time) VALUES (?, ?, ?)", id, fileID, helper.NewTimeString()); db.Error != nil {
+	if db := repo.db.Exec(
+		"INSERT INTO snapshot_file (snapshot_id, file_id, create_time) VALUES (?, ?, ?)",
+		id, fileID, helper.NewTimeString(),
+	); db.Error != nil {
 		return db.Error
 	}
 	return nil

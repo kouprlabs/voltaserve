@@ -9,7 +9,6 @@
 // AGPL-3.0-only in the root of this repository.
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
-import { Snapshot } from './snapshot'
 
 export type MosaicTile = {
   width: number
@@ -28,13 +27,6 @@ export type MosaicZoomLevel = {
   tile: MosaicTile
 }
 
-export type MosaicInfo = {
-  isAvailable: boolean
-  isOutdated: boolean
-  snapshot?: Snapshot
-  metadata?: MosaicMetadata
-}
-
 export type MosaicMetadata = {
   width: number
   height: number
@@ -43,42 +35,42 @@ export type MosaicMetadata = {
 }
 
 export class MosaicAPI {
-  static create(id: string, showError = true) {
+  static create(fileId: string, showError = true) {
     return apiFetcher({
-      url: `/mosaics/${id}`,
+      url: `/mosaics/${fileId}`,
       method: 'POST',
       showError,
     })
   }
 
-  static delete(id: string) {
+  static delete(fileId: string) {
     return apiFetcher({
-      url: `/mosaics/${id}`,
+      url: `/mosaics/${fileId}`,
       method: 'DELETE',
     })
   }
 
-  static useGetInfo(
-    id: string | null | undefined,
+  static useGetMetadata(
+    fileId: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/mosaics/${id}/info`
-    return useSWR<MosaicInfo>(
-      id ? url : null,
+    const url = `/mosaics/${fileId}/metadata`
+    return useSWR<MosaicMetadata>(
+      fileId ? url : null,
       () =>
         apiFetcher({
           url,
           method: 'GET',
           showError: false,
-        }) as Promise<MosaicInfo>,
+        }) as Promise<MosaicMetadata>,
       swrOptions,
     )
   }
 
-  static getInfo(id: string) {
+  static getMetadata(fileId: string) {
     return apiFetcher({
-      url: `/mosaics/${id}/info`,
+      url: `/mosaics/${fileId}/metadata`,
       method: 'GET',
-    }) as Promise<MosaicInfo>
+    }) as Promise<MosaicMetadata>
   }
 }

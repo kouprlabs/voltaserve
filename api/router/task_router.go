@@ -124,50 +124,6 @@ func (r *TaskRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*service.TaskListOptions, error) {
-	var err error
-	var page uint64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("page")
-		}
-	}
-	var size uint64
-	if c.Query("size") == "" {
-		size = OrganizationDefaultPageSize
-	} else {
-		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("size")
-		}
-	}
-	if size == 0 {
-		return nil, errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !r.taskSvc.IsValidSortBy(sortBy) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !r.taskSvc.IsValidSortOrder(sortOrder) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	query, err := url.QueryUnescape(c.Query("query"))
-	if err != nil {
-		return nil, errorpkg.NewInvalidQueryParamError("query")
-	}
-	return &service.TaskListOptions{
-		Query:     query,
-		Page:      page,
-		Size:      size,
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
-	}, nil
-}
-
 // Count godoc
 //
 //	@Summary		Count
@@ -324,4 +280,48 @@ func (r *TaskRouter) Patch(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(task)
+}
+
+func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*service.TaskListOptions, error) {
+	var err error
+	var page uint64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("page")
+		}
+	}
+	var size uint64
+	if c.Query("size") == "" {
+		size = OrganizationDefaultPageSize
+	} else {
+		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("size")
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !r.taskSvc.IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !r.taskSvc.IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return nil, errorpkg.NewInvalidQueryParamError("query")
+	}
+	return &service.TaskListOptions{
+		Query:     query,
+		Page:      page,
+		Size:      size,
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, nil
 }

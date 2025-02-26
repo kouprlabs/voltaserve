@@ -24,17 +24,15 @@ const MosaicCreate = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
-  const mutateInfo = useAppSelector((state) => state.ui.mosaic.mutateInfo)
 
   const handleCreate = useCallback(async () => {
     if (id) {
       await MosaicAPI.create(id, false)
-      await mutateInfo?.(await MosaicAPI.getInfo(id))
       await mutateFiles?.()
       await mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFiles, mutateTasks, mutateInfo, dispatch])
+  }, [id, mutateFiles, mutateTasks, dispatch])
 
   if (!id) {
     return null
@@ -75,7 +73,7 @@ const MosaicCreate = () => {
             colorScheme="blue"
             onClick={handleCreate}
           >
-            Create Mosaic
+            Create
           </Button>
         </div>
       </ModalFooter>

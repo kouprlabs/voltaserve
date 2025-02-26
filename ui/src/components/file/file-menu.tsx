@@ -119,7 +119,8 @@ const FileMenu = ({
         isMicrosoftOffice(file.snapshot?.original.extension) ||
         isOpenOffice(file.snapshot?.original.extension) ||
         isImage(file.snapshot?.original.extension)) &&
-      ((geViewerPermission(file.permission) && file.snapshot?.entities) ||
+      ((geViewerPermission(file.permission) &&
+        file.snapshot?.capabilities.entities) ||
         geEditorPermission(file.permission)),
     [file],
   )

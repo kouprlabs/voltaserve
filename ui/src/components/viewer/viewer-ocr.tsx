@@ -16,17 +16,11 @@ export type ViewerPDFProps = {
   file: File
 }
 
-const ViewerPDF = ({ file }: ViewerPDFProps) => {
+const ViewerOCR = ({ file }: ViewerPDFProps) => {
   const url = useMemo(() => {
     if (file.snapshot?.ocr && file.snapshot?.ocr.extension) {
       return `/proxy/api/v3/files/${file.id}/ocr${
         file.snapshot?.ocr.extension
-      }?${new URLSearchParams({
-        access_token: getAccessTokenOrRedirect(),
-      })}`
-    } else if (file.snapshot?.preview && file.snapshot?.preview.extension) {
-      return `/proxy/api/v3/files/${file.id}/preview${
-        file.snapshot?.preview.extension
       }?${new URLSearchParams({
         access_token: getAccessTokenOrRedirect(),
       })}`
@@ -42,4 +36,4 @@ const ViewerPDF = ({ file }: ViewerPDFProps) => {
   )
 }
 
-export default ViewerPDF
+export default ViewerOCR

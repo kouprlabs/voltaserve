@@ -376,7 +376,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         ref={folderUploadInput}
         className={cx('hidden')}
         type="file"
-        /* @ts-expect-error intentionaly ignored */
+        /* @ts-expect-error intentionally ignored */
         directory=""
         webkitdirectory=""
         mozdirectory=""
