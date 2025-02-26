@@ -32,6 +32,7 @@ mod m20241114_000001_drop_user_force_change_password_column;
 mod m20241209_000001_add_user_failed_attempts_column;
 mod m20241209_000001_add_user_locked_until_column;
 mod m20250225_000001_add_summary_column;
+mod m20250226_000001_add_intent_column;
 
 #[async_trait::async_trait]
 impl MigratorTrait for Migrator {
@@ -56,6 +57,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20241209_000001_add_user_failed_attempts_column::Migration),
             Box::new(m20241209_000001_add_user_locked_until_column::Migration),
             Box::new(m20250225_000001_add_summary_column::Migration),
+            Box::new(m20250226_000001_add_intent_column::Migration),
         ]
     }
 }

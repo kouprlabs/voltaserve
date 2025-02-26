@@ -22,6 +22,7 @@ CREATE TABLE "snapshot" (
 	create_time text NOT NULL,
 	update_time text NULL,
     summary text NULL,
+    intent text NULL,
 	CONSTRAINT snapshot_pkey PRIMARY KEY (id)
 );
 

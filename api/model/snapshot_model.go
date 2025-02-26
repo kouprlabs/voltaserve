@@ -16,6 +16,10 @@ const (
 	SnapshotStatusReady      = "ready"
 )
 
+const (
+	SnapshotIntentDocument = "document"
+)
+
 type Snapshot interface {
 	GetID() string
 	GetVersion() int64

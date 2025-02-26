@@ -36,6 +36,7 @@ type snapshotEntity struct {
 	Mosaic     datatypes.JSON `gorm:"column:mosaic"      json:"mosaic,omitempty"`
 	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
 	Summary    *string        `gorm:"column:summary"     json:"summary,omitempty"`
+	Intent     *string        `gorm:"column:summary"     json:"intent,omitempty"`
 	Status     string         `gorm:"column,status"      json:"status,omitempty"`
 	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
 	TaskID     *string        `gorm:"column:task_id"     json:"taskId,omitempty"`
@@ -481,6 +482,7 @@ type SnapshotUpdateOptions struct {
 	Status    *string
 	Language  *string
 	Summary   *string
+	Intent    *string
 	TaskID    *string
 }
 
@@ -495,6 +497,7 @@ const (
 	SnapshotFieldStatus    = "status"
 	SnapshotFieldLanguage  = "language"
 	SnapshotFieldSummary   = "summary"
+	SnapshotFieldIntent    = "intent"
 	SnapshotFieldTaskID    = "taskId"
 )
 
@@ -532,6 +535,9 @@ func (repo *SnapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	}
 	if slices.Contains(opts.Fields, SnapshotFieldSummary) {
 		snapshot.SetSummary(opts.Summary)
+	}
+	if slices.Contains(opts.Fields, SnapshotFieldIntent) {
+		snapshot.SetSummary(opts.Intent)
 	}
 	if slices.Contains(opts.Fields, SnapshotFieldTaskID) {
 		snapshot.SetTaskID(opts.TaskID)

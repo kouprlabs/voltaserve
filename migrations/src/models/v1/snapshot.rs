@@ -24,6 +24,7 @@ pub enum Snapshot {
     Thumbnail,
     Language,
     Summary,
+    Intent,
     Status,
     TaskId,
     CreateTime,
