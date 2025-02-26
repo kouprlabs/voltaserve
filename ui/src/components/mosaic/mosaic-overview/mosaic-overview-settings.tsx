@@ -9,15 +9,11 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useMemo } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
-import { IconBolt, IconDelete, SectionError, SectionSpinner } from '@koupr/ui'
+import { IconDelete, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { FileAPI } from '@/client/api/file'
 import { MosaicAPI } from '@/client/api/mosaic'
-import {
-  geEditorPermission,
-  geOwnerPermission,
-  NONE_PERMISSION,
-} from '@/client/api/permission'
+import { geOwnerPermission, NONE_PERMISSION } from '@/client/api/permission'
 import { TaskAPI } from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
