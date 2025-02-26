@@ -12,20 +12,24 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /build
 
-COPY go.mod go.sum ./
+COPY api ./api
+COPY conversion ./conversion
+COPY mosaic ./mosaic
+COPY webdav ./webdav
+COPY go.work go.work.sum ./
 
 RUN go mod download
 
-COPY . .
+WORKDIR /build/webdav
 
 RUN go build -o voltaserve-webdav
 
-FROM alpine:3.21 AS runner
+FROM debian:bookworm AS runner
 
 WORKDIR /app
 
-COPY --from=builder /build/voltaserve-webdav ./voltaserve-webdav
-COPY --from=builder /build/.env ./.env
+COPY --from=builder /build/webdav/voltaserve-webdav ./voltaserve-webdav
+COPY --from=builder /build/webdav/.env ./.env
 
 ENTRYPOINT ["./voltaserve-webdav"]
 

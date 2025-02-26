@@ -4,6 +4,6 @@ use (
 	./api
 	./conversion
 	./mosaic
-	./ui
 	./webdav
+	./ui
 )
