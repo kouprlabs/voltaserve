@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM golang:1.22-bookworm AS builder
+FROM golang:1.23-bookworm AS builder
 
 WORKDIR /build
 

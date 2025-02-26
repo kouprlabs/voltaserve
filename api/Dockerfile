@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /build
 
