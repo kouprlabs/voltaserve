@@ -577,6 +577,8 @@ definitions:
         type: string
       id:
         type: string
+      intent:
+        type: string
       isActive:
         type: boolean
       language:
