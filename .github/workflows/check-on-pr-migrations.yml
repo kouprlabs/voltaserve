@@ -51,7 +51,5 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./migrations
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           push: false
           platforms: linux/${{ matrix.platform }}
