@@ -56,5 +56,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./mosaic/Dockerfile
           push: false
           platforms: linux/${{ matrix.platform }}
