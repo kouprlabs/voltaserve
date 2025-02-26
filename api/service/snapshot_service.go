@@ -42,6 +42,7 @@ type SnapshotService struct {
 	taskCache      *cache.TaskCache
 	s3             infra.S3Manager
 	config         *config.Config
+	languages      []*SnapshotLanguage
 }
 
 func NewSnapshotService() *SnapshotService {
@@ -58,25 +59,44 @@ func NewSnapshotService() *SnapshotService {
 		taskCache:      cache.NewTaskCache(),
 		s3:             infra.NewS3Manager(),
 		config:         config.GetConfig(),
+		languages: []*SnapshotLanguage{
+			{ID: "ara", ISO6393: "ara", Name: "Arabic"},
+			{ID: "chi_sim", ISO6393: "zho", Name: "Chinese Simplified"},
+			{ID: "chi_tra", ISO6393: "zho", Name: "Chinese Traditional"},
+			{ID: "deu", ISO6393: "deu", Name: "German"},
+			{ID: "eng", ISO6393: "eng", Name: "English"},
+			{ID: "fra", ISO6393: "fra", Name: "French"},
+			{ID: "hin", ISO6393: "hin", Name: "Hindi"},
+			{ID: "ita", ISO6393: "ita", Name: "Italian"},
+			{ID: "jpn", ISO6393: "jpn", Name: "Japanese"},
+			{ID: "nld", ISO6393: "nld", Name: "Dutch"},
+			{ID: "por", ISO6393: "por", Name: "Portuguese"},
+			{ID: "rus", ISO6393: "rus", Name: "Russian"},
+			{ID: "spa", ISO6393: "spa", Name: "Spanish"},
+			{ID: "swe", ISO6393: "swe", Name: "Swedish"},
+			{ID: "nor", ISO6393: "nor", Name: "Norwegian"},
+			{ID: "fin", ISO6393: "fin", Name: "Finnish"},
+			{ID: "dan", ISO6393: "dan", Name: "Danish"},
+		},
 	}
 }
 
 type Snapshot struct {
-	ID         string            `json:"id"`
-	Version    int64             `json:"version"`
-	Original   *Download         `json:"original,omitempty"`
-	Preview    *Download         `json:"preview,omitempty"`
-	OCR        *Download         `json:"ocr,omitempty"`
-	Text       *Download         `json:"text,omitempty"`
-	Entities   *Download         `json:"entities,omitempty"`
-	Mosaic     *Download         `json:"mosaic,omitempty"`
-	Thumbnail  *Download         `json:"thumbnail,omitempty"`
-	Language   *string           `json:"language,omitempty"`
-	Status     string            `json:"status,omitempty"`
-	IsActive   bool              `json:"isActive"`
-	Task       *SnapshotTaskInfo `json:"task,omitempty"`
-	CreateTime string            `json:"createTime"`
-	UpdateTime *string           `json:"updateTime,omitempty"`
+	ID           string                `json:"id"`
+	Version      int64                 `json:"version"`
+	Original     *SnapshotDownloadable `json:"original,omitempty"`
+	Preview      *SnapshotDownloadable `json:"preview,omitempty"`
+	OCR          *SnapshotDownloadable `json:"ocr,omitempty"`
+	Text         *SnapshotDownloadable `json:"text,omitempty"`
+	Thumbnail    *SnapshotDownloadable `json:"thumbnail,omitempty"`
+	Summary      *string               `json:"summary,omitempty"`
+	Language     *string               `json:"language,omitempty"`
+	Capabilities SnapshotCapabilities  `json:"capabilities"`
+	Status       string                `json:"status,omitempty"`
+	IsActive     bool                  `json:"isActive"`
+	Task         *SnapshotTaskInfo     `json:"task,omitempty"`
+	CreateTime   string                `json:"createTime"`
+	UpdateTime   *string               `json:"updateTime,omitempty"`
 }
 
 const (
@@ -90,7 +110,18 @@ const (
 	SnapshotSortOrderDesc = "desc"
 )
 
-type Download struct {
+type SnapshotCapabilities struct {
+	Original  bool `json:"original"`
+	Preview   bool `json:"preview"`
+	OCR       bool `json:"ocr"`
+	Text      bool `json:"text"`
+	Summary   bool `json:"summary"`
+	Entities  bool `json:"entities"`
+	Mosaic    bool `json:"mosaic"`
+	Thumbnail bool `json:"thumbnail"`
+}
+
+type SnapshotDownloadable struct {
 	Extension string               `json:"extension,omitempty"`
 	Size      *int64               `json:"size,omitempty"`
 	Image     *model.ImageProps    `json:"image,omitempty"`
@@ -108,11 +139,6 @@ type SnapshotList struct {
 	TotalElements uint64      `json:"totalElements"`
 	Page          uint64      `json:"page"`
 	Size          uint64      `json:"size"`
-}
-
-type SnapshotProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
 }
 
 type SnapshotListOptions struct {
@@ -137,6 +163,11 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 		Page:          opts.Page,
 		Size:          uint64(len(mapped)),
 	}, nil
+}
+
+type SnapshotProbe struct {
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *SnapshotService) Probe(fileID string, opts SnapshotListOptions, userID string) (*SnapshotProbe, error) {
@@ -269,6 +300,16 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 		}
 	}
 	return svc.snapshotMapper.mapOne(snapshot), nil
+}
+
+type SnapshotLanguage struct {
+	ID      string `json:"id"`
+	ISO6393 string `json:"iso6393"`
+	Name    string `json:"name"`
+}
+
+func (svc *SnapshotService) GetLanguages() ([]*SnapshotLanguage, error) {
+	return svc.languages, nil
 }
 
 func (svc *SnapshotService) IsValidSortBy(value string) bool {
@@ -525,29 +566,39 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 		Version:    m.GetVersion(),
 		Status:     m.GetStatus(),
 		Language:   m.GetLanguage(),
+		Summary:    m.GetSummary(),
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
 	}
 	if m.HasOriginal() {
 		s.Original = mp.mapS3Object(m.GetOriginal())
+		s.Capabilities.Original = true
 	}
 	if m.HasPreview() {
 		s.Preview = mp.mapS3Object(m.GetPreview())
+		s.Capabilities.Preview = true
 	}
 	if m.HasOCR() {
 		s.OCR = mp.mapS3Object(m.GetOCR())
+		s.Capabilities.OCR = true
 	}
 	if m.HasText() {
 		s.Text = mp.mapS3Object(m.GetText())
-	}
-	if m.HasEntities() {
-		s.Entities = mp.mapS3Object(m.GetEntities())
-	}
-	if m.HasMosaic() {
-		s.Mosaic = mp.mapS3Object(m.GetMosaic())
+		s.Capabilities.Text = true
 	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.mapS3Object(m.GetThumbnail())
+		s.Capabilities.Thumbnail = true
+	}
+	if m.GetSummary() != nil {
+		s.Summary = m.GetSummary()
+		s.Capabilities.Summary = true
+	}
+	if m.HasEntities() {
+		s.Capabilities.Entities = true
+	}
+	if m.HasMosaic() {
+		s.Capabilities.Mosaic = true
 	}
 	if m.GetTaskID() != nil {
 		s.Task = &SnapshotTaskInfo{
@@ -560,7 +611,6 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 			s.Task.IsPending = isPending
 		}
 	}
-
 	return s
 }
 
@@ -574,8 +624,8 @@ func (mp *snapshotMapper) mapMany(snapshots []model.Snapshot, activeID *string) 
 	return res
 }
 
-func (mp *snapshotMapper) mapS3Object(o *model.S3Object) *Download {
-	download := &Download{
+func (mp *snapshotMapper) mapS3Object(o *model.S3Object) *SnapshotDownloadable {
+	download := &SnapshotDownloadable{
 		Extension: filepath.Ext(o.Key),
 		Size:      o.Size,
 	}

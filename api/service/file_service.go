@@ -172,6 +172,14 @@ func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf
 	return svc.fileDownload.downloadPreviewBuffer(id, rangeHeader, buf, userID)
 }
 
+func (svc *FileService) DownloadTextBuffer(id string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
+	return svc.fileDownload.downloadTextBuffer(id, buf, userID)
+}
+
+func (svc *FileService) DownloadOCRBuffer(id string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
+	return svc.fileDownload.downloadOCRBuffer(id, buf, userID)
+}
+
 func (svc *FileService) DownloadThumbnailBuffer(id string, buf *bytes.Buffer, userID string) (model.Snapshot, error) {
 	return svc.fileDownload.downloadThumbnailBuffer(id, buf, userID)
 }
@@ -1461,6 +1469,66 @@ func (svc *fileDownload) downloadPreviewBuffer(id string, rangeHeader string, bu
 	}
 	if snapshot.HasPreview() {
 		rangeInterval, err := svc.downloadS3Object(snapshot.GetPreview(), rangeHeader, buf)
+		if err != nil {
+			return nil, err
+		}
+		return &DownloadResult{
+			File:          file,
+			Snapshot:      snapshot,
+			RangeInterval: rangeInterval,
+		}, nil
+	} else {
+		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+}
+
+func (svc *fileDownload) downloadTextBuffer(id string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
+	if err != nil {
+		return nil, err
+	}
+	if snapshot.HasText() {
+		rangeInterval, err := svc.downloadS3Object(snapshot.GetText(), "", buf)
+		if err != nil {
+			return nil, err
+		}
+		return &DownloadResult{
+			File:          file,
+			Snapshot:      snapshot,
+			RangeInterval: rangeInterval,
+		}, nil
+	} else {
+		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+}
+
+func (svc *fileDownload) downloadOCRBuffer(id string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
+	if err != nil {
+		return nil, err
+	}
+	if snapshot.HasOCR() {
+		rangeInterval, err := svc.downloadS3Object(snapshot.GetOCR(), "", buf)
 		if err != nil {
 			return nil, err
 		}

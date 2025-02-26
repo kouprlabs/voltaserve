@@ -19,6 +19,7 @@ import ViewerAudio from '@/components/viewer/viewer-audio'
 import ViewerImage from '@/components/viewer/viewer-image'
 import ViewerModel from '@/components/viewer/viewer-model'
 import ViewerMosaic from '@/components/viewer/viewer-mosaic'
+import ViewerOCR from '@/components/viewer/viewer-ocr'
 import ViewerPDF from '@/components/viewer/viewer-pdf'
 import ViewerVideo from '@/components/viewer/viewer-video'
 import downloadFile from '@/lib/helpers/download-file'
@@ -54,8 +55,12 @@ const ViewerPage = () => {
       ),
     [file],
   )
-  const hasMosaicImage = useMemo(
-    () => hasImage && file?.snapshot && file.snapshot?.mosaic,
+  const hasMosaic = useMemo(
+    () => hasImage && file?.snapshot && file.snapshot?.capabilities.mosaic,
+    [hasImage],
+  )
+  const hasOCR = useMemo(
+    () => hasImage && file?.snapshot && file.snapshot?.ocr,
     [hasImage],
   )
   const hasVideo = useMemo(
@@ -88,8 +93,10 @@ const ViewerPage = () => {
         if (hasPDF) {
           return <ViewerPDF file={file} />
         } else if (hasImage) {
-          if (hasMosaicImage) {
+          if (hasMosaic) {
             return <ViewerMosaic file={file} />
+          } else if (hasOCR) {
+            return <ViewerOCR file={file} />
           } else {
             return <ViewerImage file={file} />
           }
@@ -117,17 +124,9 @@ const ViewerPage = () => {
         }
       }
     },
-    [
-      hasMosaicPath,
-      hasMosaicImage,
-      hasPDF,
-      hasImage,
-      hasVideo,
-      hasAudio,
-      hasGLB,
-    ],
+    [hasMosaicPath, hasMosaic, hasPDF, hasImage, hasVideo, hasAudio, hasGLB],
   )
-  const isTheaterMode = hasVideo || (hasImage && !hasMosaicImage)
+  const isTheaterMode = hasVideo || (hasImage && !hasMosaic)
 
   return (
     <>

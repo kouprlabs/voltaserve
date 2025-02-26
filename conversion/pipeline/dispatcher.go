@@ -24,7 +24,7 @@ type Dispatcher struct {
 	imagePipeline      model.Pipeline
 	officePipeline     model.Pipeline
 	audioVideoPipeline model.Pipeline
-	insightsPipeline   model.Pipeline
+	entityPipeline     model.Pipeline
 	mosaicPipeline     model.Pipeline
 	glbPipeline        model.Pipeline
 	zipPipeline        model.Pipeline
@@ -39,7 +39,7 @@ func NewDispatcher() *Dispatcher {
 		imagePipeline:      NewImagePipeline(),
 		officePipeline:     NewOfficePipeline(),
 		audioVideoPipeline: NewAudioVideoPipeline(),
-		insightsPipeline:   NewInsightsPipeline(),
+		entityPipeline:     NewEntityPipeline(),
 		mosaicPipeline:     NewMosaicPipeline(),
 		glbPipeline:        NewGLBPipeline(),
 		zipPipeline:        NewZIPPipeline(),
@@ -73,8 +73,8 @@ func (d *Dispatcher) Dispatch(opts api_client.PipelineRunOptions) error {
 		err = d.imagePipeline.Run(opts)
 	} else if id == model.PipelineAudioVideo {
 		err = d.audioVideoPipeline.Run(opts)
-	} else if id == model.PipelineInsights {
-		err = d.insightsPipeline.Run(opts)
+	} else if id == model.PipelineEntity {
+		err = d.entityPipeline.Run(opts)
 	} else if id == model.PipelineMosaic {
 		err = d.mosaicPipeline.Run(opts)
 	} else if id == model.PipelineGLB {

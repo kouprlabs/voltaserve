@@ -27,7 +27,7 @@ import (
 	"github.com/kouprlabs/voltaserve/conversion/processor"
 )
 
-type insightsPipeline struct {
+type entityPipeline struct {
 	imageProc      *processor.ImageProcessor
 	pdfProc        *processor.PDFProcessor
 	ocrProc        *processor.OCRProcessor
@@ -38,8 +38,8 @@ type insightsPipeline struct {
 	languageClient *language_client.LanguageClient
 }
 
-func NewInsightsPipeline() model.Pipeline {
-	return &insightsPipeline{
+func NewEntityPipeline() model.Pipeline {
+	return &entityPipeline{
 		imageProc:      processor.NewImageProcessor(),
 		pdfProc:        processor.NewPDFProcessor(),
 		ocrProc:        processor.NewOCRProcessor(),
@@ -51,7 +51,7 @@ func NewInsightsPipeline() model.Pipeline {
 	}
 }
 
-func (p *insightsPipeline) Run(opts api_client.PipelineRunOptions) error {
+func (p *entityPipeline) Run(opts api_client.PipelineRunOptions) error {
 	if opts.Payload == nil || opts.Payload["language"] == "" {
 		return errors.New("language is undefined")
 	}
@@ -69,14 +69,14 @@ func (p *insightsPipeline) Run(opts api_client.PipelineRunOptions) error {
 	return p.RunFromLocalPath(inputPath, opts)
 }
 
-func (p *insightsPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *entityPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 		Fields: []string{api_client.TaskFieldName},
 		Name:   helper.ToPtr("Extracting text."),
 	}); err != nil {
 		return err
 	}
-	text, err := p.createText(inputPath, opts)
+	text, err := p.extractText(inputPath, opts)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (p *insightsPipeline) RunFromLocalPath(inputPath string, opts api_client.Pi
 	}); err != nil {
 		return err
 	}
-	if err := p.createEntities(*text, opts); err != nil {
+	if err := p.collectEntities(*text, opts); err != nil {
 		return err
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
@@ -99,7 +99,7 @@ func (p *insightsPipeline) RunFromLocalPath(inputPath string, opts api_client.Pi
 	return nil
 }
 
-func (p *insightsPipeline) createText(inputPath string, opts api_client.PipelineRunOptions) (*string, error) {
+func (p *entityPipeline) extractText(inputPath string, opts api_client.PipelineRunOptions) (*string, error) {
 	/* Generate PDF/A */
 	var pdfPath string
 	if p.fileIdent.IsImage(opts.Key) {
@@ -181,7 +181,7 @@ func (p *insightsPipeline) createText(inputPath string, opts api_client.Pipeline
 	return text, nil
 }
 
-func (p *insightsPipeline) createEntities(text string, opts api_client.PipelineRunOptions) error {
+func (p *entityPipeline) collectEntities(text string, opts api_client.PipelineRunOptions) error {
 	if len(text) == 0 {
 		return errors.New("text is empty")
 	}

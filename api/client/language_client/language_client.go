@@ -31,7 +31,7 @@ func NewLanguageClient() *LanguageClient {
 	}
 }
 
-type InsightsEntity struct {
+type Entity struct {
 	Text      string `json:"text"`
 	Label     string `json:"label"`
 	Frequency int    `json:"frequency"`
@@ -42,14 +42,14 @@ type GetEntitiesOptions struct {
 	Language string `json:"language"`
 }
 
-func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]InsightsEntity, error) {
+func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]Entity, error) {
 	b, err := json.Marshal(opts)
 	if err != nil {
-		return []InsightsEntity{}, err
+		return []Entity{}, err
 	}
 	resp, err := http.Post(fmt.Sprintf("%s/v3/entities", cl.config.LanguageURL), "application/json", bytes.NewBuffer(b))
 	if err != nil {
-		return []InsightsEntity{}, err
+		return []Entity{}, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
@@ -61,12 +61,12 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]InsightsEntity
 	}
 	b, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return []InsightsEntity{}, err
+		return []Entity{}, err
 	}
-	var res []InsightsEntity
+	var res []Entity
 	err = json.Unmarshal(b, &res)
 	if err != nil {
-		return []InsightsEntity{}, err
+		return []Entity{}, err
 	}
 	return res, nil
 }

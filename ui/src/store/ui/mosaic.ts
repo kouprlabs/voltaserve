@@ -7,13 +7,10 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { KeyedMutator } from 'swr'
-import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { MosaicInfo } from '@/client/api/mosaic'
+import { createSlice } from '@reduxjs/toolkit'
 
 type MosaicState = {
   isModalOpen: boolean
-  mutateInfo?: KeyedMutator<MosaicInfo>
 }
 
 const initialState: MosaicState = {
@@ -33,20 +30,9 @@ const slice = createSlice({
     allModalsDidClose: (state) => {
       state.isModalOpen = false
     },
-    mutateInfoUpdated: (
-      state,
-      action: PayloadAction<KeyedMutator<MosaicInfo>>,
-    ) => {
-      state.mutateInfo = action.payload
-    },
   },
 })
 
-export const {
-  modalDidOpen,
-  modalDidClose,
-  allModalsDidClose,
-  mutateInfoUpdated,
-} = slice.actions
+export const { modalDidOpen, modalDidClose, allModalsDidClose } = slice.actions
 
 export default slice.reducer

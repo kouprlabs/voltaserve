@@ -23,6 +23,7 @@ pub enum Snapshot {
     Segmentation,
     Thumbnail,
     Language,
+    Summary,
     Status,
     TaskId,
     CreateTime,

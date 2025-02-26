@@ -107,68 +107,6 @@ func (r *UserRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *UserRouter) parseListQueryParams(c *fiber.Ctx) (*service.UserListOptions, error) {
-	var err error
-	var page uint64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("page")
-		}
-	}
-	var size uint64
-	if c.Query("size") == "" {
-		size = UserDefaultPageSize
-	} else {
-		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("size")
-		}
-	}
-	if size == 0 {
-		return nil, errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !r.userSvc.IsValidSortBy(sortBy) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !r.userSvc.IsValidSortOrder(sortOrder) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	var excludeGroupMembers bool
-	if c.Query("exclude_group_members") != "" {
-		excludeGroupMembers, err = strconv.ParseBool(c.Query("exclude_group_members"))
-		if err != nil {
-			return nil, err
-		}
-	}
-	var excludeMe bool
-	if c.Query("exclude_me") != "" {
-		excludeMe, err = strconv.ParseBool(c.Query("exclude_me"))
-		if err != nil {
-			return nil, err
-		}
-	}
-	query, err := url.QueryUnescape(c.Query("query"))
-	if err != nil {
-		return nil, errorpkg.NewInvalidQueryParamError("query")
-	}
-	return &service.UserListOptions{
-		Query:               query,
-		OrganizationID:      c.Query("organization_id"),
-		GroupID:             c.Query("group_id"),
-		ExcludeGroupMembers: excludeGroupMembers,
-		ExcludeMe:           excludeMe,
-		SortBy:              sortBy,
-		SortOrder:           sortOrder,
-		Page:                page,
-		Size:                size,
-	}, nil
-}
-
 // DownloadPicture godoc
 //
 //	@Summary		Download Picture
@@ -249,4 +187,66 @@ func (r *UserRouter) getUserIDFromAccessToken(accessToken string) (string, bool,
 	} else {
 		return "", false, errors.New("cannot find sub claim")
 	}
+}
+
+func (r *UserRouter) parseListQueryParams(c *fiber.Ctx) (*service.UserListOptions, error) {
+	var err error
+	var page uint64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("page")
+		}
+	}
+	var size uint64
+	if c.Query("size") == "" {
+		size = UserDefaultPageSize
+	} else {
+		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("size")
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !r.userSvc.IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !r.userSvc.IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	var excludeGroupMembers bool
+	if c.Query("exclude_group_members") != "" {
+		excludeGroupMembers, err = strconv.ParseBool(c.Query("exclude_group_members"))
+		if err != nil {
+			return nil, err
+		}
+	}
+	var excludeMe bool
+	if c.Query("exclude_me") != "" {
+		excludeMe, err = strconv.ParseBool(c.Query("exclude_me"))
+		if err != nil {
+			return nil, err
+		}
+	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return nil, errorpkg.NewInvalidQueryParamError("query")
+	}
+	return &service.UserListOptions{
+		Query:               query,
+		OrganizationID:      c.Query("organization_id"),
+		GroupID:             c.Query("group_id"),
+		ExcludeGroupMembers: excludeGroupMembers,
+		ExcludeMe:           excludeMe,
+		SortBy:              sortBy,
+		SortOrder:           sortOrder,
+		Page:                page,
+		Size:                size,
+	}, nil
 }

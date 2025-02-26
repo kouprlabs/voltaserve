@@ -57,61 +57,59 @@ func main() {
 
 	v3 := app.Group("v3")
 
-	health := router.NewHealthRouter()
-	health.AppendRoutes(v3)
+	healthRouter := router.NewHealthRouter()
+	healthRouter.AppendRoutes(v3)
 
-	version := router.NewVersionRouter()
-	version.AppendRoutes(app)
+	versionRouter := router.NewVersionRouter()
+	versionRouter.AppendRoutes(app)
 
-	filesGroup := v3.Group("files")
-	files := router.NewFileRouter()
-	files.AppendNonJWTRoutes(filesGroup)
+	fileGroup := v3.Group("files")
+	fileRouter := router.NewFileRouter()
+	fileRouter.AppendNonJWTRoutes(fileGroup)
 
-	snapshotsGroup := v3.Group("snapshots")
-	snapshots := router.NewSnapshotRouter()
-	snapshots.AppendNonJWTRoutes(snapshotsGroup)
-
-	insightsGroup := v3.Group("insights")
-	insights := router.NewInsightsRouter()
-	insights.AppendNonJWTRoutes(insightsGroup)
+	snapshotGroup := v3.Group("snapshots")
+	snapshotRouter := router.NewSnapshotRouter()
+	snapshotRouter.AppendNonJWTRoutes(snapshotGroup)
 
 	mosaicGroup := v3.Group("mosaics")
-	mosaic := router.NewMosaicRouter()
-	mosaic.AppendNonJWTRoutes(mosaicGroup)
+	mosaicRouter := router.NewMosaicRouter()
+	mosaicRouter.AppendNonJWTRoutes(mosaicGroup)
 
-	tasksGroup := v3.Group("tasks")
-	tasks := router.NewTaskRouter()
-	tasks.AppendNonJWTRoutes(tasksGroup)
+	taskGroup := v3.Group("tasks")
+	taskRouter := router.NewTaskRouter()
+	taskRouter.AppendNonJWTRoutes(taskGroup)
 
-	usersGroup := v3.Group("users")
-	users := router.NewUserRouter()
-	users.AppendNonJWTRoutes(usersGroup)
+	userGroup := v3.Group("users")
+	userRouter := router.NewUserRouter()
+	userRouter.AppendNonJWTRoutes(userGroup)
 
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
 
-	files.AppendRoutes(filesGroup)
-	snapshots.AppendRoutes(snapshotsGroup)
-	insights.AppendRoutes(insightsGroup)
-	mosaic.AppendRoutes(mosaicGroup)
-	tasks.AppendRoutes(tasksGroup)
-	users.AppendRoutes(usersGroup)
+	fileRouter.AppendRoutes(fileGroup)
+	snapshotRouter.AppendRoutes(snapshotGroup)
+	mosaicRouter.AppendRoutes(mosaicGroup)
+	taskRouter.AppendRoutes(taskGroup)
+	userRouter.AppendRoutes(userGroup)
 
-	invitations := router.NewInvitationRouter()
-	invitations.AppendRoutes(v3.Group("invitations"))
+	invitationRouter := router.NewInvitationRouter()
+	invitationRouter.AppendRoutes(v3.Group("invitations"))
 
-	organizations := router.NewOrganizationRouter()
-	organizations.AppendRoutes(v3.Group("organizations"))
+	orgRouter := router.NewOrganizationRouter()
+	orgRouter.AppendRoutes(v3.Group("organizations"))
 
-	storage := router.NewStorageRouter()
-	storage.AppendRoutes(v3.Group("storage"))
+	storageRouter := router.NewStorageRouter()
+	storageRouter.AppendRoutes(v3.Group("storage"))
 
-	workspaces := router.NewWorkspaceRouter()
-	workspaces.AppendRoutes(v3.Group("workspaces"))
+	workspaceRouter := router.NewWorkspaceRouter()
+	workspaceRouter.AppendRoutes(v3.Group("workspaces"))
 
-	groups := router.NewGroupRouter()
-	groups.AppendRoutes(v3.Group("groups"))
+	groupRouter := router.NewGroupRouter()
+	groupRouter.AppendRoutes(v3.Group("groups"))
+
+	entityRouter := router.NewEntityRouter()
+	entityRouter.AppendRoutes(v3.Group("entities"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

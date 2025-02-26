@@ -42,8 +42,8 @@ func newPipelineClient() *pipelineClient {
 }
 
 const (
-	PipelineInsights = "insights"
-	PipelineMosaic   = "mosaic"
+	PipelineEntity = "entity"
+	PipelineMosaic = "mosaic"
 )
 
 type PipelineRunOptions struct {
@@ -85,6 +85,6 @@ func newMockPipelineClient() *mockPipelineClient {
 	return &mockPipelineClient{}
 }
 
-func (m *mockPipelineClient) Run(opts *PipelineRunOptions) error {
+func (m *mockPipelineClient) Run(_ *PipelineRunOptions) error {
 	return nil
 }

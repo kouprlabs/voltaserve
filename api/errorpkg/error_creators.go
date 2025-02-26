@@ -130,12 +130,12 @@ func NewPictureNotFoundError(err error) *ErrorResponse {
 	)
 }
 
-func NewInsightsNotFoundError(err error) *ErrorResponse {
+func NewEntitiesNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
-		"insights_not_found",
+		"entities_not_found",
 		http.StatusNotFound,
-		"Insights not found.",
-		"Insights not found.",
+		"Entities not found.",
+		"Entities not found.",
 		err,
 	)
 }
@@ -156,16 +156,6 @@ func NewInvitationNotFoundError(err error) *ErrorResponse {
 		http.StatusNotFound,
 		"Invitation not found.",
 		"Invitation not found.",
-		err,
-	)
-}
-
-func NewSnapshotCannotBePatchedError(err error) *ErrorResponse {
-	return NewErrorResponse(
-		"snapshot_cannot_be_patched",
-		http.StatusBadRequest,
-		"Snapshot cannot be patched.",
-		"Snapshot cannot be patched.",
 		err,
 	)
 }

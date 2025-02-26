@@ -41,13 +41,13 @@ func NewMosaicRouter() *MosaicRouter {
 }
 
 func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
-	g.Post("/:id", r.Create)
-	g.Delete("/:id", r.Delete)
-	g.Get("/:id/info", r.ReadInfo)
+	g.Post("/:file_id", r.Create)
+	g.Delete("/:file_id", r.Delete)
+	g.Get("/:file_id/metadata", r.GetMetadata)
 }
 
 func (r *MosaicRouter) AppendNonJWTRoutes(g fiber.Router) {
-	g.Get("/:id/zoom_level/:zoom_level/row/:row/column/:column/extension/:extension", r.DownloadTile)
+	g.Get("/:file_id/zoom_level/:zoom_level/row/:row/column/:column/extension/:extension", r.DownloadTile)
 }
 
 // Create godoc
@@ -58,13 +58,13 @@ func (r *MosaicRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Id				mosaic_create
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	string	true	"ID"
+//	@Param			file_id	path	string	true	"File ID"
 //	@Success		201
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/mosaics/{id} [post]
+//	@Router			/mosaics/{file_id} [post]
 func (r *MosaicRouter) Create(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.Create(c.Params("id"), helper.GetUserID(c))
+	res, err := r.mosaicSvc.Create(c.Params("file_id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -79,34 +79,34 @@ func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 //	@Id				mosaic_delete
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	string	true	"ID"
+//	@Param			file_id	path	string	true	"File ID"
 //	@Success		200
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/mosaics/{id} [delete]
+//	@Router			/mosaics/{file_id} [delete]
 func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.Delete(c.Params("id"), helper.GetUserID(c))
+	res, err := r.mosaicSvc.Delete(c.Params("file_id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
 }
 
-// ReadInfo godoc
+// GetMetadata godoc
 //
-//	@Summary		Read Info
-//	@Description	Read Info
+//	@Summary		Get Metadata
+//	@Description	Get Metadata
 //	@Tags			Mosaic
-//	@Id				mosaic_read_info
+//	@Id				mosaic_get_metadata
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.MosaicInfo
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/mosaics/{id}/info [get]
-func (r *MosaicRouter) ReadInfo(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.ReadInfo(c.Params("id"), helper.GetUserID(c))
+//	@Param			file_id	path		string	true	"File ID"
+//	@Success		200		{object}	mosaic_client.MosaicMetadata
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/mosaics/{file_id}/metadata [get]
+func (r *MosaicRouter) GetMetadata(c *fiber.Ctx) error {
+	res, err := r.mosaicSvc.GetMetadata(c.Params("file_id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -120,13 +120,13 @@ func (r *MosaicRouter) ReadInfo(c *fiber.Ctx) error {
 //	@Tags			Mosaic
 //	@Id				mosaic_download_tile
 //	@Produce		json
-//	@Param			id			path		string	true	"ID"
+//	@Param			file_id		path		string	true	"File ID"
 //	@Param			zoom_level	path		string	true	"Zoom Level"
 //	@Param			row			path		string	true	"Row"
 //	@Param			column		path		string	true	"Column"
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/mosaics/{id}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension} [get]
+//	@Router			/mosaics/{file_id}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension} [get]
 func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -139,9 +139,9 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	id := c.Params("id")
+	id := c.Params("file_id")
 	if id == "" {
-		return errorpkg.NewMissingQueryParamError("id")
+		return errorpkg.NewMissingQueryParamError("file_id")
 	}
 	var zoomLevel int64
 	if c.Params("zoom_level") == "" {

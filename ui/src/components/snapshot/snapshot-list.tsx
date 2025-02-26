@@ -197,10 +197,19 @@ const SnapshotList = () => {
                                   {prettyBytes(s.original.size)}
                                 </Badge>
                               ) : null}
-                              {s.entities ? (
-                                <Badge variant="outline">Insights</Badge>
+                              {s.capabilities.summary ? (
+                                <Badge variant="outline">Summary</Badge>
                               ) : null}
-                              {s.mosaic ? (
+                              {s.capabilities.text ? (
+                                <Badge variant="outline">Text</Badge>
+                              ) : null}
+                              {s.capabilities.ocr ? (
+                                <Badge variant="outline">OCR</Badge>
+                              ) : null}
+                              {s.capabilities.entities ? (
+                                <Badge variant="outline">Entities</Badge>
+                              ) : null}
+                              {s.capabilities.mosaic ? (
                                 <Badge variant="outline">Mosaic</Badge>
                               ) : null}
                               {s.isActive ? (
@@ -244,7 +253,7 @@ const SnapshotList = () => {
               isDisabled={!selected || selected.isActive || isActivating}
               onClick={handleDetach}
             >
-              Detach Snapshot
+              Detach
             </Button>
             <Button
               variant="solid"
@@ -253,7 +262,7 @@ const SnapshotList = () => {
               isDisabled={!selected || selected.isActive || isActivating}
               onClick={handleActivate}
             >
-              Activate Snapshot
+              Activate
             </Button>
           </div>
         </ModalFooter>

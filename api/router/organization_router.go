@@ -209,50 +209,6 @@ func (r *OrganizationRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.OrganizationListOptions, error) {
-	var err error
-	var page uint64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("page")
-		}
-	}
-	var size uint64
-	if c.Query("size") == "" {
-		size = OrganizationDefaultPageSize
-	} else {
-		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
-		if err != nil {
-			return nil, errorpkg.NewInvalidQueryParamError("size")
-		}
-	}
-	if size == 0 {
-		return nil, errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !r.orgSvc.IsValidSortBy(sortBy) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !r.orgSvc.IsValidSortOrder(sortOrder) {
-		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	query, err := url.QueryUnescape(c.Query("query"))
-	if err != nil {
-		return nil, errorpkg.NewInvalidQueryParamError("query")
-	}
-	return &service.OrganizationListOptions{
-		Query:     query,
-		Page:      page,
-		Size:      size,
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
-	}, nil
-}
-
 // Leave godoc
 //
 //	@Summary		Leave
@@ -305,4 +261,48 @@ func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
+}
+
+func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.OrganizationListOptions, error) {
+	var err error
+	var page uint64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("page")
+		}
+	}
+	var size uint64
+	if c.Query("size") == "" {
+		size = OrganizationDefaultPageSize
+	} else {
+		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, errorpkg.NewInvalidQueryParamError("size")
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !r.orgSvc.IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !r.orgSvc.IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return nil, errorpkg.NewInvalidQueryParamError("query")
+	}
+	return &service.OrganizationListOptions{
+		Query:     query,
+		Page:      page,
+		Size:      size,
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, nil
 }

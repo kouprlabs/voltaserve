@@ -12,8 +12,9 @@ import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import { SectionError, SectionSpinner, Select } from '@koupr/ui'
 import { OptionBase, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
+import { EntityAPI } from '@/client/api/entity'
 import { FileAPI } from '@/client/api/file'
-import { InsightsAPI, InsightsLanguage } from '@/client/api/insights'
+import { SnapshotAPI, SnapshotLanguage } from '@/client/api/snapshot'
 import { TaskAPI } from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
@@ -34,17 +35,17 @@ const InsightsCreate = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
-  const mutateInfo = useAppSelector((state) => state.ui.insights.mutateInfo)
-  const [language, setLanguage] = useState<InsightsLanguage>()
+  const [language, setLanguage] = useState<SnapshotLanguage>()
   const {
     data: languages,
     error: languagesError,
     isLoading: languagesIsLoading,
-  } = InsightsAPI.useGetLanguages(swrConfig())
+  } = SnapshotAPI.useGetLanguages(swrConfig())
   const {
     data: file,
     error: fileError,
     isLoading: fileIsLoading,
+    mutate: mutateFile,
   } = FileAPI.useGet(id, swrConfig())
   const existingLanguage = useMemo<LanguageOption | undefined>(() => {
     if (file && languages && file.snapshot?.language) {
@@ -62,13 +63,13 @@ const InsightsCreate = () => {
 
   const handleCreate = useCallback(async () => {
     if (id && language) {
-      await InsightsAPI.create(id, { languageId: language.id }, false)
-      await mutateInfo?.(await InsightsAPI.getInfo(id))
+      await EntityAPI.create(id, { language: language.id }, false)
+      await mutateFile(await FileAPI.get(id))
       await mutateFiles?.()
       await mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
     }
-  }, [language, id, mutateFiles, mutateTasks, mutateInfo, dispatch])
+  }, [language, id, mutateFile, mutateFiles, mutateTasks, dispatch])
 
   const handleLanguageChange = useCallback(
     (newValue: SingleValue<LanguageOption>) => {
@@ -139,7 +140,7 @@ const InsightsCreate = () => {
             isDisabled={!language}
             onClick={handleCreate}
           >
-            Collect Insights
+            Collect
           </Button>
         </div>
       </ModalFooter>

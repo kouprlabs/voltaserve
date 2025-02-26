@@ -56,8 +56,8 @@ func NewMosaicService() *MosaicService {
 	}
 }
 
-func (svc *MosaicService) Create(id string, userID string) (*Task, error) {
-	file, err := svc.fileCache.Get(id)
+func (svc *MosaicService) Create(fileID string, userID string) (*Task, error) {
+	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -97,8 +97,8 @@ func (svc *MosaicService) Create(id string, userID string) (*Task, error) {
 	return res, nil
 }
 
-func (svc *MosaicService) Delete(id string, userID string) (*Task, error) {
-	file, err := svc.fileCache.Get(id)
+func (svc *MosaicService) Delete(fileID string, userID string) (*Task, error) {
+	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +112,9 @@ func (svc *MosaicService) Delete(id string, userID string) (*Task, error) {
 	if err != nil {
 		return nil, err
 	}
+	if !snapshot.HasMosaic() {
+		return nil, errorpkg.NewMosaicNotFoundError(nil)
+	}
 	isTaskPending, err := svc.snapshotSvc.isTaskPending(snapshot)
 	if err != nil {
 		return nil, err
@@ -119,14 +122,10 @@ func (svc *MosaicService) Delete(id string, userID string) (*Task, error) {
 	if isTaskPending {
 		return nil, errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
-	if !snapshot.HasMosaic() {
-		return nil, errorpkg.NewMosaicNotFoundError(nil)
-	}
 	task, err := svc.createDeleteTask(file, userID)
 	if err != nil {
 		return nil, err
 	}
-	snapshot.SetMosaic(nil)
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
@@ -140,15 +139,8 @@ func (svc *MosaicService) Delete(id string, userID string) (*Task, error) {
 	return res, nil
 }
 
-type MosaicInfo struct {
-	IsAvailable bool                          `json:"isAvailable"`
-	IsOutdated  bool                          `json:"isOutdated"`
-	Snapshot    *Snapshot                     `json:"snapshot,omitempty"`
-	Metadata    *mosaic_client.MosaicMetadata `json:"metadata,omitempty"`
-}
-
-func (svc *MosaicService) ReadInfo(id string, userID string) (*MosaicInfo, error) {
-	file, err := svc.fileCache.Get(id)
+func (svc *MosaicService) GetMetadata(fileID string, userID string) (*mosaic_client.MosaicMetadata, error) {
+	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -162,32 +154,17 @@ func (svc *MosaicService) ReadInfo(id string, userID string) (*MosaicInfo, error
 	if err != nil {
 		return nil, err
 	}
-	isOutdated := false
 	if !snapshot.HasMosaic() {
-		previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
-		if err != nil {
-			return nil, err
-		}
-		if previous == nil {
-			return &MosaicInfo{IsAvailable: false}, nil
-		} else {
-			snapshot = previous
-			isOutdated = true
-		}
+		return nil, errorpkg.NewMosaicNotFoundError(nil)
 	}
-	res, err := svc.mosaicClient.GetMetadata(mosaic_client.MosaicGetMetadataOptions{
+	metadata, err := svc.mosaicClient.GetMetadata(mosaic_client.MosaicGetMetadataOptions{
 		S3Key:    filepath.FromSlash(snapshot.GetID()),
 		S3Bucket: snapshot.GetPreview().Bucket,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &MosaicInfo{
-		IsAvailable: true,
-		IsOutdated:  isOutdated,
-		Snapshot:    svc.snapshotSvc.snapshotMapper.mapOne(snapshot),
-		Metadata:    res,
-	}, nil
+	return metadata, nil
 }
 
 type MosaicDownloadTileOptions struct {
@@ -197,8 +174,8 @@ type MosaicDownloadTileOptions struct {
 	Extension string
 }
 
-func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileOptions, userID string) (*bytes.Buffer, model.Snapshot, error) {
-	file, err := svc.fileCache.Get(id)
+func (svc *MosaicService) DownloadTileBuffer(fileID string, opts MosaicDownloadTileOptions, userID string) (*bytes.Buffer, model.Snapshot, error) {
+	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -213,7 +190,7 @@ func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileO
 		return nil, nil, err
 	}
 	if !snapshot.HasMosaic() {
-		previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
+		previous, err := svc.getPreviousSnapshotWithMosaic(file.GetID(), snapshot.GetVersion())
 		if err != nil {
 			return nil, nil, err
 		}
@@ -307,7 +284,7 @@ func (svc *MosaicService) delete(task model.Task, snapshot model.Snapshot) {
 	}
 }
 
-func (svc *MosaicService) getPreviousSnapshot(fileID string, version int64) (model.Snapshot, error) {
+func (svc *MosaicService) getPreviousSnapshotWithMosaic(fileID string, version int64) (model.Snapshot, error) {
 	snapshots, err := svc.snapshotRepo.FindAllPrevious(fileID, version)
 	if err != nil {
 		return nil, err
