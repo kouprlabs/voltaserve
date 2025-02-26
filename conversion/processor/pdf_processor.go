@@ -38,21 +38,18 @@ func NewPDFProcessor() *PDFProcessor {
 }
 
 func (p *PDFProcessor) TextFromPDF(inputPath string) (*string, error) {
-	tmpPath := filepath.Join(os.TempDir(), helper.NewID()+".txt")
-
-	if err := infra.NewCommand().Exec("pdftotext", inputPath, tmpPath); err != nil {
+	path := filepath.Join(os.TempDir(), helper.NewID()+".txt")
+	if err := infra.NewCommand().Exec("pdftotext", inputPath, path); err != nil {
 		return nil, err
 	}
-
 	defer func(path string) {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return
 		} else if err != nil {
 			infra.GetLogger().Error(err)
 		}
-	}(tmpPath)
-
-	b, err := os.ReadFile(tmpPath) //nolint:gosec // Known path
+	}(path)
+	b, err := os.ReadFile(path) //nolint:gosec // Known path
 	if err != nil {
 		return nil, err
 	}

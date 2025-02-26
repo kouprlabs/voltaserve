@@ -30,7 +30,7 @@ definitions:
       userMessage:
         type: string
     type: object
-  language_client.InsightsEntity:
+  language_client.Entity:
     properties:
       frequency:
         type: integer
@@ -52,10 +52,6 @@ definitions:
         type: integer
       width:
         type: integer
-      zoomLevels:
-        items:
-          $ref: '#/definitions/model.ZoomLevel'
-        type: array
     type: object
   model.PagesProps:
     properties:
@@ -81,34 +77,6 @@ definitions:
     properties:
       extension:
         type: string
-    type: object
-  model.Tile:
-    properties:
-      height:
-        type: integer
-      lastColWidth:
-        type: integer
-      lastRowHeight:
-        type: integer
-      width:
-        type: integer
-    type: object
-  model.ZoomLevel:
-    properties:
-      cols:
-        type: integer
-      height:
-        type: integer
-      index:
-        type: integer
-      rows:
-        type: integer
-      scaleDownPercentage:
-        type: number
-      tile:
-        $ref: '#/definitions/model.Tile'
-      width:
-        type: integer
     type: object
   mosaic_client.MosaicMetadata:
     properties:
@@ -267,15 +235,33 @@ definitions:
     required:
     - storageCapacity
     type: object
-  service.Download:
+  service.EntityCreateOptions:
     properties:
-      document:
-        $ref: '#/definitions/model.DocumentProps'
-      extension:
+      language:
         type: string
-      image:
-        $ref: '#/definitions/model.ImageProps'
+    required:
+    - language
+    type: object
+  service.EntityList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/language_client.Entity'
+        type: array
+      page:
+        type: integer
       size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  service.EntityProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
         type: integer
     type: object
   service.File:
@@ -408,6 +394,17 @@ definitions:
     required:
     - text
     type: object
+  service.FileReprocessResult:
+    properties:
+      accepted:
+        items:
+          type: string
+        type: array
+      rejected:
+        items:
+          type: string
+        type: array
+    type: object
   service.Group:
     properties:
       createTime:
@@ -469,53 +466,6 @@ definitions:
       totalPages:
         type: integer
     type: object
-  service.InsightsCreateOptions:
-    properties:
-      languageId:
-        type: string
-    required:
-    - languageId
-    type: object
-  service.InsightsEntityList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/language_client.InsightsEntity'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.InsightsEntityProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.InsightsInfo:
-    properties:
-      isAvailable:
-        type: boolean
-      isOutdated:
-        type: boolean
-      snapshot:
-        $ref: '#/definitions/service.Snapshot'
-    type: object
-  service.InsightsLanguage:
-    properties:
-      id:
-        type: string
-      iso6393:
-        type: string
-      name:
-        type: string
-    type: object
   service.Invitation:
     properties:
       createTime:
@@ -566,17 +516,6 @@ definitions:
         type: integer
       totalPages:
         type: integer
-    type: object
-  service.MosaicInfo:
-    properties:
-      isAvailable:
-        type: boolean
-      isOutdated:
-        type: boolean
-      metadata:
-        $ref: '#/definitions/mosaic_client.MosaicMetadata'
-      snapshot:
-        $ref: '#/definitions/service.Snapshot'
     type: object
   service.Organization:
     properties:
@@ -630,49 +569,77 @@ definitions:
       extension:
         type: string
     type: object
-  service.ReprocessResponse:
-    properties:
-      accepted:
-        items:
-          type: string
-        type: array
-      rejected:
-        items:
-          type: string
-        type: array
-    type: object
   service.Snapshot:
     properties:
+      capabilities:
+        $ref: '#/definitions/service.SnapshotCapabilities'
       createTime:
         type: string
-      entities:
-        $ref: '#/definitions/service.Download'
       id:
         type: string
       isActive:
         type: boolean
       language:
         type: string
-      mosaic:
-        $ref: '#/definitions/service.Download'
       ocr:
-        $ref: '#/definitions/service.Download'
+        $ref: '#/definitions/service.SnapshotDownloadable'
       original:
-        $ref: '#/definitions/service.Download'
+        $ref: '#/definitions/service.SnapshotDownloadable'
       preview:
-        $ref: '#/definitions/service.Download'
+        $ref: '#/definitions/service.SnapshotDownloadable'
       status:
+        type: string
+      summary:
         type: string
       task:
         $ref: '#/definitions/service.SnapshotTaskInfo'
       text:
-        $ref: '#/definitions/service.Download'
+        $ref: '#/definitions/service.SnapshotDownloadable'
       thumbnail:
-        $ref: '#/definitions/service.Download'
+        $ref: '#/definitions/service.SnapshotDownloadable'
       updateTime:
         type: string
       version:
         type: integer
+    type: object
+  service.SnapshotCapabilities:
+    properties:
+      entities:
+        type: boolean
+      mosaic:
+        type: boolean
+      ocr:
+        type: boolean
+      original:
+        type: boolean
+      preview:
+        type: boolean
+      summary:
+        type: boolean
+      text:
+        type: boolean
+      thumbnail:
+        type: boolean
+    type: object
+  service.SnapshotDownloadable:
+    properties:
+      document:
+        $ref: '#/definitions/model.DocumentProps'
+      extension:
+        type: string
+      image:
+        $ref: '#/definitions/model.ImageProps'
+      size:
+        type: integer
+    type: object
+  service.SnapshotLanguage:
+    properties:
+      id:
+        type: string
+      iso6393:
+        type: string
+      name:
+        type: string
     type: object
   service.SnapshotList:
     properties:
@@ -950,6 +917,160 @@ info:
   title: Voltaserve API
   version: 3.0.0
 paths:
+  /entities/{file_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete
+      operationId: entities_delete
+      parameters:
+      - description: File ID
+        in: path
+        name: file_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete
+      tags:
+      - Entities
+    get:
+      description: List
+      operationId: entities_list
+      parameters:
+      - description: File ID
+        in: path
+        name: file_id
+        required: true
+        type: string
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.EntityList'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: List
+      tags:
+      - Entities
+    post:
+      consumes:
+      - application/json
+      description: Create
+      operationId: entities_create
+      parameters:
+      - description: File ID
+        in: path
+        name: file_id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.EntityCreateOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Task'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Create
+      tags:
+      - Entities
+  /entities/{file_id}/probe:
+    get:
+      description: Probe
+      operationId: entities_probe
+      parameters:
+      - description: File ID
+        in: path
+        name: file_id
+        required: true
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.EntityProbe'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe
+      tags:
+      - Entities
   /files:
     delete:
       description: Delete Many
@@ -1340,6 +1461,40 @@ paths:
       summary: Patch Name
       tags:
       - Files
+  /files/{id}/ocr{ext}:
+    get:
+      description: Download OCR
+      operationId: files_download_ocr
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download OCR
+      tags:
+      - Files
   /files/{id}/original.{ext}:
     get:
       description: Download Original
@@ -1391,14 +1546,14 @@ paths:
         name: access_token
         required: true
         type: string
-      - description: S3 Key
+      - description: Key
         in: query
-        name: s3_key
+        name: key
         required: true
         type: string
-      - description: S3 Bucket
+      - description: Bucket
         in: query
-        name: s3_bucket
+        name: bucket
         required: true
         type: string
       - description: Size
@@ -1561,7 +1716,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.ReprocessResponse'
+            $ref: '#/definitions/service.FileReprocessResult'
         "404":
           description: Not Found
           schema:
@@ -1629,6 +1784,40 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Read Compute Size
+      tags:
+      - Files
+  /files/{id}/text{ext}:
+    get:
+      description: Download Text
+      operationId: files_download_text
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Text
       tags:
       - Files
   /files/{id}/thumbnail.{ext}:
@@ -1754,14 +1943,14 @@ paths:
         in: query
         name: name
         type: string
-      - description: S3 Key
+      - description: Key
         in: query
-        name: s3_key
+        name: key
         required: true
         type: string
-      - description: S3 Bucket
+      - description: Bucket
         in: query
-        name: s3_bucket
+        name: bucket
         required: true
         type: string
       - description: Size
@@ -2222,310 +2411,6 @@ paths:
       summary: Check
       tags:
       - Health
-  /insights/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete
-      operationId: insights_delete
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete
-      tags:
-      - Insights
-    patch:
-      consumes:
-      - application/json
-      description: Patch
-      operationId: insights_patch
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Patch
-      tags:
-      - Insights
-    post:
-      consumes:
-      - application/json
-      description: Create
-      operationId: insights_create
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.InsightsCreateOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.Task'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Create
-      tags:
-      - Insights
-  /insights/{id}/entities:
-    get:
-      description: List Entities
-      operationId: insights_list_entities
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Query
-        in: query
-        name: query
-        type: string
-      - description: Page
-        in: query
-        name: page
-        type: string
-      - description: Size
-        in: query
-        name: size
-        type: string
-      - description: Sort By
-        in: query
-        name: sort_by
-        type: string
-      - description: Sort Order
-        in: query
-        name: sort_order
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.InsightsEntityList'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: List Entities
-      tags:
-      - Insights
-  /insights/{id}/entities/probe:
-    get:
-      description: Probe Entities
-      operationId: insights_probe_entities
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Size
-        in: query
-        name: size
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.InsightsEntityProbe'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Probe Entities
-      tags:
-      - Insights
-  /insights/{id}/info:
-    get:
-      consumes:
-      - application/json
-      description: Read Info
-      operationId: insights_read_info
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.InsightsInfo'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read Info
-      tags:
-      - Insights
-  /insights/{id}/ocr{ext}:
-    get:
-      description: Download OCR
-      operationId: insights_download_ocr
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      - description: Extension
-        in: query
-        name: ext
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download OCR
-      tags:
-      - Insights
-  /insights/{id}/text{ext}:
-    get:
-      description: Download Text
-      operationId: insights_download_text
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      - description: Extension
-        in: query
-        name: ext
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download Text
-      tags:
-      - Insights
-  /insights/languages:
-    get:
-      description: Read Languages
-      operationId: insights_find_languages
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.InsightsLanguage'
-            type: array
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read Languages
-      tags:
-      - Insights
   /invitations:
     post:
       consumes:
@@ -2832,16 +2717,16 @@ paths:
       summary: Probe Outgoing
       tags:
       - Invitations
-  /mosaics/{id}:
+  /mosaics/{file_id}:
     delete:
       consumes:
       - application/json
       description: Delete
       operationId: mosaic_delete
       parameters:
-      - description: ID
+      - description: File ID
         in: path
-        name: id
+        name: file_id
         required: true
         type: string
       produces:
@@ -2866,9 +2751,9 @@ paths:
       description: Create
       operationId: mosaic_create
       parameters:
-      - description: ID
+      - description: File ID
         in: path
-        name: id
+        name: file_id
         required: true
         type: string
       produces:
@@ -2887,16 +2772,16 @@ paths:
       summary: Create
       tags:
       - Mosaic
-  /mosaics/{id}/info:
+  /mosaics/{file_id}/metadata:
     get:
       consumes:
       - application/json
-      description: Read Info
-      operationId: mosaic_read_info
+      description: Get Metadata
+      operationId: mosaic_get_metadata
       parameters:
-      - description: ID
+      - description: File ID
         in: path
-        name: id
+        name: file_id
         required: true
         type: string
       produces:
@@ -2905,7 +2790,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.MosaicInfo'
+            $ref: '#/definitions/mosaic_client.MosaicMetadata'
         "404":
           description: Not Found
           schema:
@@ -2914,17 +2799,17 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read Info
+      summary: Get Metadata
       tags:
       - Mosaic
-  /mosaics/{id}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension}:
+  /mosaics/{file_id}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension}:
     get:
       description: Download Tile
       operationId: mosaic_download_tile
       parameters:
-      - description: ID
+      - description: File ID
         in: path
-        name: id
+        name: file_id
         required: true
         type: string
       - description: Zoom Level
@@ -3350,6 +3235,26 @@ paths:
       summary: Detach
       tags:
       - Snapshots
+  /snapshots/languages:
+    get:
+      description: Get Languages
+      operationId: snapshots_get_languages
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.SnapshotLanguage'
+            type: array
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Languages
+      tags:
+      - Snapshots
   /snapshots/probe:
     get:
       description: Probe
@@ -3743,6 +3648,10 @@ paths:
       - description: Exclude Group Members
         in: query
         name: exclude_group_members
+        type: boolean
+      - description: Exclude Me
+        in: query
+        name: exclude_me
         type: boolean
       produces:
       - application/json

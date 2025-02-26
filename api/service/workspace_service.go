@@ -327,27 +327,27 @@ func (svc *WorkspaceService) Delete(id string, userID string) error {
 	return nil
 }
 
-func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64, userID string) (*bool, error) {
+func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64, userID string) (bool, error) {
 	workspace, err := svc.workspaceRepo.Find(id)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
-		return nil, err
+		return false, err
 	}
 	root, err := svc.fileRepo.Find(workspace.GetRootID())
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	usage, err := svc.fileRepo.ComputeSize(root.GetID())
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	expectedUsage := usage + byteSize
 	if expectedUsage > workspace.GetStorageCapacity() {
-		return helper.ToPtr(false), err
+		return false, nil
 	}
-	return helper.ToPtr(true), nil
+	return true, nil
 }
 
 func (svc *WorkspaceService) IsValidSortBy(value string) bool {

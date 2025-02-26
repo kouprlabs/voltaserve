@@ -555,7 +555,7 @@ func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_EnoughSpace() {
 
 	hasEnoughSpace, err := service.NewWorkspaceService().HasEnoughSpaceForByteSize(workspace.ID, 512*MB, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.True(*hasEnoughSpace)
+	s.True(hasEnoughSpace)
 }
 
 func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_MissingPermission() {
@@ -587,7 +587,7 @@ func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_NotEnoughSpace() {
 
 	hasEnoughSpace, err := service.NewWorkspaceService().HasEnoughSpaceForByteSize(workspace.ID, 2*GB, s.users[0].GetID())
 	s.Require().NoError(err)
-	s.False(*hasEnoughSpace)
+	s.False(hasEnoughSpace)
 }
 
 func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_NonExistentWorkspace() {

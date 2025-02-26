@@ -141,11 +141,11 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, fh.Size, userID)
+		hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, fh.Size, userID)
 		if err != nil {
 			return err
 		}
-		if !*ok {
+		if !hasEnoughSpace {
 			return errorpkg.NewStorageLimitExceededError()
 		}
 		if name == "" {
@@ -160,8 +160,8 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
-		if err := c.SaveFile(fh, tmpPath); err != nil {
+		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+		if err := c.SaveFile(fh, path); err != nil {
 			return err
 		}
 		defer func(path string) {
@@ -170,8 +170,8 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 			} else if err != nil {
 				log.GetLogger().Error(err)
 			}
-		}(tmpPath)
-		file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
+		}(path)
+		file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &path}, userID)
 		if err != nil {
 			return err
 		}
@@ -219,15 +219,15 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, fh.Size, userID)
+	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, fh.Size, userID)
 	if err != nil {
 		return err
 	}
-	if !*ok {
+	if !hasEnoughSpace {
 		return errorpkg.NewStorageLimitExceededError()
 	}
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
-	if err := c.SaveFile(fh, tmpPath); err != nil {
+	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+	if err := c.SaveFile(fh, path); err != nil {
 		return err
 	}
 	defer func(path string) {
@@ -236,8 +236,8 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 		} else if err != nil {
 			log.GetLogger().Error(err)
 		}
-	}(tmpPath)
-	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &tmpPath}, userID)
+	}(path)
+	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{Path: &path}, userID)
 	if err != nil {
 		return err
 	}
@@ -554,7 +554,7 @@ func (r *FileRouter) PatchName(c *fiber.Ctx) error {
 //	@Id				files_reprocess
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.FileReprocessResponse
+//	@Success		200	{object}	service.FileReprocessResult
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/reprocess [post]
@@ -1102,8 +1102,8 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 //	@Param			workspace_id	query		string	true	"Workspace ID"
 //	@Param			parent_id		query		string	false	"Parent ID"
 //	@Param			name			query		string	false	"Name"
-//	@Param			s3_key			query		string	true	"S3 Key"
-//	@Param			s3_bucket		query		string	true	"S3 Bucket"
+//	@Param			key				query		string	true	"Key"
+//	@Param			bucket			query		string	true	"Bucket"
 //	@Param			size			query		string	true	"Size"
 //	@Success		200				{object}	service.File
 //	@Failure		404				{object}	errorpkg.ErrorResponse
@@ -1142,13 +1142,13 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	if name == "" {
 		return errorpkg.NewMissingQueryParamError("name")
 	}
-	s3Key := c.Query("s3_key")
-	if s3Key == "" {
-		return errorpkg.NewMissingQueryParamError("s3_key")
+	key := c.Query("key")
+	if key == "" {
+		return errorpkg.NewMissingQueryParamError("key")
 	}
-	s3Bucket := c.Query("s3_bucket")
-	if s3Bucket == "" {
-		return errorpkg.NewMissingQueryParamError("s3_bucket")
+	bucket := c.Query("bucket")
+	if bucket == "" {
+		return errorpkg.NewMissingQueryParamError("bucket")
 	}
 	snapshotID := c.Query("snapshot_id")
 	if snapshotID == "" {
@@ -1166,11 +1166,11 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, size, userID)
+	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, size, userID)
 	if err != nil {
 		return err
 	}
-	if !*ok {
+	if !hasEnoughSpace {
 		return errorpkg.NewStorageLimitExceededError()
 	}
 	file, err := r.fileSvc.Create(service.FileCreateOptions{
@@ -1184,8 +1184,8 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	}
 	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{
 		S3Reference: &model.S3Reference{
-			Key:         s3Key,
-			Bucket:      s3Bucket,
+			Key:         key,
+			Bucket:      bucket,
 			SnapshotID:  snapshotID,
 			Size:        size,
 			ContentType: contentType,
@@ -1207,8 +1207,8 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			api_key			query		string	true	"API Key"
 //	@Param			access_token	query		string	true	"Access Token"
-//	@Param			s3_key			query		string	true	"S3 Key"
-//	@Param			s3_bucket		query		string	true	"S3 Bucket"
+//	@Param			key				query		string	true	"Key"
+//	@Param			bucket			query		string	true	"Bucket"
 //	@Param			size			query		string	true	"Size"
 //	@Param			id				path		string	true	"ID"
 //	@Success		200				{object}	service.File
@@ -1237,13 +1237,13 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 		return err
 	}
 	file := files[0]
-	s3Key := c.Query("s3_key")
-	if s3Key == "" {
-		return errorpkg.NewMissingQueryParamError("s3_key")
+	key := c.Query("key")
+	if key == "" {
+		return errorpkg.NewMissingQueryParamError("key")
 	}
-	s3Bucket := c.Query("s3_bucket")
-	if s3Bucket == "" {
-		return errorpkg.NewMissingQueryParamError("s3_bucket")
+	bucket := c.Query("bucket")
+	if bucket == "" {
+		return errorpkg.NewMissingQueryParamError("bucket")
 	}
 	var size int64
 	if c.Query("size") == "" {
@@ -1261,17 +1261,17 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 	if contentType == "" {
 		return errorpkg.NewMissingQueryParamError("content_type")
 	}
-	ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, size, userID)
+	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, size, userID)
 	if err != nil {
 		return err
 	}
-	if !*ok {
+	if !hasEnoughSpace {
 		return errorpkg.NewStorageLimitExceededError()
 	}
 	file, err = r.fileSvc.Store(file.ID, service.FileStoreOptions{
 		S3Reference: &model.S3Reference{
-			Key:         s3Key,
-			Bucket:      s3Bucket,
+			Key:         key,
+			Bucket:      bucket,
 			SnapshotID:  snapshotID,
 			Size:        size,
 			ContentType: contentType,
