@@ -21,6 +21,7 @@ CREATE TABLE "snapshot" (
 	task_id text NULL,
 	create_time text NOT NULL,
 	update_time text NULL,
+    summary text NULL,
 	CONSTRAINT snapshot_pkey PRIMARY KEY (id)
 );
 
