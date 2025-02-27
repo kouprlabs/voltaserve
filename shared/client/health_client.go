@@ -8,29 +8,27 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package apiclient
+package client
 
 import (
 	"fmt"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"net/http"
-
-	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type HealthClient struct {
-	config *config.Config
+	url string
 }
 
-func NewHealthClient() *HealthClient {
+func NewHealthClient(url string) *HealthClient {
 	return &HealthClient{
-		config: config.GetConfig(),
+		url: url,
 	}
 }
 
 func (cl *HealthClient) Get() (string, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/health", cl.config.APIURL), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/health", cl.url), nil)
 	if err != nil {
 		return "", err
 	}
@@ -41,7 +39,7 @@ func (cl *HealthClient) Get() (string, error) {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	body, err := io.ReadAll(resp.Body)

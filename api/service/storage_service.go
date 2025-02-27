@@ -11,9 +11,11 @@
 package service
 
 import (
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -39,13 +41,7 @@ func NewStorageService() *StorageService {
 	}
 }
 
-type StorageUsage struct {
-	Bytes      int64 `json:"bytes"`
-	MaxBytes   int64 `json:"maxBytes"`
-	Percentage int   `json:"percentage"`
-}
-
-func (svc *StorageService) ComputeAccountUsage(userID string) (*StorageUsage, error) {
+func (svc *StorageService) ComputeAccountUsage(userID string) (*dto.StorageUsage, error) {
 	ids, err := svc.workspaceRepo.FindIDs()
 	if err != nil {
 		return nil, err
@@ -78,7 +74,7 @@ func (svc *StorageService) ComputeAccountUsage(userID string) (*StorageUsage, er
 	return svc.storageMapper.mapStorageUsage(b, maxBytes), nil
 }
 
-func (svc *StorageService) ComputeWorkspaceUsage(workspaceID string, userID string) (*StorageUsage, error) {
+func (svc *StorageService) ComputeWorkspaceUsage(workspaceID string, userID string) (*dto.StorageUsage, error) {
 	workspace, err := svc.workspaceCache.Get(workspaceID)
 	if err != nil {
 		return nil, err
@@ -100,7 +96,7 @@ func (svc *StorageService) ComputeWorkspaceUsage(workspaceID string, userID stri
 	return svc.storageMapper.mapStorageUsage(size, workspace.GetStorageCapacity()), nil
 }
 
-func (svc *StorageService) ComputeFileUsage(fileID string, userID string) (*StorageUsage, error) {
+func (svc *StorageService) ComputeFileUsage(fileID string, userID string) (*dto.StorageUsage, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
@@ -125,8 +121,8 @@ func newStorageMapper() *storageMapper {
 	return &storageMapper{}
 }
 
-func (mp *storageMapper) mapStorageUsage(byteCount int64, maxBytes int64) *StorageUsage {
-	res := StorageUsage{
+func (mp *storageMapper) mapStorageUsage(byteCount int64, maxBytes int64) *dto.StorageUsage {
+	res := dto.StorageUsage{
 		Bytes:    byteCount,
 		MaxBytes: maxBytes,
 	}

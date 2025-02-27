@@ -19,7 +19,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/spf13/afero"
 
-	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/logger"
 )
 
 var aferoFs afero.Fs
@@ -59,7 +59,7 @@ func (mgr *aferoManager) GetFile(objectName string, filePath string, bucketName 
 	}
 	defer func(file afero.File) {
 		if err := file.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(file)
 	data, err := io.ReadAll(file)
@@ -88,7 +88,7 @@ func (mgr *aferoManager) GetObject(objectName string, bucketName string, _ minio
 	}
 	defer func(file afero.File) {
 		if err := file.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(file)
 	data, err := io.ReadAll(file)
@@ -107,7 +107,7 @@ func (mgr *aferoManager) GetObjectWithBuffer(objectName string, bucketName strin
 	}
 	defer func(file afero.File) {
 		if err := file.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(file)
 	if _, err = io.Copy(buf, file); err != nil {
@@ -124,7 +124,7 @@ func (mgr *aferoManager) GetText(objectName string, bucketName string, _ minio.G
 	}
 	defer func(file afero.File) {
 		if err := file.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(file)
 	data, err := io.ReadAll(file)

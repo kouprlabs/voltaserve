@@ -16,12 +16,12 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
@@ -54,7 +54,7 @@ func (s *SnapshotServiceSuite) TestList() {
 	s.Require().NoError(err)
 	snapshots := s.createSnapshots(file.ID)
 
-	list, err := service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
+	list, err := service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -79,7 +79,7 @@ func (s *SnapshotServiceSuite) TestList_MissingFilePermission() {
 
 	s.revokeUserPermissionForFile(file, s.users[0])
 
-	_, err = service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
+	_, err = service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -96,7 +96,7 @@ func (s *SnapshotServiceSuite) TestList_Paginate() {
 	s.Require().NoError(err)
 	snapshots := s.createSnapshots(file.ID)
 
-	list, err := service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
+	list, err := service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -108,7 +108,7 @@ func (s *SnapshotServiceSuite) TestList_Paginate() {
 	s.Equal(snapshots[0].GetID(), list.Data[0].ID)
 	s.Equal(snapshots[1].GetID(), list.Data[1].ID)
 
-	list, err = service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
+	list, err = service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -129,11 +129,11 @@ func (s *SnapshotServiceSuite) TestList_SortByVersionDescending() {
 	s.Require().NoError(err)
 	snapshots := s.createSnapshots(file.ID)
 
-	list, err := service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
+	list, err := service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
 		Page:      1,
 		Size:      3,
-		SortBy:    service.SnapshotSortByVersion,
-		SortOrder: service.SnapshotSortOrderDesc,
+		SortBy:    dto.SnapshotSortByVersion,
+		SortOrder: dto.SnapshotSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(snapshots[2].GetID(), list.Data[0].ID)
@@ -150,7 +150,7 @@ func (s *SnapshotServiceSuite) TestProbe() {
 	s.Require().NoError(err)
 	_ = s.createSnapshots(file.ID)
 
-	probe, err := service.NewSnapshotService().Probe(file.ID, service.SnapshotListOptions{
+	probe, err := service.NewSnapshotService().Probe(file.ID, dto.SnapshotListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -170,7 +170,7 @@ func (s *SnapshotServiceSuite) TestProbe_MissingFilePermission() {
 
 	s.revokeUserPermissionForFile(file, s.users[0])
 
-	_, err = service.NewSnapshotService().Probe(file.ID, service.SnapshotListOptions{
+	_, err = service.NewSnapshotService().Probe(file.ID, dto.SnapshotListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -249,10 +249,12 @@ func (s *SnapshotServiceSuite) TestPatch() {
 	err = cache.NewSnapshotCache().Set(snapshot)
 	s.Require().NoError(err)
 
-	patched, err := service.NewSnapshotService().Patch(snapshot.GetID(), service.SnapshotPatchOptions{
-		Options: conversionmodel.PipelineRunOptions{SnapshotID: snapshot.GetID()},
-		Fields:  []string{model.SnapshotFieldStatus},
-		Status:  helper.ToPtr(model.SnapshotStatusProcessing),
+	patched, err := service.NewSnapshotService().Patch(snapshot.GetID(), dto.SnapshotPatchOptions{
+		Options: dto.PipelineRunOptions{
+			SnapshotID: snapshot.GetID(),
+		},
+		Fields: []string{model.SnapshotFieldStatus},
+		Status: helper.ToPtr(model.SnapshotStatusProcessing),
 	})
 	s.Require().NoError(err)
 	s.Require().Equal(model.SnapshotStatusProcessing, patched.Status)
@@ -302,7 +304,7 @@ func (s *SnapshotServiceSuite) createSnapshot(fileID string) model.Snapshot {
 	return res
 }
 
-func (s *SnapshotServiceSuite) revokeUserPermissionForFile(file *service.File, user model.User) {
+func (s *SnapshotServiceSuite) revokeUserPermissionForFile(file *dto.File, user model.User) {
 	err := repo.NewFileRepo().RevokeUserPermission(
 		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
 		user.GetID(),

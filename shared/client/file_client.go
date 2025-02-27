@@ -8,36 +8,34 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package apiclient
+package client
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/logger"
+	"github.com/kouprlabs/voltaserve/shared/tools"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/kouprlabs/voltaserve/webdav/config"
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
-
-	"github.com/kouprlabs/voltaserve/api/router"
-	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 type FileClient struct {
-	config *config.Config
-	token  *infra.Token
+	url    string
+	apiKey string
+	token  *dto.Token
 }
 
-func NewFileClient(token *infra.Token) *FileClient {
+func NewFileClient(token *dto.Token, url string, apiKey string) *FileClient {
 	return &FileClient{
 		token:  token,
-		config: config.GetConfig(),
+		url:    url,
+		apiKey: apiKey,
 	}
 }
 
@@ -48,7 +46,7 @@ type FileCreateFolderOptions struct {
 	Name        string
 }
 
-func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*service.File, error) {
+func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*dto.File, error) {
 	params := url.Values{}
 	params.Set("type", opts.Type)
 	params.Set("workspace_id", opts.WorkspaceID)
@@ -56,7 +54,7 @@ func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*service.File,
 		params.Set("parent_id", opts.ParentID)
 	}
 	params.Set("name", opts.Name)
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files?%s", cl.config.APIURL, params.Encode()), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files?%s", cl.url, params.Encode()), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -69,14 +67,14 @@ func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*service.File,
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
 	body, err := cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-	var file service.File
+	var file dto.File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
@@ -99,13 +97,13 @@ type FileCreateFromS3Options struct {
 	S3Reference S3Reference
 }
 
-func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*service.File, error) {
+func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*dto.File, error) {
 	body, err := json.Marshal(opts) //nolint:musttag // Not needed
 	if err != nil {
 		return nil, err
 	}
 	args := url.Values{
-		"api_key":      []string{cl.config.Security.APIKey},
+		"api_key":      []string{cl.apiKey},
 		"access_token": []string{cl.token.AccessToken},
 		"workspace_id": []string{opts.WorkspaceID},
 		"parent_id":    []string{opts.ParentID},
@@ -117,7 +115,7 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*service.File,
 		"size":         []string{strconv.FormatInt(opts.S3Reference.Size, 10)},
 	}
 	req, err := http.NewRequest("POST",
-		cl.config.APIURL+"/v3/files/create_from_s3?"+args.Encode(),
+		cl.url+"/v3/files/create_from_s3?"+args.Encode(),
 		bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
@@ -131,7 +129,7 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*service.File,
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 			return
 		}
 	}(resp.Body)
@@ -139,7 +137,7 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*service.File,
 	if err != nil {
 		return nil, err
 	}
-	var file service.File
+	var file dto.File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
@@ -152,13 +150,13 @@ type FilePatchFromS3Options struct {
 	S3Reference S3Reference
 }
 
-func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*service.File, error) {
+func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*dto.File, error) {
 	b, err := json.Marshal(opts) //nolint:musttag // Not needed
 	if err != nil {
 		return nil, err
 	}
 	args := url.Values{
-		"api_key":      []string{cl.config.Security.APIKey},
+		"api_key":      []string{cl.apiKey},
 		"access_token": []string{cl.token.AccessToken},
 		"name":         []string{opts.Name},
 		"key":          []string{opts.S3Reference.Key},
@@ -168,7 +166,7 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*service.File, e
 		"size":         []string{strconv.FormatInt(opts.S3Reference.Size, 10)},
 	}
 	req, err := http.NewRequest("PATCH",
-		cl.config.APIURL+"/v3/files/"+opts.ID+"/patch_from_s3?"+args.Encode(),
+		cl.url+"/v3/files/"+opts.ID+"/patch_from_s3?"+args.Encode(),
 		bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
@@ -181,7 +179,7 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*service.File, e
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 			return
 		}
 	}(resp.Body)
@@ -189,17 +187,17 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*service.File, e
 	if err != nil {
 		return nil, err
 	}
-	var file service.File
+	var file dto.File
 	if err = json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
 }
 
-func (cl *FileClient) GetByPath(path string) (*service.File, error) {
+func (cl *FileClient) GetByPath(path string) (*dto.File, error) {
 	req, err := http.NewRequest(
 		"GET",
-		fmt.Sprintf("%s/v3/files?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)),
+		fmt.Sprintf("%s/v3/files?path=%s", cl.url, tools.EncodeURIComponent(path)),
 		nil,
 	)
 	if err != nil {
@@ -215,24 +213,24 @@ func (cl *FileClient) GetByPath(path string) (*service.File, error) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
 	body, err := cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-	var file service.File
+	var file dto.File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
 }
 
-func (cl *FileClient) ListByPath(path string) ([]service.File, error) {
+func (cl *FileClient) ListByPath(path string) ([]dto.File, error) {
 	req, err := http.NewRequest(
 		"GET",
-		fmt.Sprintf("%s/v3/files/list?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)),
+		fmt.Sprintf("%s/v3/files/list?path=%s", cl.url, tools.EncodeURIComponent(path)),
 		nil,
 	)
 	if err != nil {
@@ -248,22 +246,22 @@ func (cl *FileClient) ListByPath(path string) ([]service.File, error) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
 	b, err := cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-	var files []service.File
+	var files []dto.File
 	if err = json.Unmarshal(b, &files); err != nil {
 		return nil, err
 	}
 	return files, nil
 }
 
-func (cl *FileClient) CopyOne(id string, targetID string) (*service.File, error) {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files/%s/copy/%s", cl.config.APIURL, id, targetID), nil)
+func (cl *FileClient) CopyOne(id string, targetID string) (*dto.File, error) {
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files/%s/copy/%s", cl.url, id, targetID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -277,14 +275,14 @@ func (cl *FileClient) CopyOne(id string, targetID string) (*service.File, error)
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
 	b, err := cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-	var file *service.File
+	var file *dto.File
 	if err = json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
@@ -292,7 +290,7 @@ func (cl *FileClient) CopyOne(id string, targetID string) (*service.File, error)
 }
 
 func (cl *FileClient) MoveOne(id string, targetID string) error {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files/%s/move/%s", cl.config.APIURL, id, targetID), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files/%s/move/%s", cl.url, id, targetID), nil)
 	if err != nil {
 		return err
 	}
@@ -306,18 +304,18 @@ func (cl *FileClient) MoveOne(id string, targetID string) error {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
 	return cl.successfulResponseOrThrow(resp)
 }
 
-func (cl *FileClient) PatchName(id string, opts router.FilePatchNameOptions) (*service.File, error) {
+func (cl *FileClient) PatchName(id string, opts dto.FilePatchNameOptions) (*dto.File, error) {
 	b, err := json.Marshal(opts)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v3/files/%s/name", cl.config.APIURL, id), bytes.NewBuffer(b))
+	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v3/files/%s/name", cl.url, id), bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
@@ -331,14 +329,14 @@ func (cl *FileClient) PatchName(id string, opts router.FilePatchNameOptions) (*s
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
 	b, err = cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-	var file service.File
+	var file dto.File
 	if err = json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
@@ -346,7 +344,7 @@ func (cl *FileClient) PatchName(id string, opts router.FilePatchNameOptions) (*s
 }
 
 func (cl *FileClient) DeleteOne(id string) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v3/files/%s", cl.config.APIURL, id), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v3/files/%s", cl.url, id), nil)
 	if err != nil {
 		return err
 	}
@@ -360,18 +358,18 @@ func (cl *FileClient) DeleteOne(id string) error {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
 	return cl.successfulResponseOrThrow(resp)
 }
 
-func (cl *FileClient) DownloadOriginal(file *service.File, w io.Writer, rangeHeader *string) error {
+func (cl *FileClient) DownloadOriginal(file *dto.File, w io.Writer, rangeHeader *string) error {
 	req, err := http.NewRequest(
 		"GET",
 		fmt.Sprintf(
 			"%s/v3/files/%s/original%s?access_token=%s",
-			cl.config.APIURL, file.ID, file.Snapshot.Original.Extension, cl.token.AccessToken,
+			cl.url, file.ID, file.Snapshot.Original.Extension, cl.token.AccessToken,
 		),
 		nil,
 	)
@@ -389,7 +387,7 @@ func (cl *FileClient) DownloadOriginal(file *service.File, w io.Writer, rangeHea
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
 	if _, err := io.Copy(w, resp.Body); err != nil {
@@ -405,11 +403,11 @@ func (cl *FileClient) jsonResponseOrThrow(resp *http.Response) ([]byte, error) {
 			return nil, err
 		}
 		if resp.StatusCode > 299 {
-			var apiError infra.APIErrorResponse
-			if err = json.Unmarshal(body, &apiError); err != nil {
+			var errorResponse ErrorResponse
+			if err = json.Unmarshal(body, &errorResponse); err != nil {
 				return nil, err
 			}
-			return nil, &infra.APIError{Value: apiError}
+			return nil, &errorResponse
 		} else {
 			return body, nil
 		}
@@ -424,11 +422,11 @@ func (cl *FileClient) successfulResponseOrThrow(resp *http.Response) error {
 		if err != nil {
 			return err
 		}
-		var apiError infra.APIErrorResponse
-		if err = json.Unmarshal(body, &apiError); err != nil {
+		var errorResponse ErrorResponse
+		if err = json.Unmarshal(body, &errorResponse); err != nil {
 			return err
 		}
-		return &infra.APIError{Value: apiError}
+		return &errorResponse
 	} else {
 		return nil
 	}

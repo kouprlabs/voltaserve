@@ -18,8 +18,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
@@ -205,7 +207,7 @@ func (r *TaskRouter) Create(c *fiber.Ctx) error {
 	if apiKey != r.config.Security.APIKey {
 		return errorpkg.NewInvalidAPIKeyError()
 	}
-	opts := new(service.TaskCreateOptions)
+	opts := new(dto.TaskCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -268,7 +270,7 @@ func (r *TaskRouter) Patch(c *fiber.Ctx) error {
 	if apiKey != r.config.Security.APIKey {
 		return errorpkg.NewInvalidAPIKeyError()
 	}
-	opts := new(service.TaskPatchOptions)
+	opts := new(dto.TaskPatchOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -282,7 +284,7 @@ func (r *TaskRouter) Patch(c *fiber.Ctx) error {
 	return c.JSON(task)
 }
 
-func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*service.TaskListOptions, error) {
+func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*dto.TaskListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -317,7 +319,7 @@ func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*service.TaskListOption
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &service.TaskListOptions{
+	return &dto.TaskListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,

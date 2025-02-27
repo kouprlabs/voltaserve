@@ -19,9 +19,10 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/logger"
 )
 
 type minioManager struct {
@@ -230,7 +231,7 @@ func (mgr *minioManager) RemoveBucket(bucketName string) error {
 	removeObjectErrCh := mgr.client.RemoveObjects(context.Background(), bucketName, objectCh, minio.RemoveObjectsOptions{})
 	for removeErr := range removeObjectErrCh {
 		if removeErr.Err != nil {
-			log.GetLogger().Error(removeErr.Err)
+			logger.GetLogger().Error(removeErr.Err)
 		}
 	}
 	if err = mgr.client.RemoveBucket(context.Background(), bucketName); err != nil {

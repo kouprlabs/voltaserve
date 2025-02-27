@@ -16,16 +16,16 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/log"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
 )
@@ -82,75 +82,7 @@ func NewSnapshotService() *SnapshotService {
 	}
 }
 
-type Snapshot struct {
-	ID           string                `json:"id"`
-	Version      int64                 `json:"version"`
-	Original     *SnapshotDownloadable `json:"original,omitempty"`
-	Preview      *SnapshotDownloadable `json:"preview,omitempty"`
-	OCR          *SnapshotDownloadable `json:"ocr,omitempty"`
-	Text         *SnapshotDownloadable `json:"text,omitempty"`
-	Thumbnail    *SnapshotDownloadable `json:"thumbnail,omitempty"`
-	Summary      *string               `json:"summary,omitempty"`
-	Intent       *string               `json:"intent,omitempty"`
-	Language     *string               `json:"language,omitempty"`
-	Capabilities SnapshotCapabilities  `json:"capabilities"`
-	Status       string                `json:"status,omitempty"`
-	IsActive     bool                  `json:"isActive"`
-	Task         *SnapshotTaskInfo     `json:"task,omitempty"`
-	CreateTime   string                `json:"createTime"`
-	UpdateTime   *string               `json:"updateTime,omitempty"`
-}
-
-const (
-	SnapshotSortByVersion      = "version"
-	SnapshotSortByDateCreated  = "date_created"
-	SnapshotSortByDateModified = "date_modified"
-)
-
-const (
-	SnapshotSortOrderAsc  = "asc"
-	SnapshotSortOrderDesc = "desc"
-)
-
-type SnapshotCapabilities struct {
-	Original  bool `json:"original"`
-	Preview   bool `json:"preview"`
-	OCR       bool `json:"ocr"`
-	Text      bool `json:"text"`
-	Summary   bool `json:"summary"`
-	Entities  bool `json:"entities"`
-	Mosaic    bool `json:"mosaic"`
-	Thumbnail bool `json:"thumbnail"`
-}
-
-type SnapshotDownloadable struct {
-	Extension string               `json:"extension,omitempty"`
-	Size      int64                `json:"size,omitempty"`
-	Image     *model.ImageProps    `json:"image,omitempty"`
-	Document  *model.DocumentProps `json:"document,omitempty"`
-}
-
-type SnapshotTaskInfo struct {
-	ID        string `json:"id"`
-	IsPending bool   `json:"isPending"`
-}
-
-type SnapshotList struct {
-	Data          []*Snapshot `json:"data"`
-	TotalPages    uint64      `json:"totalPages"`
-	TotalElements uint64      `json:"totalElements"`
-	Page          uint64      `json:"page"`
-	Size          uint64      `json:"size"`
-}
-
-type SnapshotListOptions struct {
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
-
-func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
+func (svc *SnapshotService) List(fileID string, opts dto.SnapshotListOptions, userID string) (*dto.SnapshotList, error) {
 	all, file, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
@@ -158,7 +90,7 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
 	mapped := newSnapshotMapper().mapMany(paged, file.GetSnapshotID())
-	return &SnapshotList{
+	return &dto.SnapshotList{
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
@@ -167,24 +99,19 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 	}, nil
 }
 
-type SnapshotProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
-}
-
-func (svc *SnapshotService) Probe(fileID string, opts SnapshotListOptions, userID string) (*SnapshotProbe, error) {
+func (svc *SnapshotService) Probe(fileID string, opts dto.SnapshotListOptions, userID string) (*dto.SnapshotProbe, error) {
 	all, _, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	totalElements := uint64(len(all))
-	return &SnapshotProbe{
+	return &dto.SnapshotProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
 }
 
-func (svc *SnapshotService) Activate(id string, userID string) (*File, error) {
+func (svc *SnapshotService) Activate(id string, userID string) (*dto.File, error) {
 	fileID, err := svc.snapshotRepo.FindFileID(id)
 	if err != nil {
 		return nil, err
@@ -217,7 +144,7 @@ func (svc *SnapshotService) Activate(id string, userID string) (*File, error) {
 	return res, nil
 }
 
-func (svc *SnapshotService) Detach(id string, userID string) (*File, error) {
+func (svc *SnapshotService) Detach(id string, userID string) (*dto.File, error) {
 	fileID, err := svc.snapshotRepo.FindFileID(id)
 	if err != nil {
 		return nil, err
@@ -267,7 +194,7 @@ func (svc *SnapshotService) Detach(id string, userID string) (*File, error) {
 	return res, nil
 }
 
-func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapshot, error) {
+func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dto.Snapshot, error) {
 	if id != opts.Options.SnapshotID {
 		return nil, errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
 	}
@@ -316,16 +243,16 @@ func (svc *SnapshotService) GetLanguages() ([]*SnapshotLanguage, error) {
 
 func (svc *SnapshotService) IsValidSortBy(value string) bool {
 	return value == "" ||
-		value == SnapshotSortByVersion ||
-		value == SnapshotSortByDateCreated ||
-		value == SnapshotSortByDateModified
+		value == dto.SnapshotSortByVersion ||
+		value == dto.SnapshotSortByDateCreated ||
+		value == dto.SnapshotSortByDateModified
 }
 
 func (svc *SnapshotService) IsValidSortOrder(value string) bool {
-	return value == "" || value == SnapshotSortOrderAsc || value == SnapshotSortOrderDesc
+	return value == "" || value == dto.SnapshotSortOrderAsc || value == dto.SnapshotSortOrderDesc
 }
 
-func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, userID string) ([]model.Snapshot, model.File, error) {
+func (svc *SnapshotService) findAll(fileID string, opts dto.SnapshotListOptions, userID string) ([]model.Snapshot, model.File, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, nil, err
@@ -337,10 +264,10 @@ func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, use
 		return nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = SnapshotSortByDateCreated
+		opts.SortBy = dto.SnapshotSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = SnapshotSortOrderAsc
+		opts.SortOrder = dto.SnapshotSortOrderAsc
 	}
 	ids, err := svc.snapshotRepo.FindIDsByFile(fileID)
 	if err != nil {
@@ -359,32 +286,32 @@ func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, use
 }
 
 func (svc *SnapshotService) sort(data []model.Snapshot, sortBy string, sortOrder string) []model.Snapshot {
-	if sortBy == SnapshotSortByVersion {
+	if sortBy == dto.SnapshotSortByVersion {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == SnapshotSortOrderDesc {
+			if sortOrder == dto.SnapshotSortOrderDesc {
 				return data[i].GetVersion() > data[j].GetVersion()
 			} else {
 				return data[i].GetVersion() < data[j].GetVersion()
 			}
 		})
 		return data
-	} else if sortBy == SnapshotSortByDateCreated {
+	} else if sortBy == dto.SnapshotSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a := helper.StringToTime(data[i].GetCreateTime())
 			b := helper.StringToTime(data[j].GetCreateTime())
-			if sortOrder == SnapshotSortOrderDesc {
+			if sortOrder == dto.SnapshotSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == SnapshotSortByDateModified {
+	} else if sortBy == dto.SnapshotSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a := helper.StringToTime(*data[i].GetUpdateTime())
 				b := helper.StringToTime(*data[j].GetUpdateTime())
-				if sortOrder == SnapshotSortOrderDesc {
+				if sortOrder == dto.SnapshotSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -433,10 +360,10 @@ func (svc *SnapshotService) deleteAssociatedTasks(snapshots []model.Snapshot) {
 	for _, snapshot := range snapshots {
 		if snapshot.GetTaskID() != nil {
 			if err := svc.taskRepo.Delete(*snapshot.GetTaskID()); err != nil {
-				log.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 			if err := svc.taskCache.Delete(*snapshot.GetTaskID()); err != nil {
-				log.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}
 	}
@@ -446,41 +373,41 @@ func (svc *SnapshotService) deleteFromS3(snapshots []model.Snapshot) {
 	for _, s := range snapshots {
 		if s.HasOriginal() {
 			if err := svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				log.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}
 		if s.HasPreview() {
 			if err := svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				log.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}
 		if s.HasText() {
 			if err := svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				log.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}
 		if s.HasThumbnail() {
 			if err := svc.s3.RemoveObject(s.GetThumbnail().Key, s.GetThumbnail().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				log.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}
 		if s.HasMosaic() {
 			if err := svc.s3.RemoveFolder(s.GetMosaic().Key, s.GetMosaic().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				log.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}
 		if s.HasEntities() {
 			if err := svc.s3.RemoveObject(s.GetEntities().Key, s.GetEntities().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				log.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}
 		if s.HasOCR() {
 			if err := svc.s3.RemoveObject(s.GetOCR().Key, s.GetOCR().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				log.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}
 		if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}
 }
@@ -488,7 +415,7 @@ func (svc *SnapshotService) deleteFromS3(snapshots []model.Snapshot) {
 func (svc *SnapshotService) deleteFromCache(snapshots []model.Snapshot) {
 	for _, s := range snapshots {
 		if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}
 }
@@ -496,23 +423,9 @@ func (svc *SnapshotService) deleteFromCache(snapshots []model.Snapshot) {
 func (svc *SnapshotService) deleteFromRepo(snapshots []model.Snapshot) {
 	for _, s := range snapshots {
 		if err := svc.snapshotRepo.Delete(s.GetID()); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}
-}
-
-type SnapshotPatchOptions struct {
-	Options   conversionmodel.PipelineRunOptions `json:"options"`
-	Fields    []string                           `json:"fields"`
-	Original  *model.S3Object                    `json:"original"`
-	Preview   *model.S3Object                    `json:"preview"`
-	Text      *model.S3Object                    `json:"text"`
-	OCR       *model.S3Object                    `json:"ocr"`
-	Entities  *model.S3Object                    `json:"entities"`
-	Mosaic    *model.S3Object                    `json:"mosaic"`
-	Thumbnail *model.S3Object                    `json:"thumbnail"`
-	Status    *string                            `json:"status"`
-	TaskID    *string                            `json:"taskId"`
 }
 
 func (svc *SnapshotService) isTaskPending(snapshot model.Snapshot) (bool, error) {
@@ -562,8 +475,8 @@ func newSnapshotMapper() *snapshotMapper {
 	}
 }
 
-func (mp *snapshotMapper) mapOne(m model.Snapshot) *Snapshot {
-	s := &Snapshot{
+func (mp *snapshotMapper) mapOne(m model.Snapshot) *dto.Snapshot {
+	s := &dto.Snapshot{
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
 		Status:     m.GetStatus(),
@@ -604,12 +517,12 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 		s.Capabilities.Mosaic = true
 	}
 	if m.GetTaskID() != nil {
-		s.Task = &SnapshotTaskInfo{
+		s.Task = &dto.SnapshotTaskInfo{
 			ID: *m.GetTaskID(),
 		}
 		isPending, err := isTaskPending(m, mp.taskCache)
 		if err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		} else {
 			s.Task.IsPending = isPending
 		}
@@ -617,8 +530,8 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 	return s
 }
 
-func (mp *snapshotMapper) mapMany(snapshots []model.Snapshot, activeID *string) []*Snapshot {
-	res := make([]*Snapshot, 0)
+func (mp *snapshotMapper) mapMany(snapshots []model.Snapshot, activeID *string) []*dto.Snapshot {
+	res := make([]*dto.Snapshot, 0)
 	for _, snapshot := range snapshots {
 		s := mp.mapOne(snapshot)
 		s.IsActive = activeID != nil && *activeID == snapshot.GetID()
@@ -627,8 +540,8 @@ func (mp *snapshotMapper) mapMany(snapshots []model.Snapshot, activeID *string) 
 	return res
 }
 
-func (mp *snapshotMapper) mapS3Object(o *model.S3Object) *SnapshotDownloadable {
-	download := &SnapshotDownloadable{
+func (mp *snapshotMapper) mapS3Object(o *model.S3Object) *dto.SnapshotDownloadable {
+	download := &dto.SnapshotDownloadable{
 		Extension: filepath.Ext(o.Key),
 		Size:      o.Size,
 	}

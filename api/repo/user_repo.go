@@ -15,9 +15,10 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 )
 
 type userEntity struct {

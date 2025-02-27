@@ -12,19 +12,20 @@ package service
 
 import (
 	"bytes"
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/tools"
 	"path/filepath"
 
 	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
-	mosaicmodel "github.com/kouprlabs/voltaserve/mosaic/model"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/client/conversionclient"
-	"github.com/kouprlabs/voltaserve/api/client/mosaicclient"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/log"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -35,24 +36,27 @@ type MosaicService struct {
 	fileGuard      *guard.FileGuard
 	taskSvc        *TaskService
 	taskMapper     *taskMapper
-	mosaicClient   *mosaicclient.MosaicClient
-	pipelineClient conversionclient.PipelineClient
+	mosaicClient   *client.MosaicClient
+	pipelineClient client.PipelineClient
 }
 
 func NewMosaicService() *MosaicService {
 	return &MosaicService{
-		snapshotCache:  cache.NewSnapshotCache(),
-		snapshotSvc:    NewSnapshotService(),
-		fileCache:      cache.NewFileCache(),
-		fileGuard:      guard.NewFileGuard(),
-		taskSvc:        NewTaskService(),
-		taskMapper:     newTaskMapper(),
-		mosaicClient:   mosaicclient.NewMosaicClient(),
-		pipelineClient: conversionclient.NewPipelineClient(),
+		snapshotCache: cache.NewSnapshotCache(),
+		snapshotSvc:   NewSnapshotService(),
+		fileCache:     cache.NewFileCache(),
+		fileGuard:     guard.NewFileGuard(),
+		taskSvc:       NewTaskService(),
+		taskMapper:    newTaskMapper(),
+		mosaicClient:  client.NewMosaicClient(config.GetConfig().MosaicURL),
+		pipelineClient: client.NewPipelineClient(
+			config.GetConfig().ConversionURL,
+			config.GetConfig().Environment.IsTest,
+		),
 	}
 }
 
-func (svc *MosaicService) Create(fileID string, userID string) (*Task, error) {
+func (svc *MosaicService) Create(fileID string, userID string) (*dto.Task, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
@@ -93,7 +97,7 @@ func (svc *MosaicService) Create(fileID string, userID string) (*Task, error) {
 	return res, nil
 }
 
-func (svc *MosaicService) Delete(fileID string, userID string) (*Task, error) {
+func (svc *MosaicService) Delete(fileID string, userID string) (*dto.Task, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
@@ -135,7 +139,7 @@ func (svc *MosaicService) Delete(fileID string, userID string) (*Task, error) {
 	return res, nil
 }
 
-func (svc *MosaicService) GetMetadata(fileID string, userID string) (*mosaicmodel.Metadata, error) {
+func (svc *MosaicService) GetMetadata(fileID string, userID string) (*dto.MosaicMetadata, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
@@ -153,7 +157,7 @@ func (svc *MosaicService) GetMetadata(fileID string, userID string) (*mosaicmode
 	if !snapshot.HasMosaic() {
 		return nil, errorpkg.NewMosaicNotFoundError(nil)
 	}
-	res, err := svc.mosaicClient.GetMetadata(mosaicclient.MosaicGetMetadataOptions{
+	res, err := svc.mosaicClient.GetMetadata(client.MosaicGetMetadataOptions{
 		S3Key:    filepath.FromSlash(snapshot.GetID()),
 		S3Bucket: snapshot.GetPreview().Bucket,
 	})
@@ -188,7 +192,7 @@ func (svc *MosaicService) DownloadTileBuffer(fileID string, opts MosaicDownloadT
 	if !snapshot.HasMosaic() {
 		return nil, nil, errorpkg.NewMosaicNotFoundError(nil)
 	}
-	res, err := svc.mosaicClient.DownloadTileBuffer(mosaicclient.MosaicDownloadTileOptions{
+	res, err := svc.mosaicClient.DownloadTileBuffer(client.MosaicDownloadTileOptions{
 		S3Key:     filepath.FromSlash(snapshot.GetID()),
 		S3Bucket:  snapshot.GetPreview().Bucket,
 		ZoomLevel: opts.ZoomLevel,
@@ -203,7 +207,7 @@ func (svc *MosaicService) DownloadTileBuffer(fileID string, opts MosaicDownloadT
 }
 
 func (svc *MosaicService) runPipeline(snapshot model.Snapshot, task model.Task) error {
-	if err := svc.pipelineClient.Run(&conversionmodel.PipelineRunOptions{
+	if err := svc.pipelineClient.Run(&dto.PipelineRunOptions{
 		PipelineID: helper.ToPtr(conversionmodel.PipelineMosaic),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
@@ -217,7 +221,7 @@ func (svc *MosaicService) runPipeline(snapshot model.Snapshot, task model.Task) 
 
 func (svc *MosaicService) createWaitingTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
+		ID:              tools.NewID(),
 		Name:            "Waiting.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -232,7 +236,7 @@ func (svc *MosaicService) createWaitingTask(file model.File, userID string) (mod
 
 func (svc *MosaicService) createDeleteTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
+		ID:              tools.NewID(),
 		Name:            "Deleting mosaic.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -246,7 +250,7 @@ func (svc *MosaicService) createDeleteTask(file model.File, userID string) (mode
 }
 
 func (svc *MosaicService) delete(task model.Task, snapshot model.Snapshot) {
-	err := svc.mosaicClient.Delete(mosaicclient.MosaicDeleteOptions{
+	err := svc.mosaicClient.Delete(client.MosaicDeleteOptions{
 		S3Key:    filepath.FromSlash(snapshot.GetID()),
 		S3Bucket: snapshot.GetPreview().Bucket,
 	})
@@ -254,12 +258,12 @@ func (svc *MosaicService) delete(task model.Task, snapshot model.Snapshot) {
 		value := err.Error()
 		task.SetError(&value)
 		if err := svc.taskSvc.saveAndSync(task); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 			return
 		}
 	} else {
 		if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 			return
 		}
 	}
@@ -267,7 +271,7 @@ func (svc *MosaicService) delete(task model.Task, snapshot model.Snapshot) {
 	snapshot.SetTaskID(nil)
 	snapshot.SetStatus(model.SnapshotStatusReady)
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
-		log.GetLogger().Error(err)
+		logger.GetLogger().Error(err)
 		return
 	}
 }

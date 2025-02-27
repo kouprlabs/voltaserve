@@ -12,13 +12,15 @@ package repo
 
 import (
 	"errors"
+	"github.com/kouprlabs/voltaserve/shared/tools"
 
 	"gorm.io/gorm"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 )
 
 type invitationEntity struct {
@@ -149,7 +151,7 @@ func (repo *InvitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invita
 	var res []model.Invitation
 	for _, e := range opts.Emails {
 		invitation := invitationEntity{
-			ID:             helper.NewID(),
+			ID:             tools.NewID(),
 			OrganizationID: opts.OrganizationID,
 			OwnerID:        opts.UserID,
 			Email:          e,

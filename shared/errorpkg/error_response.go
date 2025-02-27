@@ -27,7 +27,7 @@ func NewErrorResponse(code string, status int, message string, userMessage strin
 		Status:      status,
 		Message:     message,
 		UserMessage: userMessage,
-		MoreInfo:    fmt.Sprintf("https://voltaserve.com/docs/api/errors/%s", code),
+		MoreInfo:    fmt.Sprintf("https://voltaserve.com/docs/errors/%s", code),
 		Err:         err,
 	}
 }

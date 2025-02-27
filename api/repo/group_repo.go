@@ -12,13 +12,15 @@ package repo
 
 import (
 	"errors"
+	"github.com/kouprlabs/voltaserve/shared/tools"
 
 	"gorm.io/gorm"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 )
 
 type groupEntity struct {
@@ -338,7 +340,7 @@ func (repo *GroupRepo) GrantUserPermission(id string, userID string, permission 
 	db := repo.db.
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, helper.NewTimeString(), permission)
+			tools.NewID(), userID, id, permission, helper.NewTimeString(), permission)
 	if db.Error != nil {
 		return db.Error
 	}

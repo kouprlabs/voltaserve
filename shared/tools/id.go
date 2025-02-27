@@ -8,23 +8,25 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package errorpkg
+package tools
 
 import (
-	"errors"
-	"net/http"
+	"time"
 
-	"github.com/gofiber/fiber/v2"
-
-	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/google/uuid"
+	"github.com/speps/go-hashids/v2"
 )
 
-func ErrorHandler(c *fiber.Ctx, err error) error {
-	var e *ErrorResponse
-	if errors.As(err, &e) {
-		return c.Status(e.Status).JSON(e)
-	} else {
-		log.GetLogger().Error(err)
-		return c.Status(http.StatusInternalServerError).JSON(NewInternalServerError(err))
+func NewID() string {
+	hd := hashids.NewData()
+	hd.Salt = uuid.NewString()
+	h, err := hashids.NewWithData(hd)
+	if err != nil {
+		panic(err)
 	}
+	id, err := h.EncodeInt64([]int64{time.Now().UTC().UnixNano()})
+	if err != nil {
+		panic(err)
+	}
+	return id
 }

@@ -17,7 +17,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
@@ -61,7 +63,7 @@ func (r *EntityRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/entities/{file_id} [post]
 func (r *EntityRouter) Create(c *fiber.Ctx) error {
-	opts := new(service.EntityCreateOptions)
+	opts := new(dto.EntityCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -151,7 +153,7 @@ func (r *EntityRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *EntityRouter) parseListQueryParams(c *fiber.Ctx) (*service.EntityListOptions, error) {
+func (r *EntityRouter) parseListQueryParams(c *fiber.Ctx) (*dto.EntityListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -186,7 +188,7 @@ func (r *EntityRouter) parseListQueryParams(c *fiber.Ctx) (*service.EntityListOp
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &service.EntityListOptions{
+	return &dto.EntityListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,

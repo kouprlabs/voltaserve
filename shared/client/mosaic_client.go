@@ -8,31 +8,28 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package mosaicclient
+package client
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
-
-	mosaicmodel "github.com/kouprlabs/voltaserve/mosaic/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 type MosaicClient struct {
-	config *config.Config
+	url string
 }
 
-func NewMosaicClient() *MosaicClient {
+func NewMosaicClient(url string) *MosaicClient {
 	return &MosaicClient{
-		config: config.GetConfig(),
+		url: url,
 	}
 }
 
@@ -42,14 +39,14 @@ type MosaicCreateOptions struct {
 	S3Bucket string
 }
 
-func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*mosaicmodel.Metadata, error) {
+func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*dto.MosaicMetadata, error) {
 	file, err := os.Open(opts.Path)
 	if err != nil {
 		return nil, err
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -70,7 +67,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*mosaicmodel.Metadata,
 	if err := mw.Close(); err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/mosaics", cl.config.MosaicURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/mosaics", cl.url), buf)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +79,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*mosaicmodel.Metadata,
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -92,7 +89,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*mosaicmodel.Metadata,
 	if err != nil {
 		return nil, err
 	}
-	var res mosaicmodel.Metadata
+	var res dto.MosaicMetadata
 	if err = json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
@@ -104,14 +101,14 @@ type MosaicGetMetadataOptions struct {
 	S3Bucket string `json:"s3Bucket"`
 }
 
-func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*mosaicmodel.Metadata, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/v3/mosaics/%s/%s/metadata", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key))
+func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*dto.MosaicMetadata, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/v3/mosaics/%s/%s/metadata", cl.url, opts.S3Bucket, opts.S3Key))
 	if err != nil {
 		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -125,7 +122,7 @@ func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*mosaicmodel
 	if err != nil {
 		return nil, err
 	}
-	var res mosaicmodel.Metadata
+	var res dto.MosaicMetadata
 	err = json.Unmarshal(b, &res)
 	if err != nil {
 		return nil, err
@@ -139,7 +136,7 @@ type MosaicDeleteOptions struct {
 }
 
 func (cl *MosaicClient) Delete(opts MosaicDeleteOptions) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v3/mosaics/%s/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v3/mosaics/%s/%s", cl.url, opts.S3Bucket, opts.S3Key), nil)
 	if err != nil {
 		return err
 	}
@@ -171,14 +168,14 @@ func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) (*byt
 	resp, err := http.Get(
 		fmt.Sprintf(
 			"%s/v3/mosaics/%s/%s/zoom_level/%d/row/%d/column/%d/extension/%s",
-			cl.config.MosaicURL, opts.S3Bucket, opts.S3Key, opts.ZoomLevel, opts.Row, opts.Column, opts.Extension,
+			cl.url, opts.S3Bucket, opts.S3Key, opts.ZoomLevel, opts.Row, opts.Column, opts.Extension,
 		))
 	if err != nil {
 		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {

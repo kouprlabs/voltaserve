@@ -8,33 +8,26 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package languageclient
+package client
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"net/http"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 type LanguageClient struct {
-	config *config.Config
+	url string
 }
 
-func NewLanguageClient() *LanguageClient {
+func NewLanguageClient(url string) *LanguageClient {
 	return &LanguageClient{
-		config: config.GetConfig(),
+		url: url,
 	}
-}
-
-type Entity struct {
-	Text      string `json:"text"`
-	Label     string `json:"label"`
-	Frequency int    `json:"frequency"`
 }
 
 type GetEntitiesOptions struct {
@@ -42,18 +35,18 @@ type GetEntitiesOptions struct {
 	Language string `json:"language"`
 }
 
-func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]Entity, error) {
+func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]dto.Entity, error) {
 	b, err := json.Marshal(opts)
 	if err != nil {
-		return []Entity{}, err
+		return nil, err
 	}
-	resp, err := http.Post(fmt.Sprintf("%s/v3/entities", cl.config.LanguageURL), "application/json", bytes.NewBuffer(b))
+	resp, err := http.Post(fmt.Sprintf("%s/v3/entities", cl.url), "application/json", bytes.NewBuffer(b))
 	if err != nil {
-		return []Entity{}, err
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -61,12 +54,12 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]Entity, error)
 	}
 	b, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return []Entity{}, err
+		return nil, err
 	}
-	var res []Entity
+	var res []dto.Entity
 	err = json.Unmarshal(b, &res)
 	if err != nil {
-		return []Entity{}, err
+		return nil, err
 	}
 	return res, nil
 }

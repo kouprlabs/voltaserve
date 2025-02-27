@@ -16,8 +16,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
@@ -160,7 +162,7 @@ func (r *SnapshotRouter) Patch(c *fiber.Ctx) error {
 	if apiKey != r.config.Security.APIKey {
 		return errorpkg.NewInvalidAPIKeyError()
 	}
-	opts := new(service.SnapshotPatchOptions)
+	opts := new(dto.SnapshotPatchOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -192,7 +194,7 @@ func (r *SnapshotRouter) GetLanguages(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotListOptions, error) {
+func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*dto.SnapshotListOptions, error) {
 	var err error
 	fileID := c.Query("file_id")
 	if fileID == "" {
@@ -227,7 +229,7 @@ func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotLi
 	if !r.snapshotSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	return &service.SnapshotListOptions{
+	return &dto.SnapshotListOptions{
 		Page:      page,
 		Size:      size,
 		SortBy:    sortBy,

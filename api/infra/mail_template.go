@@ -22,7 +22,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/templates"
 )
 
@@ -102,7 +102,7 @@ func (mt *mailTemplate) getText(path string, variables map[string]string) (strin
 	}
 	defer func(f fs.File) {
 		if err := f.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(f)
 	b, _ := io.ReadAll(f)
@@ -126,7 +126,7 @@ func (mt *mailTemplate) getMessageParams(templateName string) (*MessageParams, e
 	}
 	defer func(f fs.File) {
 		if err := f.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(f)
 	b, _ := io.ReadAll(f)

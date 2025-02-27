@@ -8,26 +8,35 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package idpclient
+package client
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/kouprlabs/voltaserve/webdav/config"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
 
 const (
 	GrantTypePassword     = "password"
 	GrantTypeRefreshToken = "refresh_token"
 )
+
+type TokenClient struct {
+	url string
+}
+
+func NewTokenClient(url string) *TokenClient {
+	return &TokenClient{
+		url: url,
+	}
+}
 
 //nolint:tagliatelle // JWT-Esque
 type TokenExchangeOptions struct {
@@ -38,17 +47,7 @@ type TokenExchangeOptions struct {
 	Locale       string `json:"locale,omitempty"`
 }
 
-type TokenClient struct {
-	config *config.Config
-}
-
-func NewTokenClient() *TokenClient {
-	return &TokenClient{
-		config: config.GetConfig(),
-	}
-}
-
-func (cl *TokenClient) Exchange(options TokenExchangeOptions) (*infra.Token, error) {
+func (cl *TokenClient) Exchange(options TokenExchangeOptions) (*dto.Token, error) {
 	form := url.Values{}
 	form.Set("grant_type", options.GrantType)
 	if options.Username != "" {
@@ -62,7 +61,7 @@ func (cl *TokenClient) Exchange(options TokenExchangeOptions) (*infra.Token, err
 	}
 	req, err := http.NewRequest(
 		"POST",
-		fmt.Sprintf("%s/v3/token", cl.config.IdPURL), bytes.NewBufferString(form.Encode()),
+		fmt.Sprintf("%s/v3/token", cl.url), bytes.NewBufferString(form.Encode()),
 	)
 	if err != nil {
 		return nil, err
@@ -76,14 +75,14 @@ func (cl *TokenClient) Exchange(options TokenExchangeOptions) (*infra.Token, err
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			infra.GetLogger().Error(err.Error())
+			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
 	body, err := cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
-	var token infra.Token
+	var token dto.Token
 	if err = json.Unmarshal(body, &token); err != nil {
 		return nil, err
 	}
@@ -97,12 +96,12 @@ func (cl *TokenClient) jsonResponseOrThrow(resp *http.Response) ([]byte, error) 
 			return nil, err
 		}
 		if resp.StatusCode > 299 {
-			var idpError infra.IdPErrorResponse
-			err = json.Unmarshal(body, &idpError)
+			var errorResponse ErrorResponse
+			err = json.Unmarshal(body, &errorResponse)
 			if err != nil {
 				return nil, err
 			}
-			return nil, &infra.IdPError{Value: idpError}
+			return nil, &errorResponse
 		} else {
 			return body, nil
 		}

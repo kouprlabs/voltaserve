@@ -18,7 +18,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
@@ -63,7 +65,7 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/groups [post]
 func (r *GroupRouter) Create(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(service.GroupCreateOptions)
+	opts := new(dto.GroupCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -151,10 +153,6 @@ func (r *GroupRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-type GroupPatchNameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
 // PatchName godoc
 //
 //	@Summary		Patch Name
@@ -172,7 +170,7 @@ type GroupPatchNameOptions struct {
 //	@Router			/groups/{id}/name [patch]
 func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(GroupPatchNameOptions)
+	opts := new(dto.GroupPatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -207,10 +205,6 @@ func (r *GroupRouter) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-type GroupAddMemberOptions struct {
-	UserID string `json:"userId" validate:"required"`
-}
-
 // AddMember godoc
 //
 //	@Summary		Add Member
@@ -226,7 +220,7 @@ type GroupAddMemberOptions struct {
 //	@Router			/groups/{id}/members [post]
 func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(GroupAddMemberOptions)
+	opts := new(dto.GroupAddMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -237,10 +231,6 @@ func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
-}
-
-type GroupRemoveMemberOptions struct {
-	UserID string `json:"userId" validate:"required"`
 }
 
 // RemoveMember godoc
@@ -259,7 +249,7 @@ type GroupRemoveMemberOptions struct {
 //	@Router			/groups/{id}/members [delete]
 func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(GroupRemoveMemberOptions)
+	opts := new(dto.GroupRemoveMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -272,7 +262,7 @@ func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*service.GroupListOptions, error) {
+func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*dto.GroupListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -307,7 +297,7 @@ func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*service.GroupListOpti
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &service.GroupListOptions{
+	return &dto.GroupListOptions{
 		Query:          query,
 		OrganizationID: c.Query("organization_id"),
 		Page:           page,

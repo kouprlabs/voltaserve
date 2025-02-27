@@ -17,7 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/logger"
 )
 
 type FileIdentifier struct{}
@@ -254,7 +254,7 @@ func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 	}
 	defer func(zipFile *zip.ReadCloser) {
 		if err := zipFile.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(zipFile)
 	var hasGLTF, hasBin bool
@@ -276,7 +276,7 @@ func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 			}
 			defer func(rc io.ReadCloser) {
 				if err := rc.Close(); err != nil {
-					log.GetLogger().Error(err)
+					logger.GetLogger().Error(err)
 				}
 			}(rc)
 			var gltf GLTF

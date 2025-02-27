@@ -14,13 +14,15 @@ import (
 	"slices"
 	"sort"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
 )
@@ -55,62 +57,16 @@ func NewUserService() *UserService {
 	}
 }
 
-type User struct {
-	ID         string   `json:"id"`
-	FullName   string   `json:"fullName"`
-	Picture    *Picture `json:"picture,omitempty"`
-	Email      string   `json:"email"`
-	Username   string   `json:"username"`
-	CreateTime string   `json:"createTime"`
-	UpdateTime *string  `json:"updateTime"`
-}
-
-const (
-	UserSortByEmail        = "email"
-	UserSortByFullName     = "full_name"
-	UserSortByDateCreated  = "date_created"
-	UserSortByDateModified = "date_modified"
-)
-
-const (
-	UserSortOrderAsc  = "asc"
-	UserSortOrderDesc = "desc"
-)
-
-type Picture struct {
-	Extension string `json:"extension"`
-}
-
-type UserList struct {
-	Data          []*User `json:"data"`
-	TotalPages    uint64  `json:"totalPages"`
-	TotalElements uint64  `json:"totalElements"`
-	Page          uint64  `json:"page"`
-	Size          uint64  `json:"size"`
-}
-
-type UserListOptions struct {
-	Query               string
-	OrganizationID      string
-	GroupID             string
-	ExcludeGroupMembers bool
-	ExcludeMe           bool
-	SortBy              string
-	SortOrder           string
-	Page                uint64
-	Size                uint64
-}
-
-func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, error) {
+func (svc *UserService) List(opts dto.UserListOptions, userID string) (*dto.UserList, error) {
 	users, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = UserSortByDateCreated
+		opts.SortBy = dto.UserSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = UserSortOrderAsc
+		opts.SortOrder = dto.UserSortOrderAsc
 	}
 	sorted := svc.sort(users, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -118,7 +74,7 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	if err != nil {
 		return nil, err
 	}
-	return &UserList{
+	return &dto.UserList{
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
@@ -127,18 +83,13 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	}, nil
 }
 
-type UserProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
-}
-
-func (svc *UserService) Probe(opts UserListOptions, userID string) (*UserProbe, error) {
+func (svc *UserService) Probe(opts dto.UserListOptions, userID string) (*dto.UserProbe, error) {
 	users, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	totalElements := uint64(len(users))
-	return &UserProbe{
+	return &dto.UserProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
@@ -169,17 +120,17 @@ func (svc *UserService) ExtractPicture(id string, justification ExtractPictureJu
 
 func (svc *UserService) IsValidSortBy(value string) bool {
 	return value == "" ||
-		value == UserSortByEmail ||
-		value == UserSortByFullName ||
-		value == UserSortByDateCreated ||
-		value == UserSortByDateModified
+		value == dto.UserSortByEmail ||
+		value == dto.UserSortByFullName ||
+		value == dto.UserSortByDateCreated ||
+		value == dto.UserSortByDateModified
 }
 
 func (svc *UserService) IsValidSortOrder(value string) bool {
-	return value == "" || value == UserSortOrderAsc || value == UserSortOrderDesc
+	return value == "" || value == dto.UserSortOrderAsc || value == dto.UserSortOrderDesc
 }
 
-func (svc *UserService) findAll(opts UserListOptions, userID string) ([]model.User, error) {
+func (svc *UserService) findAll(opts dto.UserListOptions, userID string) ([]model.User, error) {
 	if opts.OrganizationID == "" && opts.GroupID == "" {
 		return make([]model.User, 0), nil
 	}
@@ -227,7 +178,7 @@ func (svc *UserService) findAll(opts UserListOptions, userID string) ([]model.Us
 	}
 }
 
-func (svc *UserService) load(opts UserListOptions) ([]model.User, error) {
+func (svc *UserService) load(opts dto.UserListOptions) ([]model.User, error) {
 	res := make([]model.User, 0)
 	var err error
 	if opts.OrganizationID != "" && opts.GroupID != "" && opts.ExcludeGroupMembers {
@@ -265,7 +216,7 @@ func (svc *UserService) load(opts UserListOptions) ([]model.User, error) {
 	return res, nil
 }
 
-func (svc *UserService) search(opts UserListOptions) ([]model.User, error) {
+func (svc *UserService) search(opts dto.UserListOptions) ([]model.User, error) {
 	res := make([]model.User, 0)
 	var err error
 	count, err := svc.userRepo.Count()
@@ -299,18 +250,18 @@ func (svc *UserService) search(opts UserListOptions) ([]model.User, error) {
 }
 
 func (svc *UserService) sort(data []model.User, sortBy string, sortOrder string) []model.User {
-	if sortBy == UserSortByEmail {
+	if sortBy == dto.UserSortByEmail {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == UserSortOrderDesc {
+			if sortOrder == dto.UserSortOrderDesc {
 				return data[i].GetEmail() > data[j].GetEmail()
 			} else {
 				return data[i].GetEmail() < data[j].GetEmail()
 			}
 		})
 		return data
-	} else if sortBy == UserSortByFullName {
+	} else if sortBy == dto.UserSortByFullName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == UserSortOrderDesc {
+			if sortOrder == dto.UserSortOrderDesc {
 				return data[i].GetFullName() > data[j].GetFullName()
 			} else {
 				return data[i].GetFullName() < data[j].GetFullName()
@@ -386,8 +337,8 @@ func newUserMapper() *userMapper {
 	return &userMapper{}
 }
 
-func (mp *userMapper) mapOne(user model.User) *User {
-	res := &User{
+func (mp *userMapper) mapOne(user model.User) *dto.User {
+	res := &dto.User{
 		ID:         user.GetID(),
 		FullName:   user.GetFullName(),
 		Email:      user.GetEmail(),
@@ -396,15 +347,15 @@ func (mp *userMapper) mapOne(user model.User) *User {
 		UpdateTime: user.GetUpdateTime(),
 	}
 	if user.GetPicture() != nil {
-		res.Picture = &Picture{
+		res.Picture = &dto.Picture{
 			Extension: helper.Base64ToExtension(*user.GetPicture()),
 		}
 	}
 	return res
 }
 
-func (mp *userMapper) mapMany(users []model.User) ([]*User, error) {
-	res := make([]*User, 0)
+func (mp *userMapper) mapMany(users []model.User) ([]*dto.User, error) {
+	res := make([]*dto.User, 0)
 	for _, user := range users {
 		res = append(res, mp.mapOne(user))
 	}

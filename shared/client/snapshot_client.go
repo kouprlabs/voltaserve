@@ -8,32 +8,31 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package apiclient
+package client
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"net/http"
-
-	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
-
-	apiservice "github.com/kouprlabs/voltaserve/api/service"
 )
 
 type SnapshotClient struct {
-	config *config.Config
+	url    string
+	apiKey string
 }
 
-func NewSnapshotClient() *SnapshotClient {
+func NewSnapshotClient(url string, apiKey string) *SnapshotClient {
 	return &SnapshotClient{
-		config: config.GetConfig(),
+		url:    url,
+		apiKey: apiKey,
 	}
 }
 
-func (cl *SnapshotClient) Patch(opts apiservice.SnapshotPatchOptions) error {
+func (cl *SnapshotClient) Patch(opts dto.SnapshotPatchOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
@@ -41,9 +40,9 @@ func (cl *SnapshotClient) Patch(opts apiservice.SnapshotPatchOptions) error {
 	req, err := http.NewRequest(
 		"PATCH",
 		fmt.Sprintf("%s/v3/snapshots/%s?api_key=%s",
-			cl.config.APIURL,
+			cl.url,
 			opts.Options.SnapshotID,
-			cl.config.Security.APIKey,
+			cl.apiKey,
 		),
 		bytes.NewBuffer(body),
 	)
@@ -58,7 +57,7 @@ func (cl *SnapshotClient) Patch(opts apiservice.SnapshotPatchOptions) error {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	return nil

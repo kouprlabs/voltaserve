@@ -8,47 +8,44 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package conversionclient
+package client
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/shared/dto"
 	"net/http"
-
-	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type PipelineClient interface {
-	Run(opts *conversionmodel.PipelineRunOptions) error
+	Run(opts *dto.PipelineRunOptions) error
 }
 
-func NewPipelineClient() PipelineClient {
-	if config.GetConfig().Environment.IsTest {
+func NewPipelineClient(url string, isTest bool) PipelineClient {
+	if isTest {
 		return newMockPipelineClient()
 	} else {
-		return newPipelineClient()
+		return newPipelineClient(url)
 	}
 }
 
 type pipelineClient struct {
-	config *config.Config
+	url string
 }
 
-func newPipelineClient() *pipelineClient {
+func newPipelineClient(url string) *pipelineClient {
 	return &pipelineClient{
-		config: config.GetConfig(),
+		url: url,
 	}
 }
 
-func (cl *pipelineClient) Run(opts *conversionmodel.PipelineRunOptions) error {
+func (cl *pipelineClient) Run(opts *dto.PipelineRunOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/pipelines/run", cl.config.ConversionURL), bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/pipelines/run", cl.url), bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}
@@ -73,6 +70,6 @@ func newMockPipelineClient() *mockPipelineClient {
 	return &mockPipelineClient{}
 }
 
-func (m *mockPipelineClient) Run(_ *conversionmodel.PipelineRunOptions) error {
+func (m *mockPipelineClient) Run(_ *dto.PipelineRunOptions) error {
 	return nil
 }

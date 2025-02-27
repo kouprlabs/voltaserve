@@ -8,39 +8,38 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package apiclient
+package client
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"net/http"
-
-	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
-
-	apiservice "github.com/kouprlabs/voltaserve/api/service"
 )
 
 type TaskClient struct {
-	config *config.Config
+	url    string
+	apiKey string
 }
 
-func NewTaskClient() *TaskClient {
+func NewTaskClient(url string, apiKey string) *TaskClient {
 	return &TaskClient{
-		config: config.GetConfig(),
+		url:    url,
+		apiKey: apiKey,
 	}
 }
 
-func (cl *TaskClient) Create(opts apiservice.TaskCreateOptions) error {
+func (cl *TaskClient) Create(opts dto.TaskCreateOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}
 	req, err := http.NewRequest(
 		"POST",
-		fmt.Sprintf("%s/v3/tasks?api_key=%s", cl.config.APIURL, cl.config.Security.APIKey),
+		fmt.Sprintf("%s/v3/tasks?api_key=%s", cl.url, cl.apiKey),
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
@@ -54,20 +53,20 @@ func (cl *TaskClient) Create(opts apiservice.TaskCreateOptions) error {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	return nil
 }
 
-func (cl *TaskClient) Patch(id string, opts apiservice.TaskPatchOptions) error {
+func (cl *TaskClient) Patch(id string, opts dto.TaskPatchOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}
 	req, err := http.NewRequest(
 		"PATCH",
-		fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.config.APIURL, id, cl.config.Security.APIKey),
+		fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.url, id, cl.apiKey),
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
@@ -81,7 +80,7 @@ func (cl *TaskClient) Patch(id string, opts apiservice.TaskPatchOptions) error {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	return nil
@@ -90,7 +89,7 @@ func (cl *TaskClient) Patch(id string, opts apiservice.TaskPatchOptions) error {
 func (cl *TaskClient) Delete(id string) error {
 	req, err := http.NewRequest(
 		"DELETE",
-		fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.config.APIURL, id, cl.config.Security.APIKey),
+		fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.url, id, cl.apiKey),
 		nil,
 	)
 	if err != nil {
@@ -104,7 +103,7 @@ func (cl *TaskClient) Delete(id string) error {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	return nil

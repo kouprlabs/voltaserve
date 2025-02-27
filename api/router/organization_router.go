@@ -18,7 +18,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
@@ -63,14 +65,14 @@ func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/organizations [post]
 func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(service.OrganizationCreateOptions)
+	opts := new(dto.OrganizationCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.orgSvc.Create(service.OrganizationCreateOptions{
+	res, err := r.orgSvc.Create(dto.OrganizationCreateOptions{
 		Name:  opts.Name,
 		Image: opts.Image,
 	}, userID)
@@ -122,10 +124,6 @@ func (r *OrganizationRouter) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-type OrganizationPatchNameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
 // PatchName godoc
 //
 //	@Summary		Patch Name
@@ -143,7 +141,7 @@ type OrganizationPatchNameOptions struct {
 //	@Router			/organizations/{id}/name [patch]
 func (r *OrganizationRouter) PatchName(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(OrganizationPatchNameOptions)
+	opts := new(dto.OrganizationPatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -230,10 +228,6 @@ func (r *OrganizationRouter) Leave(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-type OrganizationRemoveMemberOptions struct {
-	UserID string `json:"userId" validate:"required"`
-}
-
 // RemoveMember godoc
 //
 //	@Summary		Remove Member
@@ -250,7 +244,7 @@ type OrganizationRemoveMemberOptions struct {
 //	@Router			/organizations/{id}/members [delete]
 func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(OrganizationRemoveMemberOptions)
+	opts := new(dto.OrganizationRemoveMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -263,7 +257,7 @@ func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.OrganizationListOptions, error) {
+func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*dto.OrganizationListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -298,7 +292,7 @@ func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.Organi
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &service.OrganizationListOptions{
+	return &dto.OrganizationListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,

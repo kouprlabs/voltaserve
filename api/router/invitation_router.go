@@ -17,7 +17,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
@@ -66,7 +68,7 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/invitations [post]
 func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(service.InvitationCreateOptions)
+	opts := new(dto.InvitationCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}

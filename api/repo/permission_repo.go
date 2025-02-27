@@ -13,9 +13,10 @@ package repo
 import (
 	"gorm.io/gorm"
 
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 )
 
 type userPermissionEntity struct {

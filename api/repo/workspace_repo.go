@@ -12,13 +12,15 @@ package repo
 
 import (
 	"errors"
+	"github.com/kouprlabs/voltaserve/shared/tools"
 
 	"gorm.io/gorm"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 )
 
 type workspaceEntity struct {
@@ -207,7 +209,7 @@ func (repo *WorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 	if len(opts.ID) > 0 {
 		id = opts.ID
 	} else {
-		id = helper.NewID()
+		id = tools.NewID()
 	}
 	workspace := workspaceEntity{
 		ID:              id,
@@ -354,7 +356,7 @@ func (repo *WorkspaceRepo) GrantUserPermission(id string, userID string, permiss
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               VALUES (?, ?, ?, ?, ?)
               ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, helper.NewTimeString(), permission)
+			tools.NewID(), userID, id, permission, helper.NewTimeString(), permission)
 	if db.Error != nil {
 		return db.Error
 	}

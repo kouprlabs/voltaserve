@@ -17,11 +17,12 @@ import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/log"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/logger"
 )
 
 type taskEntity struct {
@@ -85,7 +86,7 @@ func (e *taskEntity) GetPayload() map[string]string {
 	}
 	res := map[string]string{}
 	if err := json.Unmarshal([]byte(e.Payload.String()), &res); err != nil {
-		log.GetLogger().Fatal(err)
+		logger.GetLogger().Fatal(err)
 		return nil
 	}
 	return res
@@ -137,11 +138,11 @@ func (e *taskEntity) SetPayload(p map[string]string) {
 	} else {
 		b, err := json.Marshal(p)
 		if err != nil {
-			log.GetLogger().Fatal(err)
+			logger.GetLogger().Fatal(err)
 			return
 		}
 		if err := e.Payload.UnmarshalJSON(b); err != nil {
-			log.GetLogger().Fatal(err)
+			logger.GetLogger().Fatal(err)
 		}
 	}
 }

@@ -15,8 +15,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 

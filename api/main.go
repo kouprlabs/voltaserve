@@ -11,7 +11,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -20,11 +22,23 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/router"
 )
+
+func ErrorHandler(c *fiber.Ctx, err error) error {
+	var errorResponse *errorpkg.ErrorResponse
+	if errors.As(err, &errorResponse) {
+		return c.Status(errorResponse.Status).JSON(errorResponse)
+	} else {
+		logger.GetLogger().Error(err)
+		return c.Status(http.StatusInternalServerError).JSON(errorpkg.NewInternalServerError(err))
+	}
+}
 
 // @title		Voltaserve API
 // @version	3.0.0
@@ -47,7 +61,7 @@ func main() {
 	cfg := config.GetConfig()
 
 	app := fiber.New(fiber.Config{
-		ErrorHandler: errorpkg.ErrorHandler,
+		ErrorHandler: ErrorHandler,
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.FileUploadMB)),
 	})
 

@@ -12,15 +12,18 @@ package service
 
 import (
 	"errors"
+	"github.com/kouprlabs/voltaserve/shared/tools"
 	"slices"
 	"sort"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/log"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
 )
@@ -49,44 +52,9 @@ func NewTaskService() *TaskService {
 	}
 }
 
-type Task struct {
-	ID              string            `json:"id"`
-	Name            string            `json:"name"`
-	Error           *string           `json:"error,omitempty"`
-	Percentage      *int              `json:"percentage,omitempty"`
-	IsIndeterminate bool              `json:"isIndeterminate"`
-	UserID          string            `json:"userId"`
-	Status          string            `json:"status"`
-	Payload         map[string]string `json:"payload,omitempty"`
-	CreateTime      string            `json:"createTime"`
-	UpdateTime      *string           `json:"updateTime,omitempty"`
-}
-
-const (
-	TaskSortByName         = "name"
-	TaskSortByStatus       = "status"
-	TaskSortByDateCreated  = "date_created"
-	TaskSortByDateModified = "date_modified"
-)
-
-const (
-	TaskSortOrderAsc  = "asc"
-	TaskSortOrderDesc = "desc"
-)
-
-type TaskCreateOptions struct {
-	Name            string            `json:"name"`
-	Error           *string           `json:"error,omitempty"`
-	Percentage      *int              `json:"percentage,omitempty"`
-	IsIndeterminate bool              `json:"isIndeterminate"`
-	UserID          string            `json:"userId"`
-	Status          string            `json:"status"`
-	Payload         map[string]string `json:"payload,omitempty"`
-}
-
-func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
+func (svc *TaskService) Create(opts dto.TaskCreateOptions) (*dto.Task, error) {
 	task, err := svc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
+		ID:              tools.NewID(),
 		Name:            opts.Name,
 		Status:          opts.Status,
 		Error:           opts.Error,
@@ -105,18 +73,7 @@ func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
 	return res, nil
 }
 
-type TaskPatchOptions struct {
-	Fields          []string          `json:"fields"`
-	Name            *string           `json:"name"`
-	Error           *string           `json:"error"`
-	Percentage      *int              `json:"percentage"`
-	IsIndeterminate *bool             `json:"isIndeterminate"`
-	UserID          *string           `json:"userId"`
-	Status          *string           `json:"status"`
-	Payload         map[string]string `json:"payload"`
-}
-
-func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
+func (svc *TaskService) Patch(id string, opts dto.TaskPatchOptions) (*dto.Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -152,7 +109,7 @@ func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	return res, nil
 }
 
-func (svc *TaskService) Find(id string, userID string) (*Task, error) {
+func (svc *TaskService) Find(id string, userID string) (*dto.Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -167,32 +124,16 @@ func (svc *TaskService) Find(id string, userID string) (*Task, error) {
 	return res, nil
 }
 
-type TaskList struct {
-	Data          []*Task `json:"data"`
-	TotalPages    uint64  `json:"totalPages"`
-	TotalElements uint64  `json:"totalElements"`
-	Page          uint64  `json:"page"`
-	Size          uint64  `json:"size"`
-}
-
-type TaskListOptions struct {
-	Query     string
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
-
-func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
+func (svc *TaskService) List(opts dto.TaskListOptions, userID string) (*dto.TaskList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = TaskSortByDateCreated
+		opts.SortBy = dto.TaskSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = TaskSortOrderAsc
+		opts.SortOrder = dto.TaskSortOrderAsc
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -200,7 +141,7 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 	if err != nil {
 		return nil, err
 	}
-	return &TaskList{
+	return &dto.TaskList{
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
@@ -209,18 +150,13 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 	}, nil
 }
 
-type TaskProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
-}
-
-func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, error) {
+func (svc *TaskService) Probe(opts dto.TaskListOptions, userID string) (*dto.TaskProbe, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	totalElements := uint64(len(all))
-	return &TaskProbe{
+	return &dto.TaskProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
@@ -228,14 +164,14 @@ func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, 
 
 func (svc *TaskService) IsValidSortBy(value string) bool {
 	return value == "" ||
-		value == TaskSortByName ||
-		value == TaskSortByStatus ||
-		value == TaskSortByDateCreated ||
-		value == TaskSortByDateModified
+		value == dto.TaskSortByName ||
+		value == dto.TaskSortByStatus ||
+		value == dto.TaskSortByDateCreated ||
+		value == dto.TaskSortByDateModified
 }
 
 func (svc *TaskService) IsValidSortOrder(value string) bool {
-	return value == "" || value == TaskSortOrderAsc || value == TaskSortOrderDesc
+	return value == "" || value == dto.TaskSortOrderAsc || value == dto.TaskSortOrderDesc
 }
 
 func (svc *TaskService) Count(userID string) (*int64, error) {
@@ -261,12 +197,7 @@ func (svc *TaskService) Dismiss(id string, userID string) error {
 	return svc.deleteAndSync(id)
 }
 
-type TaskDismissAllResult struct {
-	Succeeded []string `json:"succeeded"`
-	Failed    []string `json:"failed"`
-}
-
-func (svc *TaskService) DismissAll(userID string) (*TaskDismissAllResult, error) {
+func (svc *TaskService) DismissAll(userID string) (*dto.TaskDismissAllResult, error) {
 	ids, err := svc.taskRepo.FindIDs(userID)
 	if err != nil {
 		return nil, err
@@ -275,7 +206,7 @@ func (svc *TaskService) DismissAll(userID string) (*TaskDismissAllResult, error)
 	if err != nil {
 		return nil, err
 	}
-	res := TaskDismissAllResult{
+	res := dto.TaskDismissAllResult{
 		Succeeded: make([]string, 0),
 		Failed:    make([]string, 0),
 	}
@@ -295,7 +226,7 @@ func (svc *TaskService) Delete(id string) error {
 	return svc.deleteAndSync(id)
 }
 
-func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Task, error) {
+func (svc *TaskService) findAll(opts dto.TaskListOptions, userID string) ([]model.Task, error) {
 	var res []model.Task
 	var err error
 	if opts.Query == "" {
@@ -325,7 +256,7 @@ func (svc *TaskService) load(userID string) ([]model.Task, error) {
 	return res, nil
 }
 
-func (svc *TaskService) search(opts TaskListOptions, userID string) ([]model.Task, error) {
+func (svc *TaskService) search(opts dto.TaskListOptions, userID string) ([]model.Task, error) {
 	var res []model.Task
 	count, err := svc.taskRepo.Count()
 	if err != nil {
@@ -387,41 +318,41 @@ func (svc *TaskService) authorizeIDs(ids []string, userID string) ([]model.Task,
 }
 
 func (svc *TaskService) sort(data []model.Task, sortBy string, sortOrder string) []model.Task {
-	if sortBy == TaskSortByName {
+	if sortBy == dto.TaskSortByName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == TaskSortOrderDesc {
+			if sortOrder == dto.TaskSortOrderDesc {
 				return data[i].GetName() > data[j].GetName()
 			} else {
 				return data[i].GetName() < data[j].GetName()
 			}
 		})
 		return data
-	} else if sortBy == TaskSortByStatus {
+	} else if sortBy == dto.TaskSortByStatus {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == TaskSortOrderDesc {
+			if sortOrder == dto.TaskSortOrderDesc {
 				return data[i].GetStatus() == model.TaskStatusRunning && data[j].GetStatus() != model.TaskStatusRunning
 			} else {
 				return data[i].GetStatus() == model.TaskStatusWaiting && data[j].GetStatus() != model.TaskStatusWaiting
 			}
 		})
 		return data
-	} else if sortBy == TaskSortByDateCreated {
+	} else if sortBy == dto.TaskSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a := helper.StringToTime(data[i].GetCreateTime())
 			b := helper.StringToTime(data[j].GetCreateTime())
-			if sortOrder == TaskSortOrderDesc {
+			if sortOrder == dto.TaskSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == TaskSortByDateModified {
+	} else if sortBy == dto.TaskSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a := helper.StringToTime(*data[i].GetUpdateTime())
 				b := helper.StringToTime(*data[j].GetUpdateTime())
-				if sortOrder == TaskSortOrderDesc {
+				if sortOrder == dto.TaskSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -485,21 +416,21 @@ func (svc *TaskService) deleteAndSync(id string) error {
 	for _, snapshot := range snapshots {
 		snapshot.SetTaskID(nil)
 		if err = svc.snapshotRepo.Save(snapshot); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 		if _, err = svc.snapshotCache.Refresh(snapshot.GetID()); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 		var filesIDs []string
 		filesIDs, err = svc.fileRepo.FindIDsBySnapshot(snapshot.GetID())
 		if err == nil {
 			for _, fileID := range filesIDs {
 				if _, err = svc.fileCache.Refresh(fileID); err != nil {
-					log.GetLogger().Error(err)
+					logger.GetLogger().Error(err)
 				}
 			}
 		} else {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}
 	// Proceed with deleting the task
@@ -525,8 +456,8 @@ func newTaskMapper() *taskMapper {
 	}
 }
 
-func (mp *taskMapper) mapOne(m model.Task) (*Task, error) {
-	return &Task{
+func (mp *taskMapper) mapOne(m model.Task) (*dto.Task, error) {
+	return &dto.Task{
 		ID:              m.GetID(),
 		Name:            m.GetName(),
 		Error:           m.GetError(),
@@ -540,8 +471,8 @@ func (mp *taskMapper) mapOne(m model.Task) (*Task, error) {
 	}, nil
 }
 
-func (mp *taskMapper) mapMany(tasks []model.Task) ([]*Task, error) {
-	res := make([]*Task, 0)
+func (mp *taskMapper) mapMany(tasks []model.Task) ([]*dto.Task, error) {
+	res := make([]*dto.Task, 0)
 	for _, task := range tasks {
 		t, err := mp.mapOne(task)
 		if err != nil {

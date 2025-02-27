@@ -8,25 +8,25 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package helper
+package logger
 
 import (
-	"time"
-
-	"github.com/google/uuid"
-	"github.com/speps/go-hashids/v2"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-func NewID() string {
-	hd := hashids.NewData()
-	hd.Salt = uuid.NewString()
-	h, err := hashids.NewWithData(hd)
-	if err != nil {
-		panic(err)
+var logger *zap.SugaredLogger
+
+func GetLogger() *zap.SugaredLogger {
+	if logger == nil {
+		config := zap.NewDevelopmentConfig()
+		config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+		config.DisableCaller = true
+		if l, err := config.Build(); err != nil {
+			panic(err)
+		} else {
+			logger = l.Sugar()
+		}
 	}
-	id, err := h.EncodeInt64([]int64{time.Now().UTC().UnixNano()})
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return logger
 }

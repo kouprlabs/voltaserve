@@ -16,11 +16,13 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
@@ -45,7 +47,7 @@ func (s *OrganizationServiceSuite) SetupTest() {
 }
 
 func (s *OrganizationServiceSuite) TestCreate() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -54,7 +56,7 @@ func (s *OrganizationServiceSuite) TestCreate() {
 }
 
 func (s *OrganizationServiceSuite) TestFind() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -66,7 +68,7 @@ func (s *OrganizationServiceSuite) TestFind() {
 }
 
 func (s *OrganizationServiceSuite) TestFind_MissingPermission() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -86,14 +88,14 @@ func (s *OrganizationServiceSuite) TestFind_NonExistentOrganization() {
 
 func (s *OrganizationServiceSuite) TestList() {
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
-		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		_, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 			Name: name,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -108,9 +110,9 @@ func (s *OrganizationServiceSuite) TestList() {
 }
 
 func (s *OrganizationServiceSuite) TestList_MissingPermission() {
-	var orgs []*service.Organization
+	var orgs []*dto.Organization
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
-		o, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		o, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 			Name: name,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
@@ -120,7 +122,7 @@ func (s *OrganizationServiceSuite) TestList_MissingPermission() {
 
 	s.revokeUserPermissionForOrganization(orgs[1], s.users[0])
 
-	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -135,14 +137,14 @@ func (s *OrganizationServiceSuite) TestList_MissingPermission() {
 
 func (s *OrganizationServiceSuite) TestList_Paginate() {
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
-		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		_, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 			Name: name,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -154,7 +156,7 @@ func (s *OrganizationServiceSuite) TestList_Paginate() {
 	s.Equal("organization A", list.Data[0].Name)
 	s.Equal("organization B", list.Data[1].Name)
 
-	list, err = service.NewOrganizationService().List(service.OrganizationListOptions{
+	list, err = service.NewOrganizationService().List(dto.OrganizationListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -168,17 +170,17 @@ func (s *OrganizationServiceSuite) TestList_Paginate() {
 
 func (s *OrganizationServiceSuite) TestList_SortByNameDescending() {
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
-		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		_, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 			Name: name,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
 		Page:      1,
 		Size:      3,
-		SortBy:    service.OrganizationSortByName,
-		SortOrder: service.OrganizationSortOrderDesc,
+		SortBy:    dto.OrganizationSortByName,
+		SortOrder: dto.OrganizationSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal("organization C", list.Data[0].Name)
@@ -188,13 +190,13 @@ func (s *OrganizationServiceSuite) TestList_SortByNameDescending() {
 
 func (s *OrganizationServiceSuite) TestList_Query() {
 	for _, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
-		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		_, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 			Name: name,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
 		Query: "world",
 		Page:  1,
 		Size:  10,
@@ -209,13 +211,13 @@ func (s *OrganizationServiceSuite) TestList_Query() {
 
 func (s *OrganizationServiceSuite) TestProbe() {
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
-		_, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		_, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 			Name: name,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewOrganizationService().Probe(service.OrganizationListOptions{
+	probe, err := service.NewOrganizationService().Probe(dto.OrganizationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -225,9 +227,9 @@ func (s *OrganizationServiceSuite) TestProbe() {
 }
 
 func (s *OrganizationServiceSuite) TestProbe_MissingPermission() {
-	var orgs []*service.Organization
+	var orgs []*dto.Organization
 	for _, name := range []string{"organization A", "organization B", "organization C"} {
-		o, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+		o, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 			Name: name,
 		}, s.users[0].GetID())
 		s.Require().NoError(err)
@@ -236,7 +238,7 @@ func (s *OrganizationServiceSuite) TestProbe_MissingPermission() {
 
 	s.revokeUserPermissionForOrganization(orgs[1], s.users[0])
 
-	probe, err := service.NewOrganizationService().Probe(service.OrganizationListOptions{
+	probe, err := service.NewOrganizationService().Probe(dto.OrganizationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -246,7 +248,7 @@ func (s *OrganizationServiceSuite) TestProbe_MissingPermission() {
 }
 
 func (s *OrganizationServiceSuite) TestPatchName() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -257,7 +259,7 @@ func (s *OrganizationServiceSuite) TestPatchName() {
 }
 
 func (s *OrganizationServiceSuite) TestPatchName_MissingPermission() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -270,7 +272,7 @@ func (s *OrganizationServiceSuite) TestPatchName_MissingPermission() {
 }
 
 func (s *OrganizationServiceSuite) TestPatchName_InsufficientPermission() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -296,7 +298,7 @@ func (s *OrganizationServiceSuite) TestPatchName_NonExistentOrganization() {
 }
 
 func (s *OrganizationServiceSuite) TestDelete() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -310,7 +312,7 @@ func (s *OrganizationServiceSuite) TestDelete() {
 }
 
 func (s *OrganizationServiceSuite) TestDelete_MissingPermission() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -323,7 +325,7 @@ func (s *OrganizationServiceSuite) TestDelete_MissingPermission() {
 }
 
 func (s *OrganizationServiceSuite) TestDelete_InsufficientPermission() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -349,7 +351,7 @@ func (s *OrganizationServiceSuite) TestDelete_NonExistentOrganization() {
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -363,7 +365,7 @@ func (s *OrganizationServiceSuite) TestRemoveMember() {
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember_MissingPermission() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -379,7 +381,7 @@ func (s *OrganizationServiceSuite) TestRemoveMember_MissingPermission() {
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember_InsufficientPermission() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -402,7 +404,7 @@ func (s *OrganizationServiceSuite) TestRemoveMember_InsufficientPermission() {
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember_NonExistentMember() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -413,7 +415,7 @@ func (s *OrganizationServiceSuite) TestRemoveMember_NonExistentMember() {
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember_LastOwnerOfOrganization() {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{
 		Name: "organization",
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
@@ -423,14 +425,14 @@ func (s *OrganizationServiceSuite) TestRemoveMember_LastOwnerOfOrganization() {
 	s.Equal(errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(cache.NewOrganizationCache().GetOrNil(org.ID)).Error(), err.Error())
 }
 
-func (s *OrganizationServiceSuite) grantUserPermissionForOrganization(org *service.Organization, user model.User, permission string) {
+func (s *OrganizationServiceSuite) grantUserPermissionForOrganization(org *dto.Organization, user model.User, permission string) {
 	err := repo.NewOrganizationRepo().GrantUserPermission(org.ID, user.GetID(), permission)
 	s.Require().NoError(err)
 	_, err = cache.NewOrganizationCache().Refresh(org.ID)
 	s.Require().NoError(err)
 }
 
-func (s *OrganizationServiceSuite) revokeUserPermissionForOrganization(org *service.Organization, user model.User) {
+func (s *OrganizationServiceSuite) revokeUserPermissionForOrganization(org *dto.Organization, user model.User) {
 	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
 	s.Require().NoError(err)
 	_, err = cache.NewOrganizationCache().Refresh(org.ID)

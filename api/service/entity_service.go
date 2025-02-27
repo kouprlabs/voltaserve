@@ -12,22 +12,24 @@ package service
 
 import (
 	"encoding/json"
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/tools"
 	"sort"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
 
 	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/client/conversionclient"
-	"github.com/kouprlabs/voltaserve/api/client/languageclient"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/log"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -39,8 +41,8 @@ type EntityService struct {
 	taskSvc        *TaskService
 	taskMapper     *taskMapper
 	s3             infra.S3Manager
-	languageClient *languageclient.LanguageClient
-	pipelineClient conversionclient.PipelineClient
+	languageClient *client.LanguageClient
+	pipelineClient client.PipelineClient
 	fileIdent      *infra.FileIdentifier
 }
 
@@ -53,27 +55,16 @@ func NewEntityService() *EntityService {
 		taskSvc:        NewTaskService(),
 		taskMapper:     newTaskMapper(),
 		s3:             infra.NewS3Manager(),
-		languageClient: languageclient.NewLanguageClient(),
-		pipelineClient: conversionclient.NewPipelineClient(),
-		fileIdent:      infra.NewFileIdentifier(),
+		languageClient: client.NewLanguageClient(config.GetConfig().LanguageURL),
+		pipelineClient: client.NewPipelineClient(
+			config.GetConfig().ConversionURL,
+			config.GetConfig().Environment.IsTest,
+		),
+		fileIdent: infra.NewFileIdentifier(),
 	}
 }
 
-const (
-	EntitySortByName      = "name"
-	EntitySortByFrequency = "frequency"
-)
-
-const (
-	EntitySortOrderAsc  = "asc"
-	EntitySortOrderDesc = "desc"
-)
-
-type EntityCreateOptions struct {
-	Language string `json:"language" validate:"required"`
-}
-
-func (svc *EntityService) Create(fileID string, opts EntityCreateOptions, userID string) (*Task, error) {
+func (svc *EntityService) Create(fileID string, opts dto.EntityCreateOptions, userID string) (*dto.Task, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
@@ -115,7 +106,7 @@ func (svc *EntityService) Create(fileID string, opts EntityCreateOptions, userID
 	return res, nil
 }
 
-func (svc *EntityService) Delete(fileID string, userID string) (*Task, error) {
+func (svc *EntityService) Delete(fileID string, userID string) (*dto.Task, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
@@ -157,33 +148,17 @@ func (svc *EntityService) Delete(fileID string, userID string) (*Task, error) {
 	return res, nil
 }
 
-type EntityListOptions struct {
-	Query     string `json:"query"`
-	Page      uint64 `json:"page"`
-	Size      uint64 `json:"size"`
-	SortBy    string `json:"sortBy"`
-	SortOrder string `json:"sortOrder"`
-}
-
-type EntityList struct {
-	Data          []*languageclient.Entity `json:"data"`
-	TotalPages    uint64                   `json:"totalPages"`
-	TotalElements uint64                   `json:"totalElements"`
-	Page          uint64                   `json:"page"`
-	Size          uint64                   `json:"size"`
-}
-
-func (svc *EntityService) List(fileID string, opts EntityListOptions, userID string) (*EntityList, error) {
+func (svc *EntityService) List(fileID string, opts dto.EntityListOptions, userID string) (*dto.EntityList, error) {
 	all, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = EntitySortByName
+		opts.SortBy = dto.EntitySortByName
 	}
 	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
 	data, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
-	return &EntityList{
+	return &dto.EntityList{
 		Data:          data,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
@@ -197,7 +172,7 @@ type EntityProbe struct {
 	TotalElements uint64 `json:"totalElements"`
 }
 
-func (svc *EntityService) Probe(fileID string, opts EntityListOptions, userID string) (*EntityProbe, error) {
+func (svc *EntityService) Probe(fileID string, opts dto.EntityListOptions, userID string) (*EntityProbe, error) {
 	all, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
@@ -210,12 +185,12 @@ func (svc *EntityService) Probe(fileID string, opts EntityListOptions, userID st
 
 func (svc *EntityService) IsValidSortBy(value string) bool {
 	return value == "" ||
-		value == EntitySortByName ||
-		value == EntitySortByFrequency
+		value == dto.EntitySortByName ||
+		value == dto.EntitySortByFrequency
 }
 
 func (svc *EntityService) IsValidSortOrder(value string) bool {
-	return value == "" || value == EntitySortOrderAsc || value == EntitySortOrderDesc
+	return value == "" || value == dto.EntitySortOrderAsc || value == dto.EntitySortOrderDesc
 }
 
 func (svc *EntityService) runPipeline(snapshot model.Snapshot, task model.Task) error {
@@ -223,7 +198,7 @@ func (svc *EntityService) runPipeline(snapshot model.Snapshot, task model.Task) 
 	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
 		key = snapshot.GetPreview().Key
 	}
-	if err := svc.pipelineClient.Run(&conversionmodel.PipelineRunOptions{
+	if err := svc.pipelineClient.Run(&dto.PipelineRunOptions{
 		PipelineID: helper.ToPtr(conversionmodel.PipelineEntity),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
@@ -238,7 +213,7 @@ func (svc *EntityService) runPipeline(snapshot model.Snapshot, task model.Task) 
 
 func (svc *EntityService) createWaitingTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
+		ID:              tools.NewID(),
 		Name:            "Waiting.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -253,7 +228,7 @@ func (svc *EntityService) createWaitingTask(file model.File, userID string) (mod
 
 func (svc *EntityService) createDeleteTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
+		ID:              tools.NewID(),
 		Name:            "Deleting entities.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -272,12 +247,12 @@ func (svc *EntityService) delete(task model.Task, snapshot model.Snapshot) {
 		value := err.Error()
 		task.SetError(&value)
 		if err := svc.taskSvc.saveAndSync(task); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 			return
 		}
 	} else {
 		if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 			return
 		}
 	}
@@ -285,12 +260,12 @@ func (svc *EntityService) delete(task model.Task, snapshot model.Snapshot) {
 	snapshot.SetTaskID(nil)
 	snapshot.SetStatus(model.SnapshotStatusReady)
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
-		log.GetLogger().Error(err)
+		logger.GetLogger().Error(err)
 		return
 	}
 }
 
-func (svc *EntityService) findAll(fileID string, opts EntityListOptions, userID string) ([]*languageclient.Entity, error) {
+func (svc *EntityService) findAll(fileID string, opts dto.EntityListOptions, userID string) ([]*dto.Entity, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
@@ -312,18 +287,18 @@ func (svc *EntityService) findAll(fileID string, opts EntityListOptions, userID 
 	if err != nil {
 		return nil, err
 	}
-	var entities []*languageclient.Entity
+	var entities []*dto.Entity
 	if err := json.Unmarshal([]byte(text), &entities); err != nil {
 		return nil, err
 	}
 	return svc.doFiltering(entities, opts.Query), nil
 }
 
-func (svc *EntityService) doFiltering(data []*languageclient.Entity, query string) []*languageclient.Entity {
+func (svc *EntityService) doFiltering(data []*dto.Entity, query string) []*dto.Entity {
 	if query == "" {
 		return data
 	}
-	filtered := make([]*languageclient.Entity, 0)
+	filtered := make([]*dto.Entity, 0)
 	for _, entity := range data {
 		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
 			filtered = append(filtered, entity)
@@ -332,17 +307,17 @@ func (svc *EntityService) doFiltering(data []*languageclient.Entity, query strin
 	return filtered
 }
 
-func (svc *EntityService) doSorting(data []*languageclient.Entity, sortBy string, sortOrder string) []*languageclient.Entity {
-	if sortBy == EntitySortByName {
+func (svc *EntityService) doSorting(data []*dto.Entity, sortBy string, sortOrder string) []*dto.Entity {
+	if sortBy == dto.EntitySortByName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == EntitySortOrderDesc {
+			if sortOrder == dto.EntitySortOrderDesc {
 				return data[i].Text > data[j].Text
 			} else {
 				return data[i].Text < data[j].Text
 			}
 		})
 		return data
-	} else if sortBy == EntitySortByFrequency {
+	} else if sortBy == dto.EntitySortByFrequency {
 		sort.Slice(data, func(i, j int) bool {
 			return data[i].Frequency > data[j].Frequency
 		})
@@ -350,11 +325,11 @@ func (svc *EntityService) doSorting(data []*languageclient.Entity, sortBy string
 	return data
 }
 
-func (svc *EntityService) doPagination(data []*languageclient.Entity, page, size uint64) (pageData []*languageclient.Entity, totalElements uint64, totalPages uint64) {
+func (svc *EntityService) doPagination(data []*dto.Entity, page, size uint64) (pageData []*dto.Entity, totalElements uint64, totalPages uint64) {
 	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
-		return []*languageclient.Entity{}, totalElements, totalPages
+		return []*dto.Entity{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size

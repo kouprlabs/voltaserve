@@ -18,7 +18,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
@@ -62,7 +64,7 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/workspaces [post]
 func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(service.WorkspaceCreateOptions)
+	opts := new(dto.WorkspaceCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -228,7 +230,7 @@ func (r *WorkspaceRouter) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*service.WorkspaceListOptions, error) {
+func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*dto.WorkspaceListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -263,7 +265,7 @@ func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*service.Workspace
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &service.WorkspaceListOptions{
+	return &dto.WorkspaceListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,
