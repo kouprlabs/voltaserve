@@ -12,6 +12,7 @@ FROM golang:1.23-bookworm AS builder
 
 WORKDIR /build
 
+COPY shared ./shared
 COPY api ./api
 COPY conversion ./conversion
 COPY mosaic ./mosaic
