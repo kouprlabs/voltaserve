@@ -1,6 +1,6 @@
 basePath: /v3
 definitions:
-  api_client.PipelineRunOptions:
+  dto.PipelineRunOptions:
     properties:
       bucket:
         type: string
@@ -38,12 +38,13 @@ paths:
   /health:
     get:
       description: Get
-      operationId: get_version
+      operationId: health_get
       produces:
+      - text/plain
       - application/json
       responses:
         "200":
-          description: '{Version}'
+          description: OK
           schema:
             type: string
         "503":
@@ -52,7 +53,7 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get
       tags:
-      - Version
+      - Health
   /pipelines/run:
     post:
       consumes:
@@ -65,7 +66,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/api_client.PipelineRunOptions'
+          $ref: '#/definitions/dto.PipelineRunOptions'
       produces:
       - application/json
       responses:
@@ -73,9 +74,33 @@ paths:
           description: OK
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Run
       tags:
       - Pipelines
+  /version:
+    get:
+      description: Get
+      operationId: version_get
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get
+      tags:
+      - Version
 swagger: "2.0"

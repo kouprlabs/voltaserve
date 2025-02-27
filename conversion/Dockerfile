@@ -8,27 +8,32 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM golang:1.22-bookworm AS builder
+FROM golang:1.23-bookworm AS builder
 
 WORKDIR /build
 
-COPY go.mod go.sum ./
+COPY shared ./shared
+COPY api ./api
+COPY conversion ./conversion
+COPY mosaic ./mosaic
+COPY webdav ./webdav
+COPY go.work go.work.sum ./
 
 RUN go mod download
 
-COPY . .
+WORKDIR /build/conversion
 
 RUN go build -o voltaserve-conversion
 
-FROM ubuntu:noble
+FROM debian:bookworm AS runner
 
 RUN apt-get update &&\
     apt-get install -y htop
 
 WORKDIR /app
 
-COPY --from=builder /build/voltaserve-conversion ./voltaserve-conversion
-COPY --from=builder /build/.env ./.env
+COPY --from=builder /build/conversion/voltaserve-conversion ./voltaserve-conversion
+COPY --from=builder /build/conversion/.env ./.env
 
 ENTRYPOINT ["./voltaserve-conversion"]
 

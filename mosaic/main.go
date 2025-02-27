@@ -11,21 +11,36 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/joho/godotenv"
 
 	"github.com/kouprlabs/voltaserve/mosaic/config"
-	"github.com/kouprlabs/voltaserve/mosaic/errorpkg"
-	"github.com/kouprlabs/voltaserve/mosaic/helper"
 	"github.com/kouprlabs/voltaserve/mosaic/router"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 )
 
-// @title		Voltaserve Mosaic
-// @version	3.0.0
-// @BasePath	/v3
+func ErrorHandler(c *fiber.Ctx, err error) error {
+	var e *errorpkg.ErrorResponse
+	if errors.As(err, &e) {
+		var v *errorpkg.ErrorResponse
+		errors.As(err, &v)
+		return c.Status(v.Status).JSON(v)
+	} else {
+		log.Error(err)
+		return c.Status(http.StatusInternalServerError).JSON(errorpkg.NewInternalServerError(err))
+	}
+}
+
+//	@title		Voltaserve Mosaic
+//	@version	3.0.0
+//	@BasePath	/v3
 //
 // .
 func main() {
@@ -44,17 +59,17 @@ func main() {
 	cfg := config.GetConfig()
 
 	app := fiber.New(fiber.Config{
-		ErrorHandler: errorpkg.ErrorHandler,
+		ErrorHandler: ErrorHandler,
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
+
+	versionRouter := router.NewVersionRouter()
+	versionRouter.AppendRoutes(app)
 
 	v3 := app.Group("v3")
 
 	healthRouter := router.NewHealthRouter()
 	healthRouter.AppendRoutes(v3)
-
-	version := router.NewVersionRouter()
-	version.AppendRoutes(app)
 
 	mosaicRouter := router.NewMosaicRouter()
 	mosaicRouter.AppendRoutes(v3.Group("mosaics"))

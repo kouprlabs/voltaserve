@@ -44,11 +44,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.22
-
       - name: Run tests
         uses: robherley/go-test-action@v0
         with:
@@ -72,6 +67,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./api
+          context: .
+          file: ./api/Dockerfile
           push: false
           platforms: linux/${{ matrix.platform }}

@@ -55,6 +55,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./mosaic
+          context: .
+          file: ./mosaic/Dockerfile
           push: false
           platforms: linux/${{ matrix.platform }}

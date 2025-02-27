@@ -13,8 +13,10 @@ package cache
 import (
 	"encoding/json"
 
-	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -27,7 +29,7 @@ type SnapshotCache struct {
 func NewSnapshotCache() *SnapshotCache {
 	return &SnapshotCache{
 		snapshotRepo: repo.NewSnapshotRepo(),
-		redis:        infra.NewRedisManager(),
+		redis:        infra.NewRedisManager(config.GetConfig().Redis),
 		keyPrefix:    "snapshot:",
 	}
 }

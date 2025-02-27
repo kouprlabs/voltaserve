@@ -1,6 +1,490 @@
 basePath: /v3
 definitions:
-  conversion_client.PipelineRunOptions:
+  dto.Entity:
+    properties:
+      frequency:
+        type: integer
+      label:
+        type: string
+      text:
+        type: string
+    type: object
+  dto.EntityCreateOptions:
+    properties:
+      language:
+        type: string
+    required:
+    - language
+    type: object
+  dto.EntityList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.Entity'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.EntityProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.File:
+    properties:
+      createTime:
+        type: string
+      id:
+        type: string
+      isShared:
+        type: boolean
+      name:
+        type: string
+      parentId:
+        type: string
+      permission:
+        type: string
+      snapshot:
+        $ref: '#/definitions/dto.Snapshot'
+      type:
+        type: string
+      updateTime:
+        type: string
+      workspaceId:
+        type: string
+    type: object
+  dto.FileCopyManyOptions:
+    properties:
+      sourceIds:
+        items:
+          type: string
+        type: array
+      targetId:
+        type: string
+    required:
+    - sourceIds
+    - targetId
+    type: object
+  dto.FileCopyManyResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      new:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.FileDeleteManyOptions:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - ids
+    type: object
+  dto.FileDeleteManyResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.FileGrantGroupPermissionOptions:
+    properties:
+      groupId:
+        type: string
+      ids:
+        items:
+          type: string
+        type: array
+      permission:
+        enum:
+        - viewer
+        - editor
+        - owner
+        type: string
+    required:
+    - groupId
+    - ids
+    - permission
+    type: object
+  dto.FileGrantUserPermissionOptions:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+      permission:
+        enum:
+        - viewer
+        - editor
+        - owner
+        type: string
+      userId:
+        type: string
+    required:
+    - ids
+    - permission
+    - userId
+    type: object
+  dto.FileList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.File'
+        type: array
+      page:
+        type: integer
+      query:
+        $ref: '#/definitions/dto.FileQuery'
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.FileMoveManyOptions:
+    properties:
+      sourceIds:
+        items:
+          type: string
+        type: array
+      targetId:
+        type: string
+    required:
+    - sourceIds
+    - targetId
+    type: object
+  dto.FileMoveManyResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.FilePatchNameOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
+  dto.FileQuery:
+    properties:
+      createTimeAfter:
+        type: integer
+      createTimeBefore:
+        type: integer
+      text:
+        type: string
+      type:
+        enum:
+        - file
+        - folder
+        type: string
+      updateTimeAfter:
+        type: integer
+      updateTimeBefore:
+        type: integer
+    required:
+    - text
+    type: object
+  dto.FileReprocessResult:
+    properties:
+      accepted:
+        items:
+          type: string
+        type: array
+      rejected:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.FileRevokeGroupPermissionOptions:
+    properties:
+      groupId:
+        type: string
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - groupId
+    - ids
+    type: object
+  dto.FileRevokeUserPermissionOptions:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+      userId:
+        type: string
+    required:
+    - ids
+    - userId
+    type: object
+  dto.Group:
+    properties:
+      createTime:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      organization:
+        $ref: '#/definitions/dto.Organization'
+      permission:
+        type: string
+      updateTime:
+        type: string
+    type: object
+  dto.GroupCreateOptions:
+    properties:
+      image:
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      organizationId:
+        type: string
+    required:
+    - name
+    - organizationId
+    type: object
+  dto.GroupList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.Group'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.GroupPatchNameOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
+  dto.GroupPermission:
+    properties:
+      group:
+        $ref: '#/definitions/dto.Group'
+      id:
+        type: string
+      permission:
+        type: string
+    type: object
+  dto.GroupProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.GroupRemoveMemberOptions:
+    properties:
+      userId:
+        type: string
+    required:
+    - userId
+    type: object
+  dto.Invitation:
+    properties:
+      createTime:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      organization:
+        $ref: '#/definitions/dto.Organization'
+      owner:
+        $ref: '#/definitions/dto.User'
+      status:
+        type: string
+      updateTime:
+        type: string
+    type: object
+  dto.InvitationCreateOptions:
+    properties:
+      emails:
+        items:
+          type: string
+        type: array
+      organizationId:
+        type: string
+    required:
+    - emails
+    - organizationId
+    type: object
+  dto.InvitationList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.Invitation'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.InvitationProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.MosaicMetadata:
+    properties:
+      extension:
+        type: string
+      height:
+        type: integer
+      width:
+        type: integer
+      zoomLevels:
+        items:
+          $ref: '#/definitions/dto.MosaicZoomLevel'
+        type: array
+    type: object
+  dto.MosaicTile:
+    properties:
+      height:
+        type: integer
+      lastColWidth:
+        type: integer
+      lastRowHeight:
+        type: integer
+      width:
+        type: integer
+    type: object
+  dto.MosaicZoomLevel:
+    properties:
+      cols:
+        type: integer
+      height:
+        type: integer
+      index:
+        type: integer
+      rows:
+        type: integer
+      scaleDownPercentage:
+        type: number
+      tile:
+        $ref: '#/definitions/dto.MosaicTile'
+      width:
+        type: integer
+    type: object
+  dto.Organization:
+    properties:
+      createTime:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      permission:
+        type: string
+      updateTime:
+        type: string
+    type: object
+  dto.OrganizationCreateOptions:
+    properties:
+      image:
+        type: string
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
+  dto.OrganizationList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.Organization'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.OrganizationPatchNameOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
+  dto.OrganizationProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.OrganizationRemoveMemberOptions:
+    properties:
+      userId:
+        type: string
+    required:
+    - userId
+    type: object
+  dto.Picture:
+    properties:
+      extension:
+        type: string
+    type: object
+  dto.PipelineRunOptions:
     properties:
       bucket:
         type: string
@@ -17,6 +501,367 @@ definitions:
       taskId:
         type: string
     type: object
+  dto.Snapshot:
+    properties:
+      capabilities:
+        $ref: '#/definitions/dto.SnapshotCapabilities'
+      createTime:
+        type: string
+      id:
+        type: string
+      intent:
+        type: string
+      isActive:
+        type: boolean
+      language:
+        type: string
+      ocr:
+        $ref: '#/definitions/dto.SnapshotDownloadable'
+      original:
+        $ref: '#/definitions/dto.SnapshotDownloadable'
+      preview:
+        $ref: '#/definitions/dto.SnapshotDownloadable'
+      status:
+        type: string
+      summary:
+        type: string
+      task:
+        $ref: '#/definitions/dto.SnapshotTaskInfo'
+      text:
+        $ref: '#/definitions/dto.SnapshotDownloadable'
+      thumbnail:
+        $ref: '#/definitions/dto.SnapshotDownloadable'
+      updateTime:
+        type: string
+      version:
+        type: integer
+    type: object
+  dto.SnapshotCapabilities:
+    properties:
+      entities:
+        type: boolean
+      mosaic:
+        type: boolean
+      ocr:
+        type: boolean
+      original:
+        type: boolean
+      preview:
+        type: boolean
+      summary:
+        type: boolean
+      text:
+        type: boolean
+      thumbnail:
+        type: boolean
+    type: object
+  dto.SnapshotDownloadable:
+    properties:
+      document:
+        $ref: '#/definitions/model.DocumentProps'
+      extension:
+        type: string
+      image:
+        $ref: '#/definitions/model.ImageProps'
+      size:
+        type: integer
+    type: object
+  dto.SnapshotLanguage:
+    properties:
+      id:
+        type: string
+      iso6393:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.SnapshotList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.Snapshot'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.SnapshotPatchOptions:
+    properties:
+      entities:
+        $ref: '#/definitions/model.S3Object'
+      fields:
+        items:
+          type: string
+        type: array
+      mosaic:
+        $ref: '#/definitions/model.S3Object'
+      ocr:
+        $ref: '#/definitions/model.S3Object'
+      options:
+        $ref: '#/definitions/dto.PipelineRunOptions'
+      original:
+        $ref: '#/definitions/model.S3Object'
+      preview:
+        $ref: '#/definitions/model.S3Object'
+      status:
+        type: string
+      taskId:
+        type: string
+      text:
+        $ref: '#/definitions/model.S3Object'
+      thumbnail:
+        $ref: '#/definitions/model.S3Object'
+    type: object
+  dto.SnapshotProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.SnapshotTaskInfo:
+    properties:
+      id:
+        type: string
+      isPending:
+        type: boolean
+    type: object
+  dto.StorageUsage:
+    properties:
+      bytes:
+        type: integer
+      maxBytes:
+        type: integer
+      percentage:
+        type: integer
+    type: object
+  dto.Task:
+    properties:
+      createTime:
+        type: string
+      error:
+        type: string
+      id:
+        type: string
+      isIndeterminate:
+        type: boolean
+      name:
+        type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
+      percentage:
+        type: integer
+      status:
+        type: string
+      updateTime:
+        type: string
+      userId:
+        type: string
+    type: object
+  dto.TaskCreateOptions:
+    properties:
+      error:
+        type: string
+      isIndeterminate:
+        type: boolean
+      name:
+        type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
+      percentage:
+        type: integer
+      status:
+        type: string
+      userId:
+        type: string
+    type: object
+  dto.TaskDismissAllResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.TaskList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.Task'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.TaskPatchOptions:
+    properties:
+      error:
+        type: string
+      fields:
+        items:
+          type: string
+        type: array
+      isIndeterminate:
+        type: boolean
+      name:
+        type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
+      percentage:
+        type: integer
+      status:
+        type: string
+      userId:
+        type: string
+    type: object
+  dto.TaskProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.User:
+    properties:
+      createTime:
+        type: string
+      email:
+        type: string
+      fullName:
+        type: string
+      id:
+        type: string
+      picture:
+        $ref: '#/definitions/dto.Picture'
+      updateTime:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.UserList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.User'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.UserPermission:
+    properties:
+      id:
+        type: string
+      permission:
+        type: string
+      user:
+        $ref: '#/definitions/dto.User'
+    type: object
+  dto.UserProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.Workspace:
+    properties:
+      createTime:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      organization:
+        $ref: '#/definitions/dto.Organization'
+      permission:
+        type: string
+      rootId:
+        type: string
+      storageCapacity:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  dto.WorkspaceCreateOptions:
+    properties:
+      image:
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      organizationId:
+        type: string
+      storageCapacity:
+        type: integer
+    required:
+    - name
+    - organizationId
+    type: object
+  dto.WorkspaceList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.Workspace'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  dto.WorkspacePatchNameOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
+  dto.WorkspacePatchStorageCapacityOptions:
+    properties:
+      storageCapacity:
+        minimum: 1
+        type: integer
+    required:
+    - storageCapacity
+    type: object
+  dto.WorkspaceProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   errorpkg.ErrorResponse:
     properties:
       code:
@@ -28,15 +873,6 @@ definitions:
       status:
         type: integer
       userMessage:
-        type: string
-    type: object
-  language_client.Entity:
-    properties:
-      frequency:
-        type: integer
-      label:
-        type: string
-      text:
         type: string
     type: object
   model.DocumentProps:
@@ -78,842 +914,6 @@ definitions:
       extension:
         type: string
     type: object
-  mosaic_client.MosaicMetadata:
-    properties:
-      extension:
-        type: string
-      height:
-        type: integer
-      width:
-        type: integer
-      zoomLevels:
-        items:
-          $ref: '#/definitions/mosaic_client.MosaicZoomLevel'
-        type: array
-    type: object
-  mosaic_client.MosaicTile:
-    properties:
-      height:
-        type: integer
-      lastColWidth:
-        type: integer
-      lastRowHeight:
-        type: integer
-      width:
-        type: integer
-    type: object
-  mosaic_client.MosaicZoomLevel:
-    properties:
-      cols:
-        type: integer
-      height:
-        type: integer
-      index:
-        type: integer
-      rows:
-        type: integer
-      scaleDownPercentage:
-        type: number
-      tile:
-        $ref: '#/definitions/mosaic_client.MosaicTile'
-      width:
-        type: integer
-    type: object
-  router.FileGrantGroupPermissionOptions:
-    properties:
-      groupId:
-        type: string
-      ids:
-        items:
-          type: string
-        type: array
-      permission:
-        enum:
-        - viewer
-        - editor
-        - owner
-        type: string
-    required:
-    - groupId
-    - ids
-    - permission
-    type: object
-  router.FileGrantUserPermissionOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-      permission:
-        enum:
-        - viewer
-        - editor
-        - owner
-        type: string
-      userId:
-        type: string
-    required:
-    - ids
-    - permission
-    - userId
-    type: object
-  router.FilePatchNameOptions:
-    properties:
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
-  router.FileRevokeGroupPermissionOptions:
-    properties:
-      groupId:
-        type: string
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - groupId
-    - ids
-    type: object
-  router.FileRevokeUserPermissionOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-      userId:
-        type: string
-    required:
-    - ids
-    - userId
-    type: object
-  router.GroupPatchNameOptions:
-    properties:
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
-  router.GroupRemoveMemberOptions:
-    properties:
-      userId:
-        type: string
-    required:
-    - userId
-    type: object
-  router.OrganizationPatchNameOptions:
-    properties:
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
-  router.OrganizationRemoveMemberOptions:
-    properties:
-      userId:
-        type: string
-    required:
-    - userId
-    type: object
-  router.WorkspacePatchNameOptions:
-    properties:
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
-  router.WorkspacePatchStorageCapacityOptions:
-    properties:
-      storageCapacity:
-        minimum: 1
-        type: integer
-    required:
-    - storageCapacity
-    type: object
-  service.EntityCreateOptions:
-    properties:
-      language:
-        type: string
-    required:
-    - language
-    type: object
-  service.EntityList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/language_client.Entity'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.EntityProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.File:
-    properties:
-      createTime:
-        type: string
-      id:
-        type: string
-      isShared:
-        type: boolean
-      name:
-        type: string
-      parentId:
-        type: string
-      permission:
-        type: string
-      snapshot:
-        $ref: '#/definitions/service.Snapshot'
-      type:
-        type: string
-      updateTime:
-        type: string
-      workspaceId:
-        type: string
-    type: object
-  service.FileCopyManyOptions:
-    properties:
-      sourceIds:
-        items:
-          type: string
-        type: array
-      targetId:
-        type: string
-    required:
-    - sourceIds
-    - targetId
-    type: object
-  service.FileCopyManyResult:
-    properties:
-      failed:
-        items:
-          type: string
-        type: array
-      new:
-        items:
-          type: string
-        type: array
-      succeeded:
-        items:
-          type: string
-        type: array
-    type: object
-  service.FileDeleteManyOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
-  service.FileDeleteManyResult:
-    properties:
-      failed:
-        items:
-          type: string
-        type: array
-      succeeded:
-        items:
-          type: string
-        type: array
-    type: object
-  service.FileList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/service.File'
-        type: array
-      page:
-        type: integer
-      query:
-        $ref: '#/definitions/service.FileQuery'
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.FileMoveManyOptions:
-    properties:
-      sourceIds:
-        items:
-          type: string
-        type: array
-      targetId:
-        type: string
-    required:
-    - sourceIds
-    - targetId
-    type: object
-  service.FileMoveManyResult:
-    properties:
-      failed:
-        items:
-          type: string
-        type: array
-      succeeded:
-        items:
-          type: string
-        type: array
-    type: object
-  service.FileQuery:
-    properties:
-      createTimeAfter:
-        type: integer
-      createTimeBefore:
-        type: integer
-      text:
-        type: string
-      type:
-        enum:
-        - file
-        - folder
-        type: string
-      updateTimeAfter:
-        type: integer
-      updateTimeBefore:
-        type: integer
-    required:
-    - text
-    type: object
-  service.FileReprocessResult:
-    properties:
-      accepted:
-        items:
-          type: string
-        type: array
-      rejected:
-        items:
-          type: string
-        type: array
-    type: object
-  service.Group:
-    properties:
-      createTime:
-        type: string
-      id:
-        type: string
-      image:
-        type: string
-      name:
-        type: string
-      organization:
-        $ref: '#/definitions/service.Organization'
-      permission:
-        type: string
-      updateTime:
-        type: string
-    type: object
-  service.GroupCreateOptions:
-    properties:
-      image:
-        type: string
-      name:
-        maxLength: 255
-        type: string
-      organizationId:
-        type: string
-    required:
-    - name
-    - organizationId
-    type: object
-  service.GroupList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/service.Group'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.GroupPermission:
-    properties:
-      group:
-        $ref: '#/definitions/service.Group'
-      id:
-        type: string
-      permission:
-        type: string
-    type: object
-  service.GroupProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.Invitation:
-    properties:
-      createTime:
-        type: string
-      email:
-        type: string
-      id:
-        type: string
-      organization:
-        $ref: '#/definitions/service.Organization'
-      owner:
-        $ref: '#/definitions/service.User'
-      status:
-        type: string
-      updateTime:
-        type: string
-    type: object
-  service.InvitationCreateOptions:
-    properties:
-      emails:
-        items:
-          type: string
-        type: array
-      organizationId:
-        type: string
-    required:
-    - emails
-    - organizationId
-    type: object
-  service.InvitationList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/service.Invitation'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.InvitationProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.Organization:
-    properties:
-      createTime:
-        type: string
-      id:
-        type: string
-      image:
-        type: string
-      name:
-        type: string
-      permission:
-        type: string
-      updateTime:
-        type: string
-    type: object
-  service.OrganizationCreateOptions:
-    properties:
-      image:
-        type: string
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
-  service.OrganizationList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/service.Organization'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.OrganizationProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.Picture:
-    properties:
-      extension:
-        type: string
-    type: object
-  service.Snapshot:
-    properties:
-      capabilities:
-        $ref: '#/definitions/service.SnapshotCapabilities'
-      createTime:
-        type: string
-      id:
-        type: string
-      intent:
-        type: string
-      isActive:
-        type: boolean
-      language:
-        type: string
-      ocr:
-        $ref: '#/definitions/service.SnapshotDownloadable'
-      original:
-        $ref: '#/definitions/service.SnapshotDownloadable'
-      preview:
-        $ref: '#/definitions/service.SnapshotDownloadable'
-      status:
-        type: string
-      summary:
-        type: string
-      task:
-        $ref: '#/definitions/service.SnapshotTaskInfo'
-      text:
-        $ref: '#/definitions/service.SnapshotDownloadable'
-      thumbnail:
-        $ref: '#/definitions/service.SnapshotDownloadable'
-      updateTime:
-        type: string
-      version:
-        type: integer
-    type: object
-  service.SnapshotCapabilities:
-    properties:
-      entities:
-        type: boolean
-      mosaic:
-        type: boolean
-      ocr:
-        type: boolean
-      original:
-        type: boolean
-      preview:
-        type: boolean
-      summary:
-        type: boolean
-      text:
-        type: boolean
-      thumbnail:
-        type: boolean
-    type: object
-  service.SnapshotDownloadable:
-    properties:
-      document:
-        $ref: '#/definitions/model.DocumentProps'
-      extension:
-        type: string
-      image:
-        $ref: '#/definitions/model.ImageProps'
-      size:
-        type: integer
-    type: object
-  service.SnapshotLanguage:
-    properties:
-      id:
-        type: string
-      iso6393:
-        type: string
-      name:
-        type: string
-    type: object
-  service.SnapshotList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/service.Snapshot'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.SnapshotPatchOptions:
-    properties:
-      entities:
-        $ref: '#/definitions/model.S3Object'
-      fields:
-        items:
-          type: string
-        type: array
-      mosaic:
-        $ref: '#/definitions/model.S3Object'
-      ocr:
-        $ref: '#/definitions/model.S3Object'
-      options:
-        $ref: '#/definitions/conversion_client.PipelineRunOptions'
-      original:
-        $ref: '#/definitions/model.S3Object'
-      preview:
-        $ref: '#/definitions/model.S3Object'
-      status:
-        type: string
-      taskId:
-        type: string
-      text:
-        $ref: '#/definitions/model.S3Object'
-      thumbnail:
-        $ref: '#/definitions/model.S3Object'
-    type: object
-  service.SnapshotProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.SnapshotTaskInfo:
-    properties:
-      id:
-        type: string
-      isPending:
-        type: boolean
-    type: object
-  service.StorageUsage:
-    properties:
-      bytes:
-        type: integer
-      maxBytes:
-        type: integer
-      percentage:
-        type: integer
-    type: object
-  service.Task:
-    properties:
-      createTime:
-        type: string
-      error:
-        type: string
-      id:
-        type: string
-      isIndeterminate:
-        type: boolean
-      name:
-        type: string
-      payload:
-        additionalProperties:
-          type: string
-        type: object
-      percentage:
-        type: integer
-      status:
-        type: string
-      updateTime:
-        type: string
-      userId:
-        type: string
-    type: object
-  service.TaskCreateOptions:
-    properties:
-      error:
-        type: string
-      isIndeterminate:
-        type: boolean
-      name:
-        type: string
-      payload:
-        additionalProperties:
-          type: string
-        type: object
-      percentage:
-        type: integer
-      status:
-        type: string
-      userId:
-        type: string
-    type: object
-  service.TaskDismissAllResult:
-    properties:
-      failed:
-        items:
-          type: string
-        type: array
-      succeeded:
-        items:
-          type: string
-        type: array
-    type: object
-  service.TaskList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/service.Task'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.TaskPatchOptions:
-    properties:
-      error:
-        type: string
-      fields:
-        items:
-          type: string
-        type: array
-      isIndeterminate:
-        type: boolean
-      name:
-        type: string
-      payload:
-        additionalProperties:
-          type: string
-        type: object
-      percentage:
-        type: integer
-      status:
-        type: string
-      userId:
-        type: string
-    type: object
-  service.TaskProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.User:
-    properties:
-      createTime:
-        type: string
-      email:
-        type: string
-      fullName:
-        type: string
-      id:
-        type: string
-      picture:
-        $ref: '#/definitions/service.Picture'
-      updateTime:
-        type: string
-      username:
-        type: string
-    type: object
-  service.UserList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/service.User'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.UserPermission:
-    properties:
-      id:
-        type: string
-      permission:
-        type: string
-      user:
-        $ref: '#/definitions/service.User'
-    type: object
-  service.UserProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.Workspace:
-    properties:
-      createTime:
-        type: string
-      id:
-        type: string
-      image:
-        type: string
-      name:
-        type: string
-      organization:
-        $ref: '#/definitions/service.Organization'
-      permission:
-        type: string
-      rootId:
-        type: string
-      storageCapacity:
-        type: integer
-      updateTime:
-        type: string
-    type: object
-  service.WorkspaceCreateOptions:
-    properties:
-      image:
-        type: string
-      name:
-        maxLength: 255
-        type: string
-      organizationId:
-        type: string
-      storageCapacity:
-        type: integer
-    required:
-    - name
-    - organizationId
-    type: object
-  service.WorkspaceList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/service.Workspace'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.WorkspaceProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
 info:
   contact: {}
   title: Voltaserve API
@@ -921,8 +921,6 @@ info:
 paths:
   /entities/{file_id}:
     delete:
-      consumes:
-      - application/json
       description: Delete
       operationId: entities_delete
       parameters:
@@ -934,8 +932,10 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.Task'
         "400":
           description: Bad Request
           schema:
@@ -987,7 +987,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/service.EntityList'
+              $ref: '#/definitions/dto.EntityList'
             type: array
         "404":
           description: Not Found
@@ -1016,14 +1016,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.EntityCreateOptions'
+          $ref: '#/definitions/dto.EntityCreateOptions'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/service.Task'
+            $ref: '#/definitions/dto.Task'
         "400":
           description: Bad Request
           schema:
@@ -1060,7 +1060,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/service.EntityProbe'
+              $ref: '#/definitions/dto.EntityProbe'
             type: array
         "404":
           description: Not Found
@@ -1075,6 +1075,8 @@ paths:
       - Entities
   /files:
     delete:
+      consumes:
+      - application/json
       description: Delete Many
       operationId: files_delete_many
       parameters:
@@ -1083,14 +1085,18 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileDeleteManyOptions'
+          $ref: '#/definitions/dto.FileDeleteManyOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.FileDeleteManyResult'
+            $ref: '#/definitions/dto.FileDeleteManyResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -1099,7 +1105,7 @@ paths:
       tags:
       - Files
     get:
-      description: Read by FindPath
+      description: Find by Path
       operationId: files_find_by_path
       parameters:
       - description: ID
@@ -1118,7 +1124,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.File'
+            $ref: '#/definitions/dto.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1127,7 +1137,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read by FindPath
+      summary: Find by Path
       tags:
       - Files
     post:
@@ -1157,10 +1167,10 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/service.File'
+            $ref: '#/definitions/dto.File'
         "400":
           description: Bad Request
           schema:
@@ -1178,8 +1188,8 @@ paths:
       - Files
   /files/{id}:
     delete:
-      description: Delete One
-      operationId: files_delete_one
+      description: Delete
+      operationId: files_delete
       parameters:
       - description: ID
         in: path
@@ -1194,6 +1204,8 @@ paths:
       produces:
       - application/json
       responses:
+        "204":
+          description: No Content
         "404":
           description: Not Found
           schema:
@@ -1202,11 +1214,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete One
+      summary: Delete
       tags:
       - Files
     get:
-      description: Read
+      description: Find
       operationId: files_find
       parameters:
       - description: ID
@@ -1220,7 +1232,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.File'
+            $ref: '#/definitions/dto.File'
         "404":
           description: Not Found
           schema:
@@ -1229,7 +1241,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Find
       tags:
       - Files
     patch:
@@ -1249,9 +1261,13 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.File'
+            $ref: '#/definitions/dto.File'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
@@ -1265,10 +1281,10 @@ paths:
       summary: Patch
       tags:
       - Files
-  /files/{id}/copy/{targetId}:
+  /files/{id}/copy/{target_id}:
     post:
-      description: Copy One
-      operationId: files_copy_one
+      description: Copy
+      operationId: files_copy
       parameters:
       - description: ID
         in: path
@@ -1277,7 +1293,7 @@ paths:
         type: string
       - description: Target ID
         in: path
-        name: targetId
+        name: target_id
         required: true
         type: string
       produces:
@@ -1291,12 +1307,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Copy One
+      summary: Copy
       tags:
       - Files
   /files/{id}/count:
     get:
-      description: Count
+      description: Get Count
       operationId: files_count
       parameters:
       - description: ID
@@ -1319,12 +1335,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Count
+      summary: Get Count
       tags:
       - Files
   /files/{id}/group_permissions:
     get:
-      description: Read Group Permissions
+      description: Get Group Permissions
       operationId: files_find_group_permissions
       parameters:
       - description: ID
@@ -1339,7 +1355,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/service.GroupPermission'
+              $ref: '#/definitions/dto.GroupPermission'
             type: array
         "404":
           description: Not Found
@@ -1349,7 +1365,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read Group Permissions
+      summary: Get Group Permissions
       tags:
       - Files
   /files/{id}/list:
@@ -1388,7 +1404,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.FileList'
+            $ref: '#/definitions/dto.FileList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1400,10 +1420,10 @@ paths:
       summary: List
       tags:
       - Files
-  /files/{id}/move/{targetId}:
+  /files/{id}/move/{target_id}:
     post:
-      description: Move One
-      operationId: files_move_one
+      description: Move
+      operationId: files_move
       parameters:
       - description: ID
         in: path
@@ -1412,7 +1432,7 @@ paths:
         type: string
       - description: Target ID
         in: path
-        name: targetId
+        name: target_id
         required: true
         type: string
       produces:
@@ -1426,11 +1446,13 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Move One
+      summary: Move
       tags:
       - Files
   /files/{id}/name:
     patch:
+      consumes:
+      - application/json
       description: Patch Name
       operationId: files_patch_name
       parameters:
@@ -1444,14 +1466,18 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.FilePatchNameOptions'
+          $ref: '#/definitions/dto.FilePatchNameOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.File'
+            $ref: '#/definitions/dto.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1484,8 +1510,16 @@ paths:
         required: true
         type: string
       produces:
-      - application/json
+      - application/octet-stream
       responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1518,8 +1552,16 @@ paths:
         required: true
         type: string
       produces:
-      - application/json
+      - application/octet-stream
       responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1574,7 +1616,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.File'
+            $ref: '#/definitions/dto.File'
         "400":
           description: Bad Request
           schema:
@@ -1607,7 +1649,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/service.File'
+              $ref: '#/definitions/dto.File'
             type: array
         "404":
           description: Not Found
@@ -1641,8 +1683,16 @@ paths:
         required: true
         type: string
       produces:
-      - application/json
+      - application/octet-stream
       responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1690,7 +1740,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.FileList'
+            $ref: '#/definitions/dto.FileList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1718,7 +1772,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.FileReprocessResult'
+            $ref: '#/definitions/dto.FileReprocessResult'
         "404":
           description: Not Found
           schema:
@@ -1732,6 +1786,8 @@ paths:
       - Files
   /files/{id}/revoke_group_permission:
     post:
+      consumes:
+      - application/json
       description: Revoke Group Permission
       operationId: files_revoke_group_permission
       parameters:
@@ -1745,10 +1801,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.FileRevokeGroupPermissionOptions'
+          $ref: '#/definitions/dto.FileRevokeGroupPermissionOptions'
       produces:
       - application/json
       responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1762,7 +1822,7 @@ paths:
       - Files
   /files/{id}/size:
     get:
-      description: Read Compute Size
+      description: Get Size
       operationId: files_compute_size
       parameters:
       - description: ID
@@ -1785,7 +1845,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read Compute Size
+      summary: Get Size
       tags:
       - Files
   /files/{id}/text{ext}:
@@ -1809,8 +1869,16 @@ paths:
         required: true
         type: string
       produces:
-      - application/json
+      - application/octet-stream
       responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1843,8 +1911,16 @@ paths:
         required: true
         type: string
       produces:
-      - application/json
+      - application/octet-stream
       responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1858,7 +1934,7 @@ paths:
       - Files
   /files/{id}/user_permissions:
     get:
-      description: Read User Permissions
+      description: Get User Permissions
       operationId: files_find_user_permissions
       parameters:
       - description: ID
@@ -1873,7 +1949,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/service.UserPermission'
+              $ref: '#/definitions/dto.UserPermission'
             type: array
         "404":
           description: Not Found
@@ -1883,11 +1959,13 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read User Permissions
+      summary: Get User Permissions
       tags:
       - Files
   /files/copy:
     post:
+      consumes:
+      - application/json
       description: Copy Many
       operationId: files_copy_many
       parameters:
@@ -1896,14 +1974,18 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileCopyManyOptions'
+          $ref: '#/definitions/dto.FileCopyManyOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.FileCopyManyResult'
+            $ref: '#/definitions/dto.FileCopyManyResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -1963,10 +2045,10 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/service.File'
+            $ref: '#/definitions/dto.File'
         "400":
           description: Bad Request
           schema:
@@ -1984,6 +2066,8 @@ paths:
       - Files
   /files/grant_group_permission:
     post:
+      consumes:
+      - application/json
       description: Grant Group Permission
       operationId: files_grant_group_permission
       parameters:
@@ -1997,10 +2081,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.FileGrantGroupPermissionOptions'
+          $ref: '#/definitions/dto.FileGrantGroupPermissionOptions'
       produces:
       - application/json
       responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -2014,6 +2102,8 @@ paths:
       - Files
   /files/grant_user_permission:
     post:
+      consumes:
+      - application/json
       description: Grant User Permission
       operationId: files_grant_user_permission
       parameters:
@@ -2027,10 +2117,16 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.FileGrantUserPermissionOptions'
+          $ref: '#/definitions/dto.FileGrantUserPermissionOptions'
       produces:
       - application/json
       responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -2044,7 +2140,7 @@ paths:
       - Files
   /files/list:
     get:
-      description: List by FindPath
+      description: List by Path
       operationId: files_list_by_path
       parameters:
       - description: FindPath
@@ -2059,8 +2155,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/service.File'
+              $ref: '#/definitions/dto.File'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -2069,11 +2169,13 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: List by FindPath
+      summary: List by Path
       tags:
       - Files
   /files/move:
     post:
+      consumes:
+      - application/json
       description: Move Many
       operationId: files_move_many
       parameters:
@@ -2082,14 +2184,18 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileMoveManyOptions'
+          $ref: '#/definitions/dto.FileMoveManyOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.FileMoveManyResult'
+            $ref: '#/definitions/dto.FileMoveManyResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -2103,6 +2209,8 @@ paths:
       - Files
   /files/revoke_user_permission:
     post:
+      consumes:
+      - application/json
       description: Revoke User Permission
       operationId: files_revoke_user_permission
       parameters:
@@ -2116,10 +2224,16 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.FileRevokeUserPermissionOptions'
+          $ref: '#/definitions/dto.FileRevokeUserPermissionOptions'
       produces:
       - application/json
       responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -2166,7 +2280,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.GroupList'
+            $ref: '#/definitions/dto.GroupList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -2189,16 +2307,20 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.GroupCreateOptions'
+          $ref: '#/definitions/dto.GroupCreateOptions'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/service.Group'
+            $ref: '#/definitions/dto.Group'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
@@ -2210,8 +2332,6 @@ paths:
       - Groups
   /groups/{id}:
     delete:
-      consumes:
-      - application/json
       description: Delete
       operationId: groups_delete
       parameters:
@@ -2223,8 +2343,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
         "404":
           description: Not Found
           schema:
@@ -2237,7 +2357,7 @@ paths:
       tags:
       - Groups
     get:
-      description: Read
+      description: Find
       operationId: groups_find
       parameters:
       - description: ID
@@ -2251,7 +2371,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Group'
+            $ref: '#/definitions/dto.Group'
         "404":
           description: Not Found
           schema:
@@ -2260,7 +2380,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Find
       tags:
       - Groups
   /groups/{id}/members:
@@ -2280,10 +2400,12 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.GroupRemoveMemberOptions'
+          $ref: '#/definitions/dto.GroupRemoveMemberOptions'
       produces:
       - application/json
       responses:
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -2313,6 +2435,8 @@ paths:
       produces:
       - application/json
       responses:
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -2345,14 +2469,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.GroupPatchNameOptions'
+          $ref: '#/definitions/dto.GroupPatchNameOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Group'
+            $ref: '#/definitions/dto.Group'
         "400":
           description: Bad Request
           schema:
@@ -2383,7 +2507,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.GroupProbe'
+            $ref: '#/definitions/dto.GroupProbe'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -2397,9 +2525,10 @@ paths:
       - Groups
   /health:
     get:
-      description: Check
-      operationId: health_check
+      description: Get
+      operationId: health_get
       produces:
+      - text/plain
       - application/json
       responses:
         "200":
@@ -2410,7 +2539,7 @@ paths:
           description: Service Unavailable
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Check
+      summary: Get
       tags:
       - Health
   /invitations:
@@ -2430,15 +2559,15 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.InvitationCreateOptions'
+          $ref: '#/definitions/dto.InvitationCreateOptions'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             items:
-              $ref: '#/definitions/service.Invitation'
+              $ref: '#/definitions/dto.Invitation'
             type: array
         "400":
           description: Bad Request
@@ -2457,8 +2586,6 @@ paths:
       - Invitations
   /invitations/{id}:
     delete:
-      consumes:
-      - application/json
       description: Delete
       operationId: invitations_delete
       parameters:
@@ -2487,8 +2614,6 @@ paths:
       - Invitations
   /invitations/{id}/accept:
     post:
-      consumes:
-      - application/json
       description: Accept
       operationId: invitations_accept
       parameters:
@@ -2517,8 +2642,6 @@ paths:
       - Invitations
   /invitations/{id}/decline:
     post:
-      consumes:
-      - application/json
       description: Decline
       operationId: invitations_decline
       parameters:
@@ -2547,8 +2670,6 @@ paths:
       - Invitations
   /invitations/{id}/resend:
     post:
-      consumes:
-      - application/json
       description: Resend
       operationId: invitations_resend
       parameters:
@@ -2602,7 +2723,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.InvitationList'
+            $ref: '#/definitions/dto.InvitationList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -2612,9 +2737,10 @@ paths:
       - Invitations
   /invitations/incoming/count:
     get:
-      description: Count Incoming
-      operationId: invitation_count_incoming
+      description: Count Incoming Count
+      operationId: invitation_incoming_count
       produces:
+      - text/plain
       - application/json
       responses:
         "200":
@@ -2625,7 +2751,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Count Incoming
+      summary: Count Incoming Count
       tags:
       - Invitations
   /invitations/incoming/probe:
@@ -2643,7 +2769,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.InvitationProbe'
+            $ref: '#/definitions/dto.InvitationProbe'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -2683,7 +2813,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.InvitationList'
+            $ref: '#/definitions/dto.InvitationList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -2711,7 +2845,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.InvitationList'
+            $ref: '#/definitions/dto.InvitationProbe'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -2721,8 +2859,6 @@ paths:
       - Invitations
   /mosaics/{file_id}:
     delete:
-      consumes:
-      - application/json
       description: Delete
       operationId: mosaic_delete
       parameters:
@@ -2734,8 +2870,10 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.Task'
         "404":
           description: Not Found
           schema:
@@ -2748,8 +2886,6 @@ paths:
       tags:
       - Mosaic
     post:
-      consumes:
-      - application/json
       description: Create
       operationId: mosaic_create
       parameters:
@@ -2763,6 +2899,8 @@ paths:
       responses:
         "201":
           description: Created
+          schema:
+            $ref: '#/definitions/dto.Task'
         "404":
           description: Not Found
           schema:
@@ -2776,8 +2914,6 @@ paths:
       - Mosaic
   /mosaics/{file_id}/metadata:
     get:
-      consumes:
-      - application/json
       description: Get Metadata
       operationId: mosaic_get_metadata
       parameters:
@@ -2792,7 +2928,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/mosaic_client.MosaicMetadata'
+            $ref: '#/definitions/dto.MosaicMetadata'
         "404":
           description: Not Found
           schema:
@@ -2830,8 +2966,16 @@ paths:
         required: true
         type: string
       produces:
-      - application/json
+      - application/octet-stream
       responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -2874,7 +3018,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.OrganizationList'
+            $ref: '#/definitions/dto.OrganizationList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -2897,14 +3045,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.OrganizationCreateOptions'
+          $ref: '#/definitions/dto.OrganizationCreateOptions'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/service.Organization'
+            $ref: '#/definitions/dto.Organization'
         "400":
           description: Bad Request
           schema:
@@ -2918,8 +3066,6 @@ paths:
       - Organizations
   /organizations/{id}:
     delete:
-      consumes:
-      - application/json
       description: Delete
       operationId: organizations_delete
       parameters:
@@ -2931,8 +3077,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
         "404":
           description: Not Found
           schema:
@@ -2945,7 +3091,7 @@ paths:
       tags:
       - Organizations
     get:
-      description: Read
+      description: Find
       operationId: organizations_find
       parameters:
       - description: ID
@@ -2959,7 +3105,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Organization'
+            $ref: '#/definitions/dto.Organization'
         "404":
           description: Not Found
           schema:
@@ -2968,13 +3114,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Find
       tags:
       - Organizations
   /organizations/{id}/leave:
     post:
-      consumes:
-      - application/json
       description: Leave
       operationId: organizations_leave
       parameters:
@@ -2986,6 +3130,8 @@ paths:
       produces:
       - application/json
       responses:
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -3018,10 +3164,12 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.OrganizationRemoveMemberOptions'
+          $ref: '#/definitions/dto.OrganizationRemoveMemberOptions'
       produces:
       - application/json
       responses:
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -3054,14 +3202,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.OrganizationPatchNameOptions'
+          $ref: '#/definitions/dto.OrganizationPatchNameOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Organization'
+            $ref: '#/definitions/dto.Organization'
         "400":
           description: Bad Request
           schema:
@@ -3092,7 +3240,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.OrganizationProbe'
+            $ref: '#/definitions/dto.OrganizationProbe'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3136,7 +3288,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.SnapshotList'
+            $ref: '#/definitions/dto.SnapshotList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3168,14 +3324,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.SnapshotPatchOptions'
+          $ref: '#/definitions/dto.SnapshotPatchOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Snapshot'
+            $ref: '#/definitions/dto.Snapshot'
         "401":
           description: Unauthorized
           schema:
@@ -3200,6 +3356,10 @@ paths:
       produces:
       - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.File'
         "404":
           description: Not Found
           schema:
@@ -3224,8 +3384,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.File'
         "404":
           description: Not Found
           schema:
@@ -3248,7 +3410,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/service.SnapshotLanguage'
+              $ref: '#/definitions/dto.SnapshotLanguage'
             type: array
         "503":
           description: Service Unavailable
@@ -3277,7 +3439,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.SnapshotProbe'
+            $ref: '#/definitions/dto.SnapshotProbe'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3291,24 +3457,26 @@ paths:
       - Snapshots
   /storage/account_usage:
     get:
-      description: Compute Account Usage
-      operationId: storage_compute_account_usage
+      description: Get Account Usage
+      operationId: storage_get_account_usage
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.StorageUsage'
+            $ref: '#/definitions/dto.StorageUsage'
         "500":
           description: Internal Server Error
-      summary: Compute Account Usage
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Account Usage
       tags:
       - Storage
   /storage/file_usage:
     get:
-      description: Compute File Usage
-      operationId: storage_compute_file_usage
+      description: Get File Usage
+      operationId: storage_get_file_usage
       parameters:
       - description: File ID
         in: query
@@ -3321,16 +3489,22 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.StorageUsage'
+            $ref: '#/definitions/dto.StorageUsage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
-      summary: Compute File Usage
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get File Usage
       tags:
       - Storage
   /storage/workspace_usage:
     get:
       description: Compute Workspace Usage
-      operationId: storage_compute_workspace_usage
+      operationId: storage_get_workspace_usage
       parameters:
       - description: Workspace ID
         in: query
@@ -3343,9 +3517,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.StorageUsage'
+            $ref: '#/definitions/dto.StorageUsage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Compute Workspace Usage
       tags:
       - Storage
@@ -3380,7 +3560,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.TaskList'
+            $ref: '#/definitions/dto.TaskList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3411,12 +3595,18 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.TaskCreateOptions'
+          $ref: '#/definitions/dto.TaskCreateOptions'
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.Task'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
@@ -3430,8 +3620,6 @@ paths:
       - Tasks
   /tasks/{id}:
     delete:
-      consumes:
-      - application/json
       description: Delete
       operationId: tasks_delete
       parameters:
@@ -3443,8 +3631,12 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3457,7 +3649,7 @@ paths:
       tags:
       - Tasks
     get:
-      description: Read
+      description: Get
       operationId: tasks_get
       parameters:
       - description: ID
@@ -3471,7 +3663,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Task'
+            $ref: '#/definitions/dto.Task'
         "404":
           description: Not Found
           schema:
@@ -3480,7 +3672,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Get
       tags:
       - Tasks
     patch:
@@ -3502,14 +3694,18 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.TaskPatchOptions'
+          $ref: '#/definitions/dto.TaskPatchOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Task'
+            $ref: '#/definitions/dto.Task'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
@@ -3523,8 +3719,6 @@ paths:
       - Tasks
   /tasks/{id}/dismiss:
     post:
-      consumes:
-      - application/json
       description: Dismiss
       operationId: tasks_dismiss
       parameters:
@@ -3536,8 +3730,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
         "404":
           description: Not Found
           schema:
@@ -3551,8 +3745,8 @@ paths:
       - Tasks
   /tasks/count:
     get:
-      description: Count
-      operationId: tasks_count
+      description: Get Count
+      operationId: tasks_get_count
       produces:
       - application/json
       responses:
@@ -3564,13 +3758,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Count
+      summary: Get Count
       tags:
       - Tasks
   /tasks/dismiss:
     post:
-      consumes:
-      - application/json
       description: Dismiss All
       operationId: tasks_dismiss_all
       produces:
@@ -3579,7 +3771,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.TaskDismissAllResult'
+            $ref: '#/definitions/dto.TaskDismissAllResult'
         "500":
           description: Internal Server Error
           schema:
@@ -3602,7 +3794,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.TaskProbe'
+            $ref: '#/definitions/dto.TaskProbe'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3661,7 +3857,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.UserList'
+            $ref: '#/definitions/dto.UserList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3702,8 +3902,16 @@ paths:
         name: group
         type: string
       produces:
-      - application/json
+      - application/octet-stream
       responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3730,7 +3938,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.UserProbe'
+            $ref: '#/definitions/dto.UserProbe'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3744,20 +3956,22 @@ paths:
       - Users
   /version:
     get:
-      description: Read
-      operationId: version_read
+      description: Get
+      operationId: version_get
       produces:
       - application/json
       responses:
         "200":
-          description: '{Version}'
+          description: OK
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
         "503":
           description: Service Unavailable
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Get
       tags:
       - Version
   /workspaces:
@@ -3791,7 +4005,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.WorkspaceList'
+            $ref: '#/definitions/dto.WorkspaceList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:
@@ -3814,16 +4032,20 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.WorkspaceCreateOptions'
+          $ref: '#/definitions/dto.WorkspaceCreateOptions'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/service.Workspace'
+            $ref: '#/definitions/dto.Workspace'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
@@ -3835,8 +4057,6 @@ paths:
       - Workspaces
   /workspaces/{id}:
     delete:
-      consumes:
-      - application/json
       description: Delete
       operationId: workspaces_delete
       parameters:
@@ -3848,8 +4068,12 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -3858,7 +4082,7 @@ paths:
       tags:
       - Workspaces
     get:
-      description: Read
+      description: Find
       operationId: workspaces_find
       parameters:
       - description: ID
@@ -3872,7 +4096,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Workspace'
+            $ref: '#/definitions/dto.Workspace'
         "404":
           description: Not Found
           schema:
@@ -3881,7 +4105,41 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Read
+      summary: Find
+      tags:
+      - Workspaces
+  /workspaces/{id}/bucket:
+    get:
+      description: Get Bucket
+      operationId: workspaces_get_bucket
+      parameters:
+      - description: API Key
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - text/plain
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Bucket
       tags:
       - Workspaces
   /workspaces/{id}/storage_capacity:
@@ -3901,16 +4159,20 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.WorkspacePatchStorageCapacityOptions'
+          $ref: '#/definitions/dto.WorkspacePatchStorageCapacityOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Workspace'
+            $ref: '#/definitions/dto.Workspace'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
@@ -3937,16 +4199,20 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.WorkspacePatchNameOptions'
+          $ref: '#/definitions/dto.WorkspacePatchNameOptions'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.Workspace'
+            $ref: '#/definitions/dto.Workspace'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
@@ -3971,7 +4237,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.WorkspaceProbe'
+            $ref: '#/definitions/dto.WorkspaceProbe'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "404":
           description: Not Found
           schema:

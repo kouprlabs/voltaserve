@@ -14,14 +14,16 @@ import (
 	"errors"
 	"sort"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/log"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
 )
@@ -64,45 +66,7 @@ func NewOrganizationService() *OrganizationService {
 	}
 }
 
-type Organization struct {
-	ID         string  `json:"id"`
-	Name       string  `json:"name"`
-	Image      *string `json:"image,omitempty"`
-	Permission string  `json:"permission"`
-	CreateTime string  `json:"createTime"`
-	UpdateTime *string `json:"updateTime,omitempty"`
-}
-
-const (
-	OrganizationSortByName         = "name"
-	OrganizationSortByDateCreated  = "date_created"
-	OrganizationSortByDateModified = "date_modified"
-)
-
-const (
-	OrganizationSortOrderAsc  = "asc"
-	OrganizationSortOrderDesc = "desc"
-)
-
-type OrganizationList struct {
-	Data          []*Organization `json:"data"`
-	TotalPages    uint64          `json:"totalPages"`
-	TotalElements uint64          `json:"totalElements"`
-	Page          uint64          `json:"page"`
-	Size          uint64          `json:"size"`
-}
-
-type OrganizationProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
-}
-
-type OrganizationCreateOptions struct {
-	Name  string  `json:"name"  validate:"required,max=255"`
-	Image *string `json:"image"`
-}
-
-func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID string) (*Organization, error) {
+func (svc *OrganizationService) Create(opts dto.OrganizationCreateOptions, userID string) (*dto.Organization, error) {
 	org, err := svc.orgRepo.Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewID(),
 		Name: opts.Name,
@@ -127,7 +91,7 @@ func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID st
 	return res, nil
 }
 
-func (svc *OrganizationService) Find(id string, userID string) (*Organization, error) {
+func (svc *OrganizationService) Find(id string, userID string) (*dto.Organization, error) {
 	org, err := svc.orgCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -142,24 +106,16 @@ func (svc *OrganizationService) Find(id string, userID string) (*Organization, e
 	return res, nil
 }
 
-type OrganizationListOptions struct {
-	Query     string
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
-
-func (svc *OrganizationService) List(opts OrganizationListOptions, userID string) (*OrganizationList, error) {
+func (svc *OrganizationService) List(opts dto.OrganizationListOptions, userID string) (*dto.OrganizationList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = OrganizationSortByDateCreated
+		opts.SortBy = dto.OrganizationSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = OrganizationSortOrderAsc
+		opts.SortOrder = dto.OrganizationSortOrderAsc
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -167,7 +123,7 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 	if err != nil {
 		return nil, err
 	}
-	return &OrganizationList{
+	return &dto.OrganizationList{
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
@@ -176,19 +132,19 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 	}, nil
 }
 
-func (svc *OrganizationService) Probe(opts OrganizationListOptions, userID string) (*OrganizationProbe, error) {
+func (svc *OrganizationService) Probe(opts dto.OrganizationListOptions, userID string) (*dto.OrganizationProbe, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	totalElements := uint64(len(all))
-	return &OrganizationProbe{
+	return &dto.OrganizationProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
 }
 
-func (svc *OrganizationService) PatchName(id string, name string, userID string) (*Organization, error) {
+func (svc *OrganizationService) PatchName(id string, name string, userID string) (*dto.Organization, error) {
 	org, err := svc.orgCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -259,16 +215,16 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 
 func (svc *OrganizationService) IsValidSortBy(value string) bool {
 	return value == "" ||
-		value == OrganizationSortByName ||
-		value == OrganizationSortByDateCreated ||
-		value == OrganizationSortByDateModified
+		value == dto.OrganizationSortByName ||
+		value == dto.OrganizationSortByDateCreated ||
+		value == dto.OrganizationSortByDateModified
 }
 
 func (svc *OrganizationService) IsValidSortOrder(value string) bool {
-	return value == "" || value == OrganizationSortOrderAsc || value == OrganizationSortOrderDesc
+	return value == "" || value == dto.OrganizationSortOrderAsc || value == dto.OrganizationSortOrderDesc
 }
 
-func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
+func (svc *OrganizationService) findAll(opts dto.OrganizationListOptions, userID string) ([]model.Organization, error) {
 	var res []model.Organization
 	var err error
 	if opts.Query == "" {
@@ -298,7 +254,7 @@ func (svc *OrganizationService) load(userID string) ([]model.Organization, error
 	return res, nil
 }
 
-func (svc *OrganizationService) search(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
+func (svc *OrganizationService) search(opts dto.OrganizationListOptions, userID string) ([]model.Organization, error) {
 	var res []model.Organization
 	count, err := svc.orgRepo.Count()
 	if err != nil {
@@ -358,10 +314,10 @@ func (svc *OrganizationService) revokeGroupPermissions(memberID string, org mode
 	}
 	for _, groupID := range groupsIDs {
 		if err := svc.groupRepo.RevokeUserPermission(groupID, memberID); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 		if _, err := svc.groupCache.Refresh(groupID); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}
 	return nil
@@ -374,10 +330,10 @@ func (svc *OrganizationService) revokeWorkspacePermissions(memberID string, org 
 	}
 	for _, workspaceID := range workspaceIDs {
 		if err := svc.workspaceRepo.RevokeUserPermission(workspaceID, memberID); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 		if _, err := svc.workspaceCache.Refresh(workspaceID); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}
 	return nil
@@ -414,32 +370,32 @@ func (svc *OrganizationService) authorizeIDs(ids []string, userID string) ([]mod
 }
 
 func (svc *OrganizationService) sort(data []model.Organization, sortBy string, sortOrder string) []model.Organization {
-	if sortBy == OrganizationSortByName {
+	if sortBy == dto.OrganizationSortByName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == OrganizationSortOrderDesc {
+			if sortOrder == dto.OrganizationSortOrderDesc {
 				return data[i].GetName() > data[j].GetName()
 			} else {
 				return data[i].GetName() < data[j].GetName()
 			}
 		})
 		return data
-	} else if sortBy == OrganizationSortByDateCreated {
+	} else if sortBy == dto.OrganizationSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a := helper.StringToTime(data[i].GetCreateTime())
 			b := helper.StringToTime(data[j].GetCreateTime())
-			if sortOrder == OrganizationSortOrderDesc {
+			if sortOrder == dto.OrganizationSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == OrganizationSortByDateModified {
+	} else if sortBy == dto.OrganizationSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a := helper.StringToTime(*data[i].GetUpdateTime())
 				b := helper.StringToTime(*data[j].GetUpdateTime())
-				if sortOrder == OrganizationSortOrderDesc {
+				if sortOrder == dto.OrganizationSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -487,8 +443,8 @@ func newOrganizationMapper() *organizationMapper {
 	}
 }
 
-func (mp *organizationMapper) mapOne(m model.Organization, userID string) (*Organization, error) {
-	res := &Organization{
+func (mp *organizationMapper) mapOne(m model.Organization, userID string) (*dto.Organization, error) {
+	res := &dto.Organization{
 		ID:         m.GetID(),
 		Name:       m.GetName(),
 		CreateTime: m.GetCreateTime(),
@@ -514,8 +470,8 @@ func (mp *organizationMapper) mapOne(m model.Organization, userID string) (*Orga
 	return res, nil
 }
 
-func (mp *organizationMapper) mapMany(orgs []model.Organization, userID string) ([]*Organization, error) {
-	res := make([]*Organization, 0)
+func (mp *organizationMapper) mapMany(orgs []model.Organization, userID string) ([]*dto.Organization, error) {
+	res := make([]*dto.Organization, 0)
 	for _, org := range orgs {
 		o, err := mp.mapOne(org, userID)
 		if err != nil {

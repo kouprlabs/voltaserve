@@ -14,21 +14,19 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/webdav/cache"
-	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
-	"github.com/kouprlabs/voltaserve/webdav/client/idp_client"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+
+	"github.com/kouprlabs/voltaserve/webdav/config"
 )
 
 type Handler struct {
-	s3             *infra.S3Manager
-	workspaceCache *cache.WorkspaceCache
+	s3 infra.S3Manager
 }
 
 func NewHandler() *Handler {
 	return &Handler{
-		s3:             infra.NewS3Manager(),
-		workspaceCache: cache.NewWorkspaceCache(),
+		s3: infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 	}
 }
 
@@ -60,14 +58,12 @@ func (h *Handler) Dispatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Health(w http.ResponseWriter, _ *http.Request) {
-	apiClient := api_client.NewHealthClient()
-	apiHealth, err := apiClient.Get()
+	apiHealth, err := client.NewHealthClient(config.GetConfig().APIURL).Get()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	idpClient := idp_client.NewHealthClient()
-	idpHealth, err := idpClient.Get()
+	idpHealth, err := client.NewHealthClient(config.GetConfig().IdPURL).Get()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

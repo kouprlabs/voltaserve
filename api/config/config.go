@@ -14,6 +14,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/kouprlabs/voltaserve/shared/config"
 )
 
 type Config struct {
@@ -22,15 +24,15 @@ type Config struct {
 	ConversionURL string
 	LanguageURL   string
 	MosaicURL     string
-	DatabaseURL   string
-	Search        SearchConfig
-	Redis         RedisConfig
-	S3            S3Config
+	Postgres      config.PostgresConfig
+	Search        config.SearchConfig
+	Redis         config.RedisConfig
+	S3            config.S3Config
 	Limits        LimitsConfig
 	Security      SecurityConfig
 	SMTP          SMTPConfig
 	Defaults      DefaultsConfig
-	Environment   EnvironmentConfig
+	Environment   config.EnvironmentConfig
 }
 
 type LimitsConfig struct {
@@ -49,24 +51,6 @@ type TokenConfig struct {
 	TokenIssuer          string
 }
 
-type SearchConfig struct {
-	URL string
-}
-
-type RedisConfig struct {
-	Address  string
-	Password string
-	DB       int
-}
-
-type S3Config struct {
-	URL       string
-	AccessKey string
-	SecretKey string
-	Region    string
-	Secure    bool
-}
-
 type SecurityConfig struct {
 	JWTSigningKey string
 	CORSOrigins   []string
@@ -83,10 +67,6 @@ type SMTPConfig struct {
 	SenderName    string
 }
 
-type EnvironmentConfig struct {
-	IsTest bool
-}
-
 const (
 	FileTypePDF            = "pdf"
 	FileTypeOffice         = "office"
@@ -101,18 +81,19 @@ const (
 )
 
 func GetConfig() *Config {
-	config := &Config{}
-	readPort(config)
-	readURLs(config)
-	readSecurity(config)
-	readS3(config)
-	readSearch(config)
-	readRedis(config)
-	readSMTP(config)
-	readLimits(config)
-	readDefaults(config)
-	readEnvironment(config)
-	return config
+	cfg := &Config{}
+	readPort(cfg)
+	readURLs(cfg)
+	readSecurity(cfg)
+	readPostgres(cfg)
+	readS3(cfg)
+	readSearch(cfg)
+	readRedis(cfg)
+	readSMTP(cfg)
+	readLimits(cfg)
+	readDefaults(cfg)
+	readEnvironment(cfg)
+	return cfg
 }
 
 func (l *LimitsConfig) GetFileProcessingMB(fileType string) int {
@@ -137,13 +118,16 @@ func readURLs(config *Config) {
 	config.ConversionURL = os.Getenv("CONVERSION_URL")
 	config.LanguageURL = os.Getenv("LANGUAGE_URL")
 	config.MosaicURL = os.Getenv("MOSAIC_URL")
-	config.DatabaseURL = os.Getenv("POSTGRES_URL")
 }
 
 func readSecurity(config *Config) {
 	config.Security.JWTSigningKey = os.Getenv("SECURITY_JWT_SIGNING_KEY")
 	config.Security.CORSOrigins = strings.Split(os.Getenv("SECURITY_CORS_ORIGINS"), ",")
 	config.Security.APIKey = os.Getenv("SECURITY_API_KEY")
+}
+
+func readPostgres(config *Config) {
+	config.Postgres.URL = os.Getenv("POSTGRES_URL")
 }
 
 func readS3(config *Config) {

@@ -14,9 +14,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
+	"github.com/kouprlabs/voltaserve/webdav/config"
 )
 
 /*
@@ -32,18 +35,18 @@ Example implementation:
 - Return the response.
 */
 func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
-	token, ok := r.Context().Value("token").(*infra.Token)
+	token, ok := r.Context().Value("token").(*dto.Token)
 	if !ok {
-		infra.HandleError(fmt.Errorf("missing token"), w)
+		handleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	cl := api_client.NewFileClient(token)
+	cl := client.NewFileClient(token, config.GetConfig().APIURL, config.GetConfig().Security.APIKey)
 	file, err := cl.GetByPath(helper.DecodeURIComponent(r.URL.Path))
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
-	if file.Type == api_client.FileTypeFile {
+	if file.Type == model.FileTypeFile {
 		responseXml := fmt.Sprintf(
 			`<D:multistatus xmlns:D="DAV:">
 				<D:response>
@@ -61,7 +64,7 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 			</D:multistatus>`,
 			helper.EncodeURIComponent(file.Name),
 			func() int64 {
-				if file.Type == api_client.FileTypeFile && file.Snapshot != nil && file.Snapshot.Original != nil {
+				if file.Type == model.FileTypeFile && file.Snapshot != nil && file.Snapshot.Original != nil {
 					return file.Snapshot.Original.Size
 				}
 				return 0
@@ -72,10 +75,10 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 		w.WriteHeader(http.StatusMultiStatus)
 		if _, err := w.Write([]byte(responseXml)); err != nil {
-			infra.HandleError(err, w)
+			handleError(err, w)
 			return
 		}
-	} else if file.Type == api_client.FileTypeFolder {
+	} else if file.Type == model.FileTypeFolder {
 		responseXml := fmt.Sprintf(
 			`<D:multistatus xmlns:D="DAV:">
 				<D:response>
@@ -96,7 +99,7 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 		)
 		list, err := cl.ListByPath(helper.DecodeURIComponent(r.URL.Path))
 		if err != nil {
-			infra.HandleError(err, w)
+			handleError(err, w)
 			return
 		}
 		for _, item := range list {
@@ -115,13 +118,13 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 				</D:response>`,
 				helper.EncodeURIComponent(r.URL.Path+item.Name),
 				func() string {
-					if item.Type == api_client.FileTypeFolder {
+					if item.Type == model.FileTypeFolder {
 						return "<D:collection/>"
 					}
 					return ""
 				}(),
 				func() int64 {
-					if item.Type == api_client.FileTypeFile && item.Snapshot != nil && item.Snapshot.Original != nil {
+					if item.Type == model.FileTypeFile && item.Snapshot != nil && item.Snapshot.Original != nil {
 						return item.Snapshot.Original.Size
 					}
 					return 0
@@ -135,7 +138,7 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 		w.WriteHeader(http.StatusMultiStatus)
 		if _, err := w.Write([]byte(responseXml)); err != nil {
-			infra.HandleError(err, w)
+			handleError(err, w)
 			return
 		}
 	}

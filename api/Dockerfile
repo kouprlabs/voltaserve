@@ -8,15 +8,20 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23-alpine3.21 AS builder
 
 WORKDIR /build
 
-COPY go.mod go.sum ./
+COPY shared ./shared
+COPY api ./api
+COPY conversion ./conversion
+COPY mosaic ./mosaic
+COPY webdav ./webdav
+COPY go.work go.work.sum ./
 
 RUN go mod download
 
-COPY . .
+WORKDIR /build/api
 
 RUN go build -o voltaserve-api
 
@@ -24,9 +29,9 @@ FROM alpine:3.21 AS runner
 
 WORKDIR /app
 
-COPY --from=builder /build/voltaserve-api ./voltaserve-api
-COPY --from=builder /build/.env ./.env
-COPY --from=builder /build/templates ./templates
+COPY --from=builder /build/api/voltaserve-api ./voltaserve-api
+COPY --from=builder /build/api/.env ./.env
+COPY --from=builder /build/api/templates ./templates
 
 ENTRYPOINT ["./voltaserve-api"]
 

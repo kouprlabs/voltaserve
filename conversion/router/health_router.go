@@ -15,8 +15,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	_ "github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+
+	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/runtime"
 )
 
@@ -35,27 +38,28 @@ func NewHealthRouter(opts HealthRouterOptions) *HealthRouter {
 }
 
 func (r *HealthRouter) AppendRoutes(g fiber.Router) {
-	g.Get("health", r.GetHealth)
+	g.Get("/health", r.Get)
 }
 
-// GetHealth godoc
+// Get godoc
 //
-//	@Summary		Get Health
-//	@Description	Get Health
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Health
-//	@Id				get_health
-//	@Produce		json
+//	@Id				health_get
+//	@Produce		text/plain
+//	@Produce		application/json
 //	@Success		200	{string}	string	"OK"
 //	@Failure		503	{object}	errorpkg.ErrorResponse
 //	@Router			/health [get]
-func (r *HealthRouter) GetHealth(c *fiber.Ctx) error {
+func (r *HealthRouter) Get(c *fiber.Ctx) error {
 	if r.installer.IsRunning() {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
-	if err := infra.NewS3Manager().Connect(); err != nil {
+	if err := infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment).Connect(); err != nil {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
-	if ok, err := api_client.NewHealthClient().Get(); err != nil || ok != "OK" {
+	if ok, err := client.NewHealthClient(config.GetConfig().APIURL).Get(); err != nil || ok != "OK" {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
 	return c.SendString("OK")

@@ -51,7 +51,7 @@ docker build -t voltaserve/mosaic .
 Generate `swagger.yml`:
 
 ```shell
-swag init --output ./docs --outputTypes yaml
+swag init --parseDependency --output ./docs --outputTypes yaml
 ```
 
 Preview (will be served at [http://localhost:19095](http://localhost:19095)):

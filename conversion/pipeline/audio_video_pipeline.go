@@ -17,35 +17,38 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/helper"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
-	"github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/conversion/logger"
 	"github.com/kouprlabs/voltaserve/conversion/processor"
 )
 
 type audioVideoPipeline struct {
 	videoProc      *processor.VideoProcessor
 	imageProc      *processor.ImageProcessor
-	s3             *infra.S3Manager
-	taskClient     *api_client.TaskClient
-	snapshotClient *api_client.SnapshotClient
+	s3             infra.S3Manager
+	taskClient     *client.TaskClient
+	snapshotClient *client.SnapshotClient
 	config         *config.Config
 }
 
-func NewAudioVideoPipeline() model.Pipeline {
+func NewAudioVideoPipeline() Pipeline {
 	return &audioVideoPipeline{
 		videoProc:      processor.NewVideoProcessor(),
 		imageProc:      processor.NewImageProcessor(),
-		s3:             infra.NewS3Manager(),
-		taskClient:     api_client.NewTaskClient(),
-		snapshotClient: api_client.NewSnapshotClient(),
+		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		taskClient:     client.NewTaskClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
+		snapshotClient: client.NewSnapshotClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
 		config:         config.GetConfig(),
 	}
 }
 
-func (p *audioVideoPipeline) Run(opts api_client.PipelineRunOptions) error {
+func (p *audioVideoPipeline) Run(opts dto.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
@@ -54,15 +57,15 @@ func (p *audioVideoPipeline) Run(opts api_client.PipelineRunOptions) error {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return
 		} else if err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(inputPath)
 	return p.RunFromLocalPath(inputPath, opts)
 }
 
-func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName},
+func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
+	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
@@ -70,8 +73,8 @@ func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts api_client.
 	// Here we intentionally ignore the error, as the media file may contain just audio
 	// Additionally, we don't consider failing to create the thumbnail an error
 	_ = p.createThumbnail(inputPath, opts)
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName},
+	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Saving preview."),
 	}); err != nil {
 		return err
@@ -79,23 +82,23 @@ func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts api_client.
 	if err := p.saveOriginalAsPreview(inputPath, opts); err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName, api_client.TaskFieldStatus},
+	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(api_client.TaskStatusSuccess),
+		Status: helper.ToPtr(model.TaskStatusSuccess),
 	}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *audioVideoPipeline) createThumbnail(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *audioVideoPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	defer func(path string) {
 		_, err := os.Stat(path)
 		if os.IsExist(err) {
 			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}
 	}(outputPath)
@@ -110,18 +113,18 @@ func (p *audioVideoPipeline) createThumbnail(inputPath string, opts api_client.P
 	if err != nil {
 		return err
 	}
-	s3Object := &api_client.S3Object{
+	s3Object := &model.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(outputPath),
 		Image:  props,
-		Size:   helper.ToPtr(stat.Size()),
+		Size:   stat.Size(),
 	}
 	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options:   opts,
-		Fields:    []string{api_client.SnapshotFieldThumbnail},
+		Fields:    []string{model.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
 	}); err != nil {
 		return err
@@ -129,18 +132,18 @@ func (p *audioVideoPipeline) createThumbnail(inputPath string, opts api_client.P
 	return nil
 }
 
-func (p *audioVideoPipeline) saveOriginalAsPreview(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *audioVideoPipeline) saveOriginalAsPreview(inputPath string, opts dto.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{api_client.SnapshotFieldPreview},
-		Preview: &api_client.S3Object{
+		Fields:  []string{model.SnapshotFieldPreview},
+		Preview: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
-			Size:   helper.ToPtr(stat.Size()),
+			Size:   stat.Size(),
 		},
 	}); err != nil {
 		return err

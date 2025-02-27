@@ -22,7 +22,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/templates"
 )
 
@@ -43,29 +43,32 @@ type mailTemplate struct {
 	config config.SMTPConfig
 }
 
-func NewMailTemplate(cfg config.SMTPConfig) MailTemplate {
+func NewMailTemplate(smtpConfig config.SMTPConfig) MailTemplate {
 	if config.GetConfig().Environment.IsTest {
 		return newMockMailTemplate()
 	} else {
-		return newMailTemplate(cfg)
+		return newMailTemplate(smtpConfig)
 	}
 }
 
-func NewMailTemplateWithDialer(cfg config.SMTPConfig, dialer dialer) MailTemplate {
+func NewMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer) MailTemplate {
 	if config.GetConfig().Environment.IsTest {
 		return newMockMailTemplate()
 	} else {
-		return newMailTemplateWithDialer(cfg, dialer)
+		return newMailTemplateWithDialer(smtpConfig, dialer)
 	}
 }
 
-func newMailTemplate(cfg config.SMTPConfig) *mailTemplate {
-	return newMailTemplateWithDialer(cfg, gomail.NewDialer(cfg.Host, cfg.Port, cfg.Username, cfg.Password))
+func newMailTemplate(smtpConfig config.SMTPConfig) *mailTemplate {
+	return newMailTemplateWithDialer(
+		smtpConfig,
+		gomail.NewDialer(smtpConfig.Host, smtpConfig.Port, smtpConfig.Username, smtpConfig.Password),
+	)
 }
 
-func newMailTemplateWithDialer(cfg config.SMTPConfig, dialer dialer) *mailTemplate {
+func newMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer) *mailTemplate {
 	return &mailTemplate{
-		config: cfg,
+		config: smtpConfig,
 		dialer: dialer,
 	}
 }
@@ -102,7 +105,7 @@ func (mt *mailTemplate) getText(path string, variables map[string]string) (strin
 	}
 	defer func(f fs.File) {
 		if err := f.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(f)
 	b, _ := io.ReadAll(f)
@@ -126,7 +129,7 @@ func (mt *mailTemplate) getMessageParams(templateName string) (*MessageParams, e
 	}
 	defer func(f fs.File) {
 		if err := f.Close(); err != nil {
-			log.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(f)
 	b, _ := io.ReadAll(f)

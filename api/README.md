@@ -58,7 +58,7 @@ docker build -t voltaserve/api .
 Generate `swagger.yml`:
 
 ```shell
-swag init --output ./docs --outputTypes yaml
+swag init --parseDependency --output ./docs --outputTypes yaml
 ```
 
 Preview (will be served at [http://localhost:19090](http://localhost:19090)):

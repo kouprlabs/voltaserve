@@ -26,7 +26,7 @@ COPY tsconfig.node.json .
 RUN bun install --frozen-lockfile
 RUN bun run build
 
-FROM golang:1.22-alpine AS go-builder
+FROM golang:1.23-alpine3.21 AS go-builder
 
 WORKDIR /build
 
@@ -40,7 +40,7 @@ COPY main.go .
 
 RUN go build -o voltaserve-ui
 
-FROM alpine:3.20 AS runner
+FROM alpine:3.21 AS runner
 
 WORKDIR /app
 

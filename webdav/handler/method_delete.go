@@ -14,9 +14,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
+	"github.com/kouprlabs/voltaserve/webdav/config"
 )
 
 /*
@@ -30,19 +32,19 @@ Example implementation:
 - Return the response.
 */
 func (h *Handler) methodDelete(w http.ResponseWriter, r *http.Request) {
-	token, ok := r.Context().Value("token").(*infra.Token)
+	token, ok := r.Context().Value("token").(*dto.Token)
 	if !ok {
-		infra.HandleError(fmt.Errorf("missing token"), w)
+		handleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	cl := api_client.NewFileClient(token)
+	cl := client.NewFileClient(token, config.GetConfig().APIURL, config.GetConfig().Security.APIKey)
 	file, err := cl.GetByPath(helper.DecodeURIComponent(r.URL.Path))
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
 	if err = cl.DeleteOne(file.ID); err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

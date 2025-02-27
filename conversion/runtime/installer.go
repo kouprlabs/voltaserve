@@ -3,6 +3,7 @@ package runtime
 import (
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
+	"github.com/kouprlabs/voltaserve/conversion/logger"
 )
 
 type Installer struct {
@@ -39,17 +40,17 @@ func (d *Installer) Start() {
 }
 
 func (d *Installer) updatePackageList() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("🔄  updating", "debian", "package list")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("🔄  updating", "debian", "package list")
 	if err := d.cmd.Exec("apt-get", "update"); err != nil {
-		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "debian", "package list")
+		logger.GetLogger().Error(err)
+		logger.GetLogger().Named(logger.StrInstaller).Infow("❌️  failed", "debian", "package list")
 		return
 	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "debian", "package list")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("✅️  completed", "debian", "package list")
 }
 
 func (d *Installer) installCoreTools() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "core-tools")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("⬇️  installing", "package", "core-tools")
 	packages := []string{
 		"curl",
 		"ffmpeg",
@@ -66,40 +67,40 @@ func (d *Installer) installCoreTools() {
 	}
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
-		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "core-tools")
+		logger.GetLogger().Error(err)
+		logger.GetLogger().Named(logger.StrInstaller).Infow("❌️  failed", "package", "core-tools")
 		return
 	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "core-tools")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("✅️  completed", "package", "core-tools")
 }
 
 func (d *Installer) installGltfPipeline() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "gltf-pipeline")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("⬇️  installing", "package", "gltf-pipeline")
 	if err := d.cmd.Exec("npm", "i", "-g", "gltf-pipeline@4.1.0"); err != nil {
-		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "gltf-pipeline")
+		logger.GetLogger().Error(err)
+		logger.GetLogger().Named(logger.StrInstaller).Infow("❌️  failed", "package", "gltf-pipeline")
 		return
 	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "gltf-pipeline")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("✅️  completed", "package", "gltf-pipeline")
 }
 
 func (d *Installer) installBlender() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "blender")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("⬇️  installing", "package", "blender")
 	packages := []string{
 		"blender",
 		"python3-numpy",
 	}
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
-		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "blender")
+		logger.GetLogger().Error(err)
+		logger.GetLogger().Named(logger.StrInstaller).Infow("❌️  failed", "package", "blender")
 		return
 	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "blender")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("✅️  completed", "package", "blender")
 }
 
 func (d *Installer) installLibreOffice() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "libreoffice")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("⬇️  installing", "package", "libreoffice")
 	packages := []string{
 		"libreoffice",
 		"libreoffice-core",
@@ -111,15 +112,15 @@ func (d *Installer) installLibreOffice() {
 	}
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
-		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "libreoffice")
+		logger.GetLogger().Error(err)
+		logger.GetLogger().Named(logger.StrInstaller).Infow("❌️  failed", "package", "libreoffice")
 		return
 	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "libreoffice")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("✅️  completed", "package", "libreoffice")
 }
 
 func (d *Installer) installTesseract() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "tesseract")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("⬇️  installing", "package", "tesseract")
 	packages := []string{
 		"tesseract-ocr",
 		"tesseract-ocr-osd",
@@ -142,16 +143,16 @@ func (d *Installer) installTesseract() {
 	}
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
-		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "tesseract")
+		logger.GetLogger().Error(err)
+		logger.GetLogger().Named(logger.StrInstaller).Infow("❌️  failed", "package", "tesseract")
 		return
 	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "tesseract")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("✅️  completed", "package", "tesseract")
 }
 
 //nolint:maintidx
 func (d *Installer) installFonts() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "fonts")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("⬇️  installing", "package", "fonts")
 	packages := []string{
 		"fonts-3270",
 		"fonts-adf-accanthis",
@@ -691,9 +692,9 @@ func (d *Installer) installFonts() {
 	}
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
-		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "fonts")
+		logger.GetLogger().Error(err)
+		logger.GetLogger().Named(logger.StrInstaller).Infow("❌️  failed", "package", "fonts")
 		return
 	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "fonts")
+	logger.GetLogger().Named(logger.StrInstaller).Infow("✅️  completed", "package", "fonts")
 }

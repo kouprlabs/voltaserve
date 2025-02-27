@@ -18,9 +18,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/kouprlabs/voltaserve/mosaic/config"
-	"github.com/kouprlabs/voltaserve/mosaic/helper"
-	"github.com/kouprlabs/voltaserve/mosaic/infra"
+	"github.com/kouprlabs/voltaserve/mosaic/logger"
 	"github.com/kouprlabs/voltaserve/mosaic/service"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 )
 
 type MosaicRouter struct {
@@ -44,8 +44,8 @@ func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 
 // Create godoc
 //
-//	@Summary		Create Mosaic
-//	@Description	Create Mosaic
+//	@Summary		Create
+//	@Description	Create
 //	@Tags			Mosaics
 //	@Id				mosaics_create
 //	@Accept			multipart/form-data
@@ -53,9 +53,9 @@ func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 //	@Param			file		formData	file	true	"File to upload"
 //	@Param			s3_key		formData	string	true	"S3 Key"
 //	@Param			s3_bucket	formData	string	true	"S3 Bucket"
-//	@Success		200			{object}	builder.Metadata
-//	@Failure		400			{string}	string	"Bad Request"
-//	@Failure		500			{string}	string	"Internal Server Error"
+//	@Success		201			{object}	model.Metadata
+//	@Failure		400			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics [post]
 func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 	form, err := c.MultipartForm()
@@ -70,7 +70,7 @@ func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 	path := filepath.Join(os.TempDir(), helper.NewID()+filepath.Ext(fh.Filename))
 	defer func() {
 		if err := os.Remove(path); err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}()
 	if err := c.SaveFile(fh, path); err != nil {
@@ -82,20 +82,20 @@ func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(metadata)
+	return c.Status(fiber.StatusCreated).JSON(metadata)
 }
 
 // Delete godoc
 //
-//	@Summary		Delete Mosaic
-//	@Description	Delete Mosaic
+//	@Summary		Delete
+//	@Description	Delete
 //	@Tags			Mosaics
 //	@Id				mosaics_delete
 //	@Param			s3_bucket	path	string	true	"S3 Bucket"
 //	@Param			s3_key		path	string	true	"S3 Key"
 //	@Success		204
-//	@Failure		404	{string}	string	"Not Found"
-//	@Failure		500	{string}	string	"Internal Server Error"
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{s3_bucket}/{s3_key} [delete]
 func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 	s3Bucket := c.Params("s3_bucket")
@@ -114,9 +114,9 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 //	@Id				mosaics_get_metadata
 //	@Param			s3_bucket	path		string	true	"S3 Bucket"
 //	@Param			s3_key		path		string	true	"S3 Key"
-//	@Success		200			{object}	builder.Metadata
-//	@Failure		404			{string}	string	"Not Found"
-//	@Failure		500			{string}	string	"Internal Server Error"
+//	@Success		200			{object}	model.Metadata
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{s3_bucket}/{s3_key}/metadata [get]
 func (r *MosaicRouter) GetMetadata(c *fiber.Ctx) error {
 	s3Bucket := c.Params("s3_bucket")
@@ -134,15 +134,16 @@ func (r *MosaicRouter) GetMetadata(c *fiber.Ctx) error {
 //	@Description	Download Tile
 //	@Tags			Mosaics
 //	@Id				mosaics_download_tile
+//	@Produce		application/octet-stream
 //	@Param			s3_bucket	path		string	true	"S3 Bucket"
 //	@Param			s3_key		path		string	true	"S3 Key"
 //	@Param			zoom_level	path		int		true	"Zoom Level"
 //	@Param			row			path		int		true	"Row"
 //	@Param			column		path		int		true	"Column"
 //	@Param			extension	path		string	true	"Extension"
-//	@Success		200			{file}		file	"Tile"
-//	@Failure		404			{string}	string	"Not Found"
-//	@Failure		500			{string}	string	"Internal Server Error"
+//	@Success		200			{file}		file
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{s3_bucket}/{s3_key}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension} [get]
 func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	s3Bucket := c.Params("s3_bucket")

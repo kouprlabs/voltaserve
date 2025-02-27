@@ -14,13 +14,15 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -52,33 +54,7 @@ func NewInvitationService() *InvitationService {
 	}
 }
 
-type Invitation struct {
-	ID           string        `json:"id"`
-	Owner        *User         `json:"owner,omitempty"`
-	Email        string        `json:"email"`
-	Organization *Organization `json:"organization,omitempty"`
-	Status       string        `json:"status"`
-	CreateTime   string        `json:"createTime"`
-	UpdateTime   *string       `json:"updateTime"`
-}
-
-const (
-	InvitationSortByEmail        = "email"
-	InvitationSortByDateCreated  = "date_created"
-	InvitationSortByDateModified = "date_modified"
-)
-
-const (
-	InvitationSortOrderAsc  = "asc"
-	InvitationSortOrderDesc = "desc"
-)
-
-type InvitationCreateOptions struct {
-	OrganizationID string   `json:"organizationId" validate:"required"`
-	Emails         []string `json:"emails"         validate:"required,dive,email"`
-}
-
-func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string) ([]*Invitation, error) {
+func (svc *InvitationService) Create(opts dto.InvitationCreateOptions, userID string) ([]*dto.Invitation, error) {
 	for i := range opts.Emails {
 		opts.Emails[i] = strings.ToLower(opts.Emails[i])
 	}
@@ -120,22 +96,7 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 	return res, nil
 }
 
-type InvitationList struct {
-	Data          []*Invitation `json:"data"`
-	TotalPages    uint64        `json:"totalPages"`
-	TotalElements uint64        `json:"totalElements"`
-	Page          uint64        `json:"page"`
-	Size          uint64        `json:"size"`
-}
-
-type InvitationListOptions struct {
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
-
-func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID string) (*InvitationList, error) {
+func (svc *InvitationService) ListIncoming(opts dto.InvitationListOptions, userID string) (*dto.InvitationList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -145,10 +106,10 @@ func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID st
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = InvitationSortByDateCreated
+		opts.SortBy = dto.InvitationSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = InvitationSortOrderAsc
+		opts.SortOrder = dto.InvitationSortOrderAsc
 	}
 	sorted := svc.sort(invitations, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -156,7 +117,7 @@ func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID st
 	if err != nil {
 		return nil, err
 	}
-	return &InvitationList{
+	return &dto.InvitationList{
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
@@ -165,12 +126,7 @@ func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID st
 	}, nil
 }
 
-type InvitationProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
-}
-
-func (svc *InvitationService) ProbeIncoming(opts InvitationListOptions, userID string) (*InvitationProbe, error) {
+func (svc *InvitationService) ProbeIncoming(opts dto.InvitationListOptions, userID string) (*dto.InvitationProbe, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -179,13 +135,13 @@ func (svc *InvitationService) ProbeIncoming(opts InvitationListOptions, userID s
 	if err != nil {
 		return nil, err
 	}
-	return &InvitationProbe{
+	return &dto.InvitationProbe{
 		TotalElements: uint64(totalElements),                               // #nosec G115 integer overflow conversion
 		TotalPages:    (uint64(totalElements) + opts.Size - 1) / opts.Size, // #nosec G115 integer overflow conversion
 	}, nil
 }
 
-func (svc *InvitationService) CountIncoming(userID string) (*int64, error) {
+func (svc *InvitationService) GetCountIncoming(userID string) (*int64, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -197,7 +153,7 @@ func (svc *InvitationService) CountIncoming(userID string) (*int64, error) {
 	return &res, nil
 }
 
-func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationList, error) {
+func (svc *InvitationService) ListOutgoing(orgID string, opts dto.InvitationListOptions, userID string) (*dto.InvitationList, error) {
 	org, err := svc.orgCache.Get(orgID)
 	if err != nil {
 		return nil, err
@@ -210,10 +166,10 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOpti
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = InvitationSortByDateCreated
+		opts.SortBy = dto.InvitationSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = InvitationSortOrderAsc
+		opts.SortOrder = dto.InvitationSortOrderAsc
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -221,7 +177,7 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOpti
 	if err != nil {
 		return nil, err
 	}
-	return &InvitationList{
+	return &dto.InvitationList{
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
@@ -230,7 +186,7 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOpti
 	}, nil
 }
 
-func (svc *InvitationService) ProbeOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationProbe, error) {
+func (svc *InvitationService) ProbeOutgoing(orgID string, opts dto.InvitationListOptions, userID string) (*dto.InvitationProbe, error) {
 	org, err := svc.orgCache.Get(orgID)
 	if err != nil {
 		return nil, err
@@ -243,7 +199,7 @@ func (svc *InvitationService) ProbeOutgoing(orgID string, opts InvitationListOpt
 	if err != nil {
 		return nil, err
 	}
-	return &InvitationProbe{
+	return &dto.InvitationProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
@@ -366,13 +322,13 @@ func (svc *InvitationService) Delete(id string, userID string) error {
 
 func (svc *InvitationService) IsValidSortBy(value string) bool {
 	return value == "" ||
-		value == InvitationSortByEmail ||
-		value == InvitationSortByDateCreated ||
-		value == InvitationSortByDateModified
+		value == dto.InvitationSortByEmail ||
+		value == dto.InvitationSortByDateCreated ||
+		value == dto.InvitationSortByDateModified
 }
 
 func (svc *InvitationService) IsValidSortOrder(value string) bool {
-	return value == "" || value == InvitationSortOrderAsc || value == InvitationSortOrderDesc
+	return value == "" || value == dto.InvitationSortOrderAsc || value == dto.InvitationSortOrderDesc
 }
 
 func (svc *InvitationService) getValidOutboundEmails(emails []string, ownerEmail string, orgMembers []model.User, outgoing []model.Invitation) []string {
@@ -424,32 +380,32 @@ func (svc *InvitationService) sendEmails(invitations []model.Invitation, org mod
 }
 
 func (svc *InvitationService) sort(data []model.Invitation, sortBy string, sortOrder string) []model.Invitation {
-	if sortBy == InvitationSortByEmail {
+	if sortBy == dto.InvitationSortByEmail {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == InvitationSortOrderDesc {
+			if sortOrder == dto.InvitationSortOrderDesc {
 				return data[i].GetEmail() > data[j].GetEmail()
 			} else {
 				return data[i].GetEmail() < data[j].GetEmail()
 			}
 		})
 		return data
-	} else if sortBy == InvitationSortByDateCreated {
+	} else if sortBy == dto.InvitationSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a := helper.StringToTime(data[i].GetCreateTime())
 			b := helper.StringToTime(data[j].GetCreateTime())
-			if sortOrder == InvitationSortOrderDesc {
+			if sortOrder == dto.InvitationSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == InvitationSortByDateModified {
+	} else if sortBy == dto.InvitationSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a := helper.StringToTime(*data[i].GetUpdateTime())
 				b := helper.StringToTime(*data[j].GetUpdateTime())
-				if sortOrder == InvitationSortOrderDesc {
+				if sortOrder == dto.InvitationSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -493,7 +449,7 @@ func newInvitationMapper() *invitationMapper {
 	}
 }
 
-func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*Invitation, error) {
+func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*dto.Invitation, error) {
 	owner, err := mp.userRepo.Find(m.GetOwnerID())
 	if err != nil {
 		return nil, err
@@ -506,7 +462,7 @@ func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*Invitati
 	if err != nil {
 		return nil, err
 	}
-	return &Invitation{
+	return &dto.Invitation{
 		ID:           m.GetID(),
 		Owner:        mp.userMapper.mapOne(owner),
 		Email:        m.GetEmail(),
@@ -517,8 +473,8 @@ func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*Invitati
 	}, nil
 }
 
-func (mp *invitationMapper) mapMany(invitations []model.Invitation, userID string) ([]*Invitation, error) {
-	res := make([]*Invitation, 0)
+func (mp *invitationMapper) mapMany(invitations []model.Invitation, userID string) ([]*dto.Invitation, error) {
+	res := make([]*dto.Invitation, 0)
 	for _, invitation := range invitations {
 		i, err := mp.mapOne(invitation, userID)
 		if err != nil {

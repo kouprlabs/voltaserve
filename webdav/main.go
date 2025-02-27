@@ -23,20 +23,21 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/kouprlabs/voltaserve/webdav/client/idp_client"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
 	"github.com/kouprlabs/voltaserve/webdav/config"
 	"github.com/kouprlabs/voltaserve/webdav/handler"
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
 
 var (
-	tokens   = make(map[string]*infra.Token)
+	tokens   = make(map[string]*dto.Token)
 	expiries = make(map[string]time.Time)
 	mu       sync.RWMutex
 )
 
-func startTokenRefresh(idpClient *idp_client.TokenClient) {
+func startTokenRefresh(idpClient *client.TokenClient) {
 	ticker := time.NewTicker(5 * time.Second)
 	go func() {
 		for {
@@ -45,8 +46,8 @@ func startTokenRefresh(idpClient *idp_client.TokenClient) {
 			for username, token := range tokens {
 				expiry := expiries[username]
 				if time.Now().After(expiry.Add(-1 * time.Minute)) {
-					newToken, err := idpClient.Exchange(idp_client.TokenExchangeOptions{
-						GrantType:    idp_client.GrantTypeRefreshToken,
+					newToken, err := idpClient.Exchange(client.TokenExchangeOptions{
+						GrantType:    client.GrantTypeRefreshToken,
 						RefreshToken: token.RefreshToken,
 					})
 					if err == nil {
@@ -60,7 +61,7 @@ func startTokenRefresh(idpClient *idp_client.TokenClient) {
 	}()
 }
 
-func basicAuthMiddleware(next http.Handler, idpClient *idp_client.TokenClient) http.Handler {
+func basicAuthMiddleware(next http.Handler, idpClient *client.TokenClient) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		username, password, ok := r.BasicAuth()
 		if !ok {
@@ -73,8 +74,8 @@ func basicAuthMiddleware(next http.Handler, idpClient *idp_client.TokenClient) h
 		token, exists := tokens[username]
 		if !exists {
 			var err error
-			token, err = idpClient.Exchange(idp_client.TokenExchangeOptions{
-				GrantType: idp_client.GrantTypePassword,
+			token, err = idpClient.Exchange(client.TokenExchangeOptions{
+				GrantType: client.GrantTypePassword,
 				Username:  username,
 				Password:  password,
 			})
@@ -107,7 +108,7 @@ func main() {
 
 	cfg := config.GetConfig()
 
-	idpClient := idp_client.NewTokenClient()
+	idpClient := client.NewTokenClient(config.GetConfig().IdPURL)
 
 	h := handler.NewHandler()
 	mux := http.NewServeMux()
