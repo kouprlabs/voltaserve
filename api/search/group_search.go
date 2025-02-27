@@ -13,8 +13,10 @@ package search
 import (
 	"encoding/json"
 
-	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -40,7 +42,7 @@ func (g groupEntity) GetID() string {
 func NewGroupSearch() *GroupSearch {
 	return &GroupSearch{
 		index:     infra.GroupSearchIndex,
-		search:    infra.NewSearchManager(),
+		search:    infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
 		groupRepo: repo.NewGroupRepo(),
 	}
 }

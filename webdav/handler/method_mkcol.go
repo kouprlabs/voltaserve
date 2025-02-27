@@ -16,11 +16,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/api/client/apiclient"
-	apimodel "github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"github.com/kouprlabs/voltaserve/webdav/config"
 )
 
 /*
@@ -34,35 +36,35 @@ Example implementation:
 - Return the response.
 */
 func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
-	token, ok := r.Context().Value("token").(*infra.Token)
+	token, ok := r.Context().Value("token").(*dto.Token)
 	if !ok {
-		infra.HandleError(fmt.Errorf("missing token"), w)
+		handleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	cl := apiclient.NewFileClient(token)
+	cl := client.NewFileClient(token, config.GetConfig().APIURL, config.GetConfig().Security.APIKey)
 	rootPath := helper.DecodeURIComponent(getRootPath(r.URL.Path))
 	rootDir, err := cl.GetByPath(rootPath)
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
 	if rootDir.Name != "/" && rootDir.WorkspaceID != "" {
-		if _, err = cl.CreateFolder(apiclient.FileCreateFolderOptions{
-			Type:        apimodel.FileTypeFolder,
+		if _, err = cl.CreateFolder(client.FileCreateFolderOptions{
+			Type:        model.FileTypeFolder,
 			WorkspaceID: rootDir.WorkspaceID,
 			ParentID:    rootDir.ID,
 			Name:        helper.DecodeURIComponent(getSubPath(r.URL.Path)),
 		}); err != nil {
-			var apiError *infra.APIError
-			if errors.As(err, &apiError) {
-				if apiError.Value.Code == "file_with_similar_name_exists" && apiError.Value.Status == http.StatusForbidden {
+			var errorResponse *errorpkg.ErrorResponse
+			if errors.As(err, &errorResponse) {
+				if errorResponse.Code == "file_with_similar_name_exists" && errorResponse.Status == http.StatusForbidden {
 					// No-op
 					return
 				} else {
-					infra.HandleError(err, w)
+					handleError(err, w)
 				}
 			} else {
-				infra.HandleError(err, w)
+				handleError(err, w)
 			}
 			return
 		}

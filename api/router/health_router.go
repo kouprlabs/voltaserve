@@ -15,7 +15,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type HealthRouter struct{}
@@ -34,18 +36,19 @@ func (r *HealthRouter) AppendRoutes(g fiber.Router) {
 //	@Description	Get
 //	@Tags			Health
 //	@Id				health_get
-//	@Produce		json
+//	@Produce		text/plain
+//	@Produce		application/json
 //	@Success		200	{string}	string	"OK"
 //	@Failure		503	{object}	errorpkg.ErrorResponse
 //	@Router			/health [get]
 func (r *HealthRouter) Get(c *fiber.Ctx) error {
-	if err := infra.NewPostgresManager().Connect(true); err != nil {
+	if err := infra.NewPostgresManager(config.GetConfig().Postgres, config.GetConfig().Environment).Connect(true); err != nil {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
-	if err := infra.NewRedisManager().Connect(); err != nil {
+	if err := infra.NewRedisManager(config.GetConfig().Redis).Connect(); err != nil {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
-	if err := infra.NewS3Manager().Connect(); err != nil {
+	if err := infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment).Connect(); err != nil {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
 	return c.SendString("OK")

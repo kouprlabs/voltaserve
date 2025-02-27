@@ -18,8 +18,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -54,16 +56,17 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 //	@Description	Create
 //	@Tags			Groups
 //	@Id				groups_create
-//	@Accept			json
-//	@Produce		json
-//	@Param			body	body		service.GroupCreateOptions	true	"Body"
-//	@Success		200		{object}	service.Group
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			body	body		dto.GroupCreateOptions	true	"Body"
+//	@Success		201		{object}	dto.Group
 //	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups [post]
 func (r *GroupRouter) Create(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(service.GroupCreateOptions)
+	opts := new(dto.GroupCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -79,13 +82,13 @@ func (r *GroupRouter) Create(c *fiber.Ctx) error {
 
 // Find godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Find
+//	@Description	Find
 //	@Tags			Groups
 //	@Id				groups_find
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.Group
+//	@Success		200	{object}	dto.Group
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [get]
@@ -104,14 +107,15 @@ func (r *GroupRouter) Find(c *fiber.Ctx) error {
 //	@Description	List
 //	@Tags			Groups
 //	@Id				groups_list
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			query			query		string	false	"Query"
 //	@Param			organization_id	query		string	false	"Organization ID"
 //	@Param			page			query		string	false	"Page"
 //	@Param			size			query		string	false	"Size"
 //	@Param			sort_by			query		string	false	"Sort By"
 //	@Param			sort_order		query		string	false	"Sort Order"
-//	@Success		200				{object}	service.GroupList
+//	@Success		200				{object}	dto.GroupList
+//	@Failure		400				{object}	errorpkg.ErrorResponse
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/groups [get]
@@ -133,9 +137,10 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 //	@Description	Probe
 //	@Tags			Groups
 //	@Id				groups_probe
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			size	query		string	false	"Size"
-//	@Success		200		{object}	service.GroupProbe
+//	@Success		200		{object}	dto.GroupProbe
+//	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups/probe [get]
@@ -151,28 +156,24 @@ func (r *GroupRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-type GroupPatchNameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
 // PatchName godoc
 //
 //	@Summary		Patch Name
 //	@Description	Patch Name
 //	@Tags			Groups
 //	@Id				groups_patch_name
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		string					true	"ID"
-//	@Param			body	body		GroupPatchNameOptions	true	"Body"
-//	@Success		200		{object}	service.Group
-//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		dto.GroupPatchNameOptions	true	"Body"
+//	@Success		200		{object}	dto.Group
 //	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/name [patch]
 func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(GroupPatchNameOptions)
+	opts := new(dto.GroupPatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -192,10 +193,9 @@ func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
 //	@Description	Delete
 //	@Tags			Groups
 //	@Id				groups_delete
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path	string	true	"ID"
-//	@Success		200
+//	@Success		204
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [delete]
@@ -207,26 +207,23 @@ func (r *GroupRouter) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-type GroupAddMemberOptions struct {
-	UserID string `json:"userId" validate:"required"`
-}
-
 // AddMember godoc
 //
 //	@Summary		Add Member
 //	@Description	Add Member
 //	@Tags			Groups
 //	@Id				groups_add_member
-//	@Accept			json
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id	path	string	true	"ID"
+//	@Success		204
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/members [post]
 func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(GroupAddMemberOptions)
+	opts := new(dto.GroupAddMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -239,27 +236,24 @@ func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-type GroupRemoveMemberOptions struct {
-	UserID string `json:"userId" validate:"required"`
-}
-
 // RemoveMember godoc
 //
 //	@Summary		Remove Member
 //	@Description	Remove Member
 //	@Tags			Groups
 //	@Id				groups_remove_member
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		string						true	"ID"
-//	@Param			body	body		GroupRemoveMemberOptions	true	"Body"
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		400		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id		path	string							true	"ID"
+//	@Param			body	body	dto.GroupRemoveMemberOptions	true	"Body"
+//	@Success		204
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/members [delete]
 func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(GroupRemoveMemberOptions)
+	opts := new(dto.GroupRemoveMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -272,7 +266,7 @@ func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*service.GroupListOptions, error) {
+func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*dto.GroupListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -307,7 +301,7 @@ func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*service.GroupListOpti
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &service.GroupListOptions{
+	return &dto.GroupListOptions{
 		Query:          query,
 		OrganizationID: c.Query("organization_id"),
 		Page:           page,

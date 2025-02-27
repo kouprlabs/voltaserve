@@ -15,10 +15,12 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type workspaceEntity struct {
@@ -187,7 +189,10 @@ type WorkspaceRepo struct {
 
 func NewWorkspaceRepo() *WorkspaceRepo {
 	return &WorkspaceRepo{
-		db:             infra.NewPostgresManager().GetDBOrPanic(),
+		db: infra.NewPostgresManager(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		).GetDBOrPanic(),
 		permissionRepo: NewPermissionRepo(),
 	}
 }

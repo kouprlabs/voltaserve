@@ -11,28 +11,27 @@
 package pipeline
 
 import (
-	"github.com/kouprlabs/voltaserve/api/client/apiclient"
-	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
-	apimodel "github.com/kouprlabs/voltaserve/api/model"
-	apiservice "github.com/kouprlabs/voltaserve/api/service"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
-	"github.com/kouprlabs/voltaserve/conversion/helper"
-	"github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/conversion/config"
 )
 
 type Dispatcher struct {
-	pdfPipeline        model.Pipeline
-	imagePipeline      model.Pipeline
-	officePipeline     model.Pipeline
-	audioVideoPipeline model.Pipeline
-	entityPipeline     model.Pipeline
-	mosaicPipeline     model.Pipeline
-	glbPipeline        model.Pipeline
-	zipPipeline        model.Pipeline
-	taskClient         *apiclient.TaskClient
-	snapshotClient     *apiclient.SnapshotClient
-	fileIdent          *apiinfra.FileIdentifier
+	pdfPipeline        Pipeline
+	imagePipeline      Pipeline
+	officePipeline     Pipeline
+	audioVideoPipeline Pipeline
+	entityPipeline     Pipeline
+	mosaicPipeline     Pipeline
+	glbPipeline        Pipeline
+	zipPipeline        Pipeline
+	taskClient         *client.TaskClient
+	snapshotClient     *client.SnapshotClient
+	fileIdent          *infra.FileIdentifier
 }
 
 func NewDispatcher() *Dispatcher {
@@ -45,67 +44,67 @@ func NewDispatcher() *Dispatcher {
 		mosaicPipeline:     NewMosaicPipeline(),
 		glbPipeline:        NewGLBPipeline(),
 		zipPipeline:        NewZIPPipeline(),
-		taskClient:         apiclient.NewTaskClient(),
-		snapshotClient:     apiclient.NewSnapshotClient(),
-		fileIdent:          apiinfra.NewFileIdentifier(),
+		taskClient:         client.NewTaskClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
+		snapshotClient:     client.NewSnapshotClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
+		fileIdent:          infra.NewFileIdentifier(),
 	}
 }
 
-func (d *Dispatcher) Dispatch(opts model.PipelineRunOptions) error {
-	if err := d.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
+func (d *Dispatcher) Dispatch(opts dto.PipelineRunOptions) error {
+	if err := d.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{apimodel.SnapshotFieldStatus},
-		Status:  helper.ToPtr(apimodel.SnapshotStatusProcessing),
+		Fields:  []string{model.SnapshotFieldStatus},
+		Status:  helper.ToPtr(model.SnapshotStatusProcessing),
 	}); err != nil {
 		return err
 	}
-	if err := d.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
+	if err := d.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Name:   helper.ToPtr("Processing."),
-		Fields: []string{apimodel.TaskFieldStatus},
-		Status: helper.ToPtr(apimodel.TaskStatusRunning),
+		Fields: []string{model.TaskFieldStatus},
+		Status: helper.ToPtr(model.TaskStatusRunning),
 	}); err != nil {
 		return err
 	}
 	id := d.identify(opts)
 	var err error
-	if id == model.PipelinePDF {
+	if id == dto.PipelinePDF {
 		err = d.pdfPipeline.Run(opts)
-	} else if id == model.PipelineOffice {
+	} else if id == dto.PipelineOffice {
 		err = d.officePipeline.Run(opts)
-	} else if id == model.PipelineImage {
+	} else if id == dto.PipelineImage {
 		err = d.imagePipeline.Run(opts)
-	} else if id == model.PipelineAudioVideo {
+	} else if id == dto.PipelineAudioVideo {
 		err = d.audioVideoPipeline.Run(opts)
-	} else if id == model.PipelineEntity {
+	} else if id == dto.PipelineEntity {
 		err = d.entityPipeline.Run(opts)
-	} else if id == model.PipelineMosaic {
+	} else if id == dto.PipelineMosaic {
 		err = d.mosaicPipeline.Run(opts)
-	} else if id == model.PipelineGLB {
+	} else if id == dto.PipelineGLB {
 		err = d.glbPipeline.Run(opts)
-	} else if id == model.PipelineZIP {
+	} else if id == dto.PipelineZIP {
 		err = d.zipPipeline.Run(opts)
 	}
 	if err != nil {
-		if err := d.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
+		if err := d.snapshotClient.Patch(dto.SnapshotPatchOptions{
 			Options: opts,
-			Fields:  []string{apimodel.SnapshotFieldStatus},
-			Status:  helper.ToPtr(apimodel.SnapshotStatusError),
+			Fields:  []string{model.SnapshotFieldStatus},
+			Status:  helper.ToPtr(model.SnapshotStatusError),
 		}); err != nil {
 			return err
 		}
-		if err := d.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
-			Fields: []string{apimodel.TaskFieldStatus, apimodel.TaskFieldError},
-			Status: helper.ToPtr(apimodel.TaskStatusError),
-			Error:  helper.ToPtr(errorpkg.GetUserFriendlyMessage(err.Error(), errorpkg.FallbackMessage)),
+		if err := d.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldStatus, model.TaskFieldError},
+			Status: helper.ToPtr(model.TaskStatusError),
+			Error:  helper.ToPtr(d.getUserFriendlyMessage(err.Error())),
 		}); err != nil {
 			return err
 		}
 		return err
 	} else {
-		if err := d.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
+		if err := d.snapshotClient.Patch(dto.SnapshotPatchOptions{
 			Options: opts,
-			Fields:  []string{apimodel.SnapshotFieldStatus, apimodel.SnapshotFieldTaskID},
-			Status:  helper.ToPtr(apimodel.SnapshotStatusReady),
+			Fields:  []string{model.SnapshotFieldStatus, model.SnapshotFieldTaskID},
+			Status:  helper.ToPtr(model.SnapshotStatusReady),
 		}); err != nil {
 			return err
 		}
@@ -116,23 +115,42 @@ func (d *Dispatcher) Dispatch(opts model.PipelineRunOptions) error {
 	}
 }
 
-func (d *Dispatcher) identify(opts model.PipelineRunOptions) string {
+func (d *Dispatcher) identify(opts dto.PipelineRunOptions) string {
 	if opts.PipelineID != nil {
 		return *opts.PipelineID
 	} else {
 		if d.fileIdent.IsPDF(opts.Key) {
-			return model.PipelinePDF
+			return dto.PipelinePDF
 		} else if d.fileIdent.IsOffice(opts.Key) || d.fileIdent.IsPlainText(opts.Key) {
-			return model.PipelineOffice
+			return dto.PipelineOffice
 		} else if d.fileIdent.IsImage(opts.Key) {
-			return model.PipelineImage
+			return dto.PipelineImage
 		} else if d.fileIdent.IsAudio(opts.Key) || d.fileIdent.IsVideo(opts.Key) {
-			return model.PipelineAudioVideo
+			return dto.PipelineAudioVideo
 		} else if d.fileIdent.IsGLB(opts.Key) {
-			return model.PipelineGLB
+			return dto.PipelineGLB
 		} else if d.fileIdent.IsZIP(opts.Key) {
-			return model.PipelineZIP
+			return dto.PipelineZIP
 		}
 	}
 	return ""
+}
+
+func (d *Dispatcher) getUserFriendlyMessage(code string) string {
+	messages := map[string]string{
+		"mosaic not found":                                   "Mosaic not found.",
+		"no matching pipeline found":                         "This file type cannot be processed.",
+		"language is undefined":                              "Language is undefined.",
+		"unsupported file type":                              "Unsupported file type.",
+		"text is empty":                                      "Text is empty.",
+		"text exceeds supported limit of 1000000 characters": "Text exceeds supported limit of 1000000 characters.",
+		"missing query param api_key":                        "Missing query param api_key.",
+		"invalid query param api_key":                        "Invalid query param api_key.",
+		"invalid content type":                               "Invalid content type.",
+	}
+	res, ok := messages[code]
+	if !ok {
+		return "An error occurred while processing the file."
+	}
+	return res
 }

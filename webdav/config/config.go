@@ -13,30 +13,18 @@ package config
 import (
 	"os"
 	"strconv"
+
+	"github.com/kouprlabs/voltaserve/shared/config"
 )
 
 type Config struct {
-	Host     string
-	Port     int
-	APIURL   string
-	IdPURL   string
-	S3       S3Config
-	Redis    RedisConfig
-	Security SecurityConfig
-}
-
-type S3Config struct {
-	URL       string
-	AccessKey string
-	SecretKey string
-	Region    string
-	Secure    bool
-}
-
-type RedisConfig struct {
-	Address  string
-	Password string
-	DB       int
+	Host        string
+	Port        int
+	APIURL      string
+	IdPURL      string
+	S3          config.S3Config
+	Security    SecurityConfig
+	Environment config.EnvironmentConfig
 }
 
 type SecurityConfig struct {
@@ -44,13 +32,13 @@ type SecurityConfig struct {
 }
 
 func GetConfig() *Config {
-	config := &Config{}
-	readPort(config)
-	readURLs(config)
-	readS3(config)
-	readRedis(config)
-	readSecurity(config)
-	return config
+	cfg := &Config{}
+	readPort(cfg)
+	readURLs(cfg)
+	readS3(cfg)
+	readSecurity(cfg)
+	readEnvironment(cfg)
+	return cfg
 }
 
 func readPort(config *Config) {
@@ -81,18 +69,12 @@ func readS3(config *Config) {
 	}
 }
 
-func readRedis(config *Config) {
-	config.Redis.Address = os.Getenv("REDIS_ADDRESS")
-	config.Redis.Password = os.Getenv("REDIS_PASSWORD")
-	if len(os.Getenv("REDIS_DB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("REDIS_DB"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Redis.DB = int(v)
-	}
-}
-
 func readSecurity(config *Config) {
 	config.Security.APIKey = os.Getenv("SECURITY_API_KEY")
+}
+
+func readEnvironment(config *Config) {
+	if os.Getenv("TEST") == "true" {
+		config.Environment.IsTest = true
+	}
 }

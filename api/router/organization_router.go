@@ -18,8 +18,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -54,23 +56,23 @@ func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 //	@Description	Create
 //	@Tags			Organizations
 //	@Id				organizations_create
-//	@Accept			json
-//	@Produce		json
-//	@Param			body	body		service.OrganizationCreateOptions	true	"Body"
-//	@Success		200		{object}	service.Organization
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			body	body		dto.OrganizationCreateOptions	true	"Body"
+//	@Success		201		{object}	dto.Organization
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [post]
 func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(service.OrganizationCreateOptions)
+	opts := new(dto.OrganizationCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.orgSvc.Create(service.OrganizationCreateOptions{
+	res, err := r.orgSvc.Create(dto.OrganizationCreateOptions{
 		Name:  opts.Name,
 		Image: opts.Image,
 	}, userID)
@@ -82,13 +84,13 @@ func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 
 // Find godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Find
+//	@Description	Find
 //	@Tags			Organizations
 //	@Id				organizations_find
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.Organization
+//	@Success		200	{object}	dto.Organization
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id} [get]
@@ -107,10 +109,9 @@ func (r *OrganizationRouter) Find(c *fiber.Ctx) error {
 //	@Description	Delete
 //	@Tags			Organizations
 //	@Id				organizations_delete
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path	string	true	"ID"
-//	@Success		200
+//	@Success		204
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id} [delete]
@@ -122,28 +123,24 @@ func (r *OrganizationRouter) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-type OrganizationPatchNameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
 // PatchName godoc
 //
 //	@Summary		Patch Name
 //	@Description	Patch Name
 //	@Tags			Organizations
 //	@Id				organizations_patch_name
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		OrganizationPatchNameOptions	true	"Body"
-//	@Success		200		{object}	service.Organization
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id		path		string								true	"ID"
+//	@Param			body	body		dto.OrganizationPatchNameOptions	true	"Body"
+//	@Success		200		{object}	dto.Organization
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id}/name [patch]
 func (r *OrganizationRouter) PatchName(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(OrganizationPatchNameOptions)
+	opts := new(dto.OrganizationPatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -163,13 +160,14 @@ func (r *OrganizationRouter) PatchName(c *fiber.Ctx) error {
 //	@Description	List
 //	@Tags			Organizations
 //	@Id				organizations_list
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			query		query		string	false	"Query"
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
 //	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{object}	service.OrganizationList
+//	@Success		200			{object}	dto.OrganizationList
+//	@Failure		400			{object}	errorpkg.ErrorResponse
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [get]
@@ -191,9 +189,10 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 //	@Description	Probe
 //	@Tags			Organizations
 //	@Id				organizations_probe
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			size	query		string	false	"Size"
-//	@Success		200		{object}	service.OrganizationProbe
+//	@Success		200		{object}	dto.OrganizationProbe
+//	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/probe [get]
@@ -215,9 +214,9 @@ func (r *OrganizationRouter) Probe(c *fiber.Ctx) error {
 //	@Description	Leave
 //	@Tags			Organizations
 //	@Id				organizations_leave
-//	@Accept			json
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
+//	@Produce		application/json
+//	@Param			id	path	string	true	"ID"
+//	@Success		204
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
@@ -230,27 +229,24 @@ func (r *OrganizationRouter) Leave(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-type OrganizationRemoveMemberOptions struct {
-	UserID string `json:"userId" validate:"required"`
-}
-
 // RemoveMember godoc
 //
 //	@Summary		Remove Member
 //	@Description	Remove Member
 //	@Tags			Organizations
 //	@Id				organizations_remove_member
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		OrganizationRemoveMemberOptions	true	"Body"
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		400		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id		path	string								true	"ID"
+//	@Param			body	body	dto.OrganizationRemoveMemberOptions	true	"Body"
+//	@Success		204
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id}/members [delete]
 func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(OrganizationRemoveMemberOptions)
+	opts := new(dto.OrganizationRemoveMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -263,7 +259,7 @@ func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.OrganizationListOptions, error) {
+func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*dto.OrganizationListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -298,7 +294,7 @@ func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.Organi
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &service.OrganizationListOptions{
+	return &dto.OrganizationListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,

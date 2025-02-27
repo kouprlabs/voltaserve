@@ -1,19 +1,6 @@
 basePath: /v3
 definitions:
-  errorpkg.ErrorResponse:
-    properties:
-      code:
-        type: string
-      message:
-        type: string
-      moreInfo:
-        type: string
-      status:
-        type: integer
-      userMessage:
-        type: string
-    type: object
-  model.PipelineRunOptions:
+  dto.PipelineRunOptions:
     properties:
       bucket:
         type: string
@@ -30,6 +17,19 @@ definitions:
       taskId:
         type: string
     type: object
+  errorpkg.ErrorResponse:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+      moreInfo:
+        type: string
+      status:
+        type: integer
+      userMessage:
+        type: string
+    type: object
 info:
   contact: {}
   title: Voltaserve Conversion
@@ -40,6 +40,7 @@ paths:
       description: Get
       operationId: health_get
       produces:
+      - text/plain
       - application/json
       responses:
         "200":
@@ -65,7 +66,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/model.PipelineRunOptions'
+          $ref: '#/definitions/dto.PipelineRunOptions'
       produces:
       - application/json
       responses:
@@ -73,22 +74,28 @@ paths:
           description: OK
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Run
       tags:
       - Pipelines
   /version:
     get:
       description: Get
-      operationId: get_version
+      operationId: version_get
       produces:
       - application/json
       responses:
         "200":
-          description: '{Version}'
+          description: OK
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
         "503":
           description: Service Unavailable
           schema:

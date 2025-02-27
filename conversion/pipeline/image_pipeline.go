@@ -17,41 +17,40 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/api/client/apiclient"
-	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
-	apimodel "github.com/kouprlabs/voltaserve/api/model"
-	apiservice "github.com/kouprlabs/voltaserve/api/service"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/helper"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
-	"github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/conversion/logger"
 	"github.com/kouprlabs/voltaserve/conversion/processor"
 )
 
 type imagePipeline struct {
-	mosaicPipeline model.Pipeline
+	mosaicPipeline Pipeline
 	imageProc      *processor.ImageProcessor
-	s3             apiinfra.S3Manager
-	taskClient     *apiclient.TaskClient
-	snapshotClient *apiclient.SnapshotClient
-	fileIdent      *apiinfra.FileIdentifier
+	s3             infra.S3Manager
+	taskClient     *client.TaskClient
+	snapshotClient *client.SnapshotClient
+	fileIdent      *infra.FileIdentifier
 	config         *config.Config
 }
 
-func NewImagePipeline() model.Pipeline {
+func NewImagePipeline() Pipeline {
 	return &imagePipeline{
 		mosaicPipeline: NewMosaicPipeline(),
 		imageProc:      processor.NewImageProcessor(),
-		s3:             apiinfra.NewS3Manager(),
-		taskClient:     apiclient.NewTaskClient(),
-		snapshotClient: apiclient.NewSnapshotClient(),
-		fileIdent:      apiinfra.NewFileIdentifier(),
+		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		taskClient:     client.NewTaskClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
+		snapshotClient: client.NewSnapshotClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
+		fileIdent:      infra.NewFileIdentifier(),
 		config:         config.GetConfig(),
 	}
 }
 
-func (p *imagePipeline) Run(opts model.PipelineRunOptions) error {
+func (p *imagePipeline) Run(opts dto.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
@@ -60,15 +59,15 @@ func (p *imagePipeline) Run(opts model.PipelineRunOptions) error {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return
 		} else if err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(inputPath)
 	return p.RunFromLocalPath(inputPath, opts)
 }
 
-func (p *imagePipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
-		Fields: []string{apimodel.TaskFieldName},
+func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
+	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Measuring image dimensions."),
 	}); err != nil {
 		return err
@@ -79,8 +78,8 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts model.PipelineRu
 	}
 	var imagePath string
 	if p.fileIdent.IsTIFF(inputPath) {
-		if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
-			Fields: []string{apimodel.TaskFieldName},
+		if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
 			Name:   helper.ToPtr("Converting TIFF image to JPEG format."),
 		}); err != nil {
 			return err
@@ -100,11 +99,11 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts model.PipelineRu
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return
 		} else if err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(imagePath)
-	if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
-		Fields: []string{apimodel.TaskFieldName},
+	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
@@ -118,10 +117,10 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts model.PipelineRu
 			return err
 		}
 	} else {
-		if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
-			Fields: []string{apimodel.TaskFieldName, apimodel.TaskFieldStatus},
+		if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
 			Name:   helper.ToPtr("Done."),
-			Status: helper.ToPtr(apimodel.TaskStatusSuccess),
+			Status: helper.ToPtr(model.TaskStatusSuccess),
 		}); err != nil {
 			return err
 		}
@@ -129,7 +128,7 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts model.PipelineRu
 	return nil
 }
 
-func (p *imagePipeline) measureImageDimensions(inputPath string, opts model.PipelineRunOptions) (*apimodel.ImageProps, error) {
+func (p *imagePipeline) measureImageDimensions(inputPath string, opts dto.PipelineRunOptions) (*model.ImageProps, error) {
 	imageProps, err := p.imageProc.MeasureImage(inputPath)
 	if err != nil {
 		return nil, err
@@ -138,10 +137,10 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts model.Pipe
 	if err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{apimodel.SnapshotFieldOriginal},
-		Original: &apimodel.S3Object{
+		Fields:  []string{model.SnapshotFieldOriginal},
+		Original: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
 			Size:   stat.Size(),
@@ -153,7 +152,7 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts model.Pipe
 	return imageProps, nil
 }
 
-func (p *imagePipeline) createThumbnail(inputPath string, opts model.PipelineRunOptions) error {
+func (p *imagePipeline) createThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 	res, err := p.imageProc.Thumbnail(inputPath, p.config.Limits.ImagePreviewMaxWidth, p.config.Limits.ImagePreviewMaxHeight, outputPath)
 	if err != nil {
@@ -164,7 +163,7 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts model.PipelineRun
 			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 				return
 			} else if err != nil {
-				infra.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}(outputPath)
 	} else {
@@ -174,10 +173,10 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts model.PipelineRun
 	if err != nil {
 		return err
 	}
-	s3Object := &apimodel.S3Object{
+	s3Object := &model.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(outputPath),
-		Image: &apimodel.ImageProps{
+		Image: &model.ImageProps{
 			Width:  res.Width,
 			Height: res.Height,
 		},
@@ -186,9 +185,9 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts model.PipelineRun
 	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options:   opts,
-		Fields:    []string{apimodel.SnapshotFieldThumbnail},
+		Fields:    []string{model.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
 	}); err != nil {
 		return err
@@ -196,7 +195,7 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts model.PipelineRun
 	return nil
 }
 
-func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps apimodel.ImageProps, opts model.PipelineRunOptions) (*string, error) {
+func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps model.ImageProps, opts dto.PipelineRunOptions) (*string, error) {
 	jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
 	if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
 		return nil, err
@@ -205,7 +204,7 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps apimodel.
 	if err != nil {
 		return nil, err
 	}
-	s3Object := &apimodel.S3Object{
+	s3Object := &model.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/preview.jpg",
 		Size:   stat.Size(),
@@ -214,9 +213,9 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps apimodel.
 	if err := p.s3.PutFile(s3Object.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{apimodel.SnapshotFieldPreview},
+		Fields:  []string{model.SnapshotFieldPreview},
 		Preview: s3Object,
 	}); err != nil {
 		return nil, err
@@ -224,15 +223,15 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps apimodel.
 	return &jpegPath, nil
 }
 
-func (p *imagePipeline) saveOriginalAsPreview(inputPath string, imageProps apimodel.ImageProps, opts model.PipelineRunOptions) error {
+func (p *imagePipeline) saveOriginalAsPreview(inputPath string, imageProps model.ImageProps, opts dto.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{apimodel.SnapshotFieldPreview},
-		Preview: &apimodel.S3Object{
+		Fields:  []string{model.SnapshotFieldPreview},
+		Preview: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
 			Size:   stat.Size(),

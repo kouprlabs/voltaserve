@@ -16,9 +16,11 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -52,13 +54,14 @@ func (r *SnapshotRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Description	List
 //	@Tags			Snapshots
 //	@Id				snapshots_list
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			file_id		query		string	true	"File ID"
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
 //	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{object}	service.SnapshotList
+//	@Success		200			{object}	dto.SnapshotList
+//	@Failure		400			{object}	errorpkg.ErrorResponse
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots [get]
@@ -80,10 +83,11 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 //	@Description	Probe
 //	@Tags			Snapshots
 //	@Id				snapshots_probe
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			file_id	query		string	true	"File ID"
 //	@Param			size	query		string	false	"Size"
-//	@Success		200		{object}	service.SnapshotProbe
+//	@Success		200		{object}	dto.SnapshotProbe
+//	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/probe [get]
@@ -105,8 +109,9 @@ func (r *SnapshotRouter) Probe(c *fiber.Ctx) error {
 //	@Description	Activate
 //	@Tags			Snapshots
 //	@Id				snapshots_activate
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id}/activate [post]
@@ -124,9 +129,9 @@ func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
 //	@Description	Detach
 //	@Tags			Snapshots
 //	@Id				snapshots_detach
-//	@Produce		json
-//	@Param			id	path	string	true	"ID"
-//	@Success		204
+//	@Produce		application/json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id}/detach [post]
@@ -144,11 +149,11 @@ func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
 //	@Description	Patch
 //	@Tags			Snapshots
 //	@Id				snapshots_patch
-//	@Produce		json
-//	@Param			api_key	query		string							true	"API Key"
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		service.SnapshotPatchOptions	true	"Body"
-//	@Success		200		{object}	service.Snapshot
+//	@Produce		application/json
+//	@Param			api_key	query		string						true	"API Key"
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		dto.SnapshotPatchOptions	true	"Body"
+//	@Success		200		{object}	dto.Snapshot
 //	@Failure		401		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id} [patch]
@@ -160,7 +165,7 @@ func (r *SnapshotRouter) Patch(c *fiber.Ctx) error {
 	if apiKey != r.config.Security.APIKey {
 		return errorpkg.NewInvalidAPIKeyError()
 	}
-	opts := new(service.SnapshotPatchOptions)
+	opts := new(dto.SnapshotPatchOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -180,8 +185,8 @@ func (r *SnapshotRouter) Patch(c *fiber.Ctx) error {
 //	@Description	Get Languages
 //	@Tags			Snapshots
 //	@Id				snapshots_get_languages
-//	@Produce		json
-//	@Success		200	{array}		service.SnapshotLanguage
+//	@Produce		application/json
+//	@Success		200	{array}		dto.SnapshotLanguage
 //	@Failure		503	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/languages [get]
 func (r *SnapshotRouter) GetLanguages(c *fiber.Ctx) error {
@@ -192,7 +197,7 @@ func (r *SnapshotRouter) GetLanguages(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotListOptions, error) {
+func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*dto.SnapshotListOptions, error) {
 	var err error
 	fileID := c.Query("file_id")
 	if fileID == "" {
@@ -227,7 +232,7 @@ func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotLi
 	if !r.snapshotSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	return &service.SnapshotListOptions{
+	return &dto.SnapshotListOptions{
 		Page:      page,
 		Size:      size,
 		SortBy:    sortBy,

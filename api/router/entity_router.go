@@ -17,8 +17,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -51,17 +53,17 @@ func (r *EntityRouter) AppendRoutes(g fiber.Router) {
 //	@Description	Create
 //	@Tags			Entities
 //	@Id				entities_create
-//	@Accept			json
-//	@Produce		json
-//	@Param			file_id	path		string						true	"File ID"
-//	@Param			body	body		service.EntityCreateOptions	true	"Body"
-//	@Success		200		{object}	service.Task
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			file_id	path		string					true	"File ID"
+//	@Param			body	body		dto.EntityCreateOptions	true	"Body"
+//	@Success		201		{object}	dto.Task
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/entities/{file_id} [post]
 func (r *EntityRouter) Create(c *fiber.Ctx) error {
-	opts := new(service.EntityCreateOptions)
+	opts := new(dto.EntityCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -72,7 +74,7 @@ func (r *EntityRouter) Create(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(res)
+	return c.Status(fiber.StatusCreated).JSON(res)
 }
 
 // Delete godoc
@@ -81,20 +83,19 @@ func (r *EntityRouter) Create(c *fiber.Ctx) error {
 //	@Description	Delete
 //	@Tags			Entities
 //	@Id				entities_delete
-//	@Accept			json
-//	@Produce		json
-//	@Param			file_id	path	string	true	"File ID"
-//	@Success		200
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Produce		application/json
+//	@Param			file_id	path		string	true	"File ID"
+//	@Success		201		{object}	dto.Task
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/entities/{file_id} [delete]
 func (r *EntityRouter) Delete(c *fiber.Ctx) error {
 	res, err := r.entitySvc.Delete(c.Params("file_id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
-	return c.JSON(res)
+	return c.Status(fiber.StatusCreated).JSON(res)
 }
 
 // List godoc
@@ -103,14 +104,14 @@ func (r *EntityRouter) Delete(c *fiber.Ctx) error {
 //	@Description	List
 //	@Tags			Entities
 //	@Id				entities_list
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			file_id		path		string	true	"File ID"
 //	@Param			query		query		string	false	"Query"
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
 //	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{array}		service.EntityList
+//	@Success		200			{array}		dto.EntityList
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/entities/{file_id} [get]
@@ -132,10 +133,10 @@ func (r *EntityRouter) List(c *fiber.Ctx) error {
 //	@Description	Probe
 //	@Tags			Entities
 //	@Id				entities_probe
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			file_id	path		string	true	"File ID"
 //	@Param			size	query		string	false	"Size"
-//	@Success		200		{array}		service.EntityProbe
+//	@Success		200		{array}		dto.EntityProbe
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/entities/{file_id}/probe [get]
@@ -151,7 +152,7 @@ func (r *EntityRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *EntityRouter) parseListQueryParams(c *fiber.Ctx) (*service.EntityListOptions, error) {
+func (r *EntityRouter) parseListQueryParams(c *fiber.Ctx) (*dto.EntityListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -186,7 +187,7 @@ func (r *EntityRouter) parseListQueryParams(c *fiber.Ctx) (*service.EntityListOp
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &service.EntityListOptions{
+	return &dto.EntityListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,

@@ -36,7 +36,8 @@ gci write -s standard -s default \
 gofumpt -w . && \
 gofmt -s -w . && \
 golangci-lint run --fix && \
-goimports -w .
+goimports -w . && \
+swag fmt
 ```
 
 Build Docker image:
@@ -50,7 +51,7 @@ docker build -t voltaserve/conversion .
 Generate `swagger.yml`:
 
 ```shell
-swag init --output ./docs --outputTypes yaml
+swag init --parseDependency --output ./docs --outputTypes yaml
 ```
 
 Preview (will be served at [http://localhost:19093](http://localhost:19093)):

@@ -14,9 +14,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
-	"github.com/kouprlabs/voltaserve/conversion/model"
 	"github.com/kouprlabs/voltaserve/conversion/runtime"
 )
 
@@ -46,15 +47,15 @@ func (r *PipelineRouter) AppendRoutes(g fiber.Router) {
 //	@Description	Run
 //	@Tags			Pipelines
 //	@Id				pipelines_run
-//	@Accept			json
-//	@Produce		json
-//	@Param			body	body	model.PipelineRunOptions	true	"Body"
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			body	body	dto.PipelineRunOptions	true	"Body"
 //	@Success		200
-//	@Failure		400
-//	@Failure		500
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/pipelines/run [post]
 func (r *PipelineRouter) Run(c *fiber.Ctx) error {
-	opts := new(model.PipelineRunOptions)
+	opts := new(dto.PipelineRunOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}

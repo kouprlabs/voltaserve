@@ -15,13 +15,15 @@ import (
 	"slices"
 	"sort"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
 )
@@ -68,34 +70,7 @@ func NewGroupService() *GroupService {
 	}
 }
 
-type Group struct {
-	ID           string       `json:"id"`
-	Name         string       `json:"name"`
-	Image        *string      `json:"image,omitempty"`
-	Organization Organization `json:"organization"`
-	Permission   string       `json:"permission"`
-	CreateTime   string       `json:"createTime,omitempty"`
-	UpdateTime   *string      `json:"updateTime"`
-}
-
-const (
-	GroupSortByName         = "name"
-	GroupSortByDateCreated  = "date_created"
-	GroupSortByDateModified = "date_modified"
-)
-
-const (
-	GroupSortOrderAsc  = "asc"
-	GroupSortOrderDesc = "desc"
-)
-
-type GroupCreateOptions struct {
-	Name           string  `json:"name"           validate:"required,max=255"`
-	Image          *string `json:"image"`
-	OrganizationID string  `json:"organizationId" validate:"required"`
-}
-
-func (svc *GroupService) Create(opts GroupCreateOptions, userID string) (*Group, error) {
+func (svc *GroupService) Create(opts dto.GroupCreateOptions, userID string) (*dto.Group, error) {
 	org, err := svc.orgCache.Get(opts.OrganizationID)
 	if err != nil {
 		return nil, err
@@ -129,7 +104,7 @@ func (svc *GroupService) Create(opts GroupCreateOptions, userID string) (*Group,
 	return res, nil
 }
 
-func (svc *GroupService) Find(id string, userID string) (*Group, error) {
+func (svc *GroupService) Find(id string, userID string) (*dto.Group, error) {
 	group, err := svc.groupCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -144,33 +119,16 @@ func (svc *GroupService) Find(id string, userID string) (*Group, error) {
 	return res, nil
 }
 
-type GroupList struct {
-	Data          []*Group `json:"data"`
-	TotalPages    uint64   `json:"totalPages"`
-	TotalElements uint64   `json:"totalElements"`
-	Page          uint64   `json:"page"`
-	Size          uint64   `json:"size"`
-}
-
-type GroupListOptions struct {
-	Query          string
-	OrganizationID string
-	Page           uint64
-	Size           uint64
-	SortBy         string
-	SortOrder      string
-}
-
-func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList, error) {
+func (svc *GroupService) List(opts dto.GroupListOptions, userID string) (*dto.GroupList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = GroupSortByDateCreated
+		opts.SortBy = dto.GroupSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = GroupSortOrderAsc
+		opts.SortOrder = dto.GroupSortOrderAsc
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -178,7 +136,7 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 	if err != nil {
 		return nil, err
 	}
-	return &GroupList{
+	return &dto.GroupList{
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
@@ -187,24 +145,19 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 	}, nil
 }
 
-type GroupProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
-}
-
-func (svc *GroupService) Probe(opts GroupListOptions, userID string) (*GroupProbe, error) {
+func (svc *GroupService) Probe(opts dto.GroupListOptions, userID string) (*dto.GroupProbe, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	totalElements := uint64(len(all))
-	return &GroupProbe{
+	return &dto.GroupProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
 }
 
-func (svc *GroupService) PatchName(id string, name string, userID string) (*Group, error) {
+func (svc *GroupService) PatchName(id string, name string, userID string) (*dto.Group, error) {
 	group, err := svc.groupCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -301,13 +254,13 @@ func (svc *GroupService) RemoveMember(id string, memberID string, userID string)
 
 func (svc *GroupService) IsValidSortBy(value string) bool {
 	return value == "" ||
-		value == GroupSortByName ||
-		value == GroupSortByDateCreated ||
-		value == GroupSortByDateModified
+		value == dto.GroupSortByName ||
+		value == dto.GroupSortByDateCreated ||
+		value == dto.GroupSortByDateModified
 }
 
 func (svc *GroupService) IsValidSortOrder(value string) bool {
-	return value == "" || value == GroupSortOrderAsc || value == GroupSortOrderDesc
+	return value == "" || value == dto.GroupSortOrderAsc || value == dto.GroupSortOrderDesc
 }
 
 func (svc *GroupService) checkUserIsMemberOfOrganization(userID string, organizationID string) error {
@@ -321,7 +274,7 @@ func (svc *GroupService) checkUserIsMemberOfOrganization(userID string, organiza
 	return nil
 }
 
-func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.Group, error) {
+func (svc *GroupService) findAll(opts dto.GroupListOptions, userID string) ([]model.Group, error) {
 	var res []model.Group
 	var err error
 	if opts.Query == "" {
@@ -338,7 +291,7 @@ func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.
 	return res, nil
 }
 
-func (svc *GroupService) load(opts GroupListOptions, userID string) ([]model.Group, error) {
+func (svc *GroupService) load(opts dto.GroupListOptions, userID string) ([]model.Group, error) {
 	var res []model.Group
 	if opts.OrganizationID == "" {
 		ids, err := svc.groupRepo.FindIDs()
@@ -362,7 +315,7 @@ func (svc *GroupService) load(opts GroupListOptions, userID string) ([]model.Gro
 	return res, nil
 }
 
-func (svc *GroupService) search(opts GroupListOptions, userID string) ([]model.Group, error) {
+func (svc *GroupService) search(opts dto.GroupListOptions, userID string) ([]model.Group, error) {
 	var res []model.Group
 	count, err := svc.groupRepo.Count()
 	if err != nil {
@@ -434,32 +387,32 @@ func (svc *GroupService) authorizeIDs(ids []string, userID string) ([]model.Grou
 }
 
 func (svc *GroupService) sort(data []model.Group, sortBy string, sortOrder string) []model.Group {
-	if sortBy == GroupSortByName {
+	if sortBy == dto.GroupSortByName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == GroupSortOrderDesc {
+			if sortOrder == dto.GroupSortOrderDesc {
 				return data[i].GetName() > data[j].GetName()
 			} else {
 				return data[i].GetName() < data[j].GetName()
 			}
 		})
 		return data
-	} else if sortBy == GroupSortByDateCreated {
+	} else if sortBy == dto.GroupSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a := helper.StringToTime(data[i].GetCreateTime())
 			b := helper.StringToTime(data[j].GetCreateTime())
-			if sortOrder == GroupSortOrderDesc {
+			if sortOrder == dto.GroupSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == GroupSortByDateModified {
+	} else if sortBy == dto.GroupSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a := helper.StringToTime(*data[i].GetUpdateTime())
 				b := helper.StringToTime(*data[j].GetUpdateTime())
-				if sortOrder == GroupSortOrderDesc {
+				if sortOrder == dto.GroupSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -511,7 +464,7 @@ func newGroupMapper() *groupMapper {
 	}
 }
 
-func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
+func (mp *groupMapper) mapOne(m model.Group, userID string) (*dto.Group, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
@@ -520,7 +473,7 @@ func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	res := &Group{
+	res := &dto.Group{
 		ID:           m.GetID(),
 		Name:         m.GetName(),
 		Organization: *o,
@@ -547,8 +500,8 @@ func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
 	return res, nil
 }
 
-func (mp *groupMapper) mapMany(groups []model.Group, userID string) ([]*Group, error) {
-	res := make([]*Group, 0)
+func (mp *groupMapper) mapMany(groups []model.Group, userID string) ([]*dto.Group, error) {
+	res := make([]*dto.Group, 0)
 	for _, group := range groups {
 		g, err := mp.mapOne(group, userID)
 		if err != nil {

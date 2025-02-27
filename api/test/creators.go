@@ -13,16 +13,18 @@ package test
 import (
 	"fmt"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 func CreateUsers(count int) ([]model.User, error) {
-	db, err := infra.NewPostgresManager().GetDB()
+	db, err := infra.NewPostgresManager(config.GetConfig().Postgres, config.GetConfig().Environment).GetDB()
 	if err != nil {
 		return nil, nil
 	}
@@ -49,16 +51,16 @@ func CreateUsers(count int) ([]model.User, error) {
 	return res, nil
 }
 
-func CreateOrganization(userID string) (*service.Organization, error) {
-	org, err := service.NewOrganizationService().Create(service.OrganizationCreateOptions{Name: "organization"}, userID)
+func CreateOrganization(userID string) (*dto.Organization, error) {
+	org, err := service.NewOrganizationService().Create(dto.OrganizationCreateOptions{Name: "organization"}, userID)
 	if err != nil {
 		return nil, err
 	}
 	return org, nil
 }
 
-func CreateGroup(orgID string, userID string) (*service.Group, error) {
-	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+func CreateGroup(orgID string, userID string) (*dto.Group, error) {
+	group, err := service.NewGroupService().Create(dto.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: orgID,
 	}, userID)
@@ -68,8 +70,8 @@ func CreateGroup(orgID string, userID string) (*service.Group, error) {
 	return group, nil
 }
 
-func CreateWorkspace(orgID string, userID string) (*service.Workspace, error) {
-	workspace, err := service.NewWorkspaceService().Create(service.WorkspaceCreateOptions{
+func CreateWorkspace(orgID string, userID string) (*dto.Workspace, error) {
+	workspace, err := service.NewWorkspaceService().Create(dto.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  orgID,
 		StorageCapacity: int64(config.GetConfig().Defaults.WorkspaceStorageCapacityMB),
@@ -80,7 +82,7 @@ func CreateWorkspace(orgID string, userID string) (*service.Workspace, error) {
 	return workspace, nil
 }
 
-func CreateFile(workspaceID string, workspaceRootID string, userID string) (*service.File, error) {
+func CreateFile(workspaceID string, workspaceRootID string, userID string) (*dto.File, error) {
 	file, err := service.NewFileService().Create(service.FileCreateOptions{
 		WorkspaceID: workspaceID,
 		Name:        "file",

@@ -21,7 +21,7 @@ import (
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
 
-	"github.com/kouprlabs/voltaserve/mosaic/infra"
+	"github.com/kouprlabs/voltaserve/mosaic/logger"
 	"github.com/kouprlabs/voltaserve/mosaic/model"
 )
 
@@ -299,7 +299,7 @@ func (mb *MosaicBuilder) Build() (*model.Metadata, error) {
 		if r := recover(); r != nil {
 			if cleanupIfFails {
 				if err := os.RemoveAll(mb.options.OutputDirectory); err != nil {
-					infra.GetLogger().Error(err)
+					logger.GetLogger().Error(err)
 					return
 				}
 			}

@@ -17,13 +17,15 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
 )
@@ -57,42 +59,12 @@ func NewWorkspaceService() *WorkspaceService {
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
 		fileMapper:      newFileMapper(),
-		s3:              infra.NewS3Manager(),
+		s3:              infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		config:          config.GetConfig(),
 	}
 }
 
-type Workspace struct {
-	ID              string       `json:"id"`
-	Image           *string      `json:"image,omitempty"`
-	Name            string       `json:"name"`
-	RootID          string       `json:"rootId,omitempty"`
-	StorageCapacity int64        `json:"storageCapacity"`
-	Permission      string       `json:"permission"`
-	Organization    Organization `json:"organization"`
-	CreateTime      string       `json:"createTime"`
-	UpdateTime      *string      `json:"updateTime,omitempty"`
-}
-
-const (
-	WorkspaceSortByName         = "name"
-	WorkspaceSortByDateCreated  = "date_created"
-	WorkspaceSortByDateModified = "date_modified"
-)
-
-const (
-	WorkspaceSortOrderAsc  = "asc"
-	WorkspaceSortOrderDesc = "desc"
-)
-
-type WorkspaceCreateOptions struct {
-	Name            string  `json:"name"            validate:"required,max=255"`
-	Image           *string `json:"image"`
-	OrganizationID  string  `json:"organizationId"  validate:"required"`
-	StorageCapacity int64   `json:"storageCapacity"`
-}
-
-func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) (*Workspace, error) {
+func (svc *WorkspaceService) Create(opts dto.WorkspaceCreateOptions, userID string) (*dto.Workspace, error) {
 	org, err := svc.orgCache.Get(opts.OrganizationID)
 	if err != nil {
 		return nil, err
@@ -122,66 +94,7 @@ func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) 
 	return res, nil
 }
 
-func (svc *WorkspaceService) create(opts WorkspaceCreateOptions, userID string) (model.Workspace, error) {
-	id := helper.NewID()
-	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
-	if err := svc.s3.CreateBucket(bucket); err != nil {
-		return nil, err
-	}
-	if opts.StorageCapacity == 0 {
-		opts.StorageCapacity = helper.MegabyteToByte(svc.config.Defaults.WorkspaceStorageCapacityMB)
-	}
-	res, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
-		ID:              id,
-		Name:            opts.Name,
-		StorageCapacity: opts.StorageCapacity,
-		OrganizationID:  opts.OrganizationID,
-		Image:           opts.Image,
-		Bucket:          bucket,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.workspaceRepo.GrantUserPermission(res.GetID(), userID, model.PermissionOwner); err != nil {
-		return nil, err
-	}
-	res, err = svc.workspaceRepo.Find(res.GetID())
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *WorkspaceService) createRoot(workspace model.Workspace, userID string) (model.File, error) {
-	res, err := svc.fileRepo.Insert(repo.FileInsertOptions{
-		Name:        "root",
-		WorkspaceID: workspace.GetID(),
-		Type:        model.FileTypeFolder,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.fileRepo.GrantUserPermission(res.GetID(), userID, model.PermissionOwner); err != nil {
-		return nil, err
-	}
-	if _, err := svc.fileCache.Refresh(res.GetID()); err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *WorkspaceService) associateWithRoot(workspace model.Workspace, root model.File) (model.Workspace, error) {
-	if err := svc.workspaceRepo.UpdateRootID(workspace.GetID(), root.GetID()); err != nil {
-		return nil, err
-	}
-	res, err := svc.workspaceCache.Refresh(workspace.GetID())
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *WorkspaceService) Find(id string, userID string) (*Workspace, error) {
+func (svc *WorkspaceService) Find(id string, userID string) (*dto.Workspace, error) {
 	workspace, err := svc.workspaceCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -196,32 +109,16 @@ func (svc *WorkspaceService) Find(id string, userID string) (*Workspace, error) 
 	return res, nil
 }
 
-type WorkspaceList struct {
-	Data          []*Workspace `json:"data"`
-	TotalPages    uint64       `json:"totalPages"`
-	TotalElements uint64       `json:"totalElements"`
-	Page          uint64       `json:"page"`
-	Size          uint64       `json:"size"`
-}
-
-type WorkspaceListOptions struct {
-	Query     string
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
-
-func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*WorkspaceList, error) {
+func (svc *WorkspaceService) List(opts dto.WorkspaceListOptions, userID string) (*dto.WorkspaceList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
 	}
 	if opts.SortBy == "" {
-		opts.SortBy = WorkspaceSortByDateCreated
+		opts.SortBy = dto.WorkspaceSortByDateCreated
 	}
 	if opts.SortOrder == "" {
-		opts.SortOrder = WorkspaceSortOrderAsc
+		opts.SortOrder = dto.WorkspaceSortOrderAsc
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
@@ -229,7 +126,7 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 	if err != nil {
 		return nil, err
 	}
-	return &WorkspaceList{
+	return &dto.WorkspaceList{
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
@@ -238,24 +135,19 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 	}, nil
 }
 
-type WorkspaceProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
-}
-
-func (svc *WorkspaceService) Probe(opts WorkspaceListOptions, userID string) (*WorkspaceProbe, error) {
+func (svc *WorkspaceService) Probe(opts dto.WorkspaceListOptions, userID string) (*dto.WorkspaceProbe, error) {
 	all, err := svc.load(userID)
 	if err != nil {
 		return nil, err
 	}
 	totalElements := uint64(len(all))
-	return &WorkspaceProbe{
+	return &dto.WorkspaceProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
 }
 
-func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*Workspace, error) {
+func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*dto.Workspace, error) {
 	workspace, err := svc.workspaceCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -276,7 +168,7 @@ func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*
 	return res, nil
 }
 
-func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int64, userID string) (*Workspace, error) {
+func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int64, userID string) (*dto.Workspace, error) {
 	workspace, err := svc.workspaceCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -350,18 +242,26 @@ func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64
 	return true, nil
 }
 
+func (svc *WorkspaceService) GetBucket(id string) (string, error) {
+	workspace, err := svc.workspaceRepo.Find(id)
+	if err != nil {
+		return "", err
+	}
+	return workspace.GetBucket(), nil
+}
+
 func (svc *WorkspaceService) IsValidSortBy(value string) bool {
 	return value == "" ||
-		value == WorkspaceSortByName ||
-		value == WorkspaceSortByDateCreated ||
-		value == WorkspaceSortByDateModified
+		value == dto.WorkspaceSortByName ||
+		value == dto.WorkspaceSortByDateCreated ||
+		value == dto.WorkspaceSortByDateModified
 }
 
 func (svc *WorkspaceService) IsValidSortOrder(value string) bool {
-	return value == "" || value == WorkspaceSortOrderAsc || value == WorkspaceSortOrderDesc
+	return value == "" || value == dto.WorkspaceSortOrderAsc || value == dto.WorkspaceSortOrderDesc
 }
 
-func (svc *WorkspaceService) findAll(opts WorkspaceListOptions, userID string) ([]model.Workspace, error) {
+func (svc *WorkspaceService) findAll(opts dto.WorkspaceListOptions, userID string) ([]model.Workspace, error) {
 	var res []model.Workspace
 	var err error
 	if opts.Query == "" {
@@ -391,7 +291,7 @@ func (svc *WorkspaceService) load(userID string) ([]model.Workspace, error) {
 	return res, nil
 }
 
-func (svc *WorkspaceService) search(opts WorkspaceListOptions, userID string) ([]model.Workspace, error) {
+func (svc *WorkspaceService) search(opts dto.WorkspaceListOptions, userID string) ([]model.Workspace, error) {
 	var res []model.Workspace
 	count, err := svc.workspaceRepo.Count()
 	if err != nil {
@@ -416,6 +316,64 @@ func (svc *WorkspaceService) search(opts WorkspaceListOptions, userID string) ([
 		workspaces = append(workspaces, workspace)
 	}
 	res, err = svc.authorize(workspaces, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *WorkspaceService) create(opts dto.WorkspaceCreateOptions, userID string) (model.Workspace, error) {
+	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
+	if err := svc.s3.CreateBucket(bucket); err != nil {
+		return nil, err
+	}
+	if opts.StorageCapacity == 0 {
+		opts.StorageCapacity = helper.MegabyteToByte(svc.config.Defaults.WorkspaceStorageCapacityMB)
+	}
+	res, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
+		ID:              helper.NewID(),
+		Name:            opts.Name,
+		StorageCapacity: opts.StorageCapacity,
+		OrganizationID:  opts.OrganizationID,
+		Image:           opts.Image,
+		Bucket:          bucket,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.workspaceRepo.GrantUserPermission(res.GetID(), userID, model.PermissionOwner); err != nil {
+		return nil, err
+	}
+	res, err = svc.workspaceRepo.Find(res.GetID())
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *WorkspaceService) createRoot(workspace model.Workspace, userID string) (model.File, error) {
+	res, err := svc.fileRepo.Insert(repo.FileInsertOptions{
+		Name:        "root",
+		WorkspaceID: workspace.GetID(),
+		Type:        model.FileTypeFolder,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.fileRepo.GrantUserPermission(res.GetID(), userID, model.PermissionOwner); err != nil {
+		return nil, err
+	}
+	if _, err := svc.fileCache.Refresh(res.GetID()); err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *WorkspaceService) associateWithRoot(workspace model.Workspace, root model.File) (model.Workspace, error) {
+	if err := svc.workspaceRepo.UpdateRootID(workspace.GetID(), root.GetID()); err != nil {
+		return nil, err
+	}
+	res, err := svc.workspaceCache.Refresh(workspace.GetID())
 	if err != nil {
 		return nil, err
 	}
@@ -453,32 +411,32 @@ func (svc *WorkspaceService) authorizeIDs(ids []string, userID string) ([]model.
 }
 
 func (svc *WorkspaceService) sort(data []model.Workspace, sortBy string, sortOrder string) []model.Workspace {
-	if sortBy == WorkspaceSortByName {
+	if sortBy == dto.WorkspaceSortByName {
 		sort.Slice(data, func(i, j int) bool {
-			if sortOrder == WorkspaceSortOrderDesc {
+			if sortOrder == dto.WorkspaceSortOrderDesc {
 				return data[i].GetName() > data[j].GetName()
 			} else {
 				return data[i].GetName() < data[j].GetName()
 			}
 		})
 		return data
-	} else if sortBy == WorkspaceSortByDateCreated {
+	} else if sortBy == dto.WorkspaceSortByDateCreated {
 		sort.Slice(data, func(i, j int) bool {
 			a := helper.StringToTime(data[i].GetCreateTime())
 			b := helper.StringToTime(data[j].GetCreateTime())
-			if sortOrder == WorkspaceSortOrderDesc {
+			if sortOrder == dto.WorkspaceSortOrderDesc {
 				return a.UnixMilli() > b.UnixMilli()
 			} else {
 				return a.UnixMilli() < b.UnixMilli()
 			}
 		})
 		return data
-	} else if sortBy == WorkspaceSortByDateModified {
+	} else if sortBy == dto.WorkspaceSortByDateModified {
 		sort.Slice(data, func(i, j int) bool {
 			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
 				a := helper.StringToTime(*data[i].GetUpdateTime())
 				b := helper.StringToTime(*data[j].GetUpdateTime())
-				if sortOrder == WorkspaceSortOrderDesc {
+				if sortOrder == dto.WorkspaceSortOrderDesc {
 					return a.UnixMilli() > b.UnixMilli()
 				} else {
 					return a.UnixMilli() < b.UnixMilli()
@@ -530,7 +488,7 @@ func newWorkspaceMapper() *workspaceMapper {
 	}
 }
 
-func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace, error) {
+func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*dto.Workspace, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
@@ -539,7 +497,7 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 	if err != nil {
 		return nil, err
 	}
-	res := &Workspace{
+	res := &dto.Workspace{
 		ID:              m.GetID(),
 		Name:            m.GetName(),
 		RootID:          m.GetRootID(),
@@ -568,8 +526,8 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 	return res, nil
 }
 
-func (mp *workspaceMapper) mapMany(workspaces []model.Workspace, userID string) ([]*Workspace, error) {
-	res := make([]*Workspace, 0)
+func (mp *workspaceMapper) mapMany(workspaces []model.Workspace, userID string) ([]*dto.Workspace, error) {
+	res := make([]*dto.Workspace, 0)
 	for _, workspace := range workspaces {
 		w, err := mp.mapOne(workspace, userID)
 		if err != nil {

@@ -1,0 +1,37 @@
+# Copyright (c) 2023 Anass Bouassaba.
+#
+# Use of this software is governed by the Business Source License
+# included in the file LICENSE in the root of this repository.
+#
+# As of the Change Date specified in that file, in accordance with
+# the Business Source License, use of this software will be governed
+# by the GNU Affero General Public License v3.0 only, included in the file
+# AGPL-3.0-only in the root of this repository.
+
+name: Voltaserve Shared
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "shared/**"
+      - "!shared/README.md"
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lint using golangci-lint
+        uses: golangci/golangci-lint-action@v6.1.0
+        with:
+          working-directory: shared
+          args: --timeout=5m
+          version: v1.61.0
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: write

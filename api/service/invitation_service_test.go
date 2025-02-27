@@ -17,10 +17,12 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
@@ -48,7 +50,7 @@ func (s *InvitationServiceSuite) TestCreate() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{"test-a@voltaserve.com", "test-b@voltaserve.com"},
 	}, s.users[0].GetID())
@@ -62,7 +64,7 @@ func (s *InvitationServiceSuite) TestCreate_MissingOrganizationPermission() {
 
 	s.revokeUserPermissionForOrganization(org, s.users[0])
 
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{"test-a@voltaserve.com", "test-b@voltaserve.com"},
 	}, s.users[0].GetID())
@@ -74,12 +76,12 @@ func (s *InvitationServiceSuite) TestCreate_DuplicateEmails() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{"test@voltaserve.com"},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{"test@voltaserve.com"},
 	}, s.users[0].GetID())
@@ -88,7 +90,7 @@ func (s *InvitationServiceSuite) TestCreate_DuplicateEmails() {
 }
 
 func (s *InvitationServiceSuite) TestCreate_NonExistentOrganization() {
-	_, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: helper.NewID(),
 		Emails:         []string{"test@voltaserve.com"},
 	}, s.users[0].GetID())
@@ -100,7 +102,7 @@ func (s *InvitationServiceSuite) TestListIncoming() {
 	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
 		org, err := test.CreateOrganization(userID)
 		s.Require().NoError(err)
-		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 			OrganizationID: org.ID,
 			Emails:         []string{s.users[0].GetEmail()},
 		}, userID)
@@ -108,7 +110,7 @@ func (s *InvitationServiceSuite) TestListIncoming() {
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewInvitationService().ListIncoming(service.InvitationListOptions{
+	list, err := service.NewInvitationService().ListIncoming(dto.InvitationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -126,7 +128,7 @@ func (s *InvitationServiceSuite) TestListIncoming_SortByEmailDescending() {
 	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
 		org, err := test.CreateOrganization(userID)
 		s.Require().NoError(err)
-		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 			OrganizationID: org.ID,
 			Emails:         []string{s.users[0].GetEmail()},
 		}, userID)
@@ -134,11 +136,11 @@ func (s *InvitationServiceSuite) TestListIncoming_SortByEmailDescending() {
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewInvitationService().ListIncoming(service.InvitationListOptions{
+	list, err := service.NewInvitationService().ListIncoming(dto.InvitationListOptions{
 		Page:      1,
 		Size:      3,
-		SortBy:    service.InvitationSortByEmail,
-		SortOrder: service.InvitationSortOrderDesc,
+		SortBy:    dto.InvitationSortByEmail,
+		SortOrder: dto.InvitationSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(s.users[3].GetEmail(), list.Data[0].Owner.Email)
@@ -150,7 +152,7 @@ func (s *InvitationServiceSuite) TestListIncoming_Paginate() {
 	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
 		org, err := test.CreateOrganization(userID)
 		s.Require().NoError(err)
-		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 			OrganizationID: org.ID,
 			Emails:         []string{s.users[0].GetEmail()},
 		}, userID)
@@ -158,7 +160,7 @@ func (s *InvitationServiceSuite) TestListIncoming_Paginate() {
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewInvitationService().ListIncoming(service.InvitationListOptions{
+	list, err := service.NewInvitationService().ListIncoming(dto.InvitationListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -170,7 +172,7 @@ func (s *InvitationServiceSuite) TestListIncoming_Paginate() {
 	s.Equal(s.users[1].GetEmail(), list.Data[0].Owner.Email)
 	s.Equal(s.users[2].GetEmail(), list.Data[1].Owner.Email)
 
-	list, err = service.NewInvitationService().ListIncoming(service.InvitationListOptions{
+	list, err = service.NewInvitationService().ListIncoming(dto.InvitationListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -186,14 +188,14 @@ func (s *InvitationServiceSuite) TestProbeIncoming() {
 	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
 		org, err := test.CreateOrganization(userID)
 		s.Require().NoError(err)
-		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 			OrganizationID: org.ID,
 			Emails:         []string{s.users[0].GetEmail()},
 		}, userID)
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewInvitationService().ProbeIncoming(service.InvitationListOptions{
+	probe, err := service.NewInvitationService().ProbeIncoming(dto.InvitationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -206,14 +208,14 @@ func (s *InvitationServiceSuite) TestCountIncoming() {
 	for _, userID := range []string{s.users[1].GetID(), s.users[2].GetID(), s.users[3].GetID()} {
 		org, err := test.CreateOrganization(userID)
 		s.Require().NoError(err)
-		_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+		_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 			OrganizationID: org.ID,
 			Emails:         []string{s.users[0].GetEmail()},
 		}, userID)
 		s.Require().NoError(err)
 	}
 
-	count, err := service.NewInvitationService().CountIncoming(s.users[0].GetID())
+	count, err := service.NewInvitationService().GetCountIncoming(s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(int64(3), *count)
 }
@@ -221,13 +223,13 @@ func (s *InvitationServiceSuite) TestCountIncoming() {
 func (s *InvitationServiceSuite) TestListOutgoing() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	list, err := service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+	list, err := service.NewInvitationService().ListOutgoing(org.ID, dto.InvitationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -244,7 +246,7 @@ func (s *InvitationServiceSuite) TestListOutgoing() {
 func (s *InvitationServiceSuite) TestListOutgoing_MissingOrganizationPermission() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
@@ -252,7 +254,7 @@ func (s *InvitationServiceSuite) TestListOutgoing_MissingOrganizationPermission(
 
 	s.revokeUserPermissionForOrganization(org, s.users[0])
 
-	_, err = service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+	_, err = service.NewInvitationService().ListOutgoing(org.ID, dto.InvitationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -263,7 +265,7 @@ func (s *InvitationServiceSuite) TestListOutgoing_MissingOrganizationPermission(
 func (s *InvitationServiceSuite) TestListOutgoing_InsufficientOrganizationPermission() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
@@ -271,7 +273,7 @@ func (s *InvitationServiceSuite) TestListOutgoing_InsufficientOrganizationPermis
 
 	s.grantUserPermissionForOrganization(org, s.users[0], model.PermissionViewer)
 
-	_, err = service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+	_, err = service.NewInvitationService().ListOutgoing(org.ID, dto.InvitationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -289,17 +291,17 @@ func (s *InvitationServiceSuite) TestListOutgoing_InsufficientOrganizationPermis
 func (s *InvitationServiceSuite) TestListOutgoing_SortByEmailDescending() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	list, err := service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+	list, err := service.NewInvitationService().ListOutgoing(org.ID, dto.InvitationListOptions{
 		Page:      1,
 		Size:      3,
-		SortBy:    service.InvitationSortByEmail,
-		SortOrder: service.InvitationSortOrderDesc,
+		SortBy:    dto.InvitationSortByEmail,
+		SortOrder: dto.InvitationSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(strings.ToLower(s.users[3].GetEmail()), list.Data[0].Email)
@@ -310,13 +312,13 @@ func (s *InvitationServiceSuite) TestListOutgoing_SortByEmailDescending() {
 func (s *InvitationServiceSuite) TestListOutgoing_Paginate() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	list, err := service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+	list, err := service.NewInvitationService().ListOutgoing(org.ID, dto.InvitationListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -328,7 +330,7 @@ func (s *InvitationServiceSuite) TestListOutgoing_Paginate() {
 	s.Equal(strings.ToLower(s.users[1].GetEmail()), list.Data[0].Email)
 	s.Equal(strings.ToLower(s.users[2].GetEmail()), list.Data[1].Email)
 
-	list, err = service.NewInvitationService().ListOutgoing(org.ID, service.InvitationListOptions{
+	list, err = service.NewInvitationService().ListOutgoing(org.ID, dto.InvitationListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -343,13 +345,13 @@ func (s *InvitationServiceSuite) TestListOutgoing_Paginate() {
 func (s *InvitationServiceSuite) TestProbeOutgoing() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	probe, err := service.NewInvitationService().ProbeOutgoing(org.ID, service.InvitationListOptions{
+	probe, err := service.NewInvitationService().ProbeOutgoing(org.ID, dto.InvitationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -361,7 +363,7 @@ func (s *InvitationServiceSuite) TestProbeOutgoing() {
 func (s *InvitationServiceSuite) TestProbeOutgoing_MissingOrganizationPermission() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
@@ -369,7 +371,7 @@ func (s *InvitationServiceSuite) TestProbeOutgoing_MissingOrganizationPermission
 
 	s.revokeUserPermissionForOrganization(org, s.users[0])
 
-	_, err = service.NewInvitationService().ProbeOutgoing(org.ID, service.InvitationListOptions{
+	_, err = service.NewInvitationService().ProbeOutgoing(org.ID, dto.InvitationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -380,7 +382,7 @@ func (s *InvitationServiceSuite) TestProbeOutgoing_MissingOrganizationPermission
 func (s *InvitationServiceSuite) TestProbeOutgoing_InsufficientOrganizationPermission() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	_, err = service.NewInvitationService().Create(service.InvitationCreateOptions{
+	_, err = service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail(), s.users[2].GetEmail(), s.users[3].GetEmail()},
 	}, s.users[0].GetID())
@@ -388,7 +390,7 @@ func (s *InvitationServiceSuite) TestProbeOutgoing_InsufficientOrganizationPermi
 
 	s.grantUserPermissionForOrganization(org, s.users[0], model.PermissionViewer)
 
-	_, err = service.NewInvitationService().ProbeOutgoing(org.ID, service.InvitationListOptions{
+	_, err = service.NewInvitationService().ProbeOutgoing(org.ID, dto.InvitationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -406,7 +408,7 @@ func (s *InvitationServiceSuite) TestProbeOutgoing_InsufficientOrganizationPermi
 func (s *InvitationServiceSuite) TestAccept() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -419,7 +421,7 @@ func (s *InvitationServiceSuite) TestAccept() {
 func (s *InvitationServiceSuite) TestAccept_AlreadyAccepted() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -441,7 +443,7 @@ func (s *InvitationServiceSuite) TestAccept_AlreadyAccepted() {
 func (s *InvitationServiceSuite) TestAccept_UnauthorizedUser() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -461,7 +463,7 @@ func (s *InvitationServiceSuite) TestAccept_UnauthorizedUser() {
 func (s *InvitationServiceSuite) TestDecline() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -474,7 +476,7 @@ func (s *InvitationServiceSuite) TestDecline() {
 func (s *InvitationServiceSuite) TestDecline_AlreadyDeclined() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -496,7 +498,7 @@ func (s *InvitationServiceSuite) TestDecline_AlreadyDeclined() {
 func (s *InvitationServiceSuite) TestDecline_UnauthorizedUser() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -516,7 +518,7 @@ func (s *InvitationServiceSuite) TestDecline_UnauthorizedUser() {
 func (s *InvitationServiceSuite) TestResend() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -529,7 +531,7 @@ func (s *InvitationServiceSuite) TestResend() {
 func (s *InvitationServiceSuite) TestDelete() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -542,7 +544,7 @@ func (s *InvitationServiceSuite) TestDelete() {
 func (s *InvitationServiceSuite) TestDelete_UnauthorizedUser() {
 	org, err := test.CreateOrganization(s.users[0].GetID())
 	s.Require().NoError(err)
-	invitations, err := service.NewInvitationService().Create(service.InvitationCreateOptions{
+	invitations, err := service.NewInvitationService().Create(dto.InvitationCreateOptions{
 		OrganizationID: org.ID,
 		Emails:         []string{s.users[1].GetEmail()},
 	}, s.users[0].GetID())
@@ -559,14 +561,14 @@ func (s *InvitationServiceSuite) TestDelete_UnauthorizedUser() {
 	)
 }
 
-func (s *InvitationServiceSuite) grantUserPermissionForOrganization(org *service.Organization, user model.User, permission string) {
+func (s *InvitationServiceSuite) grantUserPermissionForOrganization(org *dto.Organization, user model.User, permission string) {
 	err := repo.NewOrganizationRepo().GrantUserPermission(org.ID, user.GetID(), permission)
 	s.Require().NoError(err)
 	_, err = cache.NewOrganizationCache().Refresh(org.ID)
 	s.Require().NoError(err)
 }
 
-func (s *InvitationServiceSuite) revokeUserPermissionForOrganization(org *service.Organization, user model.User) {
+func (s *InvitationServiceSuite) revokeUserPermissionForOrganization(org *dto.Organization, user model.User) {
 	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
 	s.Require().NoError(err)
 	_, err = cache.NewOrganizationCache().Refresh(org.ID)

@@ -16,10 +16,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/api/client/apiclient"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"github.com/kouprlabs/voltaserve/webdav/config"
+	"github.com/kouprlabs/voltaserve/webdav/logger"
 )
 
 /*
@@ -33,16 +35,16 @@ Example implementation:
 - Return the response.
 */
 func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
-	token, ok := r.Context().Value("token").(*infra.Token)
+	token, ok := r.Context().Value("token").(*dto.Token)
 	if !ok {
-		infra.HandleError(fmt.Errorf("missing token"), w)
+		handleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	cl := apiclient.NewFileClient(token)
+	cl := client.NewFileClient(token, config.GetConfig().APIURL, config.GetConfig().Security.APIKey)
 	inputPath := helper.DecodeURIComponent(r.URL.Path)
 	file, err := cl.GetByPath(inputPath)
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
 	size := file.Snapshot.Original.Size
@@ -69,7 +71,7 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusPartialContent)
 		if err := cl.DownloadOriginal(file, w, &rangeHeader); err != nil {
 			if !strings.Contains(err.Error(), "write: broken pipe") && !strings.Contains(err.Error(), "write: connection reset by peer") {
-				infra.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 			return
 		}
@@ -79,7 +81,7 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if err := cl.DownloadOriginal(file, w, &rangeHeader); err != nil {
 			if !strings.Contains(err.Error(), "write: broken pipe") && !strings.Contains(err.Error(), "write: connection reset by peer") {
-				infra.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 			return
 		}

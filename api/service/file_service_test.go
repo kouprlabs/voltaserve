@@ -20,10 +20,12 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
@@ -643,7 +645,7 @@ func (s *FileServiceTestSuite) TestList() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -662,7 +664,7 @@ func (s *FileServiceTestSuite) TestList_MissingPermission() {
 	s.Require().NoError(err)
 	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
 	s.Require().NoError(err)
-	var files []*service.File
+	var files []*dto.File
 	for _, name := range []string{"file A", "file B", "file C"} {
 		f, err := service.NewFileService().Create(service.FileCreateOptions{
 			WorkspaceID: workspace.ID,
@@ -676,7 +678,7 @@ func (s *FileServiceTestSuite) TestList_MissingPermission() {
 
 	s.revokeUserPermissionForFile(files[1], s.users[0])
 
-	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -704,7 +706,7 @@ func (s *FileServiceTestSuite) TestList_Paginate() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -716,7 +718,7 @@ func (s *FileServiceTestSuite) TestList_Paginate() {
 	s.Equal("file A", list.Data[0].Name)
 	s.Equal("file B", list.Data[1].Name)
 
-	list, err = service.NewFileService().List(workspace.RootID, service.FileListOptions{
+	list, err = service.NewFileService().List(workspace.RootID, dto.FileListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -743,11 +745,11 @@ func (s *FileServiceTestSuite) TestList_SortByNameDescending() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
 		Page:      1,
 		Size:      3,
-		SortBy:    service.FileSortByName,
-		SortOrder: service.FileSortOrderDesc,
+		SortBy:    dto.FileSortByName,
+		SortOrder: dto.FileSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal("file C", list.Data[0].Name)
@@ -770,8 +772,8 @@ func (s *FileServiceTestSuite) TestList_QueryText() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
-		Query: &service.FileQuery{
+	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+		Query: &dto.FileQuery{
 			Text: helper.ToPtr("world"),
 		},
 		Page: 1,
@@ -801,8 +803,8 @@ func (s *FileServiceTestSuite) TestList_QueryType() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
-		Query: &service.FileQuery{
+	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+		Query: &dto.FileQuery{
 			Type: helper.ToPtr(model.FileTypeFolder),
 		},
 		Page: 1,
@@ -815,8 +817,8 @@ func (s *FileServiceTestSuite) TestList_QueryType() {
 	s.Equal(uint64(1), list.TotalPages)
 	s.Equal("folder", list.Data[0].Name)
 
-	list, err = service.NewFileService().List(workspace.RootID, service.FileListOptions{
-		Query: &service.FileQuery{
+	list, err = service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+		Query: &dto.FileQuery{
 			Type: helper.ToPtr(model.FileTypeFile),
 		},
 		Page: 1,
@@ -851,8 +853,8 @@ func (s *FileServiceTestSuite) TestList_QueryCreateTimeAfterBefore() {
 	time.Sleep(1 * time.Second)
 	checkpoints = append(checkpoints, time.Now())
 
-	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
-		Query: &service.FileQuery{
+	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+		Query: &dto.FileQuery{
 			CreateTimeAfter:  helper.ToPtr(helper.TimeToTimestamp(checkpoints[1])),
 			CreateTimeBefore: helper.ToPtr(helper.TimeToTimestamp(checkpoints[3])),
 		},
@@ -888,8 +890,8 @@ func (s *FileServiceTestSuite) TestList_QueryUpdateTimeAfterBefore() {
 	time.Sleep(1 * time.Second)
 	checkpoints = append(checkpoints, time.Now())
 
-	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
-		Query: &service.FileQuery{
+	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+		Query: &dto.FileQuery{
 			UpdateTimeAfter:  helper.ToPtr(helper.TimeToTimestamp(checkpoints[1])),
 			UpdateTimeBefore: helper.ToPtr(helper.TimeToTimestamp(checkpoints[3])),
 		},
@@ -920,7 +922,7 @@ func (s *FileServiceTestSuite) TestProbe() {
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewFileService().Probe(workspace.RootID, service.FileListOptions{
+	probe, err := service.NewFileService().Probe(workspace.RootID, dto.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -934,7 +936,7 @@ func (s *FileServiceTestSuite) TestProbe_MissingPermission() {
 	s.Require().NoError(err)
 	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
 	s.Require().NoError(err)
-	var files []*service.File
+	var files []*dto.File
 	for _, name := range []string{"file A", "file B", "file C"} {
 		f, err := service.NewFileService().Create(service.FileCreateOptions{
 			WorkspaceID: workspace.ID,
@@ -948,7 +950,7 @@ func (s *FileServiceTestSuite) TestProbe_MissingPermission() {
 
 	s.revokeUserPermissionForFile(files[1], s.users[0])
 
-	probe, err := service.NewFileService().Probe(workspace.RootID, service.FileListOptions{
+	probe, err := service.NewFileService().Probe(workspace.RootID, dto.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -970,7 +972,7 @@ func (s *FileServiceTestSuite) TestComputeSize() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	size, err := service.NewFileService().ComputeSize(file.ID, s.users[0].GetID())
+	size, err := service.NewFileService().GetSize(file.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.GreaterOrEqual(*size, int64(0))
 }
@@ -990,7 +992,7 @@ func (s *FileServiceTestSuite) TestComputeSize_MissingPermission() {
 
 	s.revokeUserPermissionForFile(file, s.users[0])
 
-	_, err = service.NewFileService().ComputeSize(file.ID, s.users[0].GetID())
+	_, err = service.NewFileService().GetSize(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
 }
@@ -1015,7 +1017,7 @@ func (s *FileServiceTestSuite) TestCount() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	count, err := service.NewFileService().Count(folder.ID, s.users[0].GetID())
+	count, err := service.NewFileService().GetCount(folder.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(int64(1), *count)
 }
@@ -1040,7 +1042,7 @@ func (s *FileServiceTestSuite) TestCount_NotAFolder() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewFileService().Count(file.ID, s.users[0].GetID())
+	_, err = service.NewFileService().GetCount(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFileIsNotAFolderError(cache.NewFileCache().GetOrNil(file.ID)).Error(), err.Error())
 }
@@ -1067,7 +1069,7 @@ func (s *FileServiceTestSuite) TestCount_MissingPermission() {
 
 	s.revokeUserPermissionForFile(folder, s.users[0])
 
-	_, err = service.NewFileService().Count(folder.ID, s.users[0].GetID())
+	_, err = service.NewFileService().GetCount(folder.ID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
 }
@@ -1736,7 +1738,7 @@ func (s *FileServiceTestSuite) TestGrantGroupPermission() {
 		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+	group, err := service.NewGroupService().Create(dto.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
@@ -1758,7 +1760,7 @@ func (s *FileServiceTestSuite) TestGrantGroupPermission_MissingGroupPermission()
 		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+	group, err := service.NewGroupService().Create(dto.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
@@ -1783,7 +1785,7 @@ func (s *FileServiceTestSuite) TestGrantGroupPermission_MissingFilePermission() 
 		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+	group, err := service.NewGroupService().Create(dto.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
@@ -1808,7 +1810,7 @@ func (s *FileServiceTestSuite) TestGrantGroupPermission_InsufficientFilePermissi
 		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+	group, err := service.NewGroupService().Create(dto.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
@@ -1840,7 +1842,7 @@ func (s *FileServiceTestSuite) TestRevokeGroupPermission() {
 		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+	group, err := service.NewGroupService().Create(dto.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
@@ -1865,7 +1867,7 @@ func (s *FileServiceTestSuite) TestRevokeGroupPermission_MissingGroupPermission(
 		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+	group, err := service.NewGroupService().Create(dto.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
@@ -1893,7 +1895,7 @@ func (s *FileServiceTestSuite) TestRevokeGroupPermission_MissingFilePermission()
 		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+	group, err := service.NewGroupService().Create(dto.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
@@ -1918,7 +1920,7 @@ func (s *FileServiceTestSuite) TestRevokeGroupPermission_InsufficientFilePermiss
 		ParentID:    workspace.RootID,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
-	group, err := service.NewGroupService().Create(service.GroupCreateOptions{
+	group, err := service.NewGroupService().Create(dto.GroupCreateOptions{
 		Name:           "group",
 		OrganizationID: workspace.Organization.ID,
 	}, s.users[0].GetID())
@@ -1956,7 +1958,7 @@ func (s *FileServiceTestSuite) TestReprocess() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, service.TaskPatchOptions{
+	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldStatus},
 		Status: helper.ToPtr(model.TaskStatusError),
 	})
@@ -1985,7 +1987,7 @@ func (s *FileServiceTestSuite) TestReprocess_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, service.TaskPatchOptions{
+	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldStatus},
 		Status: helper.ToPtr(model.TaskStatusError),
 	})
@@ -2016,7 +2018,7 @@ func (s *FileServiceTestSuite) TestReprocess_InsufficientPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, service.TaskPatchOptions{
+	_, err = service.NewTaskService().Patch(file.Snapshot.Task.ID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldStatus},
 		Status: helper.ToPtr(model.TaskStatusError),
 	})
@@ -2036,14 +2038,14 @@ func (s *FileServiceTestSuite) TestReprocess_InsufficientPermission() {
 	)
 }
 
-func (s *FileServiceTestSuite) grantUserPermissionForFile(file *service.File, user model.User, permission string) {
+func (s *FileServiceTestSuite) grantUserPermissionForFile(file *dto.File, user model.User, permission string) {
 	err := repo.NewFileRepo().GrantUserPermission(file.ID, user.GetID(), permission)
 	s.Require().NoError(err)
 	_, err = cache.NewFileCache().Refresh(file.ID)
 	s.Require().NoError(err)
 }
 
-func (s *FileServiceTestSuite) revokeUserPermissionForFile(file *service.File, user model.User) {
+func (s *FileServiceTestSuite) revokeUserPermissionForFile(file *dto.File, user model.User) {
 	err := repo.NewFileRepo().RevokeUserPermission(
 		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
 		user.GetID(),
@@ -2053,14 +2055,14 @@ func (s *FileServiceTestSuite) revokeUserPermissionForFile(file *service.File, u
 	s.Require().NoError(err)
 }
 
-func (s *FileServiceTestSuite) revokeUserPermissionForGroup(group *service.Group, user model.User) {
+func (s *FileServiceTestSuite) revokeUserPermissionForGroup(group *dto.Group, user model.User) {
 	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, user.GetID())
 	s.Require().NoError(err)
 	_, err = cache.NewGroupCache().Refresh(group.ID)
 	s.Require().NoError(err)
 }
 
-func (s *FileServiceTestSuite) revokeUserPermissionForWorkspace(workspace *service.Workspace, user model.User) {
+func (s *FileServiceTestSuite) revokeUserPermissionForWorkspace(workspace *dto.Workspace, user model.User) {
 	err := repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, user.GetID())
 	s.Require().NoError(err)
 	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)

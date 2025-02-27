@@ -15,9 +15,11 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
@@ -41,7 +43,7 @@ func (s *TaskServiceSuite) SetupTest() {
 }
 
 func (s *TaskServiceSuite) TestCreate() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:    "task A",
 		UserID:  s.users[0].GetID(),
 		Status:  model.TaskStatusWaiting,
@@ -56,14 +58,14 @@ func (s *TaskServiceSuite) TestCreate() {
 }
 
 func (s *TaskServiceSuite) TestPatch_Name() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusWaiting,
 	})
 	s.Require().NoError(err)
 
-	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
+	task, err = service.NewTaskService().Patch(task.ID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("task (edit)"),
 	})
@@ -72,14 +74,14 @@ func (s *TaskServiceSuite) TestPatch_Name() {
 }
 
 func (s *TaskServiceSuite) TestPatch_Status() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusWaiting,
 	})
 	s.Require().NoError(err)
 
-	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
+	task, err = service.NewTaskService().Patch(task.ID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldStatus},
 		Status: helper.ToPtr(model.TaskStatusRunning),
 	})
@@ -88,14 +90,14 @@ func (s *TaskServiceSuite) TestPatch_Status() {
 }
 
 func (s *TaskServiceSuite) TestPatch_Error() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusWaiting,
 	})
 	s.Require().NoError(err)
 
-	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
+	task, err = service.NewTaskService().Patch(task.ID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldError},
 		Error:  helper.ToPtr("something went wrong"),
 	})
@@ -104,14 +106,14 @@ func (s *TaskServiceSuite) TestPatch_Error() {
 }
 
 func (s *TaskServiceSuite) TestPatch_Percentage() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusWaiting,
 	})
 	s.Require().NoError(err)
 
-	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
+	task, err = service.NewTaskService().Patch(task.ID, dto.TaskPatchOptions{
 		Fields:     []string{model.TaskFieldPercentage},
 		Percentage: helper.ToPtr(50),
 	})
@@ -120,14 +122,14 @@ func (s *TaskServiceSuite) TestPatch_Percentage() {
 }
 
 func (s *TaskServiceSuite) TestPatch_Payload() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusWaiting,
 	})
 	s.Require().NoError(err)
 
-	task, err = service.NewTaskService().Patch(task.ID, service.TaskPatchOptions{
+	task, err = service.NewTaskService().Patch(task.ID, dto.TaskPatchOptions{
 		Fields:  []string{model.TaskFieldPayload},
 		Payload: map[string]string{"key": "value"},
 	})
@@ -136,7 +138,7 @@ func (s *TaskServiceSuite) TestPatch_Payload() {
 }
 
 func (s *TaskServiceSuite) TestFind() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusWaiting,
@@ -150,7 +152,7 @@ func (s *TaskServiceSuite) TestFind() {
 }
 
 func (s *TaskServiceSuite) TestFind_UnauthorizedUser() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusWaiting,
@@ -165,7 +167,7 @@ func (s *TaskServiceSuite) TestFind_UnauthorizedUser() {
 func (s *TaskServiceSuite) TestList() {
 	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
 	for i, name := range []string{"task A", "task B", "task C"} {
-		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+		_, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 			Name:   name,
 			UserID: s.users[0].GetID(),
 			Status: statuses[i],
@@ -173,7 +175,7 @@ func (s *TaskServiceSuite) TestList() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewTaskService().List(service.TaskListOptions{
+	list, err := service.NewTaskService().List(dto.TaskListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -190,7 +192,7 @@ func (s *TaskServiceSuite) TestList() {
 func (s *TaskServiceSuite) TestList_Paginate() {
 	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
 	for i, name := range []string{"task A", "task B", "task C"} {
-		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+		_, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 			Name:   name,
 			UserID: s.users[0].GetID(),
 			Status: statuses[i],
@@ -198,7 +200,7 @@ func (s *TaskServiceSuite) TestList_Paginate() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewTaskService().List(service.TaskListOptions{
+	list, err := service.NewTaskService().List(dto.TaskListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -210,7 +212,7 @@ func (s *TaskServiceSuite) TestList_Paginate() {
 	s.Equal("task A", list.Data[0].Name)
 	s.Equal("task B", list.Data[1].Name)
 
-	list, err = service.NewTaskService().List(service.TaskListOptions{
+	list, err = service.NewTaskService().List(dto.TaskListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -225,7 +227,7 @@ func (s *TaskServiceSuite) TestList_Paginate() {
 func (s *TaskServiceSuite) TestList_SortByStatusDescending() {
 	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
 	for i, name := range []string{"task A", "task B", "task C"} {
-		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+		_, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 			Name:   name,
 			UserID: s.users[0].GetID(),
 			Status: statuses[i],
@@ -233,11 +235,11 @@ func (s *TaskServiceSuite) TestList_SortByStatusDescending() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewTaskService().List(service.TaskListOptions{
+	list, err := service.NewTaskService().List(dto.TaskListOptions{
 		Page:      1,
 		Size:      3,
-		SortBy:    service.TaskSortByStatus,
-		SortOrder: service.TaskSortOrderDesc,
+		SortBy:    dto.TaskSortByStatus,
+		SortOrder: dto.TaskSortOrderDesc,
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal("task B", list.Data[0].Name)
@@ -248,7 +250,7 @@ func (s *TaskServiceSuite) TestList_SortByStatusDescending() {
 func (s *TaskServiceSuite) TestList_Query() {
 	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
 	for i, name := range []string{"foo bar", "hello world", "lorem ipsum"} {
-		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+		_, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 			Name:   name,
 			UserID: s.users[0].GetID(),
 			Status: statuses[i],
@@ -256,7 +258,7 @@ func (s *TaskServiceSuite) TestList_Query() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewTaskService().List(service.TaskListOptions{
+	list, err := service.NewTaskService().List(dto.TaskListOptions{
 		Query: "world",
 		Page:  1,
 		Size:  10,
@@ -272,7 +274,7 @@ func (s *TaskServiceSuite) TestList_Query() {
 func (s *TaskServiceSuite) TestProbe() {
 	statuses := []string{model.TaskStatusWaiting, model.TaskStatusRunning, model.TaskStatusWaiting}
 	for i, name := range []string{"task A", "task B", "task C"} {
-		_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+		_, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 			Name:   name,
 			UserID: s.users[0].GetID(),
 			Status: statuses[i],
@@ -280,7 +282,7 @@ func (s *TaskServiceSuite) TestProbe() {
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewTaskService().Probe(service.TaskListOptions{
+	probe, err := service.NewTaskService().Probe(dto.TaskListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -290,7 +292,7 @@ func (s *TaskServiceSuite) TestProbe() {
 }
 
 func (s *TaskServiceSuite) TestDismiss() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task with error",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusError,
@@ -303,7 +305,7 @@ func (s *TaskServiceSuite) TestDismiss() {
 }
 
 func (s *TaskServiceSuite) TestDismiss_UnauthorizedUser() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task with error",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusError,
@@ -317,7 +319,7 @@ func (s *TaskServiceSuite) TestDismiss_UnauthorizedUser() {
 }
 
 func (s *TaskServiceSuite) TestDismiss_StatusRunning() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task with status running",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusRunning,
@@ -330,14 +332,14 @@ func (s *TaskServiceSuite) TestDismiss_StatusRunning() {
 }
 
 func (s *TaskServiceSuite) TestDismissAll() {
-	_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	_, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task A",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusError,
 		Error:  helper.ToPtr("error A"),
 	})
 	s.Require().NoError(err)
-	_, err = service.NewTaskService().Create(service.TaskCreateOptions{
+	_, err = service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task B",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusError,
@@ -350,7 +352,7 @@ func (s *TaskServiceSuite) TestDismissAll() {
 	s.Len(dismissAllResult.Succeeded, 2)
 	s.Empty(dismissAllResult.Failed)
 
-	list, err := service.NewTaskService().List(service.TaskListOptions{
+	list, err := service.NewTaskService().List(dto.TaskListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -359,7 +361,7 @@ func (s *TaskServiceSuite) TestDismissAll() {
 }
 
 func (s *TaskServiceSuite) TestDelete() {
-	task, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	task, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusWaiting,
@@ -375,13 +377,13 @@ func (s *TaskServiceSuite) TestDelete() {
 }
 
 func (s *TaskServiceSuite) TestCount() {
-	_, err := service.NewTaskService().Create(service.TaskCreateOptions{
+	_, err := service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task A",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusWaiting,
 	})
 	s.Require().NoError(err)
-	_, err = service.NewTaskService().Create(service.TaskCreateOptions{
+	_, err = service.NewTaskService().Create(dto.TaskCreateOptions{
 		Name:   "task B",
 		UserID: s.users[0].GetID(),
 		Status: model.TaskStatusRunning,

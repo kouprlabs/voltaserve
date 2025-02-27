@@ -14,13 +14,14 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/kouprlabs/voltaserve/conversion/infra"
-	"github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+
+	"github.com/kouprlabs/voltaserve/conversion/logger"
 	"github.com/kouprlabs/voltaserve/conversion/pipeline"
 )
 
 type Scheduler struct {
-	pipelineQueue       [][]model.PipelineRunOptions
+	pipelineQueue       [][]dto.PipelineRunOptions
 	pipelineWorkerCount int
 	activePipelineCount int
 	installer           *Installer
@@ -43,14 +44,14 @@ func NewDefaultSchedulerOptions() SchedulerOptions {
 
 func NewScheduler(opts SchedulerOptions) *Scheduler {
 	return &Scheduler{
-		pipelineQueue:       make([][]model.PipelineRunOptions, opts.PipelineWorkerCount),
+		pipelineQueue:       make([][]dto.PipelineRunOptions, opts.PipelineWorkerCount),
 		pipelineWorkerCount: opts.PipelineWorkerCount,
 		installer:           opts.Installer,
 	}
 }
 
 func (s *Scheduler) Start() {
-	infra.GetLogger().Named(infra.StrScheduler).Infow("🚀  launching", "type", "pipeline", "count", s.pipelineWorkerCount)
+	logger.GetLogger().Named(logger.StrScheduler).Infow("🚀  launching", "type", "pipeline", "count", s.pipelineWorkerCount)
 	for i := 0; i < s.pipelineWorkerCount; i++ {
 		go s.pipelineWorker(i)
 	}
@@ -58,9 +59,9 @@ func (s *Scheduler) Start() {
 	go s.pipelineWorkerStatus()
 }
 
-func (s *Scheduler) SchedulePipeline(opts *model.PipelineRunOptions) {
+func (s *Scheduler) SchedulePipeline(opts *dto.PipelineRunOptions) {
 	index := s.choosePipeline()
-	infra.GetLogger().Named(infra.StrScheduler).Infow("👉  choosing", "pipeline", index)
+	logger.GetLogger().Named(logger.StrScheduler).Infow("👉  choosing", "pipeline", index)
 	s.pipelineQueue[index] = append(s.pipelineQueue[index], *opts)
 }
 
@@ -79,21 +80,21 @@ func (s *Scheduler) choosePipeline() int {
 
 func (s *Scheduler) pipelineWorker(index int) {
 	dispatcher := pipeline.NewDispatcher()
-	s.pipelineQueue[index] = make([]model.PipelineRunOptions, 0)
-	infra.GetLogger().Named(infra.StrPipeline).Infow("⚙️  running", "worker", index)
+	s.pipelineQueue[index] = make([]dto.PipelineRunOptions, 0)
+	logger.GetLogger().Named(logger.StrPipeline).Infow("⚙️  running", "worker", index)
 	for {
 		if len(s.pipelineQueue[index]) > 0 && !s.installer.IsRunning() {
 			s.activePipelineCount++
 			opts := s.pipelineQueue[index][0]
-			infra.GetLogger().Named(infra.StrPipeline).Infow("🔨  working", "worker", index, "bucket", opts.Bucket, "key", opts.Key)
+			logger.GetLogger().Named(logger.StrPipeline).Infow("🔨  working", "worker", index, "bucket", opts.Bucket, "key", opts.Key)
 			start := time.Now()
 			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
 			if err == nil {
-				infra.GetLogger().Named(infra.StrPipeline).
+				logger.GetLogger().Named(logger.StrPipeline).
 					Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
 			} else {
-				infra.GetLogger().Named(infra.StrPipeline).
+				logger.GetLogger().Named(logger.StrPipeline).
 					Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key, "error", err.Error())
 			}
 			s.pipelineQueue[index] = s.pipelineQueue[index][1:]
@@ -114,9 +115,9 @@ func (s *Scheduler) pipelineQueueStatus() {
 		}
 		if sum != previous {
 			if sum == 0 {
-				infra.GetLogger().Named(infra.StrQueueStatus).Infow("🌈  empty", "type", "pipeline")
+				logger.GetLogger().Named(logger.StrQueueStatus).Infow("🌈  empty", "type", "pipeline")
 			} else {
-				infra.GetLogger().Named(infra.StrQueueStatus).Infow("⏳  items", "type", "pipeline", "count", sum)
+				logger.GetLogger().Named(logger.StrQueueStatus).Infow("⏳  items", "type", "pipeline", "count", sum)
 			}
 		}
 		previous = sum
@@ -129,9 +130,9 @@ func (s *Scheduler) pipelineWorkerStatus() {
 		time.Sleep(3 * time.Second)
 		if previous != s.activePipelineCount {
 			if s.activePipelineCount == 0 {
-				infra.GetLogger().Named(infra.StrWorkerStatus).Infow("🌤️  all idle", "type", "pipeline")
+				logger.GetLogger().Named(logger.StrWorkerStatus).Infow("🌤️  all idle", "type", "pipeline")
 			} else {
-				infra.GetLogger().Named(infra.StrWorkerStatus).
+				logger.GetLogger().Named(logger.StrWorkerStatus).
 					Infow("🔥  active", "type", "pipeline", "count", s.activePipelineCount)
 			}
 		}

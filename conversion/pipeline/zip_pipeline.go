@@ -17,40 +17,40 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/api/client/apiclient"
-	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
-	apimodel "github.com/kouprlabs/voltaserve/api/model"
-	apiservice "github.com/kouprlabs/voltaserve/api/service"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/conversion/helper"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
-	"github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/logger"
 	"github.com/kouprlabs/voltaserve/conversion/processor"
 )
 
 type zipPipeline struct {
-	glbPipeline    model.Pipeline
+	glbPipeline    Pipeline
 	zipProc        *processor.ZIPProcessor
 	gltfProc       *processor.GLTFProcessor
-	s3             apiinfra.S3Manager
-	fileIdent      *apiinfra.FileIdentifier
-	taskClient     *apiclient.TaskClient
-	snapshotClient *apiclient.SnapshotClient
+	s3             infra.S3Manager
+	fileIdent      *infra.FileIdentifier
+	taskClient     *client.TaskClient
+	snapshotClient *client.SnapshotClient
 }
 
-func NewZIPPipeline() model.Pipeline {
+func NewZIPPipeline() Pipeline {
 	return &zipPipeline{
 		glbPipeline:    NewGLBPipeline(),
 		zipProc:        processor.NewZIPProcessor(),
 		gltfProc:       processor.NewGLTFProcessor(),
-		s3:             apiinfra.NewS3Manager(),
-		fileIdent:      apiinfra.NewFileIdentifier(),
-		taskClient:     apiclient.NewTaskClient(),
-		snapshotClient: apiclient.NewSnapshotClient(),
+		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		fileIdent:      infra.NewFileIdentifier(),
+		taskClient:     client.NewTaskClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
+		snapshotClient: client.NewSnapshotClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
 	}
 }
 
-func (p *zipPipeline) Run(opts model.PipelineRunOptions) error {
+func (p *zipPipeline) Run(opts dto.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
@@ -59,20 +59,20 @@ func (p *zipPipeline) Run(opts model.PipelineRunOptions) error {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return
 		} else if err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(inputPath)
 	return p.RunFromLocalPath(inputPath, opts)
 }
 
-func (p *zipPipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunOptions) error {
+func (p *zipPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
 	isGLTF, err := p.fileIdent.IsGLTF(inputPath)
 	if err != nil {
 		return err
 	}
 	if isGLTF {
-		if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
-			Fields: []string{apimodel.TaskFieldName},
+		if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
 			Name:   helper.ToPtr("Extracting ZIP."),
 		}); err != nil {
 			return err
@@ -80,7 +80,7 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunO
 		tmpDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 		defer func(path string) {
 			if err := os.RemoveAll(path); err != nil {
-				infra.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}(tmpDir)
 		if err := p.zipProc.Extract(inputPath, tmpDir); err != nil {
@@ -94,8 +94,8 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunO
 			// Do nothing, treat it as a ZIP file
 			return nil
 		}
-		if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
-			Fields: []string{apimodel.TaskFieldName},
+		if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
 			Name:   helper.ToPtr("Converting to GLB."),
 		}); err != nil {
 			return err
@@ -108,7 +108,7 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunO
 			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 				return
 			} else if err != nil {
-				infra.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}(*glbPath)
 		if err := p.glbPipeline.RunFromLocalPath(*glbPath, opts); err != nil {
@@ -119,7 +119,7 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunO
 	return nil
 }
 
-func (p *zipPipeline) convertToGLB(inputPath string, opts model.PipelineRunOptions) (*string, error) {
+func (p *zipPipeline) convertToGLB(inputPath string, opts dto.PipelineRunOptions) (*string, error) {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".glb")
 	if err := p.gltfProc.ToGLB(inputPath, outputPath); err != nil {
 		return nil, err
@@ -132,10 +132,10 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts model.PipelineRunOptio
 	if err := p.s3.PutFile(glbKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{apimodel.SnapshotFieldPreview},
-		Preview: &apimodel.S3Object{
+		Fields:  []string{model.SnapshotFieldPreview},
+		Preview: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    glbKey,
 			Size:   stat.Size(),

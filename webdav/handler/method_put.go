@@ -23,11 +23,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/api/client/apiclient"
-	apimodel "github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"github.com/kouprlabs/voltaserve/webdav/config"
+	"github.com/kouprlabs/voltaserve/webdav/logger"
 )
 
 /*
@@ -43,9 +45,9 @@ Example implementation:
 - Return the response.
 */
 func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
-	token, ok := r.Context().Value("token").(*infra.Token)
+	token, ok := r.Context().Value("token").(*dto.Token)
 	if !ok {
-		infra.HandleError(fmt.Errorf("missing token"), w)
+		handleError(fmt.Errorf("missing token"), w)
 		return
 	}
 	name := helper.DecodeURIComponent(path.Base(r.URL.Path))
@@ -53,77 +55,78 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	cl := apiclient.NewFileClient(token)
+	cl := client.NewFileClient(token, config.GetConfig().APIURL, config.GetConfig().Security.APIKey)
 	directory, err := cl.GetByPath(helper.DecodeURIComponent(helper.Dirname(r.URL.Path)))
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
 	outputPath := filepath.Join(os.TempDir(), uuid.New().String())
 	//nolint:gosec // Known safe path
 	file, err := os.Create(outputPath)
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
 	defer func(path string, file *os.File) {
 		if err := file.Close(); err != nil {
-			infra.HandleError(err, w)
+			handleError(err, w)
 		}
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return
 		} else if err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(outputPath, file)
 	if _, err = io.Copy(file, r.Body); err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
-	workspace, err := h.workspaceCache.Get(helper.ExtractWorkspaceIDFromPath(r.URL.Path))
+	workspaceClient := client.NewWorkspaceClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey)
+	bucket, err := workspaceClient.GetBucket(helper.ExtractWorkspaceIDFromPath(r.URL.Path))
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
 	snapshotID := helper.NewID()
 	key := snapshotID + "/original" + strings.ToLower(filepath.Ext(name))
-	if err = h.s3.PutFile(key, outputPath, infra.DetectMIMEFromPath(outputPath), workspace.GetBucket(), minio.PutObjectOptions{}); err != nil {
-		infra.HandleError(err, w)
+	if err = h.s3.PutFile(key, outputPath, helper.DetectMIMEFromPath(outputPath), bucket, minio.PutObjectOptions{}); err != nil {
+		handleError(err, w)
 		return
 	}
 	stat, err := os.Stat(outputPath)
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
-	s3Reference := apiclient.S3Reference{
-		Bucket:      workspace.GetBucket(),
+	s3Reference := client.S3Reference{
+		Bucket:      bucket,
 		Key:         key,
 		SnapshotID:  snapshotID,
 		Size:        stat.Size(),
-		ContentType: infra.DetectMIMEFromPath(outputPath),
+		ContentType: helper.DetectMIMEFromPath(outputPath),
 	}
 	existingFile, err := cl.GetByPath(r.URL.Path)
 	if err == nil {
-		if _, err = cl.PatchFromS3(apiclient.FilePatchFromS3Options{
+		if _, err = cl.PatchFromS3(client.FilePatchFromS3Options{
 			ID:          existingFile.ID,
 			Name:        name,
 			S3Reference: s3Reference,
 		}); err != nil {
-			infra.HandleError(err, w)
+			handleError(err, w)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
 		return
 	} else {
-		if _, err = cl.CreateFromS3(apiclient.FileCreateFromS3Options{
-			Type:        apimodel.FileTypeFile,
+		if _, err = cl.CreateFromS3(client.FileCreateFromS3Options{
+			Type:        model.FileTypeFile,
 			WorkspaceID: directory.WorkspaceID,
 			ParentID:    directory.ID,
 			Name:        name,
 			S3Reference: s3Reference,
 		}); err != nil {
-			infra.HandleError(err, w)
+			handleError(err, w)
 			return
 		}
 	}

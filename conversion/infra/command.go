@@ -18,8 +18,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
 	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/helper"
 )
 
 var commandMutex sync.Mutex

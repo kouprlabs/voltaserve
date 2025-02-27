@@ -17,22 +17,22 @@ import (
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
 
-	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
-	apimodel "github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/helper"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
+	conversioninfra "github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type ImageProcessor struct {
-	fileIdent *apiinfra.FileIdentifier
+	fileIdent *infra.FileIdentifier
 	config    *config.Config
 }
 
 func NewImageProcessor() *ImageProcessor {
 	return &ImageProcessor{
-		fileIdent: apiinfra.NewFileIdentifier(),
+		fileIdent: infra.NewFileIdentifier(),
 		config:    config.GetConfig(),
 	}
 }
@@ -75,15 +75,15 @@ func (p *ImageProcessor) Thumbnail(inputPath string, width int, height int, outp
 	}
 }
 
-func (p *ImageProcessor) MeasureImage(inputPath string) (*apimodel.ImageProps, error) {
+func (p *ImageProcessor) MeasureImage(inputPath string) (*model.ImageProps, error) {
 	bildImage, err := imgio.Open(inputPath)
 	if err == nil {
-		return &apimodel.ImageProps{
+		return &model.ImageProps{
 			Width:  bildImage.Bounds().Dx(),
 			Height: bildImage.Bounds().Dy(),
 		}, nil
 	} else {
-		size, err := infra.NewCommand().ReadOutput("identify", "-format", "%w,%h", inputPath)
+		size, err := conversioninfra.NewCommand().ReadOutput("identify", "-format", "%w,%h", inputPath)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func (p *ImageProcessor) MeasureImage(inputPath string) (*apimodel.ImageProps, e
 		if err != nil {
 			return nil, err
 		}
-		return &apimodel.ImageProps{
+		return &model.ImageProps{
 			Width:  width,
 			Height: height,
 		}, nil
@@ -127,7 +127,7 @@ func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, ou
 		} else {
 			heightStr = strconv.FormatInt(int64(height), 10)
 		}
-		if err := infra.NewCommand().Exec("convert", "-resize", widthStr+"x"+heightStr, inputPath, outputPath); err != nil {
+		if err := conversioninfra.NewCommand().Exec("convert", "-resize", widthStr+"x"+heightStr, inputPath, outputPath); err != nil {
 			return err
 		}
 		return nil
@@ -145,7 +145,7 @@ func (p *ImageProcessor) ConvertImage(inputPath string, outputPath string) error
 		}
 		return imgio.Save(outputPath, bildImage, encoder)
 	} else {
-		if err := infra.NewCommand().Exec("convert", inputPath, outputPath); err != nil {
+		if err := conversioninfra.NewCommand().Exec("convert", inputPath, outputPath); err != nil {
 			return err
 		}
 		return nil
@@ -157,7 +157,7 @@ func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string)
 	if err == nil && p.IsSupportedByBild(outputPath) {
 		return imgio.Save(outputPath, bildImage, imgio.JPEGEncoder(100))
 	} else {
-		if err := infra.NewCommand().Exec("convert", inputPath, "-alpha", "off", outputPath); err != nil {
+		if err := conversioninfra.NewCommand().Exec("convert", inputPath, "-alpha", "off", outputPath); err != nil {
 			return err
 		}
 		return nil
@@ -165,7 +165,7 @@ func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string)
 }
 
 func (p *ImageProcessor) DPIFromImage(inputPath string) (*int, error) {
-	output, err := infra.NewCommand().ReadOutput("exiftool", "-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", inputPath)
+	output, err := conversioninfra.NewCommand().ReadOutput("exiftool", "-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", inputPath)
 	if err != nil {
 		return nil, err
 	}

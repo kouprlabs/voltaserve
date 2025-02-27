@@ -17,41 +17,40 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/api/client/apiclient"
-	"github.com/kouprlabs/voltaserve/api/client/mosaicclient"
-	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
-	apimodel "github.com/kouprlabs/voltaserve/api/model"
-	apiservice "github.com/kouprlabs/voltaserve/api/service"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/conversion/helper"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
-	"github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/logger"
 	"github.com/kouprlabs/voltaserve/conversion/processor"
 )
 
 type mosaicPipeline struct {
 	videoProc      *processor.VideoProcessor
 	imageProc      *processor.ImageProcessor
-	fileIdent      *apiinfra.FileIdentifier
-	s3             apiinfra.S3Manager
-	taskClient     *apiclient.TaskClient
-	snapshotClient *apiclient.SnapshotClient
-	mosaicClient   *mosaicclient.MosaicClient
+	fileIdent      *infra.FileIdentifier
+	s3             infra.S3Manager
+	taskClient     *client.TaskClient
+	snapshotClient *client.SnapshotClient
+	mosaicClient   *client.MosaicClient
 }
 
-func NewMosaicPipeline() model.Pipeline {
+func NewMosaicPipeline() Pipeline {
 	return &mosaicPipeline{
 		videoProc:      processor.NewVideoProcessor(),
 		imageProc:      processor.NewImageProcessor(),
-		fileIdent:      apiinfra.NewFileIdentifier(),
-		s3:             apiinfra.NewS3Manager(),
-		taskClient:     apiclient.NewTaskClient(),
-		snapshotClient: apiclient.NewSnapshotClient(),
-		mosaicClient:   mosaicclient.NewMosaicClient(),
+		fileIdent:      infra.NewFileIdentifier(),
+		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		taskClient:     client.NewTaskClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
+		snapshotClient: client.NewSnapshotClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
+		mosaicClient:   client.NewMosaicClient(config.GetConfig().MosaicURL),
 	}
 }
 
-func (p *mosaicPipeline) Run(opts model.PipelineRunOptions) error {
+func (p *mosaicPipeline) Run(opts dto.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
@@ -60,18 +59,18 @@ func (p *mosaicPipeline) Run(opts model.PipelineRunOptions) error {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return
 		} else if err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(inputPath)
 	return p.RunFromLocalPath(inputPath, opts)
 }
 
-func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts model.PipelineRunOptions) error {
+func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
 	if !p.fileIdent.IsImage(opts.Key) {
 		return errors.New("unsupported file type")
 	}
-	if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
-		Fields: []string{apimodel.TaskFieldName},
+	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Creating mosaic."),
 	}); err != nil {
 		return err
@@ -85,32 +84,32 @@ func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts model.PipelineR
 			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 				return
 			} else if err != nil {
-				infra.GetLogger().Error(err)
+				logger.GetLogger().Error(err)
 			}
 		}(outputPath)
 		inputPath = outputPath
 	}
-	if _, err := p.mosaicClient.Create(mosaicclient.MosaicCreateOptions{
+	if _, err := p.mosaicClient.Create(client.MosaicCreateOptions{
 		Path:     inputPath,
 		S3Key:    filepath.FromSlash(opts.SnapshotID),
 		S3Bucket: opts.Bucket,
 	}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(apiservice.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{apimodel.SnapshotFieldMosaic},
-		Mosaic: &apimodel.S3Object{
+		Fields:  []string{model.SnapshotFieldMosaic},
+		Mosaic: &model.S3Object{
 			Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic"),
 			Bucket: opts.Bucket,
 		},
 	}); err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, apiservice.TaskPatchOptions{
-		Fields: []string{apimodel.TaskFieldName, apimodel.TaskFieldStatus},
+	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(apimodel.TaskStatusSuccess),
+		Status: helper.ToPtr(model.TaskStatusSuccess),
 	}); err != nil {
 		return err
 	}

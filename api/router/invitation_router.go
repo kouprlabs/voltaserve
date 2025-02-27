@@ -17,8 +17,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -40,7 +42,7 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
 	g.Get("/incoming", r.ListIncoming)
 	g.Get("/incoming/probe", r.ProbeIncoming)
-	g.Get("/incoming/count", r.CountIncoming)
+	g.Get("/incoming/count", r.GetIncomingCount)
 	g.Get("/outgoing", r.ListOutgoing)
 	g.Get("/outgoing/probe", r.ProbeOutgoing)
 	g.Post("/:id/accept", r.Accept)
@@ -55,18 +57,18 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 //	@Description	Create
 //	@Tags			Invitations
 //	@Id				invitations_create
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		service.InvitationCreateOptions	true	"Body"
-//	@Success		200		{array}		service.Invitation
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		dto.InvitationCreateOptions	true	"Body"
+//	@Success		201		{array}		dto.Invitation
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/invitations [post]
 func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
-	opts := new(service.InvitationCreateOptions)
+	opts := new(dto.InvitationCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -77,7 +79,7 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(res)
+	return c.Status(fiber.StatusCreated).JSON(res)
 }
 
 // ListIncoming godoc
@@ -86,12 +88,13 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 //	@Description	List Incoming
 //	@Tags			Invitations
 //	@Id				invitation_list_incoming
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
 //	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{object}	service.InvitationList
+//	@Success		200			{object}	dto.InvitationList
+//	@Failure		400			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming [get]
 func (r *InvitationRouter) ListIncoming(c *fiber.Ctx) error {
@@ -112,9 +115,10 @@ func (r *InvitationRouter) ListIncoming(c *fiber.Ctx) error {
 //	@Description	Probe Incoming
 //	@Tags			Invitations
 //	@Id				invitation_probe_incoming
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			size	query		string	false	"Size"
-//	@Success		200		{object}	service.InvitationProbe
+//	@Success		200		{object}	dto.InvitationProbe
+//	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming/probe [get]
 func (r *InvitationRouter) ProbeIncoming(c *fiber.Ctx) error {
@@ -129,18 +133,19 @@ func (r *InvitationRouter) ProbeIncoming(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// CountIncoming godoc
+// GetIncomingCount godoc
 //
-//	@Summary		Count Incoming
-//	@Description	Count Incoming
+//	@Summary		Count Incoming Count
+//	@Description	Count Incoming Count
 //	@Tags			Invitations
-//	@Id				invitation_count_incoming
-//	@Produce		json
+//	@Id				invitation_incoming_count
+//	@Produce		text/plain
+//	@Produce		application/json
 //	@Success		200	{integer}	int
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming/count [get]
-func (r *InvitationRouter) CountIncoming(c *fiber.Ctx) error {
-	res, err := r.invitationSvc.CountIncoming(helper.GetUserID(c))
+func (r *InvitationRouter) GetIncomingCount(c *fiber.Ctx) error {
+	res, err := r.invitationSvc.GetCountIncoming(helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -153,13 +158,14 @@ func (r *InvitationRouter) CountIncoming(c *fiber.Ctx) error {
 //	@Description	List Outgoing
 //	@Tags			Invitations
 //	@Id				invitation_list_outgoing
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			organization_id	query		string	true	"Organization ID"
 //	@Param			page			query		string	false	"Page"
 //	@Param			size			query		string	false	"Size"
 //	@Param			sort_by			query		string	false	"Sort By"
 //	@Param			sort_order		query		string	false	"Sort Order"
-//	@Success		200				{object}	service.InvitationList
+//	@Success		200				{object}	dto.InvitationList
+//	@Failure		400				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/outgoing [get]
 func (r *InvitationRouter) ListOutgoing(c *fiber.Ctx) error {
@@ -180,10 +186,11 @@ func (r *InvitationRouter) ListOutgoing(c *fiber.Ctx) error {
 //	@Description	Probe Outgoing
 //	@Tags			Invitations
 //	@Id				invitation_probe_outgoing
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			organization_id	query		string	true	"Organization ID"
 //	@Param			size			query		string	false	"Size"
-//	@Success		200				{object}	service.InvitationList
+//	@Success		200				{object}	dto.InvitationProbe
+//	@Failure		400				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/outgoing/probe [get]
 func (r *InvitationRouter) ProbeOutgoing(c *fiber.Ctx) error {
@@ -198,7 +205,7 @@ func (r *InvitationRouter) ProbeOutgoing(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*service.InvitationListOptions, error) {
+func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*dto.InvitationListOptions, error) {
 	orgID := c.Query("organization_id")
 	if orgID == "" {
 		return nil, errorpkg.NewMissingQueryParamError("organization_id")
@@ -233,7 +240,7 @@ func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*service.
 	if !r.invitationSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	return &service.InvitationListOptions{
+	return &dto.InvitationListOptions{
 		Page:      page,
 		Size:      size,
 		SortBy:    sortBy,
@@ -247,8 +254,7 @@ func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*service.
 //	@Description	Delete
 //	@Tags			Invitations
 //	@Id				invitations_delete
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
@@ -268,8 +274,7 @@ func (r *InvitationRouter) Delete(c *fiber.Ctx) error {
 //	@Description	Resend
 //	@Tags			Invitations
 //	@Id				invitations_resend
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
@@ -289,8 +294,7 @@ func (r *InvitationRouter) Resend(c *fiber.Ctx) error {
 //	@Description	Accept
 //	@Tags			Invitations
 //	@Id				invitations_accept
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
@@ -310,8 +314,7 @@ func (r *InvitationRouter) Accept(c *fiber.Ctx) error {
 //	@Description	Decline
 //	@Tags			Invitations
 //	@Id				invitations_decline
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
@@ -325,7 +328,7 @@ func (r *InvitationRouter) Decline(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-func (r *InvitationRouter) parseIncomingListQueryParams(c *fiber.Ctx) (*service.InvitationListOptions, error) {
+func (r *InvitationRouter) parseIncomingListQueryParams(c *fiber.Ctx) (*dto.InvitationListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -356,7 +359,7 @@ func (r *InvitationRouter) parseIncomingListQueryParams(c *fiber.Ctx) (*service.
 	if !r.invitationSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	return &service.InvitationListOptions{
+	return &dto.InvitationListOptions{
 		Page:      page,
 		Size:      size,
 		SortBy:    sortBy,
