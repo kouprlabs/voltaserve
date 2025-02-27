@@ -15,12 +15,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/kouprlabs/voltaserve/shared/dto"
-	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 )
 
 const (

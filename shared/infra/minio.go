@@ -21,7 +21,6 @@ import (
 
 	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
-
 	"github.com/kouprlabs/voltaserve/shared/logger"
 )
 

@@ -11,8 +11,9 @@
 package helper
 
 import (
-	"github.com/kouprlabs/voltaserve/shared/dto"
 	"time"
+
+	"github.com/kouprlabs/voltaserve/shared/dto"
 )
 
 func NewExpiry(token *dto.Token) time.Time {

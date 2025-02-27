@@ -12,11 +12,12 @@ package errorpkg
 
 import (
 	"fmt"
-	"github.com/kouprlabs/voltaserve/shared/model"
 	"net/http"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+
+	"github.com/kouprlabs/voltaserve/shared/model"
 )
 
 func NewGroupNotFoundError(err error) *ErrorResponse {

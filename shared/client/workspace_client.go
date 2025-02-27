@@ -12,9 +12,10 @@ package client
 
 import (
 	"fmt"
-	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"net/http"
+
+	"github.com/kouprlabs/voltaserve/shared/logger"
 )
 
 type WorkspaceClient struct {

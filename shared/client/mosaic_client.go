@@ -14,13 +14,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kouprlabs/voltaserve/shared/dto"
-	"github.com/kouprlabs/voltaserve/shared/errorpkg"
-	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
+
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 )
 
 type MosaicClient struct {
@@ -82,7 +83,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*dto.MosaicMetadata, e
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusCreated {
 		return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
 	b, err := io.ReadAll(resp.Body)

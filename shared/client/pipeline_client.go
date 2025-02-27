@@ -14,8 +14,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kouprlabs/voltaserve/shared/dto"
 	"net/http"
+
+	"github.com/kouprlabs/voltaserve/shared/dto"
 )
 
 type PipelineClient interface {

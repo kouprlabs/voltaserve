@@ -15,14 +15,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/kouprlabs/voltaserve/shared/dto"
-	"github.com/kouprlabs/voltaserve/shared/helper"
-	"github.com/kouprlabs/voltaserve/shared/logger"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 )
 
 type FileClient struct {
