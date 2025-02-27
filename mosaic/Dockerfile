@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM golang:1.23-alpine AS builder
+FROM golang:1.23-alpine3.21 AS builder
 
 WORKDIR /build
 
@@ -25,7 +25,7 @@ WORKDIR /build/mosaic
 
 RUN go build -o voltaserve-mosaic
 
-FROM debian:bookworm AS runner
+FROM alpine:3.21 AS runner
 
 WORKDIR /app
 
