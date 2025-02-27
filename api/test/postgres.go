@@ -20,7 +20,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 
-	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 )
 
 type Postgres struct {

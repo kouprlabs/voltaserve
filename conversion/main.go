@@ -11,23 +11,39 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/joho/godotenv"
 
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
 	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
-	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/router"
 	"github.com/kouprlabs/voltaserve/conversion/runtime"
 )
 
-// @title		Voltaserve Conversion
-// @version	3.0.0
-// @BasePath	/v3
+func ErrorHandler(c *fiber.Ctx, err error) error {
+	var e *errorpkg.ErrorResponse
+	if errors.As(err, &e) {
+		var v *errorpkg.ErrorResponse
+		errors.As(err, &v)
+		return c.Status(v.Status).JSON(v)
+	} else {
+		log.Error(err)
+		return c.Status(http.StatusInternalServerError).JSON(errorpkg.NewInternalServerError(err))
+	}
+}
+
+//	@title		Voltaserve Conversion
+//	@version	3.0.0
+//	@BasePath	/v3
 //
 // .
 func main() {
@@ -55,7 +71,7 @@ func main() {
 	})
 
 	app := fiber.New(fiber.Config{
-		ErrorHandler: errorpkg.ErrorHandler,
+		ErrorHandler: ErrorHandler,
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 

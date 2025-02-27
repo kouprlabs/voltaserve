@@ -14,17 +14,17 @@ import (
 	"fmt"
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 func CreateUsers(count int) ([]model.User, error) {
-	db, err := infra.NewPostgresManager().GetDB()
+	db, err := infra.NewPostgresManager(config.GetConfig().Postgres, config.GetConfig().Environment).GetDB()
 	if err != nil {
 		return nil, nil
 	}

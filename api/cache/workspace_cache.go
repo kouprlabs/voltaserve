@@ -13,9 +13,10 @@ package cache
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -27,7 +28,7 @@ type WorkspaceCache struct {
 
 func NewWorkspaceCache() *WorkspaceCache {
 	return &WorkspaceCache{
-		redis:         infra.NewRedisManager(),
+		redis:         infra.NewRedisManager(config.GetConfig().Redis),
 		workspaceRepo: repo.NewWorkspaceRepo(),
 		keyPrefix:     "workspace:",
 	}

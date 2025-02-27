@@ -43,29 +43,32 @@ type mailTemplate struct {
 	config config.SMTPConfig
 }
 
-func NewMailTemplate(cfg config.SMTPConfig) MailTemplate {
+func NewMailTemplate(smtpConfig config.SMTPConfig) MailTemplate {
 	if config.GetConfig().Environment.IsTest {
 		return newMockMailTemplate()
 	} else {
-		return newMailTemplate(cfg)
+		return newMailTemplate(smtpConfig)
 	}
 }
 
-func NewMailTemplateWithDialer(cfg config.SMTPConfig, dialer dialer) MailTemplate {
+func NewMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer) MailTemplate {
 	if config.GetConfig().Environment.IsTest {
 		return newMockMailTemplate()
 	} else {
-		return newMailTemplateWithDialer(cfg, dialer)
+		return newMailTemplateWithDialer(smtpConfig, dialer)
 	}
 }
 
-func newMailTemplate(cfg config.SMTPConfig) *mailTemplate {
-	return newMailTemplateWithDialer(cfg, gomail.NewDialer(cfg.Host, cfg.Port, cfg.Username, cfg.Password))
+func newMailTemplate(smtpConfig config.SMTPConfig) *mailTemplate {
+	return newMailTemplateWithDialer(
+		smtpConfig,
+		gomail.NewDialer(smtpConfig.Host, smtpConfig.Port, smtpConfig.Username, smtpConfig.Password),
+	)
 }
 
-func newMailTemplateWithDialer(cfg config.SMTPConfig, dialer dialer) *mailTemplate {
+func newMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer) *mailTemplate {
 	return &mailTemplate{
-		config: cfg,
+		config: smtpConfig,
 		dialer: dialer,
 	}
 }

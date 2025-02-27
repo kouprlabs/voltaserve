@@ -20,9 +20,9 @@ import (
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -41,7 +41,7 @@ func NewTaskRouter() *TaskRouter {
 func (r *TaskRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Get("/probe", r.Probe)
-	g.Get("/count", r.Count)
+	g.Get("/count", r.GetCount)
 	g.Post("/dismiss", r.DismissAll)
 	g.Get("/:id", r.Get)
 	g.Post("/:id/dismiss", r.Dismiss)
@@ -59,9 +59,9 @@ func (r *TaskRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Description	Get
 //	@Tags			Tasks
 //	@Id				tasks_get
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.Task
+//	@Success		200	{object}	dto.Task
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id} [get]
@@ -80,13 +80,14 @@ func (r *TaskRouter) Get(c *fiber.Ctx) error {
 //	@Description	List
 //	@Tags			Tasks
 //	@Id				tasks_list
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			query		query		string	false	"Query"
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
 //	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{object}	service.TaskList
+//	@Success		200			{object}	dto.TaskList
+//	@Failure		400			{object}	errorpkg.ErrorResponse
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/tasks [get]
@@ -108,9 +109,10 @@ func (r *TaskRouter) List(c *fiber.Ctx) error {
 //	@Description	Probe
 //	@Tags			Tasks
 //	@Id				tasks_probe
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			size	query		string	false	"Size"
-//	@Success		200		{object}	service.TaskProbe
+//	@Success		200		{object}	dto.TaskProbe
+//	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/probe [get]
@@ -126,17 +128,17 @@ func (r *TaskRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// Count godoc
+// GetCount godoc
 //
-//	@Summary		Count
-//	@Description	Count
+//	@Summary		Get Count
+//	@Description	Get Count
 //	@Tags			Tasks
-//	@Id				tasks_count
-//	@Produce		json
-//	@Success		200	{integer}	int
+//	@Id				tasks_get_count
+//	@Produce		application/json
+//	@Success		200	{integer}	int64
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/count [get]
-func (r *TaskRouter) Count(c *fiber.Ctx) error {
+func (r *TaskRouter) GetCount(c *fiber.Ctx) error {
 	res, err := r.taskSvc.Count(helper.GetUserID(c))
 	if err != nil {
 		return err
@@ -150,16 +152,14 @@ func (r *TaskRouter) Count(c *fiber.Ctx) error {
 //	@Description	Dismiss
 //	@Tags			Tasks
 //	@Id				tasks_dismiss
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path	string	true	"ID"
-//	@Success		200
+//	@Success		204
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id}/dismiss [post]
 func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
-	if err := r.taskSvc.Dismiss(c.Params("id"), userID); err != nil {
+	if err := r.taskSvc.Dismiss(c.Params("id"), helper.GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -171,14 +171,12 @@ func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
 //	@Description	Dismiss All
 //	@Tags			Tasks
 //	@Id				tasks_dismiss_all
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	service.TaskDismissAllResult
+//	@Produce		application/json
+//	@Success		200	{object}	dto.TaskDismissAllResult
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/dismiss [post]
 func (r *TaskRouter) DismissAll(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
-	res, err := r.taskSvc.DismissAll(userID)
+	res, err := r.taskSvc.DismissAll(helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -191,13 +189,14 @@ func (r *TaskRouter) DismissAll(c *fiber.Ctx) error {
 //	@Description	Create
 //	@Tags			Tasks
 //	@Id				tasks_create
-//	@Produce		json
-//	@Param			api_key	query	string						true	"API Key"
-//	@Param			id		path	string						true	"ID"
-//	@Param			body	body	service.TaskCreateOptions	true	"Body"
-//	@Success		204
-//	@Failure		401	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Produce		application/json
+//	@Param			api_key	query		string					true	"API Key"
+//	@Param			id		path		string					true	"ID"
+//	@Param			body	body		dto.TaskCreateOptions	true	"Body"
+//	@Success		201		{object}	dto.Task
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		401		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/tasks [post]
 func (r *TaskRouter) Create(c *fiber.Ctx) error {
 	apiKey := c.Query("api_key")
@@ -218,7 +217,7 @@ func (r *TaskRouter) Create(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(task)
+	return c.Status(fiber.StatusCreated).JSON(task)
 }
 
 // Delete godoc
@@ -227,10 +226,10 @@ func (r *TaskRouter) Create(c *fiber.Ctx) error {
 //	@Description	Delete
 //	@Tags			Tasks
 //	@Id				tasks_delete
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path	string	true	"ID"
-//	@Success		200
+//	@Success		204
+//	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id} [delete]
@@ -254,11 +253,12 @@ func (r *TaskRouter) Delete(c *fiber.Ctx) error {
 //	@Description	Patch
 //	@Tags			Tasks
 //	@Id				tasks_patch
-//	@Produce		json
-//	@Param			api_key	query		string						true	"API Key"
-//	@Param			id		path		string						true	"ID"
-//	@Param			body	body		service.TaskPatchOptions	true	"Body"
-//	@Success		200		{object}	service.Task
+//	@Produce		application/json
+//	@Param			api_key	query		string					true	"API Key"
+//	@Param			id		path		string					true	"ID"
+//	@Param			body	body		dto.TaskPatchOptions	true	"Body"
+//	@Success		200		{object}	dto.Task
+//	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		401		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id} [patch]

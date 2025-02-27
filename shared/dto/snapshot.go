@@ -100,3 +100,9 @@ type SnapshotPatchOptions struct {
 	Status    *string            `json:"status"`
 	TaskID    *string            `json:"taskId"`
 }
+
+type SnapshotLanguage struct {
+	ID      string `json:"id"`
+	ISO6393 string `json:"iso6393"`
+	Name    string `json:"name"`
+}

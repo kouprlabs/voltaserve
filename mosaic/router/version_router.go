@@ -12,6 +12,8 @@ package router
 
 import (
 	"github.com/gofiber/fiber/v2"
+
+	_ "github.com/kouprlabs/voltaserve/shared/errorpkg"
 )
 
 type VersionRouter struct{}
@@ -30,8 +32,8 @@ func (r *VersionRouter) AppendRoutes(g fiber.Router) {
 //	@Description	Get
 //	@Tags			Version
 //	@Id				version_get
-//	@Produce		json
-//	@Success		200	{string}	string	"{Version}"
+//	@Produce		application/json
+//	@Success		200	{object}	map[string]string
 //	@Failure		503	{object}	errorpkg.ErrorResponse
 //	@Router			/version [get]
 func (r *VersionRouter) Get(c *fiber.Ctx) error {

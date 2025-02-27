@@ -12,19 +12,18 @@ package service
 
 import (
 	"errors"
-	"github.com/kouprlabs/voltaserve/shared/tools"
 	"slices"
 	"sort"
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
 )
@@ -80,7 +79,7 @@ func (svc *GroupService) Create(opts dto.GroupCreateOptions, userID string) (*dt
 		return nil, err
 	}
 	group, err := svc.groupRepo.Insert(repo.GroupInsertOptions{
-		ID:             tools.NewID(),
+		ID:             helper.NewID(),
 		Name:           opts.Name,
 		OrganizationID: opts.OrganizationID,
 		OwnerID:        userID,

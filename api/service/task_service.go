@@ -12,17 +12,16 @@ package service
 
 import (
 	"errors"
-	"github.com/kouprlabs/voltaserve/shared/tools"
 	"slices"
 	"sort"
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
@@ -54,7 +53,7 @@ func NewTaskService() *TaskService {
 
 func (svc *TaskService) Create(opts dto.TaskCreateOptions) (*dto.Task, error) {
 	task, err := svc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            opts.Name,
 		Status:          opts.Status,
 		Error:           opts.Error,

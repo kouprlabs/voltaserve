@@ -18,13 +18,13 @@ import (
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
@@ -43,7 +43,7 @@ type SnapshotService struct {
 	taskCache      *cache.TaskCache
 	s3             infra.S3Manager
 	config         *config.Config
-	languages      []*SnapshotLanguage
+	languages      []*dto.SnapshotLanguage
 }
 
 func NewSnapshotService() *SnapshotService {
@@ -58,9 +58,9 @@ func NewSnapshotService() *SnapshotService {
 		fileRepo:       repo.NewFileRepo(),
 		taskRepo:       repo.NewTaskRepo(),
 		taskCache:      cache.NewTaskCache(),
-		s3:             infra.NewS3Manager(),
+		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		config:         config.GetConfig(),
-		languages: []*SnapshotLanguage{
+		languages: []*dto.SnapshotLanguage{
 			{ID: "ara", ISO6393: "ara", Name: "Arabic"},
 			{ID: "chi_sim", ISO6393: "zho", Name: "Chinese Simplified"},
 			{ID: "chi_tra", ISO6393: "zho", Name: "Chinese Traditional"},
@@ -231,13 +231,7 @@ func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dt
 	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 
-type SnapshotLanguage struct {
-	ID      string `json:"id"`
-	ISO6393 string `json:"iso6393"`
-	Name    string `json:"name"`
-}
-
-func (svc *SnapshotService) GetLanguages() ([]*SnapshotLanguage, error) {
+func (svc *SnapshotService) GetLanguages() ([]*dto.SnapshotLanguage, error) {
 	return svc.languages, nil
 }
 

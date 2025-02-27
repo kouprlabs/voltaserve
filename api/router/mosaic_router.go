@@ -22,10 +22,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -57,19 +56,18 @@ func (r *MosaicRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Description	Create
 //	@Tags			Mosaic
 //	@Id				mosaic_create
-//	@Accept			json
-//	@Produce		json
-//	@Param			file_id	path	string	true	"File ID"
-//	@Success		201
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Produce		application/json
+//	@Param			file_id	path		string	true	"File ID"
+//	@Success		201		{object}	dto.Task
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id} [post]
 func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 	res, err := r.mosaicSvc.Create(c.Params("file_id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
-	return c.JSON(res)
+	return c.Status(fiber.StatusCreated).JSON(res)
 }
 
 // Delete godoc
@@ -78,19 +76,18 @@ func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 //	@Description	Delete
 //	@Tags			Mosaic
 //	@Id				mosaic_delete
-//	@Accept			json
-//	@Produce		json
-//	@Param			file_id	path	string	true	"File ID"
-//	@Success		200
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Produce		application/json
+//	@Param			file_id	path		string	true	"File ID"
+//	@Success		201		{object}	dto.Task
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id} [delete]
 func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 	res, err := r.mosaicSvc.Delete(c.Params("file_id"), helper.GetUserID(c))
 	if err != nil {
 		return err
 	}
-	return c.JSON(res)
+	return c.Status(fiber.StatusCreated).JSON(res)
 }
 
 // GetMetadata godoc
@@ -99,10 +96,9 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 //	@Description	Get Metadata
 //	@Tags			Mosaic
 //	@Id				mosaic_get_metadata
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			file_id	path		string	true	"File ID"
-//	@Success		200		{object}	any
+//	@Success		200		{object}	dto.MosaicMetadata
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id}/metadata [get]
@@ -120,11 +116,13 @@ func (r *MosaicRouter) GetMetadata(c *fiber.Ctx) error {
 //	@Description	Download Tile
 //	@Tags			Mosaic
 //	@Id				mosaic_download_tile
-//	@Produce		json
+//	@Produce		application/octet-stream
 //	@Param			file_id		path		string	true	"File ID"
 //	@Param			zoom_level	path		string	true	"Zoom Level"
 //	@Param			row			path		string	true	"Row"
 //	@Param			column		path		string	true	"Column"
+//	@Success		200			{file}		file
+//	@Failure		400			{object}	errorpkg.ErrorResponse
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension} [get]
@@ -190,7 +188,7 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMIMEFromBytes(b))
+	c.Set("Content-Type", helper.DetectMIMEFromBytes(b))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"tile%s\"", c.Params("extension")))
 	return c.Send(b)
 }

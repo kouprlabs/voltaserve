@@ -10,6 +10,17 @@
 
 package dto
 
+const (
+	PipelinePDF        = "pdf"
+	PipelineOffice     = "office"
+	PipelineImage      = "image"
+	PipelineAudioVideo = "audio_video"
+	PipelineEntity     = "entity"
+	PipelineMosaic     = "mosaic"
+	PipelineGLB        = "glb"
+	PipelineZIP        = "zip"
+)
+
 type PipelineRunOptions struct {
 	PipelineID *string           `json:"pipelineId,omitempty"`
 	TaskID     string            `json:"taskId"`

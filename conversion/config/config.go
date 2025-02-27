@@ -13,6 +13,8 @@ package config
 import (
 	"os"
 	"strconv"
+
+	"github.com/kouprlabs/voltaserve/shared/config"
 )
 
 type Config struct {
@@ -23,7 +25,8 @@ type Config struct {
 	EnableInstaller bool
 	Security        SecurityConfig
 	Limits          LimitsConfig
-	S3              S3Config
+	S3              config.S3Config
+	Environment     config.EnvironmentConfig
 }
 
 type SecurityConfig struct {
@@ -38,23 +41,16 @@ type LimitsConfig struct {
 	ImageMosaicTriggerThresholdPixels int
 }
 
-type S3Config struct {
-	URL       string
-	AccessKey string
-	SecretKey string
-	Region    string
-	Secure    bool
-}
-
 func GetConfig() *Config {
-	config := &Config{}
-	readPort(config)
-	readEnableInstaller(config)
-	readURLs(config)
-	readSecurity(config)
-	readS3(config)
-	readLimits(config)
-	return config
+	cfg := &Config{}
+	readPort(cfg)
+	readEnableInstaller(cfg)
+	readURLs(cfg)
+	readSecurity(cfg)
+	readS3(cfg)
+	readLimits(cfg)
+	readEnvironment(cfg)
+	return cfg
 }
 
 func readPort(config *Config) {
@@ -135,5 +131,11 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.ImageMosaicTriggerThresholdPixels = int(v)
+	}
+}
+
+func readEnvironment(config *Config) {
+	if os.Getenv("TEST") == "true" {
+		config.Environment.IsTest = true
 	}
 }

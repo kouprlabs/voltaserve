@@ -13,32 +13,28 @@ package config
 import (
 	"os"
 	"strconv"
+
+	"github.com/kouprlabs/voltaserve/shared/config"
 )
 
 type Config struct {
-	Port   int
-	Limits LimitsConfig
-	S3     S3Config
+	Port        int
+	Limits      LimitsConfig
+	S3          config.S3Config
+	Environment config.EnvironmentConfig
 }
 
 type LimitsConfig struct {
 	MultipartBodyLengthLimitMB int
 }
 
-type S3Config struct {
-	URL       string
-	AccessKey string
-	SecretKey string
-	Region    string
-	Secure    bool
-}
-
 func GetConfig() *Config {
-	config := &Config{}
-	readPort(config)
-	readS3(config)
-	readLimits(config)
-	return config
+	cfg := &Config{}
+	readPort(cfg)
+	readS3(cfg)
+	readLimits(cfg)
+	readEnvironment(cfg)
+	return cfg
 }
 
 func readPort(config *Config) {
@@ -71,5 +67,11 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.MultipartBodyLengthLimitMB = int(v)
+	}
+}
+
+func readEnvironment(config *Config) {
+	if os.Getenv("TEST") == "true" {
+		config.Environment.IsTest = true
 	}
 }

@@ -12,15 +12,15 @@ package repo
 
 import (
 	"errors"
-	"github.com/kouprlabs/voltaserve/shared/tools"
 
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type fileEntity struct {
@@ -195,7 +195,10 @@ type FileRepo struct {
 
 func NewFileRepo() *FileRepo {
 	return &FileRepo{
-		db:             infra.NewPostgresManager().GetDBOrPanic(),
+		db: infra.NewPostgresManager(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		).GetDBOrPanic(),
 		permissionRepo: NewPermissionRepo(),
 	}
 }
@@ -208,7 +211,7 @@ type FileInsertOptions struct {
 }
 
 func (repo *FileRepo) Insert(opts FileInsertOptions) (model.File, error) {
-	id := tools.NewID()
+	id := helper.NewID()
 	var parentID *string
 	if opts.ParentID != "" {
 		parentID = &opts.ParentID
@@ -557,7 +560,7 @@ func (repo *FileRepo) GrantUserPermission(id string, userID string, permission s
               (SELECT ?, ?, w.id, 'viewer', ? FROM file f
               INNER JOIN workspace w ON w.id = f.workspace_id AND f.id = ?)
               ON CONFLICT DO NOTHING`,
-			tools.NewID(), userID, helper.NewTimeString(), id)
+			helper.NewID(), userID, helper.NewTimeString(), id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -571,7 +574,7 @@ func (repo *FileRepo) GrantUserPermission(id string, userID string, permission s
 		db := repo.db.
 			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
                   VALUES (?, ?, ?, 'viewer', ?) ON CONFLICT DO NOTHING`,
-				tools.NewID(), userID, f.GetID(), helper.NewTimeString())
+				helper.NewID(), userID, f.GetID(), helper.NewTimeString())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -586,7 +589,7 @@ func (repo *FileRepo) GrantUserPermission(id string, userID string, permission s
 		db := repo.db.
 			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
                   VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-				tools.NewID(), userID, leaf.GetID(), permission, helper.NewTimeString(), permission)
+				helper.NewID(), userID, leaf.GetID(), permission, helper.NewTimeString(), permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -614,7 +617,7 @@ func (repo *FileRepo) GrantGroupPermission(id string, groupID string, permission
               (SELECT ?, ?, w.id, 'viewer', ? FROM file f
               INNER JOIN workspace w ON w.id = f.workspace_id AND f.id = ?)
               ON CONFLICT DO NOTHING`,
-			tools.NewID(), groupID, helper.NewTimeString(), id)
+			helper.NewID(), groupID, helper.NewTimeString(), id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -628,7 +631,7 @@ func (repo *FileRepo) GrantGroupPermission(id string, groupID string, permission
 		db := repo.db.
 			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
                   VALUES (?, ?, ?, 'viewer', ?) ON CONFLICT DO NOTHING`,
-				tools.NewID(), groupID, f.GetID(), helper.NewTimeString())
+				helper.NewID(), groupID, f.GetID(), helper.NewTimeString())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -643,7 +646,7 @@ func (repo *FileRepo) GrantGroupPermission(id string, groupID string, permission
 		db := repo.db.
 			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
                   VALUES (?, ?, ?, ?, ?) ON CONFLICT (group_id, resource_id) DO UPDATE SET permission = ?`,
-				tools.NewID(), groupID, leaf.GetID(), permission, helper.NewTimeString(), permission)
+				helper.NewID(), groupID, leaf.GetID(), permission, helper.NewTimeString(), permission)
 		if db.Error != nil {
 			return db.Error
 		}

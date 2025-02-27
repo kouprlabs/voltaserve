@@ -18,9 +18,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kouprlabs/voltaserve/shared/helper"
+
 	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
+	"github.com/kouprlabs/voltaserve/conversion/logger"
 )
 
 type PDFProcessor struct {
@@ -46,7 +48,7 @@ func (p *PDFProcessor) TextFromPDF(inputPath string) (*string, error) {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return
 		} else if err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}(path)
 	b, err := os.ReadFile(path) //nolint:gosec // Known path

@@ -17,10 +17,11 @@ import (
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
@@ -43,7 +44,8 @@ func (s *UserServiceSuite) SetupTest() {
 		return
 	}
 	for _, user := range s.users {
-		err := infra.NewSearchManager().Index(infra.UserSearchIndex, []infra.SearchModel{user})
+		err := infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment).
+			Index(infra.UserSearchIndex, []infra.SearchModel{user})
 		s.Require().NoError(err)
 	}
 }

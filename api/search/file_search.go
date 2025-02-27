@@ -15,9 +15,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -47,8 +48,8 @@ func (f fileEntity) GetID() string {
 func NewFileSearch() *FileSearch {
 	return &FileSearch{
 		index:        infra.FileSearchIndex,
-		search:       infra.NewSearchManager(),
-		s3:           infra.NewS3Manager(),
+		search:       infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
+		s3:           infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		snapshotRepo: repo.NewSnapshotRepo(),
 	}
 }

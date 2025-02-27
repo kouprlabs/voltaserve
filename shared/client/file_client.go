@@ -16,8 +16,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/logger"
-	"github.com/kouprlabs/voltaserve/shared/tools"
 	"io"
 	"net/http"
 	"net/url"
@@ -197,7 +197,7 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*dto.File, error
 func (cl *FileClient) GetByPath(path string) (*dto.File, error) {
 	req, err := http.NewRequest(
 		"GET",
-		fmt.Sprintf("%s/v3/files?path=%s", cl.url, tools.EncodeURIComponent(path)),
+		fmt.Sprintf("%s/v3/files?path=%s", cl.url, helper.EncodeURIComponent(path)),
 		nil,
 	)
 	if err != nil {
@@ -230,7 +230,7 @@ func (cl *FileClient) GetByPath(path string) (*dto.File, error) {
 func (cl *FileClient) ListByPath(path string) ([]dto.File, error) {
 	req, err := http.NewRequest(
 		"GET",
-		fmt.Sprintf("%s/v3/files/list?path=%s", cl.url, tools.EncodeURIComponent(path)),
+		fmt.Sprintf("%s/v3/files/list?path=%s", cl.url, helper.EncodeURIComponent(path)),
 		nil,
 	)
 	if err != nil {

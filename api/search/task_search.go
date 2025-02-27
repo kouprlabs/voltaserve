@@ -13,9 +13,10 @@ package search
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -44,7 +45,7 @@ func (t taskEntity) GetID() string {
 func NewTaskSearch() *TaskSearch {
 	return &TaskSearch{
 		index:    infra.TaskSearchIndex,
-		search:   infra.NewSearchManager(),
+		search:   infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
 		taskRepo: repo.NewTaskRepo(),
 	}
 }

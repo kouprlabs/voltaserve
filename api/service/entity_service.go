@@ -12,23 +12,21 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/shared/client"
-	"github.com/kouprlabs/voltaserve/shared/tools"
 	"sort"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
 
-	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
@@ -54,7 +52,7 @@ func NewEntityService() *EntityService {
 		fileGuard:      guard.NewFileGuard(),
 		taskSvc:        NewTaskService(),
 		taskMapper:     newTaskMapper(),
-		s3:             infra.NewS3Manager(),
+		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		languageClient: client.NewLanguageClient(config.GetConfig().LanguageURL),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
@@ -167,17 +165,12 @@ func (svc *EntityService) List(fileID string, opts dto.EntityListOptions, userID
 	}, nil
 }
 
-type EntityProbe struct {
-	TotalPages    uint64 `json:"totalPages"`
-	TotalElements uint64 `json:"totalElements"`
-}
-
-func (svc *EntityService) Probe(fileID string, opts dto.EntityListOptions, userID string) (*EntityProbe, error) {
+func (svc *EntityService) Probe(fileID string, opts dto.EntityListOptions, userID string) (*dto.EntityProbe, error) {
 	all, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
 	}
-	return &EntityProbe{
+	return &dto.EntityProbe{
 		TotalElements: uint64(len(all)),
 		TotalPages:    (uint64(len(all)) + opts.Size - 1) / opts.Size,
 	}, nil
@@ -199,7 +192,7 @@ func (svc *EntityService) runPipeline(snapshot model.Snapshot, task model.Task) 
 		key = snapshot.GetPreview().Key
 	}
 	if err := svc.pipelineClient.Run(&dto.PipelineRunOptions{
-		PipelineID: helper.ToPtr(conversionmodel.PipelineEntity),
+		PipelineID: helper.ToPtr(dto.PipelineEntity),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetPreview().Bucket,
@@ -213,7 +206,7 @@ func (svc *EntityService) runPipeline(snapshot model.Snapshot, task model.Task) 
 
 func (svc *EntityService) createWaitingTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            "Waiting.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -228,7 +221,7 @@ func (svc *EntityService) createWaitingTask(file model.File, userID string) (mod
 
 func (svc *EntityService) createDeleteTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            "Deleting entities.",
 		UserID:          userID,
 		IsIndeterminate: true,

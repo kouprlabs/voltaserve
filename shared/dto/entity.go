@@ -45,3 +45,8 @@ type EntityList struct {
 	Page          uint64    `json:"page"`
 	Size          uint64    `json:"size"`
 }
+
+type EntityProbe struct {
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
+}

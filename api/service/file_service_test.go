@@ -22,10 +22,10 @@ import (
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
@@ -972,7 +972,7 @@ func (s *FileServiceTestSuite) TestComputeSize() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	size, err := service.NewFileService().ComputeSize(file.ID, s.users[0].GetID())
+	size, err := service.NewFileService().GetSize(file.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.GreaterOrEqual(*size, int64(0))
 }
@@ -992,7 +992,7 @@ func (s *FileServiceTestSuite) TestComputeSize_MissingPermission() {
 
 	s.revokeUserPermissionForFile(file, s.users[0])
 
-	_, err = service.NewFileService().ComputeSize(file.ID, s.users[0].GetID())
+	_, err = service.NewFileService().GetSize(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
 }
@@ -1017,7 +1017,7 @@ func (s *FileServiceTestSuite) TestCount() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	count, err := service.NewFileService().Count(folder.ID, s.users[0].GetID())
+	count, err := service.NewFileService().GetCount(folder.ID, s.users[0].GetID())
 	s.Require().NoError(err)
 	s.Equal(int64(1), *count)
 }
@@ -1042,7 +1042,7 @@ func (s *FileServiceTestSuite) TestCount_NotAFolder() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	_, err = service.NewFileService().Count(file.ID, s.users[0].GetID())
+	_, err = service.NewFileService().GetCount(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFileIsNotAFolderError(cache.NewFileCache().GetOrNil(file.ID)).Error(), err.Error())
 }
@@ -1069,7 +1069,7 @@ func (s *FileServiceTestSuite) TestCount_MissingPermission() {
 
 	s.revokeUserPermissionForFile(folder, s.users[0])
 
-	_, err = service.NewFileService().Count(folder.ID, s.users[0].GetID())
+	_, err = service.NewFileService().GetCount(folder.ID, s.users[0].GetID())
 	s.Require().Error(err)
 	s.Equal(errorpkg.NewFileNotFoundError(err).Error(), err.Error())
 }

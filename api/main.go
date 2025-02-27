@@ -23,9 +23,9 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/router"
 )
@@ -40,9 +40,9 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 	}
 }
 
-// @title		Voltaserve API
-// @version	3.0.0
-// @BasePath	/v3
+//	@title		Voltaserve API
+//	@version	3.0.0
+//	@BasePath	/v3
 //
 // .
 func main() {
@@ -77,6 +77,10 @@ func main() {
 	healthRouter := router.NewHealthRouter()
 	healthRouter.AppendRoutes(v3)
 
+	workspaceGroup := v3.Group("workspaces")
+	workspaceRouter := router.NewWorkspaceRouter()
+	workspaceRouter.AppendNonJWTRoutes(workspaceGroup)
+
 	fileGroup := v3.Group("files")
 	fileRouter := router.NewFileRouter()
 	fileRouter.AppendNonJWTRoutes(fileGroup)
@@ -101,6 +105,7 @@ func main() {
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
 
+	workspaceRouter.AppendRoutes(workspaceGroup)
 	fileRouter.AppendRoutes(fileGroup)
 	snapshotRouter.AppendRoutes(snapshotGroup)
 	mosaicRouter.AppendRoutes(mosaicGroup)
@@ -115,9 +120,6 @@ func main() {
 
 	storageRouter := router.NewStorageRouter()
 	storageRouter.AppendRoutes(v3.Group("storage"))
-
-	workspaceRouter := router.NewWorkspaceRouter()
-	workspaceRouter.AppendRoutes(v3.Group("workspaces"))
 
 	groupRouter := router.NewGroupRouter()
 	groupRouter.AppendRoutes(v3.Group("groups"))

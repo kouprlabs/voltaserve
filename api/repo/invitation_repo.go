@@ -12,15 +12,15 @@ package repo
 
 import (
 	"errors"
-	"github.com/kouprlabs/voltaserve/shared/tools"
 
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type invitationEntity struct {
@@ -136,7 +136,10 @@ type InvitationRepo struct {
 
 func NewInvitationRepo() *InvitationRepo {
 	return &InvitationRepo{
-		db:       infra.NewPostgresManager().GetDBOrPanic(),
+		db: infra.NewPostgresManager(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		).GetDBOrPanic(),
 		userRepo: NewUserRepo(),
 	}
 }
@@ -151,7 +154,7 @@ func (repo *InvitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invita
 	var res []model.Invitation
 	for _, e := range opts.Emails {
 		invitation := invitationEntity{
-			ID:             tools.NewID(),
+			ID:             helper.NewID(),
 			OrganizationID: opts.OrganizationID,
 			OwnerID:        opts.UserID,
 			Email:          e,

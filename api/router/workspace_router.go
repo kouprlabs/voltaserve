@@ -20,18 +20,21 @@ import (
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 
-	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 type WorkspaceRouter struct {
 	workspaceSvc *service.WorkspaceService
+	config       *config.Config
 }
 
 func NewWorkspaceRouter() *WorkspaceRouter {
 	return &WorkspaceRouter{
 		workspaceSvc: service.NewWorkspaceService(),
+		config:       config.GetConfig(),
 	}
 }
 
@@ -49,17 +52,22 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Patch("/:id/storage_capacity", r.PatchStorageCapacity)
 }
 
+func (r *WorkspaceRouter) AppendNonJWTRoutes(g fiber.Router) {
+	g.Get("/:id/bucket", r.GetBucket)
+}
+
 // Create godoc
 //
 //	@Summary		Create
 //	@Description	Create
 //	@Tags			Workspaces
 //	@Id				workspaces_create
-//	@Accept			json
-//	@Produce		json
-//	@Param			body	body		service.WorkspaceCreateOptions	true	"Body"
-//	@Success		200		{object}	service.Workspace
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			body	body		dto.WorkspaceCreateOptions	true	"Body"
+//	@Success		201		{object}	dto.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces [post]
 func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
@@ -80,13 +88,13 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 
 // Find godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Find
+//	@Description	Find
 //	@Tags			Workspaces
 //	@Id				workspaces_find
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.Workspace
+//	@Success		200	{object}	dto.Workspace
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [get]
@@ -104,13 +112,14 @@ func (r *WorkspaceRouter) Find(c *fiber.Ctx) error {
 //	@Description	List
 //	@Tags			Workspaces
 //	@Id				workspaces_list
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			query		query		string	false	"Query"
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
 //	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{object}	service.WorkspaceList
+//	@Success		200			{object}	dto.WorkspaceList
+//	@Failure		400			{object}	errorpkg.ErrorResponse
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces [get]
@@ -132,9 +141,10 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 //	@Description	Probe
 //	@Tags			Workspaces
 //	@Id				workspaces_probe
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			size	query		string	false	"Size"
-//	@Success		200		{object}	service.WorkspaceProbe
+//	@Success		200		{object}	dto.WorkspaceProbe
+//	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/probe [get]
@@ -150,26 +160,23 @@ func (r *WorkspaceRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-type WorkspacePatchNameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
 // PatchName godoc
 //
 //	@Summary		Patch Name
 //	@Description	Patch Name
 //	@Tags			Workspaces
 //	@Id				workspaces_patch_name
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		string						true	"ID"
-//	@Param			body	body		WorkspacePatchNameOptions	true	"Body"
-//	@Success		200		{object}	service.Workspace
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		dto.WorkspacePatchNameOptions	true	"Body"
+//	@Success		200		{object}	dto.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_name [patch]
 func (r *WorkspaceRouter) PatchName(c *fiber.Ctx) error {
-	opts := new(WorkspacePatchNameOptions)
+	opts := new(dto.WorkspacePatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -180,26 +187,23 @@ func (r *WorkspaceRouter) PatchName(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-type WorkspacePatchStorageCapacityOptions struct {
-	StorageCapacity int64 `json:"storageCapacity" validate:"required,min=1"`
-}
-
 // PatchStorageCapacity godoc
 //
 //	@Summary		Patch Storage Capacity
 //	@Description	Patch Storage Capacity
 //	@Tags			Workspaces
 //	@Id				workspaces_patch_storage_capacity
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		string									true	"Id"
-//	@Param			body	body		WorkspacePatchStorageCapacityOptions	true	"Body"
-//	@Success		200		{object}	service.Workspace
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id		path		string										true	"Id"
+//	@Param			body	body		dto.WorkspacePatchStorageCapacityOptions	true	"Body"
+//	@Success		200		{object}	dto.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/storage_capacity [patch]
 func (r *WorkspaceRouter) PatchStorageCapacity(c *fiber.Ctx) error {
-	opts := new(WorkspacePatchStorageCapacityOptions)
+	opts := new(dto.WorkspacePatchStorageCapacityOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -216,10 +220,10 @@ func (r *WorkspaceRouter) PatchStorageCapacity(c *fiber.Ctx) error {
 //	@Description	Delete
 //	@Tags			Workspaces
 //	@Id				workspaces_delete
-//	@Accept			json
-//	@Produce		json
+//	@Produce		application/json
 //	@Param			id	path	string	true	"ID"
-//	@Success		200
+//	@Success		204
+//	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [delete]
 func (r *WorkspaceRouter) Delete(c *fiber.Ctx) error {
@@ -228,6 +232,35 @@ func (r *WorkspaceRouter) Delete(c *fiber.Ctx) error {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
+}
+
+// GetBucket godoc
+//
+//	@Summary		Get Bucket
+//	@Description	Get Bucket
+//	@Tags			Workspaces
+//	@Id				workspaces_get_bucket
+//	@Produce		text/plain
+//	@Produce		application/json
+//	@Param			api_key	query		string	true	"API Key"
+//	@Param			id		path		string	true	"ID"
+//	@Success		200		{string}	string
+//	@Failure		401		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/workspaces/{id}/bucket [get]
+func (r *WorkspaceRouter) GetBucket(c *fiber.Ctx) error {
+	apiKey := c.Query("api_key")
+	if apiKey == "" {
+		return errorpkg.NewMissingQueryParamError("api_key")
+	}
+	if apiKey != r.config.Security.APIKey {
+		return errorpkg.NewInvalidAPIKeyError()
+	}
+	bucket, err := r.workspaceSvc.GetBucket(c.Params("id"))
+	if err != nil {
+		return err
+	}
+	return c.SendString(bucket)
 }
 
 func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*dto.WorkspaceListOptions, error) {

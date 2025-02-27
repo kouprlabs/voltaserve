@@ -12,7 +12,6 @@ package service
 
 import (
 	"errors"
-	"github.com/kouprlabs/voltaserve/shared/tools"
 	"sort"
 	"strings"
 
@@ -20,13 +19,13 @@ import (
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
 )
@@ -60,7 +59,7 @@ func NewWorkspaceService() *WorkspaceService {
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
 		fileMapper:      newFileMapper(),
-		s3:              infra.NewS3Manager(),
+		s3:              infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		config:          config.GetConfig(),
 	}
 }
@@ -89,64 +88,6 @@ func (svc *WorkspaceService) Create(opts dto.WorkspaceCreateOptions, userID stri
 		return nil, err
 	}
 	res, err := svc.workspaceMapper.mapOne(workspace, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *WorkspaceService) create(opts dto.WorkspaceCreateOptions, userID string) (model.Workspace, error) {
-	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
-	if err := svc.s3.CreateBucket(bucket); err != nil {
-		return nil, err
-	}
-	if opts.StorageCapacity == 0 {
-		opts.StorageCapacity = helper.MegabyteToByte(svc.config.Defaults.WorkspaceStorageCapacityMB)
-	}
-	res, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
-		ID:              tools.NewID(),
-		Name:            opts.Name,
-		StorageCapacity: opts.StorageCapacity,
-		OrganizationID:  opts.OrganizationID,
-		Image:           opts.Image,
-		Bucket:          bucket,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.workspaceRepo.GrantUserPermission(res.GetID(), userID, model.PermissionOwner); err != nil {
-		return nil, err
-	}
-	res, err = svc.workspaceRepo.Find(res.GetID())
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *WorkspaceService) createRoot(workspace model.Workspace, userID string) (model.File, error) {
-	res, err := svc.fileRepo.Insert(repo.FileInsertOptions{
-		Name:        "root",
-		WorkspaceID: workspace.GetID(),
-		Type:        model.FileTypeFolder,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.fileRepo.GrantUserPermission(res.GetID(), userID, model.PermissionOwner); err != nil {
-		return nil, err
-	}
-	if _, err := svc.fileCache.Refresh(res.GetID()); err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *WorkspaceService) associateWithRoot(workspace model.Workspace, root model.File) (model.Workspace, error) {
-	if err := svc.workspaceRepo.UpdateRootID(workspace.GetID(), root.GetID()); err != nil {
-		return nil, err
-	}
-	res, err := svc.workspaceCache.Refresh(workspace.GetID())
 	if err != nil {
 		return nil, err
 	}
@@ -301,6 +242,14 @@ func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64
 	return true, nil
 }
 
+func (svc *WorkspaceService) GetBucket(id string) (string, error) {
+	workspace, err := svc.workspaceRepo.Find(id)
+	if err != nil {
+		return "", err
+	}
+	return workspace.GetBucket(), nil
+}
+
 func (svc *WorkspaceService) IsValidSortBy(value string) bool {
 	return value == "" ||
 		value == dto.WorkspaceSortByName ||
@@ -367,6 +316,64 @@ func (svc *WorkspaceService) search(opts dto.WorkspaceListOptions, userID string
 		workspaces = append(workspaces, workspace)
 	}
 	res, err = svc.authorize(workspaces, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *WorkspaceService) create(opts dto.WorkspaceCreateOptions, userID string) (model.Workspace, error) {
+	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
+	if err := svc.s3.CreateBucket(bucket); err != nil {
+		return nil, err
+	}
+	if opts.StorageCapacity == 0 {
+		opts.StorageCapacity = helper.MegabyteToByte(svc.config.Defaults.WorkspaceStorageCapacityMB)
+	}
+	res, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
+		ID:              helper.NewID(),
+		Name:            opts.Name,
+		StorageCapacity: opts.StorageCapacity,
+		OrganizationID:  opts.OrganizationID,
+		Image:           opts.Image,
+		Bucket:          bucket,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.workspaceRepo.GrantUserPermission(res.GetID(), userID, model.PermissionOwner); err != nil {
+		return nil, err
+	}
+	res, err = svc.workspaceRepo.Find(res.GetID())
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *WorkspaceService) createRoot(workspace model.Workspace, userID string) (model.File, error) {
+	res, err := svc.fileRepo.Insert(repo.FileInsertOptions{
+		Name:        "root",
+		WorkspaceID: workspace.GetID(),
+		Type:        model.FileTypeFolder,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.fileRepo.GrantUserPermission(res.GetID(), userID, model.PermissionOwner); err != nil {
+		return nil, err
+	}
+	if _, err := svc.fileCache.Refresh(res.GetID()); err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *WorkspaceService) associateWithRoot(workspace model.Workspace, root model.File) (model.Workspace, error) {
+	if err := svc.workspaceRepo.UpdateRootID(workspace.GetID(), root.GetID()); err != nil {
+		return nil, err
+	}
+	res, err := svc.workspaceCache.Refresh(workspace.GetID())
 	if err != nil {
 		return nil, err
 	}

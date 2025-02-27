@@ -21,19 +21,21 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
 
 type AferoSuite struct {
 	suite.Suite
-	org       *service.Organization
-	workspace *service.Workspace
+	org       *dto.Organization
+	workspace *dto.Workspace
 	users     []model.User
 }
 
@@ -95,15 +97,16 @@ func (s *AferoSuite) TestUploadAndDownload() {
 	s.Equal(downloadContent, string(content))
 }
 
-func (s *AferoSuite) uploadFile(path string, size int64, bucket string, fileID string, snapshotID string, userID string) (*service.File, error) {
+func (s *AferoSuite) uploadFile(path string, size int64, bucket string, fileID string, snapshotID string, userID string) (*dto.File, error) {
 	s3Reference := &model.S3Reference{
 		Bucket:      bucket,
 		Key:         snapshotID + "/original" + strings.ToLower(filepath.Ext(path)),
 		Size:        size,
 		SnapshotID:  snapshotID,
-		ContentType: infra.DetectMIMEFromPath(path),
+		ContentType: helper.DetectMIMEFromPath(path),
 	}
-	if err := infra.NewS3Manager().PutFile(s3Reference.Key, path, s3Reference.ContentType, s3Reference.Bucket, minio.PutObjectOptions{}); err != nil {
+	if err := infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment).
+		PutFile(s3Reference.Key, path, s3Reference.ContentType, s3Reference.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
 	res, err := service.NewFileService().Store(fileID, service.FileStoreOptions{S3Reference: s3Reference}, userID)

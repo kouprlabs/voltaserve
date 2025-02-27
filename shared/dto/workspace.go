@@ -60,3 +60,11 @@ type WorkspaceProbe struct {
 	TotalPages    uint64 `json:"totalPages"`
 	TotalElements uint64 `json:"totalElements"`
 }
+
+type WorkspacePatchNameOptions struct {
+	Name string `json:"name" validate:"required,max=255"`
+}
+
+type WorkspacePatchStorageCapacityOptions struct {
+	StorageCapacity int64 `json:"storageCapacity" validate:"required,min=1"`
+}

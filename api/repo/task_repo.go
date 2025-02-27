@@ -18,10 +18,11 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/logger"
 )
 
@@ -194,7 +195,10 @@ type TaskRepo struct {
 
 func NewTaskRepo() *TaskRepo {
 	return &TaskRepo{
-		db: infra.NewPostgresManager().GetDBOrPanic(),
+		db: infra.NewPostgresManager(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		).GetDBOrPanic(),
 	}
 }
 

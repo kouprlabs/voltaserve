@@ -64,6 +64,7 @@ paths:
       description: Get
       operationId: health_get
       produces:
+      - text/plain
       - application/json
       responses:
         "200":
@@ -102,18 +103,18 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             $ref: '#/definitions/model.Metadata'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Create
       tags:
       - Mosaics
@@ -138,11 +139,11 @@ paths:
         "404":
           description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Delete
       tags:
       - Mosaics
@@ -169,11 +170,11 @@ paths:
         "404":
           description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get Metadata
       tags:
       - Mosaics
@@ -212,19 +213,21 @@ paths:
         name: extension
         required: true
         type: string
+      produces:
+      - application/octet-stream
       responses:
         "200":
-          description: Tile
+          description: OK
           schema:
             type: file
         "404":
           description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Download Tile
       tags:
       - Mosaics
@@ -236,9 +239,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{Version}'
+          description: OK
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
         "503":
           description: Service Unavailable
           schema:

@@ -15,11 +15,11 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/kouprlabs/voltaserve/api/client/apiclient"
-	apirouter "github.com/kouprlabs/voltaserve/api/router"
+	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"github.com/kouprlabs/voltaserve/webdav/config"
 )
 
 /*
@@ -33,23 +33,23 @@ Example implementation:
 - Return the response.
 */
 func (h *Handler) methodCopy(w http.ResponseWriter, r *http.Request) {
-	token, ok := r.Context().Value("token").(*infra.Token)
+	token, ok := r.Context().Value("token").(*dto.Token)
 	if !ok {
-		infra.HandleError(fmt.Errorf("missing token"), w)
+		handleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	cl := apiclient.NewFileClient(token)
+	cl := client.NewFileClient(token, config.GetConfig().APIURL, config.GetConfig().Security.APIKey)
 	sourcePath := helper.DecodeURIComponent(r.URL.Path)
 	targetPath := helper.DecodeURIComponent(helper.GetTargetPath(r))
 	sourceFile, err := cl.GetByPath(sourcePath)
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
 	targetDir := helper.DecodeURIComponent(helper.Dirname(helper.GetTargetPath(r)))
 	targetFile, err := cl.GetByPath(targetDir)
 	if err != nil {
-		infra.HandleError(err, w)
+		handleError(err, w)
 		return
 	}
 	if sourceFile.WorkspaceID != targetFile.WorkspaceID {
@@ -60,11 +60,11 @@ func (h *Handler) methodCopy(w http.ResponseWriter, r *http.Request) {
 	} else {
 		clone, err := cl.CopyOne(sourceFile.ID, targetFile.ID)
 		if err != nil {
-			infra.HandleError(err, w)
+			handleError(err, w)
 			return
 		}
-		if _, err = cl.PatchName(clone.ID, apirouter.FilePatchNameOptions{Name: path.Base(targetPath)}); err != nil {
-			infra.HandleError(err, w)
+		if _, err = cl.PatchName(clone.ID, dto.FilePatchNameOptions{Name: path.Base(targetPath)}); err != nil {
+			handleError(err, w)
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)

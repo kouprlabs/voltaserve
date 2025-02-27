@@ -13,9 +13,10 @@ package search
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -27,7 +28,7 @@ type UserSearch struct {
 func NewUserSearch() *UserSearch {
 	return &UserSearch{
 		index:  infra.UserSearchIndex,
-		search: infra.NewSearchManager(),
+		search: infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
 	}
 }
 

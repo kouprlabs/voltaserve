@@ -14,11 +14,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/kouprlabs/voltaserve/shared/client"
-	"github.com/kouprlabs/voltaserve/shared/tools"
 	"os"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strings"
 
@@ -26,15 +23,16 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/reactivex/rxgo/v2"
 
+	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
-	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
@@ -118,12 +116,12 @@ func (svc *FileService) IsValidSortOrder(value string) bool {
 	return svc.fileSortService.isValidSortOrder(value)
 }
 
-func (svc *FileService) ComputeSize(id string, userID string) (*int64, error) {
-	return svc.fileCompute.computeSize(id, userID)
+func (svc *FileService) GetSize(id string, userID string) (*int64, error) {
+	return svc.fileCompute.getSize(id, userID)
 }
 
-func (svc *FileService) Count(id string, userID string) (*int64, error) {
-	return svc.fileCompute.count(id, userID)
+func (svc *FileService) GetCount(id string, userID string) (*int64, error) {
+	return svc.fileCompute.getCount(id, userID)
 }
 
 func (svc *FileService) Copy(sourceID string, targetID string, userID string) (*dto.File, error) {
@@ -198,7 +196,7 @@ func (svc *FileService) FindGroupPermissions(id string, userID string) ([]*dto.G
 	return svc.filePermission.findGroupPermissions(id, userID)
 }
 
-func (svc *FileService) Reprocess(id string, userID string) (*FileReprocessResult, error) {
+func (svc *FileService) Reprocess(id string, userID string) (*dto.FileReprocessResult, error) {
 	return svc.fileReprocess.reprocess(id, userID)
 }
 
@@ -856,7 +854,7 @@ func newFileCompute() *fileCompute {
 	}
 }
 
-func (svc *fileCompute) computeSize(id string, userID string) (*int64, error) {
+func (svc *fileCompute) getSize(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -871,7 +869,7 @@ func (svc *fileCompute) computeSize(id string, userID string) (*int64, error) {
 	return &res, nil
 }
 
-func (svc *fileCompute) count(id string, userID string) (*int64, error) {
+func (svc *fileCompute) getCount(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -984,7 +982,7 @@ func (svc *fileCopy) performCopy(source model.File, target model.File, userID st
 
 func (svc *fileCopy) createTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            "Copying.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -1079,7 +1077,7 @@ func (svc *fileCopy) cloneTree(source model.File, target model.File, tree []mode
 
 func (svc *fileCopy) newClone(file model.File) model.File {
 	f := repo.NewFileModel()
-	f.SetID(tools.NewID())
+	f.SetID(helper.NewID())
 	f.SetParentID(file.GetParentID())
 	f.SetWorkspaceID(file.GetWorkspaceID())
 	f.SetSnapshotID(file.GetSnapshotID())
@@ -1091,7 +1089,7 @@ func (svc *fileCopy) newClone(file model.File) model.File {
 
 func (svc *fileCopy) newUserPermission(file model.File, userID string) model.UserPermission {
 	p := repo.NewUserPermissionModel()
-	p.SetID(tools.NewID())
+	p.SetID(helper.NewID())
 	p.SetUserID(userID)
 	p.SetResourceID(file.GetID())
 	p.SetPermission(model.PermissionOwner)
@@ -1238,7 +1236,7 @@ func (svc *fileDelete) check(file model.File) error {
 
 func (svc *fileDelete) createTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            "Deleting.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -1339,7 +1337,7 @@ func newFileDownload() *fileDownload {
 		fileCache:     cache.NewFileCache(),
 		fileGuard:     guard.NewFileGuard(),
 		snapshotCache: cache.NewSnapshotCache(),
-		s3:            infra.NewS3Manager(),
+		s3:            infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 	}
 }
 
@@ -1602,7 +1600,7 @@ func (svc *fileMove) performMove(source model.File, target model.File, userID st
 
 func (svc *fileMove) createTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            "Moving.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -2004,25 +2002,8 @@ func newFileReprocess() *fileReprocess {
 	}
 }
 
-type FileReprocessResult struct {
-	Accepted []string `json:"accepted"`
-	Rejected []string `json:"rejected"`
-}
-
-func (r *FileReprocessResult) AppendAccepted(id string) {
-	if !slices.Contains(r.Accepted, id) {
-		r.Accepted = append(r.Accepted, id)
-	}
-}
-
-func (r *FileReprocessResult) AppendRejected(id string) {
-	if !slices.Contains(r.Rejected, id) {
-		r.Rejected = append(r.Rejected, id)
-	}
-}
-
-func (svc *fileReprocess) reprocess(id string, userID string) (*FileReprocessResult, error) {
-	resp := &FileReprocessResult{
+func (svc *fileReprocess) reprocess(id string, userID string) (*dto.FileReprocessResult, error) {
+	resp := &dto.FileReprocessResult{
 		// We intend to send an empty array to the caller, better than nil
 		Accepted: []string{},
 		Rejected: []string{},
@@ -2119,7 +2100,7 @@ func (svc *fileReprocess) getTree(file model.File, userID string) ([]model.File,
 
 func (svc *fileReprocess) createTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            "Waiting.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -2177,7 +2158,7 @@ func newFileStore() *fileStore {
 		snapshotSvc:    NewSnapshotService(),
 		taskSvc:        NewTaskService(),
 		fileIdent:      infra.NewFileIdentifier(),
-		s3:             infra.NewS3Manager(),
+		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
 			config.GetConfig().Environment.IsTest,
@@ -2257,7 +2238,7 @@ func (svc *fileStore) getPropertiesFromPath(file model.File, opts FileStoreOptio
 	if err != nil {
 		return fileStoreProperties{}, err
 	}
-	snapshotID := tools.NewID()
+	snapshotID := helper.NewID()
 	return fileStoreProperties{
 		SnapshotID: snapshotID,
 		Path:       *opts.Path,
@@ -2268,7 +2249,7 @@ func (svc *fileStore) getPropertiesFromPath(file model.File, opts FileStoreOptio
 			Size:   stat.Size(),
 		},
 		Bucket:      workspace.GetBucket(),
-		ContentType: infra.DetectMIMEFromPath(*opts.Path),
+		ContentType: helper.DetectMIMEFromPath(*opts.Path),
 	}, nil
 }
 
@@ -2327,7 +2308,7 @@ func (svc *fileStore) assignSnapshotToFile(file model.File, snapshot model.Snaps
 
 func (svc *fileStore) createTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            "Waiting.",
 		UserID:          userID,
 		IsIndeterminate: true,

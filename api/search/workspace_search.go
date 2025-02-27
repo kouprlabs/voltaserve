@@ -13,9 +13,10 @@ package search
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
@@ -43,7 +44,7 @@ func (w workspaceEntity) GetID() string {
 func NewWorkspaceSearch() *WorkspaceSearch {
 	return &WorkspaceSearch{
 		index:         infra.WorkspaceSearchIndex,
-		search:        infra.NewSearchManager(),
+		search:        infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
 		workspaceRepo: repo.NewWorkspaceRepo(),
 	}
 }

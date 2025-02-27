@@ -12,19 +12,17 @@ package service
 
 import (
 	"bytes"
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/shared/client"
-	"github.com/kouprlabs/voltaserve/shared/tools"
 	"path/filepath"
 
-	conversionmodel "github.com/kouprlabs/voltaserve/conversion/model"
+	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 )
@@ -208,7 +206,7 @@ func (svc *MosaicService) DownloadTileBuffer(fileID string, opts MosaicDownloadT
 
 func (svc *MosaicService) runPipeline(snapshot model.Snapshot, task model.Task) error {
 	if err := svc.pipelineClient.Run(&dto.PipelineRunOptions{
-		PipelineID: helper.ToPtr(conversionmodel.PipelineMosaic),
+		PipelineID: helper.ToPtr(dto.PipelineMosaic),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetPreview().Bucket,
@@ -221,7 +219,7 @@ func (svc *MosaicService) runPipeline(snapshot model.Snapshot, task model.Task) 
 
 func (svc *MosaicService) createWaitingTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            "Waiting.",
 		UserID:          userID,
 		IsIndeterminate: true,
@@ -236,7 +234,7 @@ func (svc *MosaicService) createWaitingTask(file model.File, userID string) (mod
 
 func (svc *MosaicService) createDeleteTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              tools.NewID(),
+		ID:              helper.NewID(),
 		Name:            "Deleting mosaic.",
 		UserID:          userID,
 		IsIndeterminate: true,

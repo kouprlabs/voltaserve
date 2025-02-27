@@ -20,23 +20,23 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	apiinfra "github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/mosaic/builder"
 	"github.com/kouprlabs/voltaserve/mosaic/config"
-	"github.com/kouprlabs/voltaserve/mosaic/errorpkg"
-	"github.com/kouprlabs/voltaserve/mosaic/helper"
-	"github.com/kouprlabs/voltaserve/mosaic/infra"
+	"github.com/kouprlabs/voltaserve/mosaic/logger"
 	"github.com/kouprlabs/voltaserve/mosaic/model"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/infra"
 )
 
 type MosaicService struct {
-	s3     apiinfra.S3Manager
+	s3     infra.S3Manager
 	config *config.Config
 }
 
 func NewMosaicService() *MosaicService {
 	return &MosaicService{
-		s3:     apiinfra.NewS3Manager(),
+		s3:     infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		config: config.GetConfig(),
 	}
 }
@@ -45,7 +45,7 @@ func (svc *MosaicService) Create(path, s3Key, s3Bucket string) (*model.Metadata,
 	tmpDir := filepath.Join(os.TempDir(), helper.NewID())
 	defer func() {
 		if err := os.RemoveAll(tmpDir); err != nil {
-			infra.GetLogger().Error(err)
+			logger.GetLogger().Error(err)
 		}
 	}()
 	metadata, err := builder.NewMosaicBuilder(builder.MosaicBuilderOptions{

@@ -41,7 +41,7 @@ func NewStorageService() *StorageService {
 	}
 }
 
-func (svc *StorageService) ComputeAccountUsage(userID string) (*dto.StorageUsage, error) {
+func (svc *StorageService) GetAccountUsage(userID string) (*dto.StorageUsage, error) {
 	ids, err := svc.workspaceRepo.FindIDs()
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (svc *StorageService) ComputeAccountUsage(userID string) (*dto.StorageUsage
 	return svc.storageMapper.mapStorageUsage(b, maxBytes), nil
 }
 
-func (svc *StorageService) ComputeWorkspaceUsage(workspaceID string, userID string) (*dto.StorageUsage, error) {
+func (svc *StorageService) GetWorkspaceUsage(workspaceID string, userID string) (*dto.StorageUsage, error) {
 	workspace, err := svc.workspaceCache.Get(workspaceID)
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func (svc *StorageService) ComputeWorkspaceUsage(workspaceID string, userID stri
 	return svc.storageMapper.mapStorageUsage(size, workspace.GetStorageCapacity()), nil
 }
 
-func (svc *StorageService) ComputeFileUsage(fileID string, userID string) (*dto.StorageUsage, error) {
+func (svc *StorageService) GetFileUsage(fileID string, userID string) (*dto.StorageUsage, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err

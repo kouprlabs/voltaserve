@@ -10,6 +10,8 @@
 
 package dto
 
+import "slices"
+
 const (
 	FileSortByName         = "name"
 	FileSortByKind         = "kind"
@@ -133,4 +135,21 @@ type GroupPermission struct {
 	ID         string `json:"id"`
 	Group      *Group `json:"group"`
 	Permission string `json:"permission"`
+}
+
+type FileReprocessResult struct {
+	Accepted []string `json:"accepted"`
+	Rejected []string `json:"rejected"`
+}
+
+func (r *FileReprocessResult) AppendAccepted(id string) {
+	if !slices.Contains(r.Accepted, id) {
+		r.Accepted = append(r.Accepted, id)
+	}
+}
+
+func (r *FileReprocessResult) AppendRejected(id string) {
+	if !slices.Contains(r.Rejected, id) {
+		r.Rejected = append(r.Rejected, id)
+	}
 }

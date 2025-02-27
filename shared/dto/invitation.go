@@ -35,3 +35,23 @@ type InvitationCreateOptions struct {
 	OrganizationID string   `json:"organizationId" validate:"required"`
 	Emails         []string `json:"emails"         validate:"required,dive,email"`
 }
+
+type InvitationList struct {
+	Data          []*Invitation `json:"data"`
+	TotalPages    uint64        `json:"totalPages"`
+	TotalElements uint64        `json:"totalElements"`
+	Page          uint64        `json:"page"`
+	Size          uint64        `json:"size"`
+}
+
+type InvitationListOptions struct {
+	Page      uint64
+	Size      uint64
+	SortBy    string
+	SortOrder string
+}
+
+type InvitationProbe struct {
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
+}
