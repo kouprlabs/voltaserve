@@ -80,7 +80,6 @@ func (svc *MosaicService) Create(fileID string, userID string) (*dto.Task, error
 	if err != nil {
 		return nil, err
 	}
-	snapshot.SetStatus(model.SnapshotStatusWaiting)
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
@@ -125,7 +124,6 @@ func (svc *MosaicService) Delete(fileID string, userID string) (*dto.Task, error
 		return nil, err
 	}
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
@@ -267,7 +265,6 @@ func (svc *MosaicService) delete(task model.Task, snapshot model.Snapshot) {
 	}
 	snapshot.SetMosaic(nil)
 	snapshot.SetTaskID(nil)
-	snapshot.SetStatus(model.SnapshotStatusReady)
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		logger.GetLogger().Error(err)
 		return

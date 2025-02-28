@@ -8,13 +8,13 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import useSWR, { SWRConfiguration } from 'swr'
+import { Task } from '@/client'
 import { apiFetcher } from '@/client/fetcher'
 import { File } from './file'
 
 export type Snapshot = {
   id: string
   version: number
-  status: SnapshotStatus
   original: SnapshotDownloadable
   preview?: SnapshotDownloadable
   ocr?: SnapshotDownloadable
@@ -25,16 +25,9 @@ export type Snapshot = {
   language?: string
   capabilities: SnapshotCapabilities
   isActive: boolean
-  task?: SnapshotTaskInfo
+  task?: Task
   createTime: string
   updateTime?: string
-}
-
-export enum SnapshotStatus {
-  Waiting = 'waiting',
-  Processing = 'processing',
-  Ready = 'ready',
-  Error = 'error',
 }
 
 export type SnapshotList = {
@@ -64,11 +57,6 @@ export enum SnapshotSortBy {
 export enum SnapshotSortOrder {
   Asc = 'asc',
   Desc = 'desc',
-}
-
-export type SnapshotTaskInfo = {
-  id: string
-  isPending: boolean
 }
 
 export type SnapshotCapabilities = {

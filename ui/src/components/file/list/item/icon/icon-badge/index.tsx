@@ -7,8 +7,8 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
+import { TaskStatus } from '@/client'
 import { File } from '@/client/api/file'
-import { SnapshotStatus } from '@/client/api/snapshot'
 import IconBadgeError from './icon-badge-error'
 import IconBadgeInsights from './icon-badge-insights'
 import IconBadgeMosaic from './icon-badge-mosaic'
@@ -26,13 +26,13 @@ const IconBadge = ({ file, isLoading }: IconBadgeProps) => {
     <>
       {file.type === 'file' ? (
         <>
-          {file.snapshot?.status === SnapshotStatus.Waiting ? (
+          {file.snapshot?.task?.status === TaskStatus.Waiting ? (
             <IconBadgeWaiting />
           ) : null}
-          {file.snapshot?.status === SnapshotStatus.Processing || isLoading ? (
+          {file.snapshot?.task?.status === TaskStatus.Running || isLoading ? (
             <IconBadgeProcessing />
           ) : null}
-          {file.snapshot?.status === SnapshotStatus.Error ? (
+          {file.snapshot?.task?.status === TaskStatus.Error ? (
             <IconBadgeError />
           ) : null}
           {file.isShared ? <IconBadgeShared /> : null}

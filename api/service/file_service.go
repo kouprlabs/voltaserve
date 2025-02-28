@@ -2278,11 +2278,6 @@ func (svc *fileStore) performStore(props fileStoreProperties) error {
 func (svc *fileStore) createSnapshot(file model.File, props fileStoreProperties) (model.Snapshot, error) {
 	res := repo.NewSnapshotModel()
 	res.SetID(props.SnapshotID)
-	if props.ExceedsProcessingLimit {
-		res.SetStatus(model.SnapshotStatusReady)
-	} else {
-		res.SetStatus(model.SnapshotStatusWaiting)
-	}
 	latestVersion, err := svc.snapshotRepo.FindLatestVersionForFile(file.GetID())
 	if err != nil {
 		return nil, err

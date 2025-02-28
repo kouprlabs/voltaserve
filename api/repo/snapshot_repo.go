@@ -39,7 +39,6 @@ type snapshotEntity struct {
 	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
 	Summary    *string        `gorm:"column:summary"     json:"summary,omitempty"`
 	Intent     *string        `gorm:"column:intent"      json:"intent,omitempty"`
-	Status     string         `gorm:"column,status"      json:"status,omitempty"`
 	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
 	TaskID     *string        `gorm:"column:task_id"     json:"taskId,omitempty"`
 	CreateTime string         `gorm:"column:create_time" json:"createTime"`
@@ -158,10 +157,6 @@ func (s *snapshotEntity) GetSummary() *string {
 
 func (s *snapshotEntity) GetIntent() *string {
 	return s.Intent
-}
-
-func (s *snapshotEntity) GetStatus() string {
-	return s.Status
 }
 
 func (s *snapshotEntity) GetLanguage() *string {
@@ -329,10 +324,6 @@ func (s *snapshotEntity) SetIntent(intent *string) {
 	s.Intent = intent
 }
 
-func (s *snapshotEntity) SetStatus(status string) {
-	s.Status = status
-}
-
 func (s *snapshotEntity) SetLanguage(language *string) {
 	s.Language = language
 }
@@ -376,7 +367,6 @@ func NewSnapshotModelWithOptions(opts SnapshotNewModelOptions) model.Snapshot {
 	res := &snapshotEntity{
 		ID:         opts.ID,
 		Version:    opts.Version,
-		Status:     opts.Status,
 		TaskID:     opts.TaskID,
 		Language:   opts.Language,
 		Summary:    opts.Summary,
@@ -495,7 +485,6 @@ type SnapshotUpdateOptions struct {
 	Entities  *model.S3Object
 	Mosaic    *model.S3Object
 	Thumbnail *model.S3Object
-	Status    *string
 	Language  *string
 	Summary   *string
 	Intent    *string
@@ -528,9 +517,6 @@ func (repo *SnapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	if slices.Contains(opts.Fields, model.SnapshotFieldThumbnail) {
 		snapshot.SetThumbnail(opts.Thumbnail)
 	}
-	if slices.Contains(opts.Fields, model.SnapshotFieldStatus) {
-		snapshot.SetStatus(*opts.Status)
-	}
 	if slices.Contains(opts.Fields, model.SnapshotFieldLanguage) {
 		snapshot.SetLanguage(opts.Language)
 	}
@@ -538,7 +524,7 @@ func (repo *SnapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 		snapshot.SetSummary(opts.Summary)
 	}
 	if slices.Contains(opts.Fields, model.SnapshotFieldIntent) {
-		snapshot.SetSummary(opts.Intent)
+		snapshot.SetIntent(opts.Intent)
 	}
 	if slices.Contains(opts.Fields, model.SnapshotFieldTaskID) {
 		snapshot.SetTaskID(opts.TaskID)

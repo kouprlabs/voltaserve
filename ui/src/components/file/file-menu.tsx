@@ -52,6 +52,7 @@ import {
 } from '@/lib/helpers/file-extension'
 import mapFileList from '@/lib/helpers/map-file-list'
 import { isMacOS as helperIsMacOS } from '@/lib/helpers/os'
+import { isTaskPending } from '@/lib/helpers/task'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -114,7 +115,7 @@ const FileMenu = ({
   const isInsightsAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      !file.snapshot?.task?.isPending &&
+      !isTaskPending(file.snapshot?.task) &&
       (isPDF(file.snapshot?.original.extension) ||
         isMicrosoftOffice(file.snapshot?.original.extension) ||
         isOpenOffice(file.snapshot?.original.extension) ||
@@ -127,7 +128,7 @@ const FileMenu = ({
   const isMosaicAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      !file.snapshot?.task?.isPending &&
+      !isTaskPending(file.snapshot?.task) &&
       isImage(file.snapshot?.original.extension),
     [file],
   )

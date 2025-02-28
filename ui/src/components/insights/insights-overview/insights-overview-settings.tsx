@@ -21,6 +21,7 @@ import {
 import { TaskAPI } from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
+import { isTaskPending } from '@/lib/helpers/task'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
 
@@ -41,13 +42,13 @@ const InsightsOverviewSettings = () => {
   } = FileAPI.useGet(id, swrConfig())
   const canCollect = useMemo(() => {
     return (
-      !file?.snapshot?.task?.isPending &&
+      !isTaskPending(file?.snapshot?.task) &&
       geEditorPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [file])
   const canDelete = useMemo(() => {
     return (
-      !file?.snapshot?.task?.isPending &&
+      !isTaskPending(file?.snapshot?.task) &&
       geOwnerPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [file])

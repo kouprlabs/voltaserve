@@ -11,12 +11,6 @@
 package model
 
 const (
-	SnapshotStatusWaiting    = "waiting"
-	SnapshotStatusProcessing = "processing"
-	SnapshotStatusReady      = "ready"
-)
-
-const (
 	SnapshotFieldOriginal  = "original"
 	SnapshotFieldPreview   = "preview"
 	SnapshotFieldText      = "text"
@@ -24,7 +18,6 @@ const (
 	SnapshotFieldEntities  = "entities"
 	SnapshotFieldMosaic    = "mosaic"
 	SnapshotFieldThumbnail = "thumbnail"
-	SnapshotFieldStatus    = "status"
 	SnapshotFieldLanguage  = "language"
 	SnapshotFieldSummary   = "summary"
 	SnapshotFieldIntent    = "intent"
@@ -55,7 +48,6 @@ type Snapshot interface {
 	HasEntities() bool
 	HasMosaic() bool
 	HasThumbnail() bool
-	GetStatus() string
 	GetLanguage() *string
 	GetCreateTime() string
 	GetUpdateTime() *string
@@ -70,7 +62,6 @@ type Snapshot interface {
 	SetThumbnail(*S3Object)
 	SetSummary(*string)
 	SetIntent(*string)
-	SetStatus(string)
 	SetLanguage(*string)
 	SetTaskID(*string)
 	SetCreateTime(string)

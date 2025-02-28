@@ -253,11 +253,11 @@ func (s *SnapshotServiceSuite) TestPatch() {
 		Options: dto.PipelineRunOptions{
 			SnapshotID: snapshot.GetID(),
 		},
-		Fields: []string{model.SnapshotFieldStatus},
-		Status: helper.ToPtr(model.SnapshotStatusProcessing),
+		Fields:  []string{model.SnapshotFieldSummary},
+		Summary: helper.ToPtr("lorem ipsum"),
 	})
 	s.Require().NoError(err)
-	s.Require().Equal(model.SnapshotStatusProcessing, patched.Status)
+	s.Require().Equal("lorem ipsum", *patched.Summary)
 }
 
 func (s *SnapshotServiceSuite) createSnapshots(fileID string) []model.Snapshot {
