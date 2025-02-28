@@ -37,9 +37,8 @@ type Snapshot struct {
 	Intent       *string               `json:"intent,omitempty"`
 	Language     *string               `json:"language,omitempty"`
 	Capabilities SnapshotCapabilities  `json:"capabilities"`
-	Status       string                `json:"status,omitempty"`
 	IsActive     bool                  `json:"isActive"`
-	Task         *SnapshotTaskInfo     `json:"task,omitempty"`
+	Task         *Task                 `json:"task,omitempty"`
 	CreateTime   string                `json:"createTime"`
 	UpdateTime   *string               `json:"updateTime,omitempty"`
 }
@@ -60,11 +59,6 @@ type SnapshotDownloadable struct {
 	Size      int64                `json:"size,omitempty"`
 	Image     *model.ImageProps    `json:"image,omitempty"`
 	Document  *model.DocumentProps `json:"document,omitempty"`
-}
-
-type SnapshotTaskInfo struct {
-	ID        string `json:"id"`
-	IsPending bool   `json:"isPending"`
 }
 
 type SnapshotList struct {
@@ -97,8 +91,10 @@ type SnapshotPatchOptions struct {
 	Entities  *model.S3Object    `json:"entities"`
 	Mosaic    *model.S3Object    `json:"mosaic"`
 	Thumbnail *model.S3Object    `json:"thumbnail"`
-	Status    *string            `json:"status"`
 	TaskID    *string            `json:"taskId"`
+	Language  *string            `json:"language"`
+	Summary   *string            `json:"summary"`
+	Intent    *string            `json:"intent"`
 }
 
 type SnapshotLanguage struct {

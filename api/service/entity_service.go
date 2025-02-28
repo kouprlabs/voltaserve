@@ -89,7 +89,6 @@ func (svc *EntityService) Create(fileID string, opts dto.EntityCreateOptions, us
 		return nil, err
 	}
 	snapshot.SetLanguage(&opts.Language)
-	snapshot.SetStatus(model.SnapshotStatusWaiting)
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
@@ -134,7 +133,6 @@ func (svc *EntityService) Delete(fileID string, userID string) (*dto.Task, error
 		return nil, err
 	}
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		return nil, err
 	}
@@ -251,7 +249,6 @@ func (svc *EntityService) delete(task model.Task, snapshot model.Snapshot) {
 	}
 	snapshot.SetEntities(nil)
 	snapshot.SetTaskID(nil)
-	snapshot.SetStatus(model.SnapshotStatusReady)
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		logger.GetLogger().Error(err)
 		return

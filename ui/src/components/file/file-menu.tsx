@@ -36,6 +36,7 @@ import {
   IconVisibility,
 } from '@koupr/ui'
 import cx from 'classnames'
+import { TaskStatus } from '@/client'
 import { FileAPI } from '@/client/api/file'
 import {
   geEditorPermission,
@@ -114,7 +115,7 @@ const FileMenu = ({
   const isInsightsAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      !file.snapshot?.task?.isPending &&
+      file.snapshot?.task?.status !== TaskStatus.Running &&
       (isPDF(file.snapshot?.original.extension) ||
         isMicrosoftOffice(file.snapshot?.original.extension) ||
         isOpenOffice(file.snapshot?.original.extension) ||
@@ -127,7 +128,7 @@ const FileMenu = ({
   const isMosaicAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      !file.snapshot?.task?.isPending &&
+      file.snapshot?.task?.status !== TaskStatus.Running &&
       isImage(file.snapshot?.original.extension),
     [file],
   )

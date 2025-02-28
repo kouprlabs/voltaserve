@@ -14,7 +14,7 @@ import cx from 'classnames'
 import { FileAPI } from '@/client/api/file'
 import { MosaicAPI } from '@/client/api/mosaic'
 import { geOwnerPermission, NONE_PERMISSION } from '@/client/api/permission'
-import { TaskAPI } from '@/client/api/task'
+import { TaskAPI, TaskStatus } from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -49,7 +49,7 @@ const MosaicOverviewSettings = () => {
 
   const canDelete = useMemo(() => {
     return (
-      !file?.snapshot?.task?.isPending &&
+      file?.snapshot?.task?.status !== TaskStatus.Running &&
       geOwnerPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [file])

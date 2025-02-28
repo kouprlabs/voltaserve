@@ -51,13 +51,6 @@ func NewDispatcher() *Dispatcher {
 }
 
 func (d *Dispatcher) Dispatch(opts dto.PipelineRunOptions) error {
-	if err := d.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldStatus},
-		Status:  helper.ToPtr(model.SnapshotStatusProcessing),
-	}); err != nil {
-		return err
-	}
 	if err := d.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Name:   helper.ToPtr("Processing."),
 		Fields: []string{model.TaskFieldStatus},
@@ -83,13 +76,6 @@ func (d *Dispatcher) Dispatch(opts dto.PipelineRunOptions) error {
 		err = d.glbPipeline.Run(opts)
 	} else if id == dto.PipelineZIP {
 		err = d.zipPipeline.Run(opts)
-	}
-	if err := d.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldStatus, model.SnapshotFieldTaskID},
-		Status:  helper.ToPtr(model.SnapshotStatusReady),
-	}); err != nil {
-		return err
 	}
 	if err != nil {
 		if err := d.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{

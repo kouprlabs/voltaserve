@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router-dom'
 import { Link as ChakraLink } from '@chakra-ui/react'
 import { RelativeDate, Text } from '@koupr/ui'
 import cx from 'classnames'
-import { SnapshotStatus } from '@/client/api/snapshot'
 import store from '@/store/configure-store'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -118,9 +117,9 @@ const ListItem = ({
       navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
     } else if (
       file.type === 'file' &&
-      ((file.snapshot?.preview &&
-        file.snapshot?.status === SnapshotStatus.Ready) ||
-        file.snapshot?.capabilities.mosaic)
+      (file.snapshot?.preview ||
+        file.snapshot?.capabilities.mosaic ||
+        file.snapshot?.capabilities.ocr)
     ) {
       window.open(`/file/${file.id}`, '_blank')?.focus()
     }

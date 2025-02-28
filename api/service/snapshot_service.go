@@ -207,7 +207,10 @@ func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dt
 		Entities:  opts.Entities,
 		Mosaic:    opts.Mosaic,
 		Thumbnail: opts.Thumbnail,
-		Status:    opts.Status,
+		Language:  opts.Language,
+		Summary:   opts.Summary,
+		Intent:    opts.Intent,
+		TaskID:    opts.TaskID,
 	}); err != nil {
 		return nil, err
 	}
@@ -460,12 +463,14 @@ func isTaskPending(snapshot model.Snapshot, taskCache *cache.TaskCache) (bool, e
 }
 
 type snapshotMapper struct {
-	taskCache *cache.TaskCache
+	taskCache  *cache.TaskCache
+	taskMapper *taskMapper
 }
 
 func newSnapshotMapper() *snapshotMapper {
 	return &snapshotMapper{
-		taskCache: cache.NewTaskCache(),
+		taskCache:  cache.NewTaskCache(),
+		taskMapper: newTaskMapper(),
 	}
 }
 
@@ -473,7 +478,6 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *dto.Snapshot {
 	s := &dto.Snapshot{
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
-		Status:     m.GetStatus(),
 		Language:   m.GetLanguage(),
 		Summary:    m.GetSummary(),
 		Intent:     m.GetIntent(),
@@ -511,14 +515,9 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *dto.Snapshot {
 		s.Capabilities.Mosaic = true
 	}
 	if m.GetTaskID() != nil {
-		s.Task = &dto.SnapshotTaskInfo{
-			ID: *m.GetTaskID(),
-		}
-		isPending, err := isTaskPending(m, mp.taskCache)
-		if err != nil {
-			logger.GetLogger().Error(err)
-		} else {
-			s.Task.IsPending = isPending
+		task, err := mp.taskCache.Get(*m.GetTaskID())
+		if err == nil {
+			s.Task, _ = mp.taskMapper.mapOne(task)
 		}
 	}
 	return s

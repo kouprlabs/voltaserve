@@ -18,7 +18,7 @@ import {
   geOwnerPermission,
   NONE_PERMISSION,
 } from '@/client/api/permission'
-import { TaskAPI } from '@/client/api/task'
+import { TaskAPI, TaskStatus } from '@/client/api/task'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -41,13 +41,13 @@ const InsightsOverviewSettings = () => {
   } = FileAPI.useGet(id, swrConfig())
   const canCollect = useMemo(() => {
     return (
-      !file?.snapshot?.task?.isPending &&
+      file?.snapshot?.task?.status !== TaskStatus.Running &&
       geEditorPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [file])
   const canDelete = useMemo(() => {
     return (
-      !file?.snapshot?.task?.isPending &&
+      file?.snapshot?.task?.status !== TaskStatus.Running &&
       geOwnerPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [file])

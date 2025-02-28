@@ -16,6 +16,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { SectionError, SectionSpinner } from '@koupr/ui'
+import { TaskStatus } from '@/client'
 import { FileAPI } from '@/client/api/file'
 import { errorToString } from '@/client/error'
 import { swrConfig } from '@/client/options'
@@ -40,7 +41,7 @@ const Mosaic = () => {
   const fileIsReady = file && !fileError
 
   useEffect(() => {
-    if (file?.snapshot?.task?.isPending) {
+    if (file?.snapshot?.task?.status === TaskStatus.Running) {
       dispatch(modalDidClose())
     }
   }, [file])
