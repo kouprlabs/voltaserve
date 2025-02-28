@@ -116,6 +116,7 @@ const FileMenu = ({
     () =>
       file?.type === 'file' &&
       file.snapshot?.task?.status !== TaskStatus.Running &&
+      file.snapshot?.task?.status !== TaskStatus.Waiting &&
       (isPDF(file.snapshot?.original.extension) ||
         isMicrosoftOffice(file.snapshot?.original.extension) ||
         isOpenOffice(file.snapshot?.original.extension) ||
@@ -129,6 +130,7 @@ const FileMenu = ({
     () =>
       file?.type === 'file' &&
       file.snapshot?.task?.status !== TaskStatus.Running &&
+      file.snapshot?.task?.status !== TaskStatus.Waiting &&
       isImage(file.snapshot?.original.extension),
     [file],
   )

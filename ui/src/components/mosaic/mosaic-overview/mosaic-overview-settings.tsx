@@ -50,6 +50,7 @@ const MosaicOverviewSettings = () => {
   const canDelete = useMemo(() => {
     return (
       file?.snapshot?.task?.status !== TaskStatus.Running &&
+      file?.snapshot?.task?.status !== TaskStatus.Waiting &&
       geOwnerPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [file])

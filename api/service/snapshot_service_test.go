@@ -257,7 +257,7 @@ func (s *SnapshotServiceSuite) TestPatch() {
 		Summary: helper.ToPtr("lorem ipsum"),
 	})
 	s.Require().NoError(err)
-	s.Require().Equal("lorem ipsum", patched.Summary)
+	s.Require().Equal("lorem ipsum", *patched.Summary)
 }
 
 func (s *SnapshotServiceSuite) createSnapshots(fileID string) []model.Snapshot {
