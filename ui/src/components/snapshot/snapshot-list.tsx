@@ -241,7 +241,6 @@ const SnapshotList = () => {
             <Button
               type="button"
               variant="outline"
-              colorScheme="blue"
               isDisabled={isActivating}
               onClick={handleClose}
             >

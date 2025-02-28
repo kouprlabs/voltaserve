@@ -17,6 +17,7 @@ COPY api ./api
 COPY conversion ./conversion
 COPY mosaic ./mosaic
 COPY webdav ./webdav
+COPY ui ./ui
 COPY go.work go.work.sum ./
 
 RUN go mod download

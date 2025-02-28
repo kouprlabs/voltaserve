@@ -236,12 +236,7 @@ const FileSearchFilters = () => {
                 <div
                   className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
-                  <Button
-                    type="button"
-                    variant="outline"
-                    colorScheme="blue"
-                    onClick={handleClose}
-                  >
+                  <Button type="button" variant="outline" onClick={handleClose}>
                     Close
                   </Button>
                   <Button
