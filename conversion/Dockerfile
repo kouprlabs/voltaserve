@@ -25,7 +25,7 @@ WORKDIR /build/conversion
 
 RUN go build -o voltaserve-conversion
 
-FROM debian:bookworm AS runner
+FROM ubuntu:noble AS runner
 
 RUN apt-get update &&\
     apt-get install -y htop
