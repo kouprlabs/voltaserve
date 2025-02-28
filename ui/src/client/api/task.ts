@@ -31,6 +31,8 @@ export type Task = {
   userId: string
   status: TaskStatus
   payload?: TaskPayload
+  createTime: string
+  updateTime?: string
 }
 
 export enum TaskStatus {

@@ -20,7 +20,13 @@ import {
   IconButton,
   Text,
 } from '@chakra-ui/react'
-import { IconCheckCircle, IconClose, IconError, IconHourglass } from '@koupr/ui'
+import {
+  IconCheckCircle,
+  IconClose,
+  IconError,
+  IconHourglass,
+  RelativeDate,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { TaskAPI, TaskStatus, Task } from '@/client/api/task'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
@@ -110,6 +116,7 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
               </AccordionItem>
             </Accordion>
           ) : null}
+          <RelativeDate date={new Date(task.createTime)} />
         </div>
       </CardBody>
     </Card>

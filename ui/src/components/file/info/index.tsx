@@ -47,7 +47,6 @@ const FileInfo = () => {
             <Button
               type="button"
               variant="outline"
-              colorScheme="blue"
               onClick={() => dispatch(infoModalDidClose())}
             >
               Close

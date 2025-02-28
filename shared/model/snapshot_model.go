@@ -14,7 +14,6 @@ const (
 	SnapshotStatusWaiting    = "waiting"
 	SnapshotStatusProcessing = "processing"
 	SnapshotStatusReady      = "ready"
-	SnapshotStatusError      = "error"
 )
 
 const (

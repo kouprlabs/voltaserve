@@ -84,14 +84,14 @@ func (d *Dispatcher) Dispatch(opts dto.PipelineRunOptions) error {
 	} else if id == dto.PipelineZIP {
 		err = d.zipPipeline.Run(opts)
 	}
+	if err := d.snapshotClient.Patch(dto.SnapshotPatchOptions{
+		Options: opts,
+		Fields:  []string{model.SnapshotFieldStatus, model.SnapshotFieldTaskID},
+		Status:  helper.ToPtr(model.SnapshotStatusReady),
+	}); err != nil {
+		return err
+	}
 	if err != nil {
-		if err := d.snapshotClient.Patch(dto.SnapshotPatchOptions{
-			Options: opts,
-			Fields:  []string{model.SnapshotFieldStatus},
-			Status:  helper.ToPtr(model.SnapshotStatusError),
-		}); err != nil {
-			return err
-		}
 		if err := d.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 			Fields: []string{model.TaskFieldStatus, model.TaskFieldError},
 			Status: helper.ToPtr(model.TaskStatusError),
@@ -101,13 +101,6 @@ func (d *Dispatcher) Dispatch(opts dto.PipelineRunOptions) error {
 		}
 		return err
 	} else {
-		if err := d.snapshotClient.Patch(dto.SnapshotPatchOptions{
-			Options: opts,
-			Fields:  []string{model.SnapshotFieldStatus, model.SnapshotFieldTaskID},
-			Status:  helper.ToPtr(model.SnapshotStatusReady),
-		}); err != nil {
-			return err
-		}
 		if err := d.taskClient.Delete(opts.TaskID); err != nil {
 			return err
 		}
@@ -138,15 +131,15 @@ func (d *Dispatcher) identify(opts dto.PipelineRunOptions) string {
 
 func (d *Dispatcher) getUserFriendlyMessage(code string) string {
 	messages := map[string]string{
-		"mosaic not found":                                   "Mosaic not found.",
-		"no matching pipeline found":                         "This file type cannot be processed.",
-		"language is undefined":                              "Language is undefined.",
-		"unsupported file type":                              "Unsupported file type.",
-		"text is empty":                                      "Text is empty.",
-		"text exceeds supported limit of 1000000 characters": "Text exceeds supported limit of 1000000 characters.",
-		"missing query param api_key":                        "Missing query param api_key.",
-		"invalid query param api_key":                        "Invalid query param api_key.",
-		"invalid content type":                               "Invalid content type.",
+		"mosaic not found":                                 "Mosaic not found.",
+		"no matching pipeline found":                       "This file type cannot be processed.",
+		"language is undefined":                            "Language is undefined.",
+		"unsupported file type":                            "Unsupported file type.",
+		"text is empty":                                    "Text is empty.",
+		"text exceeds supported limit of 1000K characters": "Text exceeds supported limit of 1000K characters.",
+		"missing query param api_key":                      "Missing query param api_key.",
+		"invalid query param api_key":                      "Invalid query param api_key.",
+		"invalid content type":                             "Invalid content type.",
 	}
 	res, ok := messages[code]
 	if !ok {
