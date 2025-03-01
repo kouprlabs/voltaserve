@@ -62,5 +62,5 @@ func (wh *SnapshotWebhook) Call(snapshot model.Snapshot, eventType string) error
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	return client.SuccessfulResponseOrThrow(resp)
+	return client.SuccessfulResponseOrError(resp)
 }

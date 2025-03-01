@@ -89,7 +89,7 @@ func OctetStreamResponseOrError(resp *http.Response) ([]byte, error) {
 	}
 }
 
-func OctetStreamResponseWithWriterOrThrow(resp *http.Response, w io.Writer) error {
+func OctetStreamResponseWithWriterOrError(resp *http.Response, w io.Writer) error {
 	contentType := resp.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/octet-stream") {
 		body, err := io.ReadAll(resp.Body)
@@ -113,7 +113,7 @@ func OctetStreamResponseWithWriterOrThrow(resp *http.Response, w io.Writer) erro
 	}
 }
 
-func SuccessfulResponseOrThrow(resp *http.Response) error {
+func SuccessfulResponseOrError(resp *http.Response) error {
 	if resp.StatusCode > 299 {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {

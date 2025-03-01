@@ -134,7 +134,7 @@ func (cl *MosaicClient) Delete(opts MosaicDeleteOptions) error {
 	if err != nil {
 		return err
 	}
-	return SuccessfulResponseOrThrow(resp)
+	return SuccessfulResponseOrError(resp)
 }
 
 type MosaicDownloadTileOptions struct {

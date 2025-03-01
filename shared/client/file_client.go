@@ -299,7 +299,7 @@ func (cl *FileClient) MoveOne(id string, targetID string) error {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	return SuccessfulResponseOrThrow(resp)
+	return SuccessfulResponseOrError(resp)
 }
 
 func (cl *FileClient) PatchName(id string, opts dto.FilePatchNameOptions) (*dto.File, error) {
@@ -353,7 +353,7 @@ func (cl *FileClient) DeleteOne(id string) error {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	return SuccessfulResponseOrThrow(resp)
+	return SuccessfulResponseOrError(resp)
 }
 
 func (cl *FileClient) DownloadOriginal(file *dto.File, w io.Writer, rangeHeader *string) error {
@@ -382,5 +382,5 @@ func (cl *FileClient) DownloadOriginal(file *dto.File, w io.Writer, rangeHeader 
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	return OctetStreamResponseWithWriterOrThrow(resp, w)
+	return OctetStreamResponseWithWriterOrError(resp, w)
 }

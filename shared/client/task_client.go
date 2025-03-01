@@ -114,5 +114,5 @@ func (cl *TaskClient) Delete(id string) error {
 	if err != nil {
 		return err
 	}
-	return SuccessfulResponseOrThrow(resp)
+	return SuccessfulResponseOrError(resp)
 }
