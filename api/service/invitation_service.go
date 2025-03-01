@@ -96,7 +96,14 @@ func (svc *InvitationService) Create(opts dto.InvitationCreateOptions, userID st
 	return res, nil
 }
 
-func (svc *InvitationService) ListIncoming(opts dto.InvitationListOptions, userID string) (*dto.InvitationList, error) {
+type InvitationListOptions struct {
+	Page      uint64
+	Size      uint64
+	SortBy    string
+	SortOrder string
+}
+
+func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID string) (*dto.InvitationList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -126,7 +133,7 @@ func (svc *InvitationService) ListIncoming(opts dto.InvitationListOptions, userI
 	}, nil
 }
 
-func (svc *InvitationService) ProbeIncoming(opts dto.InvitationListOptions, userID string) (*dto.InvitationProbe, error) {
+func (svc *InvitationService) ProbeIncoming(opts InvitationListOptions, userID string) (*dto.InvitationProbe, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -153,7 +160,7 @@ func (svc *InvitationService) GetCountIncoming(userID string) (*int64, error) {
 	return &res, nil
 }
 
-func (svc *InvitationService) ListOutgoing(orgID string, opts dto.InvitationListOptions, userID string) (*dto.InvitationList, error) {
+func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOptions, userID string) (*dto.InvitationList, error) {
 	org, err := svc.orgCache.Get(orgID)
 	if err != nil {
 		return nil, err
@@ -186,7 +193,7 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts dto.InvitationList
 	}, nil
 }
 
-func (svc *InvitationService) ProbeOutgoing(orgID string, opts dto.InvitationListOptions, userID string) (*dto.InvitationProbe, error) {
+func (svc *InvitationService) ProbeOutgoing(orgID string, opts InvitationListOptions, userID string) (*dto.InvitationProbe, error) {
 	org, err := svc.orgCache.Get(orgID)
 	if err != nil {
 		return nil, err

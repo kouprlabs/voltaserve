@@ -266,7 +266,7 @@ func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*dto.GroupListOptions, error) {
+func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*service.GroupListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -301,7 +301,7 @@ func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*dto.GroupListOptions,
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &dto.GroupListOptions{
+	return &service.GroupListOptions{
 		Query:          query,
 		OrganizationID: c.Query("organization_id"),
 		Page:           page,

@@ -109,7 +109,15 @@ func (svc *WorkspaceService) Find(id string, userID string) (*dto.Workspace, err
 	return res, nil
 }
 
-func (svc *WorkspaceService) List(opts dto.WorkspaceListOptions, userID string) (*dto.WorkspaceList, error) {
+type WorkspaceListOptions struct {
+	Query     string
+	Page      uint64
+	Size      uint64
+	SortBy    string
+	SortOrder string
+}
+
+func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*dto.WorkspaceList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -135,7 +143,7 @@ func (svc *WorkspaceService) List(opts dto.WorkspaceListOptions, userID string) 
 	}, nil
 }
 
-func (svc *WorkspaceService) Probe(opts dto.WorkspaceListOptions, userID string) (*dto.WorkspaceProbe, error) {
+func (svc *WorkspaceService) Probe(opts WorkspaceListOptions, userID string) (*dto.WorkspaceProbe, error) {
 	all, err := svc.load(userID)
 	if err != nil {
 		return nil, err
@@ -261,7 +269,7 @@ func (svc *WorkspaceService) IsValidSortOrder(value string) bool {
 	return value == "" || value == dto.WorkspaceSortOrderAsc || value == dto.WorkspaceSortOrderDesc
 }
 
-func (svc *WorkspaceService) findAll(opts dto.WorkspaceListOptions, userID string) ([]model.Workspace, error) {
+func (svc *WorkspaceService) findAll(opts WorkspaceListOptions, userID string) ([]model.Workspace, error) {
 	var res []model.Workspace
 	var err error
 	if opts.Query == "" {
@@ -291,7 +299,7 @@ func (svc *WorkspaceService) load(userID string) ([]model.Workspace, error) {
 	return res, nil
 }
 
-func (svc *WorkspaceService) search(opts dto.WorkspaceListOptions, userID string) ([]model.Workspace, error) {
+func (svc *WorkspaceService) search(opts WorkspaceListOptions, userID string) ([]model.Workspace, error) {
 	var res []model.Workspace
 	count, err := svc.workspaceRepo.Count()
 	if err != nil {

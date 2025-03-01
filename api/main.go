@@ -69,13 +69,11 @@ func main() {
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
-	versionRouter := router.NewVersionRouter()
-	versionRouter.AppendRoutes(app)
+	router.NewVersionRouter().AppendRoutes(app)
 
 	v3 := app.Group("v3")
 
-	healthRouter := router.NewHealthRouter()
-	healthRouter.AppendRoutes(v3)
+	router.NewHealthRouter().AppendRoutes(v3)
 
 	workspaceGroup := v3.Group("workspaces")
 	workspaceRouter := router.NewWorkspaceRouter()
@@ -112,20 +110,11 @@ func main() {
 	taskRouter.AppendRoutes(taskGroup)
 	userRouter.AppendRoutes(userGroup)
 
-	invitationRouter := router.NewInvitationRouter()
-	invitationRouter.AppendRoutes(v3.Group("invitations"))
-
-	orgRouter := router.NewOrganizationRouter()
-	orgRouter.AppendRoutes(v3.Group("organizations"))
-
-	storageRouter := router.NewStorageRouter()
-	storageRouter.AppendRoutes(v3.Group("storage"))
-
-	groupRouter := router.NewGroupRouter()
-	groupRouter.AppendRoutes(v3.Group("groups"))
-
-	entityRouter := router.NewEntityRouter()
-	entityRouter.AppendRoutes(v3.Group("entities"))
+	router.NewInvitationRouter().AppendRoutes(v3.Group("invitations"))
+	router.NewOrganizationRouter().AppendRoutes(v3.Group("organizations"))
+	router.NewStorageRouter().AppendRoutes(v3.Group("storage"))
+	router.NewGroupRouter().AppendRoutes(v3.Group("groups"))
+	router.NewEntityRouter().AppendRoutes(v3.Group("entities"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

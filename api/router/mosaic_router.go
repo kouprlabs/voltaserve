@@ -169,7 +169,7 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 			return err
 		}
 	}
-	buf, snapshot, err := r.mosaicSvc.DownloadTileBuffer(id, service.MosaicDownloadTileOptions{
+	b, snapshot, err := r.mosaicSvc.DownloadTileBuffer(id, service.MosaicDownloadTileOptions{
 		ZoomLevel: int(zoomLevel),
 		Row:       int(row),
 		Column:    int(column),
@@ -187,7 +187,6 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	if strings.TrimPrefix(extension, ".") != c.Params("extension") {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	b := buf.Bytes()
 	c.Set("Content-Type", helper.DetectMIMEFromBytes(b))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"tile%s\"", c.Params("extension")))
 	return c.Send(b)

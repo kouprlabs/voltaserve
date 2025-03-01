@@ -38,14 +38,6 @@ type OrganizationList struct {
 	Size          uint64          `json:"size"`
 }
 
-type OrganizationListOptions struct {
-	Query     string
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
-
 type OrganizationProbe struct {
 	TotalPages    uint64 `json:"totalPages"`
 	TotalElements uint64 `json:"totalElements"`

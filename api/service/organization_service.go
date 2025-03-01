@@ -106,7 +106,15 @@ func (svc *OrganizationService) Find(id string, userID string) (*dto.Organizatio
 	return res, nil
 }
 
-func (svc *OrganizationService) List(opts dto.OrganizationListOptions, userID string) (*dto.OrganizationList, error) {
+type OrganizationListOptions struct {
+	Query     string
+	Page      uint64
+	Size      uint64
+	SortBy    string
+	SortOrder string
+}
+
+func (svc *OrganizationService) List(opts OrganizationListOptions, userID string) (*dto.OrganizationList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -132,7 +140,7 @@ func (svc *OrganizationService) List(opts dto.OrganizationListOptions, userID st
 	}, nil
 }
 
-func (svc *OrganizationService) Probe(opts dto.OrganizationListOptions, userID string) (*dto.OrganizationProbe, error) {
+func (svc *OrganizationService) Probe(opts OrganizationListOptions, userID string) (*dto.OrganizationProbe, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -224,7 +232,7 @@ func (svc *OrganizationService) IsValidSortOrder(value string) bool {
 	return value == "" || value == dto.OrganizationSortOrderAsc || value == dto.OrganizationSortOrderDesc
 }
 
-func (svc *OrganizationService) findAll(opts dto.OrganizationListOptions, userID string) ([]model.Organization, error) {
+func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
 	var res []model.Organization
 	var err error
 	if opts.Query == "" {
@@ -254,7 +262,7 @@ func (svc *OrganizationService) load(userID string) ([]model.Organization, error
 	return res, nil
 }
 
-func (svc *OrganizationService) search(opts dto.OrganizationListOptions, userID string) ([]model.Organization, error) {
+func (svc *OrganizationService) search(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
 	var res []model.Organization
 	count, err := svc.orgRepo.Count()
 	if err != nil {

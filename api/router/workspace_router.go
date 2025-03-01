@@ -263,7 +263,7 @@ func (r *WorkspaceRouter) GetBucket(c *fiber.Ctx) error {
 	return c.SendString(bucket)
 }
 
-func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*dto.WorkspaceListOptions, error) {
+func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*service.WorkspaceListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -298,7 +298,7 @@ func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*dto.WorkspaceList
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &dto.WorkspaceListOptions{
+	return &service.WorkspaceListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,

@@ -284,7 +284,7 @@ func (r *TaskRouter) Patch(c *fiber.Ctx) error {
 	return c.JSON(task)
 }
 
-func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*dto.TaskListOptions, error) {
+func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*service.TaskListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -319,7 +319,7 @@ func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*dto.TaskListOptions, e
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &dto.TaskListOptions{
+	return &service.TaskListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,

@@ -69,7 +69,7 @@ func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	if !p.fileIdent.IsImage(opts.Key) {
 		return errors.New("unsupported file type")
 	}
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Creating mosaic."),
 	}); err != nil {
@@ -96,7 +96,7 @@ func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{model.SnapshotFieldMosaic},
 		Mosaic: &model.S3Object{
@@ -106,7 +106,7 @@ func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	}); err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(model.TaskStatusSuccess),

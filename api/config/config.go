@@ -29,9 +29,10 @@ type Config struct {
 	Redis         config.RedisConfig
 	S3            config.S3Config
 	Limits        LimitsConfig
-	Security      SecurityConfig
+	Security      config.SecurityConfig
 	SMTP          SMTPConfig
 	Defaults      DefaultsConfig
+	Webhook       WebhookConfig
 	Environment   config.EnvironmentConfig
 }
 
@@ -51,12 +52,6 @@ type TokenConfig struct {
 	TokenIssuer          string
 }
 
-type SecurityConfig struct {
-	JWTSigningKey string
-	CORSOrigins   []string
-	APIKey        string
-}
-
 type SMTPConfig struct {
 	Host          string
 	Port          int
@@ -65,6 +60,10 @@ type SMTPConfig struct {
 	Password      string
 	SenderAddress string
 	SenderName    string
+}
+
+type WebhookConfig struct {
+	Snapshot string
 }
 
 const (
@@ -92,6 +91,7 @@ func GetConfig() *Config {
 	readSMTP(cfg)
 	readLimits(cfg)
 	readDefaults(cfg)
+	readWebhook(cfg)
 	readEnvironment(cfg)
 	return cfg
 }
@@ -216,6 +216,10 @@ func readDefaults(config *Config) {
 		}
 		config.Defaults.WorkspaceStorageCapacityMB = int(v)
 	}
+}
+
+func readWebhook(config *Config) {
+	config.Webhook.Snapshot = os.Getenv("WEBHOOK_SNAPSHOT")
 }
 
 func readEnvironment(config *Config) {

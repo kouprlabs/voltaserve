@@ -259,7 +259,7 @@ func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*dto.OrganizationListOptions, error) {
+func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.OrganizationListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -294,7 +294,7 @@ func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*dto.Organizati
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &dto.OrganizationListOptions{
+	return &service.OrganizationListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,

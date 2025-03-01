@@ -56,13 +56,7 @@ func (cl *pipelineClient) Run(opts *dto.PipelineRunOptions) error {
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("request failed with status %d", resp.StatusCode)
-	}
-	if err := resp.Body.Close(); err != nil {
-		return err
-	}
-	return nil
+	return SuccessfulResponseOrThrow(resp)
 }
 
 type mockPipelineClient struct{}

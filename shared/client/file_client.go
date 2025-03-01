@@ -13,17 +13,16 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/logger"
+	"github.com/kouprlabs/voltaserve/shared/model"
 )
 
 type FileClient struct {
@@ -71,23 +70,15 @@ func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*dto.File, err
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := cl.jsonResponseOrThrow(resp)
+	body, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var file dto.File
-	if err = json.Unmarshal(body, &file); err != nil {
+	if err := json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
-}
-
-type S3Reference struct {
-	Bucket      string
-	Key         string
-	SnapshotID  string
-	Size        int64
-	ContentType string
 }
 
 type FileCreateFromS3Options struct {
@@ -95,7 +86,7 @@ type FileCreateFromS3Options struct {
 	WorkspaceID string
 	ParentID    string
 	Name        string
-	S3Reference S3Reference
+	S3Reference model.S3Reference
 }
 
 func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*dto.File, error) {
@@ -134,12 +125,12 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*dto.File, err
 			return
 		}
 	}(resp.Body)
-	body, err = cl.jsonResponseOrThrow(resp)
+	body, err = JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var file dto.File
-	if err = json.Unmarshal(body, &file); err != nil {
+	if err := json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
@@ -148,7 +139,7 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*dto.File, err
 type FilePatchFromS3Options struct {
 	ID          string
 	Name        string
-	S3Reference S3Reference
+	S3Reference model.S3Reference
 }
 
 func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*dto.File, error) {
@@ -184,12 +175,12 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*dto.File, error
 			return
 		}
 	}(resp.Body)
-	b, err = cl.jsonResponseOrThrow(resp)
+	b, err = JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var file dto.File
-	if err = json.Unmarshal(b, &file); err != nil {
+	if err := json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
@@ -217,12 +208,12 @@ func (cl *FileClient) GetByPath(path string) (*dto.File, error) {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := cl.jsonResponseOrThrow(resp)
+	body, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var file dto.File
-	if err = json.Unmarshal(body, &file); err != nil {
+	if err := json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
@@ -250,12 +241,12 @@ func (cl *FileClient) ListByPath(path string) ([]dto.File, error) {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	b, err := cl.jsonResponseOrThrow(resp)
+	b, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var files []dto.File
-	if err = json.Unmarshal(b, &files); err != nil {
+	if err := json.Unmarshal(b, &files); err != nil {
 		return nil, err
 	}
 	return files, nil
@@ -279,15 +270,15 @@ func (cl *FileClient) CopyOne(id string, targetID string) (*dto.File, error) {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	b, err := cl.jsonResponseOrThrow(resp)
+	b, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
-	var file *dto.File
-	if err = json.Unmarshal(b, &file); err != nil {
+	var file dto.File
+	if err := json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
-	return file, nil
+	return &file, nil
 }
 
 func (cl *FileClient) MoveOne(id string, targetID string) error {
@@ -308,7 +299,7 @@ func (cl *FileClient) MoveOne(id string, targetID string) error {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	return cl.successfulResponseOrThrow(resp)
+	return SuccessfulResponseOrThrow(resp)
 }
 
 func (cl *FileClient) PatchName(id string, opts dto.FilePatchNameOptions) (*dto.File, error) {
@@ -333,12 +324,12 @@ func (cl *FileClient) PatchName(id string, opts dto.FilePatchNameOptions) (*dto.
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	b, err = cl.jsonResponseOrThrow(resp)
+	b, err = JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var file dto.File
-	if err = json.Unmarshal(b, &file); err != nil {
+	if err := json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
@@ -362,7 +353,7 @@ func (cl *FileClient) DeleteOne(id string) error {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	return cl.successfulResponseOrThrow(resp)
+	return SuccessfulResponseOrThrow(resp)
 }
 
 func (cl *FileClient) DownloadOriginal(file *dto.File, w io.Writer, rangeHeader *string) error {
@@ -391,44 +382,5 @@ func (cl *FileClient) DownloadOriginal(file *dto.File, w io.Writer, rangeHeader 
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	if _, err := io.Copy(w, resp.Body); err != nil {
-		return err
-	}
-	return err
-}
-
-func (cl *FileClient) jsonResponseOrThrow(resp *http.Response) ([]byte, error) {
-	if strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		if resp.StatusCode > 299 {
-			var errorResponse ErrorResponse
-			if err = json.Unmarshal(body, &errorResponse); err != nil {
-				return nil, err
-			}
-			return nil, &errorResponse
-		} else {
-			return body, nil
-		}
-	} else {
-		return nil, errors.New("unexpected response format")
-	}
-}
-
-func (cl *FileClient) successfulResponseOrThrow(resp *http.Response) error {
-	if resp.StatusCode > 299 {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		var errorResponse ErrorResponse
-		if err = json.Unmarshal(body, &errorResponse); err != nil {
-			return err
-		}
-		return &errorResponse
-	} else {
-		return nil
-	}
+	return OctetStreamResponseWithWriterOrThrow(resp, w)
 }

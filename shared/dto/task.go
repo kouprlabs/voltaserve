@@ -64,14 +64,6 @@ type TaskList struct {
 	Size          uint64  `json:"size"`
 }
 
-type TaskListOptions struct {
-	Query     string
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
-
 type TaskProbe struct {
 	TotalPages    uint64 `json:"totalPages"`
 	TotalElements uint64 `json:"totalElements"`

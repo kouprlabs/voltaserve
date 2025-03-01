@@ -197,7 +197,7 @@ func (r *SnapshotRouter) GetLanguages(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*dto.SnapshotListOptions, error) {
+func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotListOptions, error) {
 	var err error
 	fileID := c.Query("file_id")
 	if fileID == "" {
@@ -232,7 +232,7 @@ func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*dto.SnapshotListOp
 	if !r.snapshotSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	return &dto.SnapshotListOptions{
+	return &service.SnapshotListOptions{
 		Page:      page,
 		Size:      size,
 		SortBy:    sortBy,

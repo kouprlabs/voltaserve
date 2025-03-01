@@ -1295,7 +1295,7 @@ func (r *FileRouter) getUserIDFromAccessToken(accessToken string) (string, error
 	}
 }
 
-func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*dto.FileListOptions, error) {
+func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -1330,7 +1330,7 @@ func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*dto.FileListOptions, e
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	opts := dto.FileListOptions{
+	opts := service.FileListOptions{
 		Page:      page,
 		Size:      size,
 		SortBy:    sortBy,

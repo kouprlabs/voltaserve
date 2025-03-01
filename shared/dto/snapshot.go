@@ -20,11 +20,6 @@ const (
 	SnapshotSortByDateModified = "date_modified"
 )
 
-const (
-	SnapshotSortOrderAsc  = "asc"
-	SnapshotSortOrderDesc = "desc"
-)
-
 type Snapshot struct {
 	ID           string                `json:"id"`
 	Version      int64                 `json:"version"`
@@ -69,12 +64,10 @@ type SnapshotList struct {
 	Size          uint64      `json:"size"`
 }
 
-type SnapshotListOptions struct {
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
+const (
+	SnapshotSortOrderAsc  = "asc"
+	SnapshotSortOrderDesc = "desc"
+)
 
 type SnapshotProbe struct {
 	TotalPages    uint64 `json:"totalPages"`
@@ -101,4 +94,14 @@ type SnapshotLanguage struct {
 	ID      string `json:"id"`
 	ISO6393 string `json:"iso6393"`
 	Name    string `json:"name"`
+}
+
+const (
+	SnapshotWebhookEventTypeCreated = "created"
+	SnapshotWebhookEventTypeUpdated = "updated"
+)
+
+type SnapshotWebhookOptions struct {
+	EventType string         `json:"eventType"`
+	Snapshot  model.Snapshot `json:"snapshot"`
 }

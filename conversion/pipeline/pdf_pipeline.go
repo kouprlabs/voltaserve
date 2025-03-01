@@ -79,7 +79,7 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 	if err := p.patchSnapshotPreviewField(inputPath, &document, opts); err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
@@ -87,13 +87,13 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 	}
 	// We don't consider failing the creation of the thumbnail an error
 	_ = p.createThumbnail(inputPath, opts)
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Saving preview."),
 	}); err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Extracting text."),
 	}); err != nil {
@@ -102,7 +102,7 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 	if err := p.extractText(inputPath, opts); err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(model.TaskStatusSuccess),
@@ -141,7 +141,7 @@ func (p *pdfPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOpti
 	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options:   opts,
 		Fields:    []string{model.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
@@ -163,7 +163,7 @@ func (p *pdfPipeline) extractText(inputPath string, opts dto.PipelineRunOptions)
 	if err := p.s3.PutText(key, *text, "text/plain", opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{model.SnapshotFieldText},
 		Text: &model.S3Object{
@@ -183,8 +183,8 @@ func (p *pdfPipeline) patchSnapshotPreviewField(inputPath string, document *mode
 		return err
 	}
 	if filepath.Ext(inputPath) == filepath.Ext(opts.Key) {
-		/* The original is a PDF file */
-		if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+		// The original is a PDF file
+		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 			Options: opts,
 			Fields:  []string{model.SnapshotFieldPreview},
 			Preview: &model.S3Object{
@@ -197,8 +197,8 @@ func (p *pdfPipeline) patchSnapshotPreviewField(inputPath string, document *mode
 			return err
 		}
 	} else {
-		/* The original is an office file */
-		if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+		// The original is an office file
+		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 			Options: opts,
 			Fields:  []string{model.SnapshotFieldPreview},
 			Preview: &model.S3Object{

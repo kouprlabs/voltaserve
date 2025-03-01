@@ -152,7 +152,7 @@ func (r *EntityRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *EntityRouter) parseListQueryParams(c *fiber.Ctx) (*dto.EntityListOptions, error) {
+func (r *EntityRouter) parseListQueryParams(c *fiber.Ctx) (*service.EntityListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -187,7 +187,7 @@ func (r *EntityRouter) parseListQueryParams(c *fiber.Ctx) (*dto.EntityListOption
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &dto.EntityListOptions{
+	return &service.EntityListOptions{
 		Query:     query,
 		Page:      page,
 		Size:      size,

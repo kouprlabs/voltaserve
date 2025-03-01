@@ -64,7 +64,7 @@ func (p *audioVideoPipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
@@ -73,7 +73,7 @@ func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts dto.Pipelin
 	// Here we intentionally ignore the error, as the media file may contain just audio
 	// Additionally, we don't consider failing to create the thumbnail an error
 	_ = p.createThumbnail(inputPath, opts)
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Saving preview."),
 	}); err != nil {
@@ -82,7 +82,7 @@ func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts dto.Pipelin
 	if err := p.saveOriginalAsPreview(inputPath, opts); err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(model.TaskStatusSuccess),
@@ -122,7 +122,7 @@ func (p *audioVideoPipeline) createThumbnail(inputPath string, opts dto.Pipeline
 	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options:   opts,
 		Fields:    []string{model.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
@@ -137,7 +137,7 @@ func (p *audioVideoPipeline) saveOriginalAsPreview(inputPath string, opts dto.Pi
 	if err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{model.SnapshotFieldPreview},
 		Preview: &model.S3Object{

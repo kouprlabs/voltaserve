@@ -66,7 +66,7 @@ func (p *imagePipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Measuring image dimensions."),
 	}); err != nil {
@@ -78,7 +78,7 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunO
 	}
 	var imagePath string
 	if p.fileIdent.IsTIFF(inputPath) {
-		if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 			Fields: []string{model.TaskFieldName},
 			Name:   helper.ToPtr("Converting TIFF image to JPEG format."),
 		}); err != nil {
@@ -102,7 +102,7 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunO
 			logger.GetLogger().Error(err)
 		}
 	}(imagePath)
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
@@ -117,7 +117,7 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunO
 			return err
 		}
 	} else {
-		if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 			Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
 			Name:   helper.ToPtr("Done."),
 			Status: helper.ToPtr(model.TaskStatusSuccess),
@@ -137,7 +137,7 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts dto.Pipeli
 	if err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{model.SnapshotFieldOriginal},
 		Original: &model.S3Object{
@@ -185,7 +185,7 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts dto.PipelineRunOp
 	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options:   opts,
 		Fields:    []string{model.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
@@ -213,7 +213,7 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps model.Ima
 	if err := p.s3.PutFile(s3Object.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{model.SnapshotFieldPreview},
 		Preview: s3Object,
@@ -228,7 +228,7 @@ func (p *imagePipeline) saveOriginalAsPreview(inputPath string, imageProps model
 	if err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{model.SnapshotFieldPreview},
 		Preview: &model.S3Object{

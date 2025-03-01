@@ -82,7 +82,14 @@ func NewSnapshotService() *SnapshotService {
 	}
 }
 
-func (svc *SnapshotService) List(fileID string, opts dto.SnapshotListOptions, userID string) (*dto.SnapshotList, error) {
+type SnapshotListOptions struct {
+	Page      uint64
+	Size      uint64
+	SortBy    string
+	SortOrder string
+}
+
+func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID string) (*dto.SnapshotList, error) {
 	all, file, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
@@ -99,7 +106,7 @@ func (svc *SnapshotService) List(fileID string, opts dto.SnapshotListOptions, us
 	}, nil
 }
 
-func (svc *SnapshotService) Probe(fileID string, opts dto.SnapshotListOptions, userID string) (*dto.SnapshotProbe, error) {
+func (svc *SnapshotService) Probe(fileID string, opts SnapshotListOptions, userID string) (*dto.SnapshotProbe, error) {
 	all, _, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
@@ -249,7 +256,7 @@ func (svc *SnapshotService) IsValidSortOrder(value string) bool {
 	return value == "" || value == dto.SnapshotSortOrderAsc || value == dto.SnapshotSortOrderDesc
 }
 
-func (svc *SnapshotService) findAll(fileID string, opts dto.SnapshotListOptions, userID string) ([]model.Snapshot, model.File, error) {
+func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, userID string) ([]model.Snapshot, model.File, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, nil, err

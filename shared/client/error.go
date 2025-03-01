@@ -10,7 +10,9 @@
 
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type ErrorResponse struct {
 	Code        string `json:"code"`

@@ -44,13 +44,6 @@ type InvitationList struct {
 	Size          uint64        `json:"size"`
 }
 
-type InvitationListOptions struct {
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
-
 type InvitationProbe struct {
 	TotalPages    uint64 `json:"totalPages"`
 	TotalElements uint64 `json:"totalElements"`
