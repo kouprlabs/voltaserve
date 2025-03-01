@@ -95,7 +95,7 @@ func (s *OrganizationServiceSuite) TestList() {
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -122,7 +122,7 @@ func (s *OrganizationServiceSuite) TestList_MissingPermission() {
 
 	s.revokeUserPermissionForOrganization(orgs[1], s.users[0])
 
-	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -144,7 +144,7 @@ func (s *OrganizationServiceSuite) TestList_Paginate() {
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -156,7 +156,7 @@ func (s *OrganizationServiceSuite) TestList_Paginate() {
 	s.Equal("organization A", list.Data[0].Name)
 	s.Equal("organization B", list.Data[1].Name)
 
-	list, err = service.NewOrganizationService().List(dto.OrganizationListOptions{
+	list, err = service.NewOrganizationService().List(service.OrganizationListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -176,7 +176,7 @@ func (s *OrganizationServiceSuite) TestList_SortByNameDescending() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
 		Page:      1,
 		Size:      3,
 		SortBy:    dto.OrganizationSortByName,
@@ -196,7 +196,7 @@ func (s *OrganizationServiceSuite) TestList_Query() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewOrganizationService().List(dto.OrganizationListOptions{
+	list, err := service.NewOrganizationService().List(service.OrganizationListOptions{
 		Query: "world",
 		Page:  1,
 		Size:  10,
@@ -217,7 +217,7 @@ func (s *OrganizationServiceSuite) TestProbe() {
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewOrganizationService().Probe(dto.OrganizationListOptions{
+	probe, err := service.NewOrganizationService().Probe(service.OrganizationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -238,7 +238,7 @@ func (s *OrganizationServiceSuite) TestProbe_MissingPermission() {
 
 	s.revokeUserPermissionForOrganization(orgs[1], s.users[0])
 
-	probe, err := service.NewOrganizationService().Probe(dto.OrganizationListOptions{
+	probe, err := service.NewOrganizationService().Probe(service.OrganizationListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())

@@ -140,7 +140,7 @@ func (s *WorkspaceServiceSuite) TestList() {
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewWorkspaceService().List(dto.WorkspaceListOptions{
+	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -171,7 +171,7 @@ func (s *WorkspaceServiceSuite) TestList_MissingPermission() {
 
 	s.revokeUserPermissionForWorkspace(workspaces[1], s.users[0])
 
-	list, err := service.NewWorkspaceService().List(dto.WorkspaceListOptions{
+	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -197,7 +197,7 @@ func (s *WorkspaceServiceSuite) TestList_Paginate() {
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewWorkspaceService().List(dto.WorkspaceListOptions{
+	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -209,7 +209,7 @@ func (s *WorkspaceServiceSuite) TestList_Paginate() {
 	s.Equal("workspace A", list.Data[0].Name)
 	s.Equal("workspace B", list.Data[1].Name)
 
-	list, err = service.NewWorkspaceService().List(dto.WorkspaceListOptions{
+	list, err = service.NewWorkspaceService().List(service.WorkspaceListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -233,7 +233,7 @@ func (s *WorkspaceServiceSuite) TestList_SortByNameDescending() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewWorkspaceService().List(dto.WorkspaceListOptions{
+	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
 		Page:      1,
 		Size:      3,
 		SortBy:    dto.WorkspaceSortByName,
@@ -257,7 +257,7 @@ func (s *WorkspaceServiceSuite) TestList_Query() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewWorkspaceService().List(dto.WorkspaceListOptions{
+	list, err := service.NewWorkspaceService().List(service.WorkspaceListOptions{
 		Query: "world",
 		Page:  1,
 		Size:  10,
@@ -282,7 +282,7 @@ func (s *WorkspaceServiceSuite) TestProbe() {
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewWorkspaceService().Probe(dto.WorkspaceListOptions{
+	probe, err := service.NewWorkspaceService().Probe(service.WorkspaceListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -307,7 +307,7 @@ func (s *WorkspaceServiceSuite) TestProbe_MissingPermission() {
 
 	s.revokeUserPermissionForWorkspace(workspaces[1], s.users[0])
 
-	probe, err := service.NewWorkspaceService().Probe(dto.WorkspaceListOptions{
+	probe, err := service.NewWorkspaceService().Probe(service.WorkspaceListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())

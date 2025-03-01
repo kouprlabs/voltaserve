@@ -54,7 +54,7 @@ func (s *SnapshotServiceSuite) TestList() {
 	s.Require().NoError(err)
 	snapshots := s.createSnapshots(file.ID)
 
-	list, err := service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
+	list, err := service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -79,7 +79,7 @@ func (s *SnapshotServiceSuite) TestList_MissingFilePermission() {
 
 	s.revokeUserPermissionForFile(file, s.users[0])
 
-	_, err = service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
+	_, err = service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -96,7 +96,7 @@ func (s *SnapshotServiceSuite) TestList_Paginate() {
 	s.Require().NoError(err)
 	snapshots := s.createSnapshots(file.ID)
 
-	list, err := service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
+	list, err := service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -108,7 +108,7 @@ func (s *SnapshotServiceSuite) TestList_Paginate() {
 	s.Equal(snapshots[0].GetID(), list.Data[0].ID)
 	s.Equal(snapshots[1].GetID(), list.Data[1].ID)
 
-	list, err = service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
+	list, err = service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -129,7 +129,7 @@ func (s *SnapshotServiceSuite) TestList_SortByVersionDescending() {
 	s.Require().NoError(err)
 	snapshots := s.createSnapshots(file.ID)
 
-	list, err := service.NewSnapshotService().List(file.ID, dto.SnapshotListOptions{
+	list, err := service.NewSnapshotService().List(file.ID, service.SnapshotListOptions{
 		Page:      1,
 		Size:      3,
 		SortBy:    dto.SnapshotSortByVersion,
@@ -150,7 +150,7 @@ func (s *SnapshotServiceSuite) TestProbe() {
 	s.Require().NoError(err)
 	_ = s.createSnapshots(file.ID)
 
-	probe, err := service.NewSnapshotService().Probe(file.ID, dto.SnapshotListOptions{
+	probe, err := service.NewSnapshotService().Probe(file.ID, service.SnapshotListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -170,7 +170,7 @@ func (s *SnapshotServiceSuite) TestProbe_MissingFilePermission() {
 
 	s.revokeUserPermissionForFile(file, s.users[0])
 
-	_, err = service.NewSnapshotService().Probe(file.ID, dto.SnapshotListOptions{
+	_, err = service.NewSnapshotService().Probe(file.ID, service.SnapshotListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())

@@ -128,7 +128,7 @@ func (s *GroupServiceSuite) TestList() {
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewGroupService().List(dto.GroupListOptions{
+	list, err := service.NewGroupService().List(service.GroupListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -158,7 +158,7 @@ func (s *GroupServiceSuite) TestList_MissingPermission() {
 
 	s.revokeUserPermissionForGroup(groups[1], s.users[0])
 
-	list, err := service.NewGroupService().List(dto.GroupListOptions{
+	list, err := service.NewGroupService().List(service.GroupListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -183,7 +183,7 @@ func (s *GroupServiceSuite) TestList_Paginate() {
 		time.Sleep(1 * time.Second)
 	}
 
-	list, err := service.NewGroupService().List(dto.GroupListOptions{
+	list, err := service.NewGroupService().List(service.GroupListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -195,7 +195,7 @@ func (s *GroupServiceSuite) TestList_Paginate() {
 	s.Equal("group A", list.Data[0].Name)
 	s.Equal("group B", list.Data[1].Name)
 
-	list, err = service.NewGroupService().List(dto.GroupListOptions{
+	list, err = service.NewGroupService().List(service.GroupListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -218,7 +218,7 @@ func (s *GroupServiceSuite) TestList_SortByNameDescending() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewGroupService().List(dto.GroupListOptions{
+	list, err := service.NewGroupService().List(service.GroupListOptions{
 		Page:      1,
 		Size:      3,
 		SortBy:    dto.WorkspaceSortByName,
@@ -241,7 +241,7 @@ func (s *GroupServiceSuite) TestList_Query() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewGroupService().List(dto.GroupListOptions{
+	list, err := service.NewGroupService().List(service.GroupListOptions{
 		Query: "world",
 		Page:  1,
 		Size:  10,
@@ -265,7 +265,7 @@ func (s *GroupServiceSuite) TestProbe() {
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewGroupService().Probe(dto.GroupListOptions{
+	probe, err := service.NewGroupService().Probe(service.GroupListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -289,7 +289,7 @@ func (s *GroupServiceSuite) TestProbe_MissingPermission() {
 
 	s.revokeUserPermissionForGroup(groups[1], s.users[0])
 
-	probe, err := service.NewGroupService().Probe(dto.GroupListOptions{
+	probe, err := service.NewGroupService().Probe(service.GroupListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -536,7 +536,7 @@ func (s *GroupServiceSuite) TestRemoveMember() {
 	err = service.NewGroupService().RemoveMember(group.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
 
-	memberList, err := service.NewUserService().List(dto.UserListOptions{
+	memberList, err := service.NewUserService().List(service.UserListOptions{
 		GroupID: group.ID,
 		Page:    1,
 		Size:    10,

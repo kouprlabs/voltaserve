@@ -645,7 +645,7 @@ func (s *FileServiceTestSuite) TestList() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -678,7 +678,7 @@ func (s *FileServiceTestSuite) TestList_MissingPermission() {
 
 	s.revokeUserPermissionForFile(files[1], s.users[0])
 
-	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -706,7 +706,7 @@ func (s *FileServiceTestSuite) TestList_Paginate() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -718,7 +718,7 @@ func (s *FileServiceTestSuite) TestList_Paginate() {
 	s.Equal("file A", list.Data[0].Name)
 	s.Equal("file B", list.Data[1].Name)
 
-	list, err = service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err = service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -745,7 +745,7 @@ func (s *FileServiceTestSuite) TestList_SortByNameDescending() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Page:      1,
 		Size:      3,
 		SortBy:    dto.FileSortByName,
@@ -772,7 +772,7 @@ func (s *FileServiceTestSuite) TestList_QueryText() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Query: &dto.FileQuery{
 			Text: helper.ToPtr("world"),
 		},
@@ -803,7 +803,7 @@ func (s *FileServiceTestSuite) TestList_QueryType() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Query: &dto.FileQuery{
 			Type: helper.ToPtr(model.FileTypeFolder),
 		},
@@ -817,7 +817,7 @@ func (s *FileServiceTestSuite) TestList_QueryType() {
 	s.Equal(uint64(1), list.TotalPages)
 	s.Equal("folder", list.Data[0].Name)
 
-	list, err = service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err = service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Query: &dto.FileQuery{
 			Type: helper.ToPtr(model.FileTypeFile),
 		},
@@ -853,7 +853,7 @@ func (s *FileServiceTestSuite) TestList_QueryCreateTimeAfterBefore() {
 	time.Sleep(1 * time.Second)
 	checkpoints = append(checkpoints, time.Now())
 
-	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Query: &dto.FileQuery{
 			CreateTimeAfter:  helper.ToPtr(helper.TimeToTimestamp(checkpoints[1])),
 			CreateTimeBefore: helper.ToPtr(helper.TimeToTimestamp(checkpoints[3])),
@@ -890,7 +890,7 @@ func (s *FileServiceTestSuite) TestList_QueryUpdateTimeAfterBefore() {
 	time.Sleep(1 * time.Second)
 	checkpoints = append(checkpoints, time.Now())
 
-	list, err := service.NewFileService().List(workspace.RootID, dto.FileListOptions{
+	list, err := service.NewFileService().List(workspace.RootID, service.FileListOptions{
 		Query: &dto.FileQuery{
 			UpdateTimeAfter:  helper.ToPtr(helper.TimeToTimestamp(checkpoints[1])),
 			UpdateTimeBefore: helper.ToPtr(helper.TimeToTimestamp(checkpoints[3])),
@@ -922,7 +922,7 @@ func (s *FileServiceTestSuite) TestProbe() {
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewFileService().Probe(workspace.RootID, dto.FileListOptions{
+	probe, err := service.NewFileService().Probe(workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -950,7 +950,7 @@ func (s *FileServiceTestSuite) TestProbe_MissingPermission() {
 
 	s.revokeUserPermissionForFile(files[1], s.users[0])
 
-	probe, err := service.NewFileService().Probe(workspace.RootID, dto.FileListOptions{
+	probe, err := service.NewFileService().Probe(workspace.RootID, service.FileListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
