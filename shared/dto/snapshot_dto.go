@@ -75,19 +75,18 @@ type SnapshotProbe struct {
 }
 
 type SnapshotPatchOptions struct {
-	Options   PipelineRunOptions `json:"options"`
-	Fields    []string           `json:"fields"`
-	Original  *model.S3Object    `json:"original"`
-	Preview   *model.S3Object    `json:"preview"`
-	Text      *model.S3Object    `json:"text"`
-	OCR       *model.S3Object    `json:"ocr"`
-	Entities  *model.S3Object    `json:"entities"`
-	Mosaic    *model.S3Object    `json:"mosaic"`
-	Thumbnail *model.S3Object    `json:"thumbnail"`
-	TaskID    *string            `json:"taskId"`
-	Language  *string            `json:"language"`
-	Summary   *string            `json:"summary"`
-	Intent    *string            `json:"intent"`
+	Fields    []string        `json:"fields"`
+	Original  *model.S3Object `json:"original"`
+	Preview   *model.S3Object `json:"preview"`
+	Text      *model.S3Object `json:"text"`
+	OCR       *model.S3Object `json:"ocr"`
+	Entities  *model.S3Object `json:"entities"`
+	Mosaic    *model.S3Object `json:"mosaic"`
+	Thumbnail *model.S3Object `json:"thumbnail"`
+	TaskID    *string         `json:"taskId"`
+	Language  *string         `json:"language"`
+	Summary   *string         `json:"summary"`
+	Intent    *string         `json:"intent"`
 }
 
 type SnapshotLanguage struct {

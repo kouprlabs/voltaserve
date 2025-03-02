@@ -547,13 +547,3 @@ func NewInvalidAPIKeyError() *ErrorResponse {
 		nil,
 	)
 }
-
-func NewPathVariablesAndBodyParametersNotConsistent() *ErrorResponse {
-	return NewErrorResponse(
-		"path_variables_and_body_parameters_not_consistent",
-		http.StatusUnauthorized,
-		"Path variables and body parameters are not consistent.",
-		"Path variables and body parameters are not consistent.",
-		nil,
-	)
-}

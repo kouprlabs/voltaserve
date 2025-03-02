@@ -137,9 +137,8 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts dto.Pipeli
 	if err != nil {
 		return nil, err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldOriginal},
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldOriginal},
 		Original: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
@@ -185,8 +184,7 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts dto.PipelineRunOp
 	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMIMEFromPath(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options:   opts,
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
 		Fields:    []string{model.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
 	}); err != nil {
@@ -213,8 +211,7 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps model.Ima
 	if err := p.s3.PutFile(s3Object.Key, jpegPath, helper.DetectMIMEFromPath(jpegPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
 		Fields:  []string{model.SnapshotFieldPreview},
 		Preview: s3Object,
 	}); err != nil {
@@ -228,9 +225,8 @@ func (p *imagePipeline) saveOriginalAsPreview(inputPath string, imageProps model
 	if err != nil {
 		return err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldPreview},
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldPreview},
 		Preview: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,

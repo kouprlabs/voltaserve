@@ -250,9 +250,6 @@ func (s *SnapshotServiceSuite) TestPatch() {
 	s.Require().NoError(err)
 
 	patched, err := service.NewSnapshotService().Patch(snapshot.GetID(), dto.SnapshotPatchOptions{
-		Options: dto.PipelineRunOptions{
-			SnapshotID: snapshot.GetID(),
-		},
 		Fields:  []string{model.SnapshotFieldSummary},
 		Summary: helper.ToPtr("lorem ipsum"),
 	})

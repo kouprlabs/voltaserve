@@ -122,8 +122,7 @@ func (p *audioVideoPipeline) createThumbnail(inputPath string, opts dto.Pipeline
 	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMIMEFromPath(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options:   opts,
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
 		Fields:    []string{model.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
 	}); err != nil {
@@ -137,9 +136,8 @@ func (p *audioVideoPipeline) saveOriginalAsPreview(inputPath string, opts dto.Pi
 	if err != nil {
 		return err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldPreview},
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldPreview},
 		Preview: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,

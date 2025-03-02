@@ -132,9 +132,8 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts dto.PipelineRunOptions
 	if err := p.s3.PutFile(glbKey, outputPath, helper.DetectMIMEFromPath(outputPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldPreview},
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldPreview},
 		Preview: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    glbKey,
