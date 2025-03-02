@@ -107,7 +107,7 @@ func (p *officePipeline) convertToPDF(inputPath string, opts dto.PipelineRunOpti
 		return nil, err
 	}
 	pdfKey := opts.SnapshotID + "/preview.pdf"
-	if err := p.s3.PutFile(pdfKey, pdfPath, helper.DetectMimeFromFile(pdfPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
+	if err := p.s3.PutFile(pdfKey, pdfPath, helper.DetectMIMEFromPath(pdfPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
 	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{

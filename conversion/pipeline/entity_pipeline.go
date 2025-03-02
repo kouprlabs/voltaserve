@@ -144,7 +144,7 @@ func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptio
 			Key:    opts.SnapshotID + "/ocr.pdf",
 			Size:   stat.Size(),
 		}
-		if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
+		if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMIMEFromPath(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 			return nil, err
 		}
 		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
