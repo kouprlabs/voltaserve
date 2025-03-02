@@ -67,11 +67,13 @@ func (p *officePipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *officePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Converting to PDF."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Converting to PDF."),
+		}); err != nil {
+			return err
+		}
 	}
 	pdfPath, err := p.patchPreviewWithPDF(inputPath, opts)
 	if err != nil {

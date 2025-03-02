@@ -571,7 +571,7 @@ func (mp *snapshotMapper) mapS3Object(o *model.S3Object) *dto.SnapshotDownloadab
 }
 
 func (mp *snapshotMapper) mapWithS3Objects(m model.Snapshot) *dto.SnapshotWithS3Objects {
-	return &dto.SnapshotWithS3Objects{
+	s := &dto.SnapshotWithS3Objects{
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
 		Original:   m.GetOriginal(),
@@ -584,8 +584,14 @@ func (mp *snapshotMapper) mapWithS3Objects(m model.Snapshot) *dto.SnapshotWithS3
 		Language:   m.GetLanguage(),
 		Summary:    m.GetSummary(),
 		Intent:     m.GetIntent(),
-		TaskID:     m.GetTaskID(),
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
 	}
+	if m.GetTaskID() != nil {
+		task, err := mp.taskCache.Get(*m.GetTaskID())
+		if err == nil {
+			s.Task, _ = mp.taskMapper.mapOne(task)
+		}
+	}
+	return s
 }

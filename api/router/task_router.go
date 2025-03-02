@@ -43,7 +43,7 @@ func (r *TaskRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/probe", r.Probe)
 	g.Get("/count", r.GetCount)
 	g.Post("/dismiss", r.DismissAll)
-	g.Get("/:id", r.Get)
+	g.Get("/:id", r.Find)
 	g.Post("/:id/dismiss", r.Dismiss)
 }
 
@@ -53,19 +53,19 @@ func (r *TaskRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Patch("/:id", r.Patch)
 }
 
-// Get godoc
+// Find godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Find
+//	@Description	Find
 //	@Tags			Tasks
-//	@Id				tasks_get
+//	@Id				tasks_find
 //	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	dto.Task
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id} [get]
-func (r *TaskRouter) Get(c *fiber.Ctx) error {
+func (r *TaskRouter) Find(c *fiber.Ctx) error {
 	userID := helper.GetUserID(c)
 	res, err := r.taskSvc.Find(c.Params("id"), userID)
 	if err != nil {

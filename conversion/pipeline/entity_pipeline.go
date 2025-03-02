@@ -58,11 +58,13 @@ func (p *entityPipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *entityPipeline) RunFromLocalPath(_ string, opts dto.PipelineRunOptions) error {
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Extracting text."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Extracting text."),
+		}); err != nil {
+			return err
+		}
 	}
 	snapshot, err := p.snapshotClient.Find(opts.SnapshotID)
 	if err != nil {
@@ -75,21 +77,25 @@ func (p *entityPipeline) RunFromLocalPath(_ string, opts dto.PipelineRunOptions)
 	if err != nil {
 		return err
 	}
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Collecting entities."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Collecting entities."),
+		}); err != nil {
+			return err
+		}
 	}
 	if err := p.patchEntities(text, opts); err != nil {
 		return err
 	}
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
-		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(model.TaskStatusSuccess),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
+			Name:   helper.ToPtr("Done."),
+			Status: helper.ToPtr(model.TaskStatusSuccess),
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
 }

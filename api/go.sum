@@ -180,6 +180,8 @@ github.com/kouprlabs/voltaserve/shared v0.0.0-20250302172900-621d7c0a5606 h1:vjK
 github.com/kouprlabs/voltaserve/shared v0.0.0-20250302172900-621d7c0a5606/go.mod h1:9j5IDoEWIkWM0QEJo394EJSTF2nOJwisICqhNqLDfkw=
 github.com/kouprlabs/voltaserve/shared v0.0.0-20250302201811-194a0447cae4 h1:HxjvrYqMadGj/qRbcNhX1bd58wHantogYX9yupfc0A0=
 github.com/kouprlabs/voltaserve/shared v0.0.0-20250302201811-194a0447cae4/go.mod h1:9j5IDoEWIkWM0QEJo394EJSTF2nOJwisICqhNqLDfkw=
+github.com/kouprlabs/voltaserve/shared v0.0.0-20250302210629-045077cf8ec7 h1:JgZdnoybswk6qUvY5vfm+Q3lnmk26gEpulK+15oZkhw=
+github.com/kouprlabs/voltaserve/shared v0.0.0-20250302210629-045077cf8ec7/go.mod h1:9j5IDoEWIkWM0QEJo394EJSTF2nOJwisICqhNqLDfkw=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.3.0 h1:WgNl7dwNpEZ6jJ9k1snq4pZsg7DOEN8hP9Xw0Tsjwk0=
 github.com/kr/pretty v0.3.0/go.mod h1:640gp4NfQd8pI5XOwp5fnNeVWj67G7CFk/SaSQn7NBk=

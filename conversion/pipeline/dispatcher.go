@@ -51,12 +51,14 @@ func NewDispatcher() *Dispatcher {
 }
 
 func (d *Dispatcher) Dispatch(opts dto.PipelineRunOptions) error {
-	if _, err := d.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Name:   helper.ToPtr("Processing."),
-		Fields: []string{model.TaskFieldStatus},
-		Status: helper.ToPtr(model.TaskStatusRunning),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := d.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Name:   helper.ToPtr("Processing."),
+			Fields: []string{model.TaskFieldStatus},
+			Status: helper.ToPtr(model.TaskStatusRunning),
+		}); err != nil {
+			return err
+		}
 	}
 	id := d.identify(opts)
 	var err error
@@ -78,17 +80,21 @@ func (d *Dispatcher) Dispatch(opts dto.PipelineRunOptions) error {
 		err = d.zipPipeline.Run(opts)
 	}
 	if err != nil {
-		if _, err := d.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-			Fields: []string{model.TaskFieldStatus, model.TaskFieldError},
-			Status: helper.ToPtr(model.TaskStatusError),
-			Error:  helper.ToPtr(d.getUserFriendlyMessage(err.Error())),
-		}); err != nil {
-			return err
+		if opts.TaskID != nil {
+			if _, err := d.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+				Fields: []string{model.TaskFieldStatus, model.TaskFieldError},
+				Status: helper.ToPtr(model.TaskStatusError),
+				Error:  helper.ToPtr(d.getUserFriendlyMessage(err.Error())),
+			}); err != nil {
+				return err
+			}
 		}
 		return err
 	} else {
-		if err := d.taskClient.Delete(opts.TaskID); err != nil {
-			return err
+		if opts.TaskID != nil {
+			if err := d.taskClient.Delete(*opts.TaskID); err != nil {
+				return err
+			}
 		}
 		return nil
 	}

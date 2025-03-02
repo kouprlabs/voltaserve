@@ -69,11 +69,13 @@ func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	if !p.fileIdent.IsImage(opts.Key) {
 		return errors.New("unsupported file type")
 	}
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Creating mosaic."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Creating mosaic."),
+		}); err != nil {
+			return err
+		}
 	}
 	if !p.imageProc.IsSupportedByBild(inputPath) {
 		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
@@ -105,12 +107,14 @@ func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	}); err != nil {
 		return err
 	}
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
-		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(model.TaskStatusSuccess),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
+			Name:   helper.ToPtr("Done."),
+			Status: helper.ToPtr(model.TaskStatusSuccess),
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -2132,7 +2132,7 @@ func (svc *fileReprocess) runPipeline(file model.File, snapshot model.Snapshot, 
 		return err
 	}
 	if err := svc.pipelineClient.Run(&dto.PipelineRunOptions{
-		TaskID:     task.GetID(),
+		TaskID:     helper.ToPtr(task.GetID()),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
 		Key:        snapshot.GetOriginal().Key,
@@ -2356,7 +2356,7 @@ func (svc *fileStore) runPipeline(file model.File, snapshot model.Snapshot, prop
 		return err
 	}
 	if err := svc.pipelineClient.Run(&dto.PipelineRunOptions{
-		TaskID:     task.GetID(),
+		TaskID:     helper.ToPtr(task.GetID()),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     props.Original.Bucket,
 		Key:        props.Original.Key,

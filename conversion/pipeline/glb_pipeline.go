@@ -64,11 +64,13 @@ func (p *glbPipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *glbPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Creating thumbnail."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Creating thumbnail."),
+		}); err != nil {
+			return err
+		}
 	}
 	_ = p.patchThumbnail(inputPath, opts)
 	if err := p.patchPreview(inputPath, opts); err != nil {

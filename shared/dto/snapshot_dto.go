@@ -108,7 +108,7 @@ type SnapshotWithS3Objects struct {
 	Summary    *string         `json:"summary,omitempty"`
 	Intent     *string         `json:"intent,omitempty"`
 	Language   *string         `json:"language,omitempty"`
-	TaskID     *string         `json:"taskId,omitempty"`
+	Task       *Task           `json:"taskId,omitempty"`
 	CreateTime string          `json:"createTime"`
 	UpdateTime *string         `json:"updateTime,omitempty"`
 }

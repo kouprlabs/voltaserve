@@ -191,7 +191,7 @@ func (svc *EntityService) runPipeline(snapshot model.Snapshot, task model.Task) 
 	}
 	if err := svc.pipelineClient.Run(&dto.PipelineRunOptions{
 		PipelineID: helper.ToPtr(dto.PipelineEntity),
-		TaskID:     task.GetID(),
+		TaskID:     helper.ToPtr(task.GetID()),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetPreview().Bucket,
 		Key:        key,

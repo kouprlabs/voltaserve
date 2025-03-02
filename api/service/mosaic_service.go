@@ -204,7 +204,7 @@ func (svc *MosaicService) DownloadTileBuffer(fileID string, opts MosaicDownloadT
 func (svc *MosaicService) runPipeline(snapshot model.Snapshot, task model.Task) error {
 	if err := svc.pipelineClient.Run(&dto.PipelineRunOptions{
 		PipelineID: helper.ToPtr(dto.PipelineMosaic),
-		TaskID:     task.GetID(),
+		TaskID:     helper.ToPtr(task.GetID()),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetPreview().Bucket,
 		Key:        snapshot.GetPreview().Key,
