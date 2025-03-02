@@ -242,7 +242,7 @@ func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dt
 		}
 	}
 	if svc.config.SnapshotWebhook != "" {
-		if err := svc.snapshotWebhook.Call(svc.snapshotMapper.mapOne(snapshot), dto.SnapshotWebhookEventTypeUpdate); err != nil {
+		if err := svc.snapshotWebhook.Call(svc.snapshotMapper.mapForWebhook(snapshot), dto.SnapshotWebhookEventTypeUpdate); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}
@@ -520,7 +520,6 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *dto.Snapshot {
 		s.Capabilities.Thumbnail = true
 	}
 	if m.GetSummary() != nil {
-		s.Summary = m.GetSummary()
 		s.Capabilities.Summary = true
 	}
 	if m.HasEntities() {
@@ -560,4 +559,24 @@ func (mp *snapshotMapper) mapS3Object(o *model.S3Object) *dto.SnapshotDownloadab
 		download.Document = o.Document
 	}
 	return download
+}
+
+func (mp *snapshotMapper) mapForWebhook(m model.Snapshot) *dto.SnapshotForWebhook {
+	return &dto.SnapshotForWebhook{
+		ID:         m.GetID(),
+		Version:    m.GetVersion(),
+		Original:   m.GetOriginal(),
+		Preview:    m.GetPreview(),
+		OCR:        m.GetOCR(),
+		Text:       m.GetText(),
+		Thumbnail:  m.GetThumbnail(),
+		Entities:   m.GetEntities(),
+		Mosaic:     m.GetMosaic(),
+		Language:   m.GetLanguage(),
+		Summary:    m.GetSummary(),
+		Intent:     m.GetIntent(),
+		TaskID:     m.GetTaskID(),
+		CreateTime: m.GetCreateTime(),
+		UpdateTime: m.GetUpdateTime(),
+	}
 }

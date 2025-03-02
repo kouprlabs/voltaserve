@@ -96,12 +96,30 @@ type SnapshotLanguage struct {
 	Name    string `json:"name"`
 }
 
+type SnapshotForWebhook struct {
+	ID         string          `json:"id"`
+	Version    int64           `json:"version"`
+	Original   *model.S3Object `json:"original,omitempty"`
+	Preview    *model.S3Object `json:"preview,omitempty"`
+	Text       *model.S3Object `json:"text,omitempty"`
+	OCR        *model.S3Object `json:"ocr,omitempty"`
+	Entities   *model.S3Object `json:"entities,omitempty"`
+	Mosaic     *model.S3Object `json:"mosaic,omitempty"`
+	Thumbnail  *model.S3Object `json:"thumbnail,omitempty"`
+	Summary    *string         `json:"summary,omitempty"`
+	Intent     *string         `json:"intent,omitempty"`
+	Language   *string         `json:"language,omitempty"`
+	TaskID     *string         `json:"taskId,omitempty"`
+	CreateTime string          `json:"createTime"`
+	UpdateTime *string         `json:"updateTime,omitempty"`
+}
+
 const (
 	SnapshotWebhookEventTypeCreate = "create"
 	SnapshotWebhookEventTypeUpdate = "update"
 )
 
 type SnapshotWebhookOptions struct {
-	EventType string    `json:"eventType"`
-	Snapshot  *Snapshot `json:"snapshot,omitempty"`
+	EventType string              `json:"eventType"`
+	Snapshot  *SnapshotForWebhook `json:"snapshot,omitempty"`
 }
