@@ -59,26 +59,25 @@ func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*dto.File, err
 		return nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := JsonResponseOrError(resp)
+	b, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
-	var file dto.File
-	if err := json.Unmarshal(body, &file); err != nil {
+	var res dto.File
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &file, nil
+	return &res, nil
 }
 
 type FileCreateFromS3Options struct {
@@ -113,14 +112,13 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*dto.File, err
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 			return
 		}
@@ -129,11 +127,11 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*dto.File, err
 	if err != nil {
 		return nil, err
 	}
-	var file dto.File
-	if err := json.Unmarshal(b, &file); err != nil {
+	var res dto.File
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &file, nil
+	return &res, nil
 }
 
 type FilePatchFromS3Options struct {
@@ -164,13 +162,13 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*dto.File, error
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 			return
 		}
@@ -179,11 +177,11 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*dto.File, error
 	if err != nil {
 		return nil, err
 	}
-	var file dto.File
-	if err := json.Unmarshal(b, &file); err != nil {
+	var res dto.File
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &file, nil
+	return &res, nil
 }
 
 func (cl *FileClient) GetByPath(path string) (*dto.File, error) {
@@ -197,26 +195,25 @@ func (cl *FileClient) GetByPath(path string) (*dto.File, error) {
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := JsonResponseOrError(resp)
+	b, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
-	var file dto.File
-	if err := json.Unmarshal(body, &file); err != nil {
+	var res dto.File
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &file, nil
+	return &res, nil
 }
 
 func (cl *FileClient) ListByPath(path string) ([]dto.File, error) {
@@ -230,14 +227,13 @@ func (cl *FileClient) ListByPath(path string) ([]dto.File, error) {
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
@@ -245,11 +241,11 @@ func (cl *FileClient) ListByPath(path string) ([]dto.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	var files []dto.File
-	if err := json.Unmarshal(b, &files); err != nil {
+	var res []dto.File
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return files, nil
+	return res, nil
 }
 
 func (cl *FileClient) CopyOne(id string, targetID string) (*dto.File, error) {
@@ -259,14 +255,13 @@ func (cl *FileClient) CopyOne(id string, targetID string) (*dto.File, error) {
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
@@ -274,11 +269,11 @@ func (cl *FileClient) CopyOne(id string, targetID string) (*dto.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	var file dto.File
-	if err := json.Unmarshal(b, &file); err != nil {
+	var res dto.File
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &file, nil
+	return &res, nil
 }
 
 func (cl *FileClient) MoveOne(id string, targetID string) error {
@@ -288,14 +283,13 @@ func (cl *FileClient) MoveOne(id string, targetID string) error {
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
@@ -313,14 +307,13 @@ func (cl *FileClient) PatchName(id string, opts dto.FilePatchNameOptions) (*dto.
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
@@ -328,11 +321,11 @@ func (cl *FileClient) PatchName(id string, opts dto.FilePatchNameOptions) (*dto.
 	if err != nil {
 		return nil, err
 	}
-	var file dto.File
-	if err := json.Unmarshal(b, &file); err != nil {
+	var res dto.File
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &file, nil
+	return &res, nil
 }
 
 func (cl *FileClient) DeleteOne(id string) error {
@@ -342,14 +335,13 @@ func (cl *FileClient) DeleteOne(id string) error {
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
@@ -371,14 +363,13 @@ func (cl *FileClient) DownloadOriginal(file *dto.File, w io.Writer, rangeHeader 
 	if rangeHeader != nil {
 		req.Header.Set("Range", *rangeHeader)
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)

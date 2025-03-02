@@ -66,24 +66,23 @@ func (cl *TokenClient) Exchange(options TokenExchangeOptions) (*dto.Token, error
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := JsonResponseOrError(resp)
+	b, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
-	var token dto.Token
-	if err := json.Unmarshal(body, &token); err != nil {
+	var res dto.Token
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &token, nil
+	return &res, nil
 }
