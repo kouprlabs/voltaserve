@@ -10,6 +10,12 @@
 
 package config
 
+import "os"
+
 type SearchConfig struct {
 	URL string
+}
+
+func ReadSearch(config *SearchConfig) {
+	config.URL = os.Getenv("SEARCH_URL")
 }

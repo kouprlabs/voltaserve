@@ -10,10 +10,29 @@
 
 package config
 
+import (
+	"os"
+	"strconv"
+)
+
 type S3Config struct {
 	URL       string
 	AccessKey string
 	SecretKey string
 	Region    string
 	Secure    bool
+}
+
+func ReadS3(config *S3Config) {
+	config.URL = os.Getenv("S3_URL")
+	config.AccessKey = os.Getenv("S3_ACCESS_KEY")
+	config.SecretKey = os.Getenv("S3_SECRET_KEY")
+	config.Region = os.Getenv("S3_REGION")
+	if len(os.Getenv("S3_SECURE")) > 0 {
+		v, err := strconv.ParseBool(os.Getenv("S3_SECURE"))
+		if err != nil {
+			panic(err)
+		}
+		config.Secure = v
+	}
 }

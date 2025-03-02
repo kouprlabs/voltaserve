@@ -31,9 +31,9 @@ type LimitsConfig struct {
 func GetConfig() *Config {
 	cfg := &Config{}
 	readPort(cfg)
-	readS3(cfg)
 	readLimits(cfg)
-	readEnvironment(cfg)
+	config.ReadS3(&cfg.S3)
+	config.ReadEnvironment(&cfg.Environment)
 	return cfg
 }
 
@@ -46,20 +46,6 @@ func readPort(config *Config) {
 	}
 }
 
-func readS3(config *Config) {
-	config.S3.URL = os.Getenv("S3_URL")
-	config.S3.AccessKey = os.Getenv("S3_ACCESS_KEY")
-	config.S3.SecretKey = os.Getenv("S3_SECRET_KEY")
-	config.S3.Region = os.Getenv("S3_REGION")
-	if len(os.Getenv("S3_SECURE")) > 0 {
-		v, err := strconv.ParseBool(os.Getenv("S3_SECURE"))
-		if err != nil {
-			panic(err)
-		}
-		config.S3.Secure = v
-	}
-}
-
 func readLimits(config *Config) {
 	if len(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB")) > 0 {
 		v, err := strconv.ParseInt(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB"), 10, 32)
@@ -67,11 +53,5 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.MultipartBodyLengthLimitMB = int(v)
-	}
-}
-
-func readEnvironment(config *Config) {
-	if os.Getenv("TEST") == "true" {
-		config.Environment.IsTest = true
 	}
 }

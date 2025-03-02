@@ -23,7 +23,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/gomail.v2"
 
-	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/shared/config"
+
 	"github.com/kouprlabs/voltaserve/api/infra"
 )
 
@@ -98,7 +99,7 @@ func (s *MailTemplateSuite) TestSend() {
 			mt := infra.NewMailTemplateWithDialer(config.SMTPConfig{
 				SenderName:    "Voltaserve",
 				SenderAddress: "voltaserve@example.com",
-			}, dialMock)
+			}, dialMock, true)
 
 			// gomail is non-deterministic in its headers, so we'll brute force our expected body.
 			s.EventuallyWithT(func(t *assert.CollectT) {

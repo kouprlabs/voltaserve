@@ -19,21 +19,21 @@ import (
 )
 
 type Config struct {
-	Port          int
-	PublicUIURL   string
-	ConversionURL string
-	LanguageURL   string
-	MosaicURL     string
-	Postgres      config.PostgresConfig
-	Search        config.SearchConfig
-	Redis         config.RedisConfig
-	S3            config.S3Config
-	Limits        LimitsConfig
-	Security      config.SecurityConfig
-	SMTP          SMTPConfig
-	Defaults      DefaultsConfig
-	Webhook       WebhookConfig
-	Environment   config.EnvironmentConfig
+	Port            int
+	PublicUIURL     string
+	ConversionURL   string
+	LanguageURL     string
+	MosaicURL       string
+	Postgres        config.PostgresConfig
+	Search          config.SearchConfig
+	Redis           config.RedisConfig
+	S3              config.S3Config
+	Security        config.SecurityConfig
+	Environment     config.EnvironmentConfig
+	SMTP            config.SMTPConfig
+	Limits          LimitsConfig
+	Defaults        DefaultsConfig
+	SnapshotWebhook string
 }
 
 type LimitsConfig struct {
@@ -43,23 +43,6 @@ type LimitsConfig struct {
 
 type DefaultsConfig struct {
 	WorkspaceStorageCapacityMB int
-}
-
-type TokenConfig struct {
-	AccessTokenLifetime  int
-	RefreshTokenLifetime int
-	TokenAudience        string
-	TokenIssuer          string
-}
-
-type SMTPConfig struct {
-	Host          string
-	Port          int
-	Secure        bool
-	Username      string
-	Password      string
-	SenderAddress string
-	SenderName    string
 }
 
 type WebhookConfig struct {
@@ -83,16 +66,16 @@ func GetConfig() *Config {
 	cfg := &Config{}
 	readPort(cfg)
 	readURLs(cfg)
-	readSecurity(cfg)
-	readPostgres(cfg)
-	readS3(cfg)
-	readSearch(cfg)
-	readRedis(cfg)
-	readSMTP(cfg)
 	readLimits(cfg)
 	readDefaults(cfg)
-	readWebhook(cfg)
-	readEnvironment(cfg)
+	readWebhooks(cfg)
+	config.ReadSecurity(&cfg.Security)
+	config.ReadPostgres(&cfg.Postgres)
+	config.ReadS3(&cfg.S3)
+	config.ReadSearch(&cfg.Search)
+	config.ReadRedis(&cfg.Redis)
+	config.ReadSMTP(&cfg.SMTP)
+	config.ReadEnvironment(&cfg.Environment)
 	return cfg
 }
 
@@ -118,68 +101,6 @@ func readURLs(config *Config) {
 	config.ConversionURL = os.Getenv("CONVERSION_URL")
 	config.LanguageURL = os.Getenv("LANGUAGE_URL")
 	config.MosaicURL = os.Getenv("MOSAIC_URL")
-}
-
-func readSecurity(config *Config) {
-	config.Security.JWTSigningKey = os.Getenv("SECURITY_JWT_SIGNING_KEY")
-	config.Security.CORSOrigins = strings.Split(os.Getenv("SECURITY_CORS_ORIGINS"), ",")
-	config.Security.APIKey = os.Getenv("SECURITY_API_KEY")
-}
-
-func readPostgres(config *Config) {
-	config.Postgres.URL = os.Getenv("POSTGRES_URL")
-}
-
-func readS3(config *Config) {
-	config.S3.URL = os.Getenv("S3_URL")
-	config.S3.AccessKey = os.Getenv("S3_ACCESS_KEY")
-	config.S3.SecretKey = os.Getenv("S3_SECRET_KEY")
-	config.S3.Region = os.Getenv("S3_REGION")
-	if len(os.Getenv("S3_SECURE")) > 0 {
-		v, err := strconv.ParseBool(os.Getenv("S3_SECURE"))
-		if err != nil {
-			panic(err)
-		}
-		config.S3.Secure = v
-	}
-}
-
-func readSearch(config *Config) {
-	config.Search.URL = os.Getenv("SEARCH_URL")
-}
-
-func readRedis(config *Config) {
-	config.Redis.Address = os.Getenv("REDIS_ADDRESS")
-	config.Redis.Password = os.Getenv("REDIS_PASSWORD")
-	if len(os.Getenv("REDIS_DB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("REDIS_DB"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Redis.DB = int(v)
-	}
-}
-
-func readSMTP(config *Config) {
-	config.SMTP.Host = os.Getenv("SMTP_HOST")
-	if len(os.Getenv("SMTP_PORT")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("SMTP_PORT"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.SMTP.Port = int(v)
-	}
-	if len(os.Getenv("SMTP_SECURE")) > 0 {
-		v, err := strconv.ParseBool(os.Getenv("SMTP_SECURE"))
-		if err != nil {
-			panic(err)
-		}
-		config.SMTP.Secure = v
-	}
-	config.SMTP.Username = os.Getenv("SMTP_USERNAME")
-	config.SMTP.Password = os.Getenv("SMTP_PASSWORD")
-	config.SMTP.SenderAddress = os.Getenv("SMTP_SENDER_ADDRESS")
-	config.SMTP.SenderName = os.Getenv("SMTP_SENDER_NAME")
 }
 
 func readLimits(config *Config) {
@@ -218,12 +139,6 @@ func readDefaults(config *Config) {
 	}
 }
 
-func readWebhook(config *Config) {
-	config.Webhook.Snapshot = os.Getenv("WEBHOOK_SNAPSHOT")
-}
-
-func readEnvironment(config *Config) {
-	if os.Getenv("TEST") == "true" {
-		config.Environment.IsTest = true
-	}
+func readWebhooks(config *Config) {
+	config.SnapshotWebhook = os.Getenv("SNAPSHOT_WEBHOOK")
 }

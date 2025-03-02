@@ -45,7 +45,7 @@ func (wh *SnapshotWebhook) Call(snapshot model.Snapshot, eventType string) error
 	}
 	req, err := http.NewRequest(
 		"POST",
-		fmt.Sprintf("%s?api_key=%s", config.GetConfig().Webhook.Snapshot, wh.config.Security.APIKey),
+		fmt.Sprintf("%s?api_key=%s", config.GetConfig().SnapshotWebhook, wh.config.Security.APIKey),
 		bytes.NewBuffer(body),
 	)
 	if err != nil {

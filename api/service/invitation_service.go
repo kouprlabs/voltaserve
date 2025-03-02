@@ -48,7 +48,7 @@ func NewInvitationService() *InvitationService {
 		invitationRepo:   repo.NewInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
 		userRepo:         repo.NewUserRepo(),
-		mailTmpl:         infra.NewMailTemplate(config.GetConfig().SMTP),
+		mailTmpl:         infra.NewMailTemplate(config.GetConfig().SMTP, false),
 		orgMapper:        newOrganizationMapper(),
 		config:           config.GetConfig(),
 	}

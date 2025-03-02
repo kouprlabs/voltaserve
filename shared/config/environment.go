@@ -10,6 +10,14 @@
 
 package config
 
+import "os"
+
 type EnvironmentConfig struct {
 	IsTest bool
+}
+
+func ReadEnvironment(config *EnvironmentConfig) {
+	if os.Getenv("TEST") == "true" {
+		config.IsTest = true
+	}
 }

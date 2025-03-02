@@ -10,8 +10,25 @@
 
 package config
 
+import (
+	"os"
+	"strconv"
+)
+
 type RedisConfig struct {
 	Address  string
 	Password string
 	DB       int
+}
+
+func ReadRedis(config *RedisConfig) {
+	config.Address = os.Getenv("REDIS_ADDRESS")
+	config.Password = os.Getenv("REDIS_PASSWORD")
+	if len(os.Getenv("REDIS_DB")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("REDIS_DB"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		config.DB = int(v)
+	}
 }

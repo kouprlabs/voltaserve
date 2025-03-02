@@ -23,21 +23,17 @@ type Config struct {
 	APIURL      string
 	IdPURL      string
 	S3          config.S3Config
-	Security    SecurityConfig
+	Security    config.SecurityConfig
 	Environment config.EnvironmentConfig
-}
-
-type SecurityConfig struct {
-	APIKey string
 }
 
 func GetConfig() *Config {
 	cfg := &Config{}
 	readPort(cfg)
 	readURLs(cfg)
-	readS3(cfg)
-	readSecurity(cfg)
-	readEnvironment(cfg)
+	config.ReadS3(&cfg.S3)
+	config.ReadSecurity(&cfg.Security)
+	config.ReadEnvironment(&cfg.Environment)
 	return cfg
 }
 
@@ -53,28 +49,4 @@ func readPort(config *Config) {
 func readURLs(config *Config) {
 	config.APIURL = os.Getenv("API_URL")
 	config.IdPURL = os.Getenv("IDP_URL")
-}
-
-func readS3(config *Config) {
-	config.S3.URL = os.Getenv("S3_URL")
-	config.S3.AccessKey = os.Getenv("S3_ACCESS_KEY")
-	config.S3.SecretKey = os.Getenv("S3_SECRET_KEY")
-	config.S3.Region = os.Getenv("S3_REGION")
-	if len(os.Getenv("S3_SECURE")) > 0 {
-		v, err := strconv.ParseBool(os.Getenv("S3_SECURE"))
-		if err != nil {
-			panic(err)
-		}
-		config.S3.Secure = v
-	}
-}
-
-func readSecurity(config *Config) {
-	config.Security.APIKey = os.Getenv("SECURITY_API_KEY")
-}
-
-func readEnvironment(config *Config) {
-	if os.Getenv("TEST") == "true" {
-		config.Environment.IsTest = true
-	}
 }
