@@ -152,7 +152,7 @@ func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
 //	@Id				snapshots_find
 //	@Produce		application/json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	dto.SnapshotForWebhook
+//	@Success		200	{object}	dto.SnapshotWithS3Objects
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id} [get]
@@ -181,7 +181,7 @@ func (r *SnapshotRouter) Find(c *fiber.Ctx) error {
 //	@Param			api_key	query		string						true	"API Key"
 //	@Param			id		path		string						true	"ID"
 //	@Param			body	body		dto.SnapshotPatchOptions	true	"Body"
-//	@Success		200		{object}	dto.SnapshotForWebhook
+//	@Success		200		{object}	dto.SnapshotWithS3Objects
 //	@Failure		401		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id} [patch]
