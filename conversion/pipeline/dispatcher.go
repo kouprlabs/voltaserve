@@ -91,10 +91,11 @@ func (d *Dispatcher) Dispatch(opts dto.PipelineRunOptions) error {
 		}
 		return err
 	} else {
-		if opts.TaskID != nil {
-			if err := d.taskClient.Delete(*opts.TaskID); err != nil {
-				return err
-			}
+		if _, err := d.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldStatus},
+			Status: helper.ToPtr(model.TaskStatusSuccess),
+		}); err != nil {
+			return err
 		}
 		return nil
 	}
