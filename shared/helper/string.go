@@ -24,5 +24,5 @@ func RemoveNonNumeric(s string) string {
 }
 
 func RemoveWhitespace(s string) string {
-	return strings.Join(strings.Fields(s), "")
+	return strings.Join(strings.Fields(s), " ")
 }
