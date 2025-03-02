@@ -32,6 +32,7 @@ type fileEntity struct {
 	UserPermissions  []*UserPermissionValue  `gorm:"-"                   json:"userPermissions"`
 	GroupPermissions []*GroupPermissionValue `gorm:"-"                   json:"groupPermissions"`
 	Text             *string                 `gorm:"-"                   json:"text,omitempty"`
+	Summary          *string                 `gorm:"-"                   json:"summary,omitempty"`
 	SnapshotID       *string                 `gorm:"column:snapshot_id"  json:"snapshotId,omitempty"`
 	CreateTime       string                  `gorm:"column:create_time"  json:"createTime"`
 	UpdateTime       *string                 `gorm:"column:update_time"  json:"updateTime,omitempty"`
@@ -91,6 +92,10 @@ func (f *fileEntity) GetText() *string {
 	return f.Text
 }
 
+func (f *fileEntity) GetSummary() *string {
+	return f.Summary
+}
+
 func (f *fileEntity) GetSnapshotID() *string {
 	return f.SnapshotID
 }
@@ -125,6 +130,10 @@ func (f *fileEntity) SetName(name string) {
 
 func (f *fileEntity) SetText(text *string) {
 	f.Text = text
+}
+
+func (f *fileEntity) SetSummary(summary *string) {
+	f.Summary = summary
 }
 
 func (f *fileEntity) SetSnapshotID(snapshotID *string) {

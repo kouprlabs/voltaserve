@@ -36,6 +36,7 @@ type fileEntity struct {
 	Type        string  `json:"type"`
 	ParentID    *string `json:"parentId,omitempty"`
 	Text        *string `json:"text,omitempty"`
+	Summary     *string `json:"summary,omitempty"`
 	SnapshotID  *string `json:"snapshotId,omitempty"`
 	CreateTime  string  `json:"createTime"`
 	UpdateTime  *string `json:"updateTime,omitempty"`
@@ -58,7 +59,7 @@ func (s *FileSearch) Index(files []model.File) (err error) {
 	if len(files) == 0 {
 		return nil
 	}
-	if err = s.populateTextField(files); err != nil {
+	if err = s.populateTextAndSummaryFields(files); err != nil {
 		return err
 	}
 	var models []infra.SearchModel
@@ -75,7 +76,7 @@ func (s *FileSearch) Update(files []model.File) (err error) {
 	if len(files) == 0 {
 		return nil
 	}
-	if err = s.populateTextField(files); err != nil {
+	if err = s.populateTextAndSummaryFields(files); err != nil {
 		return err
 	}
 	var models []infra.SearchModel
@@ -119,7 +120,7 @@ func (s *FileSearch) Query(query string, opts infra.SearchQueryOptions) ([]model
 	return res, nil
 }
 
-func (s *FileSearch) populateTextField(files []model.File) error {
+func (s *FileSearch) populateTextAndSummaryFields(files []model.File) error {
 	for _, f := range files {
 		if f.GetType() == model.FileTypeFile && f.GetSnapshotID() != nil {
 			snapshot, err := s.snapshotRepo.Find(*f.GetSnapshotID())
@@ -133,6 +134,7 @@ func (s *FileSearch) populateTextField(files []model.File) error {
 				}
 				f.SetText(&text)
 			}
+			f.SetSummary(snapshot.GetSummary())
 		}
 	}
 	return nil
@@ -146,6 +148,7 @@ func (s *FileSearch) mapEntity(file model.File) *fileEntity {
 		Type:        file.GetType(),
 		ParentID:    file.GetParentID(),
 		Text:        file.GetText(),
+		Summary:     file.GetSummary(),
 		SnapshotID:  file.GetSnapshotID(),
 		CreateTime:  file.GetCreateTime(),
 		UpdateTime:  file.GetUpdateTime(),
