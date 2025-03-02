@@ -141,8 +141,7 @@ func (p *pdfPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOpti
 	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMIMEFromPath(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options:   opts,
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
 		Fields:    []string{model.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
 	}); err != nil {
@@ -163,9 +162,8 @@ func (p *pdfPipeline) extractText(inputPath string, opts dto.PipelineRunOptions)
 	if err := p.s3.PutText(key, *text, "text/plain", opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldText},
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldText},
 		Text: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    key,
@@ -184,9 +182,8 @@ func (p *pdfPipeline) patchSnapshotPreviewField(inputPath string, document *mode
 	}
 	if filepath.Ext(inputPath) == filepath.Ext(opts.Key) {
 		// The original is a PDF file
-		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-			Options: opts,
-			Fields:  []string{model.SnapshotFieldPreview},
+		if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+			Fields: []string{model.SnapshotFieldPreview},
 			Preview: &model.S3Object{
 				Bucket:   opts.Bucket,
 				Key:      opts.Key,
@@ -198,9 +195,8 @@ func (p *pdfPipeline) patchSnapshotPreviewField(inputPath string, document *mode
 		}
 	} else {
 		// The original is an office file
-		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-			Options: opts,
-			Fields:  []string{model.SnapshotFieldPreview},
+		if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+			Fields: []string{model.SnapshotFieldPreview},
 			Preview: &model.S3Object{
 				Bucket:   opts.Bucket,
 				Key:      filepath.FromSlash(opts.SnapshotID + "/preview" + filepath.Ext(inputPath)),

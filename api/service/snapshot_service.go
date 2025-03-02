@@ -205,9 +205,6 @@ func (svc *SnapshotService) Detach(id string, userID string) (*dto.File, error) 
 }
 
 func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dto.Snapshot, error) {
-	if id != opts.Options.SnapshotID {
-		return nil, errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
-	}
 	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
 		Original:  opts.Original,
 		Fields:    opts.Fields,

@@ -85,9 +85,8 @@ func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts dto.Pipel
 	}
 	if filepath.Ext(inputPath) == filepath.Ext(opts.Key) {
 		// The original is a .glb
-		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-			Options: opts,
-			Fields:  []string{model.SnapshotFieldPreview},
+		if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+			Fields: []string{model.SnapshotFieldPreview},
 			Preview: &model.S3Object{
 				Bucket: opts.Bucket,
 				Key:    opts.Key,
@@ -98,9 +97,8 @@ func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts dto.Pipel
 		}
 	} else {
 		// The original is likely an .zip glTF file
-		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-			Options: opts,
-			Fields:  []string{model.SnapshotFieldPreview},
+		if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+			Fields: []string{model.SnapshotFieldPreview},
 			Preview: &model.S3Object{
 				Bucket: opts.Bucket,
 				Key:    filepath.FromSlash(opts.SnapshotID + "/preview" + filepath.Ext(inputPath)),
@@ -140,8 +138,7 @@ func (p *glbPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOpti
 		if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMIMEFromPath(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 			return err
 		}
-		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-			Options:   opts,
+		if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
 			Fields:    []string{model.SnapshotFieldThumbnail},
 			Thumbnail: s3Object,
 		}); err != nil {

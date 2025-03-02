@@ -96,9 +96,8 @@ func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	}); err != nil {
 		return err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldMosaic},
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldMosaic},
 		Mosaic: &model.S3Object{
 			Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic"),
 			Bucket: opts.Bucket,

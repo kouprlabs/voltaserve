@@ -33,18 +33,14 @@ func NewSnapshotClient(url string, apiKey string) *SnapshotClient {
 	}
 }
 
-func (cl *SnapshotClient) Patch(opts dto.SnapshotPatchOptions) (*dto.Snapshot, error) {
+func (cl *SnapshotClient) Patch(id string, opts dto.SnapshotPatchOptions) (*dto.Snapshot, error) {
 	b, err := json.Marshal(opts)
 	if err != nil {
 		return nil, err
 	}
 	req, err := http.NewRequest(
 		"PATCH",
-		fmt.Sprintf("%s/v3/snapshots/%s?api_key=%s",
-			cl.url,
-			opts.Options.SnapshotID,
-			cl.apiKey,
-		),
+		fmt.Sprintf("%s/v3/snapshots/%s?api_key=%s", cl.url, id, cl.apiKey),
 		bytes.NewBuffer(b),
 	)
 	if err != nil {

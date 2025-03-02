@@ -147,10 +147,9 @@ func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptio
 		if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMIMEFromPath(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 			return nil, err
 		}
-		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-			Options: opts,
-			Fields:  []string{model.SnapshotFieldOCR},
-			OCR:     &s3Object,
+		if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+			Fields: []string{model.SnapshotFieldOCR},
+			OCR:    &s3Object,
 		}); err != nil {
 			return nil, err
 		}
@@ -173,10 +172,9 @@ func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptio
 	if err := p.s3.PutText(s3Object.Key, *text, "text/plain", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldText},
-		Text:    &s3Object,
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldText},
+		Text:   &s3Object,
 	}); err != nil {
 		return nil, err
 	}
@@ -210,8 +208,7 @@ func (p *entityPipeline) collectEntities(text string, opts dto.PipelineRunOption
 	if err := p.s3.PutText(s3Object.Key, content, "application/json", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options:  opts,
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
 		Fields:   []string{model.SnapshotFieldEntities},
 		Entities: &s3Object,
 	}); err != nil {

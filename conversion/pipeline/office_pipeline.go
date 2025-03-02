@@ -110,9 +110,8 @@ func (p *officePipeline) convertToPDF(inputPath string, opts dto.PipelineRunOpti
 	if err := p.s3.PutFile(pdfKey, pdfPath, helper.DetectMIMEFromPath(pdfPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{model.SnapshotFieldPreview},
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldPreview},
 		Preview: &model.S3Object{
 			Bucket: opts.Bucket,
 			Key:    pdfKey,
