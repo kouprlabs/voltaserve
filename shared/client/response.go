@@ -20,14 +20,14 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 )
 
-func JsonResponseOrError(resp *http.Response) ([]byte, error) {
-	contentType := resp.Header.Get("Content-Type")
+func JsonResponseOrError(response *http.Response) ([]byte, error) {
+	contentType := response.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
-		b, err := io.ReadAll(resp.Body)
+		b, err := io.ReadAll(response.Body)
 		if err != nil {
 			return nil, err
 		}
-		if resp.StatusCode > 299 {
+		if response.StatusCode > 299 {
 			var errorResponse errorpkg.ErrorResponse
 			if err := json.Unmarshal(b, &errorResponse); err != nil {
 				return nil, err
@@ -41,14 +41,14 @@ func JsonResponseOrError(resp *http.Response) ([]byte, error) {
 	}
 }
 
-func TextResponseOrError(resp *http.Response) ([]byte, error) {
-	contentType := resp.Header.Get("Content-Type")
+func TextResponseOrError(response *http.Response) ([]byte, error) {
+	contentType := response.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "text/plain") {
-		b, err := io.ReadAll(resp.Body)
+		b, err := io.ReadAll(response.Body)
 		if err != nil {
 			return nil, err
 		}
-		if resp.StatusCode > 299 {
+		if response.StatusCode > 299 {
 			var errorResponse errorpkg.ErrorResponse
 			if err := json.Unmarshal(b, &errorResponse); err != nil {
 				return nil, err
@@ -62,12 +62,12 @@ func TextResponseOrError(resp *http.Response) ([]byte, error) {
 	}
 }
 
-func ByteResponseOrError(resp *http.Response) ([]byte, error) {
-	b, err := io.ReadAll(resp.Body)
+func ByteResponseOrError(response *http.Response) ([]byte, error) {
+	b, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode > 299 {
+	if response.StatusCode > 299 {
 		var errorResponse errorpkg.ErrorResponse
 		if err := json.Unmarshal(b, &errorResponse); err != nil {
 			return nil, err
@@ -78,9 +78,9 @@ func ByteResponseOrError(resp *http.Response) ([]byte, error) {
 	}
 }
 
-func ByteResponseWithWriterOrError(resp *http.Response, w io.Writer) error {
-	if resp.StatusCode > 299 {
-		b, err := io.ReadAll(resp.Body)
+func ByteResponseWithWriterOrError(response *http.Response, w io.Writer) error {
+	if response.StatusCode > 299 {
+		b, err := io.ReadAll(response.Body)
 		if err != nil {
 			return err
 		}
@@ -90,16 +90,16 @@ func ByteResponseWithWriterOrError(resp *http.Response, w io.Writer) error {
 		}
 		return &errorResponse
 	} else {
-		if _, err := io.Copy(w, resp.Body); err != nil {
+		if _, err := io.Copy(w, response.Body); err != nil {
 			return err
 		}
 		return nil
 	}
 }
 
-func SuccessfulResponseOrError(resp *http.Response) error {
-	if resp.StatusCode > 299 {
-		b, err := io.ReadAll(resp.Body)
+func SuccessfulResponseOrError(response *http.Response) error {
+	if response.StatusCode > 299 {
+		b, err := io.ReadAll(response.Body)
 		if err != nil {
 			return err
 		}
