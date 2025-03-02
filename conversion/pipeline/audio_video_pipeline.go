@@ -64,30 +64,36 @@ func (p *audioVideoPipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Creating thumbnail."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Creating thumbnail."),
+		}); err != nil {
+			return err
+		}
 	}
 	// Here we intentionally ignore the error, as the media file may contain just audio
 	// Additionally, we don't consider failing to create the thumbnail an error
 	_ = p.patchThumbnail(inputPath, opts)
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Saving preview."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Saving preview."),
+		}); err != nil {
+			return err
+		}
 	}
 	if err := p.patchPreviewWithOriginal(inputPath, opts); err != nil {
 		return err
 	}
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
-		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(model.TaskStatusSuccess),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
+			Name:   helper.ToPtr("Done."),
+			Status: helper.ToPtr(model.TaskStatusSuccess),
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
 }

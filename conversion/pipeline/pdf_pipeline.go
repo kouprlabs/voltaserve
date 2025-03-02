@@ -79,34 +79,40 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 	if err := p.patchPreviewWithOriginal(inputPath, &document, opts); err != nil {
 		return err
 	}
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Creating thumbnail."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Creating thumbnail."),
+		}); err != nil {
+			return err
+		}
 	}
 	_ = p.patchThumbnail(inputPath, opts)
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Saving preview."),
-	}); err != nil {
-		return err
-	}
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Extracting text."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Saving preview."),
+		}); err != nil {
+			return err
+		}
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Extracting text."),
+		}); err != nil {
+			return err
+		}
 	}
 	if err := p.patchText(inputPath, opts); err != nil {
 		return err
 	}
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
-		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(model.TaskStatusSuccess),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
+			Name:   helper.ToPtr("Done."),
+			Status: helper.ToPtr(model.TaskStatusSuccess),
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -68,11 +68,13 @@ func (p *imagePipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Measuring image dimensions."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Measuring image dimensions."),
+		}); err != nil {
+			return err
+		}
 	}
 	imageProps, err := p.patchOriginalWithImageDimensions(inputPath, opts)
 	if err != nil {
@@ -80,11 +82,13 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunO
 	}
 	var imagePath string
 	if p.fileIdent.IsTIFF(inputPath) {
-		if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-			Fields: []string{model.TaskFieldName},
-			Name:   helper.ToPtr("Converting TIFF image to JPEG format."),
-		}); err != nil {
-			return err
+		if opts.TaskID != nil {
+			if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+				Fields: []string{model.TaskFieldName},
+				Name:   helper.ToPtr("Converting TIFF image to JPEG format."),
+			}); err != nil {
+				return err
+			}
 		}
 		jpegPath, err := p.patchPreviewWithJPEG(inputPath, *imageProps, opts)
 		if err != nil {
@@ -104,22 +108,26 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunO
 			logger.GetLogger().Error(err)
 		}
 	}(imagePath)
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName},
-		Name:   helper.ToPtr("Creating thumbnail."),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName},
+			Name:   helper.ToPtr("Creating thumbnail."),
+		}); err != nil {
+			return err
+		}
 	}
 	_ = p.patchThumbnail(imagePath, opts)
 	if opts.Intent != nil && *opts.Intent == model.SnapshotIntentDocument {
 		_ = p.patchText(imagePath, opts)
 	}
-	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
-		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(model.TaskStatusSuccess),
-	}); err != nil {
-		return err
+	if opts.TaskID != nil {
+		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+			Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
+			Name:   helper.ToPtr("Done."),
+			Status: helper.ToPtr(model.TaskStatusSuccess),
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
 }

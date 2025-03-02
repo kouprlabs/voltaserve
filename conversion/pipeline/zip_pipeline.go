@@ -71,11 +71,13 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 		return err
 	}
 	if isGLTF {
-		if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-			Fields: []string{model.TaskFieldName},
-			Name:   helper.ToPtr("Extracting ZIP."),
-		}); err != nil {
-			return err
+		if opts.TaskID != nil {
+			if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+				Fields: []string{model.TaskFieldName},
+				Name:   helper.ToPtr("Extracting ZIP."),
+			}); err != nil {
+				return err
+			}
 		}
 		tmpDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 		defer func(path string) {
@@ -94,11 +96,13 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 			// Do nothing, treat it as a ZIP file
 			return nil
 		}
-		if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-			Fields: []string{model.TaskFieldName},
-			Name:   helper.ToPtr("Converting to GLB."),
-		}); err != nil {
-			return err
+		if opts.TaskID != nil {
+			if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
+				Fields: []string{model.TaskFieldName},
+				Name:   helper.ToPtr("Converting to GLB."),
+			}); err != nil {
+				return err
+			}
 		}
 		glbPath, err := p.patchPreviewWithGLB(*gltfPath, opts)
 		if err != nil {
