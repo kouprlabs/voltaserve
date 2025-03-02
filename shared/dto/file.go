@@ -10,7 +10,9 @@
 
 package dto
 
-import "slices"
+import (
+	"slices"
+)
 
 const (
 	FileSortByName         = "name"
@@ -54,14 +56,6 @@ type FileList struct {
 	Page          uint64     `json:"page"`
 	Size          uint64     `json:"size"`
 	Query         *FileQuery `json:"query,omitempty"`
-}
-
-type FileListOptions struct {
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-	Query     *FileQuery
 }
 
 type FileProbe struct {

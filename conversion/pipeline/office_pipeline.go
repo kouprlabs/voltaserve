@@ -67,7 +67,7 @@ func (p *officePipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *officePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Converting to PDF."),
 	}); err != nil {
@@ -110,7 +110,7 @@ func (p *officePipeline) convertToPDF(inputPath string, opts dto.PipelineRunOpti
 	if err := p.s3.PutFile(pdfKey, pdfPath, helper.DetectMimeFromFile(pdfPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{model.SnapshotFieldPreview},
 		Preview: &model.S3Object{

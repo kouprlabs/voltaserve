@@ -20,7 +20,6 @@ import (
 	"os"
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
-	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/logger"
 )
 
@@ -83,18 +82,15 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*dto.MosaicMetadata, e
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
-	}
-	b, err := io.ReadAll(resp.Body)
+	body, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
-	var res dto.MosaicMetadata
-	if err = json.Unmarshal(b, &res); err != nil {
+	var mosaicMetadata dto.MosaicMetadata
+	if err := json.Unmarshal(body, &mosaicMetadata); err != nil {
 		return nil, err
 	}
-	return &res, nil
+	return &mosaicMetadata, nil
 }
 
 type MosaicGetMetadataOptions struct {
@@ -112,23 +108,15 @@ func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*dto.MosaicM
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotFound {
-			return nil, errorpkg.NewMosaicNotFoundError(nil)
-		} else {
-			return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
-		}
-	}
-	b, err := io.ReadAll(resp.Body)
+	body, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
-	var res dto.MosaicMetadata
-	err = json.Unmarshal(b, &res)
-	if err != nil {
+	var mosaicMetadata dto.MosaicMetadata
+	if err := json.Unmarshal(body, &mosaicMetadata); err != nil {
 		return nil, err
 	}
-	return &res, nil
+	return &mosaicMetadata, nil
 }
 
 type MosaicDeleteOptions struct {
@@ -146,14 +134,7 @@ func (cl *MosaicClient) Delete(opts MosaicDeleteOptions) error {
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != http.StatusNoContent {
-		if resp.StatusCode == http.StatusNotFound {
-			return errorpkg.NewMosaicNotFoundError(nil)
-		} else {
-			return fmt.Errorf("request failed with status %d", resp.StatusCode)
-		}
-	}
-	return nil
+	return SuccessfulResponseOrError(resp)
 }
 
 type MosaicDownloadTileOptions struct {
@@ -165,7 +146,7 @@ type MosaicDownloadTileOptions struct {
 	Extension string `json:"extension"`
 }
 
-func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) (*bytes.Buffer, error) {
+func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) ([]byte, error) {
 	resp, err := http.Get(
 		fmt.Sprintf(
 			"%s/v3/mosaics/%s/%s/zoom_level/%d/row/%d/column/%d/extension/%s",
@@ -179,17 +160,5 @@ func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) (*byt
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotFound {
-			return nil, errorpkg.NewMosaicNotFoundError(nil)
-		} else {
-			return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
-		}
-	}
-	buf := &bytes.Buffer{}
-	_, err = io.Copy(buf, resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return buf, nil
+	return ByteResponseOrError(resp)
 }

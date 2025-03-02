@@ -43,9 +43,9 @@ func (cl *HealthClient) Get() (string, error) {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	body, err := io.ReadAll(resp.Body)
+	b, err := TextResponseOrError(resp)
 	if err != nil {
 		return "", err
 	}
-	return string(body), nil
+	return string(b), nil
 }

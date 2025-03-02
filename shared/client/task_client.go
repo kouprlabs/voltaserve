@@ -33,58 +33,70 @@ func NewTaskClient(url string, apiKey string) *TaskClient {
 	}
 }
 
-func (cl *TaskClient) Create(opts dto.TaskCreateOptions) error {
-	body, err := json.Marshal(opts)
+func (cl *TaskClient) Create(opts dto.TaskCreateOptions) (*dto.Task, error) {
+	b, err := json.Marshal(opts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req, err := http.NewRequest(
 		"POST",
 		fmt.Sprintf("%s/v3/tasks?api_key=%s", cl.url, cl.apiKey),
-		bytes.NewBuffer(body),
+		bytes.NewBuffer(b),
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	return nil
+	var task dto.Task
+	if err := json.Unmarshal(b, &task); err != nil {
+		return nil, err
+	}
+	return &task, nil
 }
 
-func (cl *TaskClient) Patch(id string, opts dto.TaskPatchOptions) error {
-	body, err := json.Marshal(opts)
+func (cl *TaskClient) Patch(id string, opts dto.TaskPatchOptions) (*dto.Task, error) {
+	b, err := json.Marshal(opts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req, err := http.NewRequest(
 		"PATCH",
 		fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.url, id, cl.apiKey),
-		bytes.NewBuffer(body),
+		bytes.NewBuffer(b),
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	return nil
+	b, err = JsonResponseOrError(resp)
+	if err != nil {
+		return nil, err
+	}
+	var task dto.Task
+	if err := json.Unmarshal(b, &task); err != nil {
+		return nil, err
+	}
+	return &task, nil
 }
 
 func (cl *TaskClient) Delete(id string) error {
@@ -102,10 +114,5 @@ func (cl *TaskClient) Delete(id string) error {
 	if err != nil {
 		return err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			logger.GetLogger().Error(err)
-		}
-	}(resp.Body)
-	return nil
+	return SuccessfulResponseOrError(resp)
 }

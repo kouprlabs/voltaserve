@@ -175,7 +175,7 @@ func (s *TaskServiceSuite) TestList() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewTaskService().List(dto.TaskListOptions{
+	list, err := service.NewTaskService().List(service.TaskListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -200,7 +200,7 @@ func (s *TaskServiceSuite) TestList_Paginate() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewTaskService().List(dto.TaskListOptions{
+	list, err := service.NewTaskService().List(service.TaskListOptions{
 		Page: 1,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -212,7 +212,7 @@ func (s *TaskServiceSuite) TestList_Paginate() {
 	s.Equal("task A", list.Data[0].Name)
 	s.Equal("task B", list.Data[1].Name)
 
-	list, err = service.NewTaskService().List(dto.TaskListOptions{
+	list, err = service.NewTaskService().List(service.TaskListOptions{
 		Page: 2,
 		Size: 2,
 	}, s.users[0].GetID())
@@ -235,7 +235,7 @@ func (s *TaskServiceSuite) TestList_SortByStatusDescending() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewTaskService().List(dto.TaskListOptions{
+	list, err := service.NewTaskService().List(service.TaskListOptions{
 		Page:      1,
 		Size:      3,
 		SortBy:    dto.TaskSortByStatus,
@@ -258,7 +258,7 @@ func (s *TaskServiceSuite) TestList_Query() {
 		s.Require().NoError(err)
 	}
 
-	list, err := service.NewTaskService().List(dto.TaskListOptions{
+	list, err := service.NewTaskService().List(service.TaskListOptions{
 		Query: "world",
 		Page:  1,
 		Size:  10,
@@ -282,7 +282,7 @@ func (s *TaskServiceSuite) TestProbe() {
 		s.Require().NoError(err)
 	}
 
-	probe, err := service.NewTaskService().Probe(dto.TaskListOptions{
+	probe, err := service.NewTaskService().Probe(service.TaskListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())
@@ -352,7 +352,7 @@ func (s *TaskServiceSuite) TestDismissAll() {
 	s.Len(dismissAllResult.Succeeded, 2)
 	s.Empty(dismissAllResult.Failed)
 
-	list, err := service.NewTaskService().List(dto.TaskListOptions{
+	list, err := service.NewTaskService().List(service.TaskListOptions{
 		Page: 1,
 		Size: 10,
 	}, s.users[0].GetID())

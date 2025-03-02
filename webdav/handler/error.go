@@ -30,7 +30,7 @@ func handleError(err error, w http.ResponseWriter) {
 		}
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
-		if _, err := w.Write([]byte("Internal Server Error")); err != nil {
+		if _, err := w.Write([]byte("Internal server error.")); err != nil {
 			return
 		}
 	}

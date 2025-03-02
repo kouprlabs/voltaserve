@@ -205,7 +205,7 @@ func (r *InvitationRouter) ProbeOutgoing(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*dto.InvitationListOptions, error) {
+func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*service.InvitationListOptions, error) {
 	orgID := c.Query("organization_id")
 	if orgID == "" {
 		return nil, errorpkg.NewMissingQueryParamError("organization_id")
@@ -240,7 +240,7 @@ func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*dto.Invi
 	if !r.invitationSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	return &dto.InvitationListOptions{
+	return &service.InvitationListOptions{
 		Page:      page,
 		Size:      size,
 		SortBy:    sortBy,
@@ -328,7 +328,7 @@ func (r *InvitationRouter) Decline(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-func (r *InvitationRouter) parseIncomingListQueryParams(c *fiber.Ctx) (*dto.InvitationListOptions, error) {
+func (r *InvitationRouter) parseIncomingListQueryParams(c *fiber.Ctx) (*service.InvitationListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -359,7 +359,7 @@ func (r *InvitationRouter) parseIncomingListQueryParams(c *fiber.Ctx) (*dto.Invi
 	if !r.invitationSvc.IsValidSortOrder(sortOrder) {
 		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	return &dto.InvitationListOptions{
+	return &service.InvitationListOptions{
 		Page:      page,
 		Size:      size,
 		SortBy:    sortBy,

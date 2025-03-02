@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package client
+package webhook
 
 import (
 	"bytes"
@@ -17,57 +17,50 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
-	"github.com/kouprlabs/voltaserve/shared/logger"
+	"github.com/kouprlabs/voltaserve/shared/model"
+
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/logger"
 )
 
-type SnapshotClient struct {
-	url    string
-	apiKey string
+type SnapshotWebhook struct {
+	config *config.Config
 }
 
-func NewSnapshotClient(url string, apiKey string) *SnapshotClient {
-	return &SnapshotClient{
-		url:    url,
-		apiKey: apiKey,
+func NewSnapshotWebhook() *SnapshotWebhook {
+	return &SnapshotWebhook{
+		config: config.GetConfig(),
 	}
 }
 
-func (cl *SnapshotClient) Patch(opts dto.SnapshotPatchOptions) (*dto.Snapshot, error) {
-	b, err := json.Marshal(opts)
+func (wh *SnapshotWebhook) Call(snapshot model.Snapshot, eventType string) error {
+	body, err := json.Marshal(dto.SnapshotWebhookOptions{
+		EventType: eventType,
+		Snapshot:  snapshot,
+	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	req, err := http.NewRequest(
-		"PATCH",
-		fmt.Sprintf("%s/v3/snapshots/%s?api_key=%s",
-			cl.url,
-			opts.Options.SnapshotID,
-			cl.apiKey,
-		),
-		bytes.NewBuffer(b),
+		"POST",
+		fmt.Sprintf("%s?api_key=%s", config.GetConfig().SnapshotWebhook, wh.config.Security.APIKey),
+		bytes.NewBuffer(body),
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	cl := &http.Client{}
+	resp, err := cl.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	b, err = JsonResponseOrError(resp)
-	if err != nil {
-		return nil, err
-	}
-	var snapshot dto.Snapshot
-	if err := json.Unmarshal(b, &snapshot); err != nil {
-		return nil, err
-	}
-	return &snapshot, nil
+	return client.SuccessfulResponseOrError(resp)
 }

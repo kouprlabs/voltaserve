@@ -99,7 +99,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		handleError(err, w)
 		return
 	}
-	s3Reference := client.S3Reference{
+	s3Reference := model.S3Reference{
 		Bucket:      bucket,
 		Key:         key,
 		SnapshotID:  snapshotID,

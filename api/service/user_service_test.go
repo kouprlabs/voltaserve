@@ -53,7 +53,7 @@ func (s *UserServiceSuite) SetupTest() {
 func (s *UserServiceSuite) TestList_GroupMembers() {
 	group := s.createGroup()
 
-	list, err := service.NewUserService().List(dto.UserListOptions{
+	list, err := service.NewUserService().List(service.UserListOptions{
 		Page:    1,
 		Size:    10,
 		GroupID: group.ID,
@@ -73,7 +73,7 @@ func (s *UserServiceSuite) TestList_GroupMembers_MissingGroupPermission() {
 
 	s.revokeUserPermissionForGroup(group, s.users[0])
 
-	_, err := service.NewUserService().List(dto.UserListOptions{
+	_, err := service.NewUserService().List(service.UserListOptions{
 		Page:    1,
 		Size:    10,
 		GroupID: group.ID,
@@ -85,7 +85,7 @@ func (s *UserServiceSuite) TestList_GroupMembers_MissingGroupPermission() {
 func (s *UserServiceSuite) TestList_GroupMembersPaginate() {
 	group := s.createGroup()
 
-	list, err := service.NewUserService().List(dto.UserListOptions{
+	list, err := service.NewUserService().List(service.UserListOptions{
 		Page:    1,
 		Size:    2,
 		GroupID: group.ID,
@@ -98,7 +98,7 @@ func (s *UserServiceSuite) TestList_GroupMembersPaginate() {
 	s.Equal(s.users[0].GetID(), list.Data[0].ID)
 	s.Equal(s.users[1].GetID(), list.Data[1].ID)
 
-	list, err = service.NewUserService().List(dto.UserListOptions{
+	list, err = service.NewUserService().List(service.UserListOptions{
 		Page:    2,
 		Size:    2,
 		GroupID: group.ID,
@@ -114,7 +114,7 @@ func (s *UserServiceSuite) TestList_GroupMembersPaginate() {
 func (s *UserServiceSuite) TestList_GroupMembersSortByEmailDescending() {
 	group := s.createGroup()
 
-	list, err := service.NewUserService().List(dto.UserListOptions{
+	list, err := service.NewUserService().List(service.UserListOptions{
 		Page:      1,
 		Size:      3,
 		GroupID:   group.ID,
@@ -130,7 +130,7 @@ func (s *UserServiceSuite) TestList_GroupMembersSortByEmailDescending() {
 func (s *UserServiceSuite) TestList_GroupMembersQuery() {
 	group := s.createGroup()
 
-	list, err := service.NewUserService().List(dto.UserListOptions{
+	list, err := service.NewUserService().List(service.UserListOptions{
 		Page:    1,
 		Size:    10,
 		GroupID: group.ID,
@@ -147,7 +147,7 @@ func (s *UserServiceSuite) TestList_GroupMembersQuery() {
 func (s *UserServiceSuite) TestList_OrganizationMembers() {
 	org := s.createOrganization()
 
-	list, err := service.NewUserService().List(dto.UserListOptions{
+	list, err := service.NewUserService().List(service.UserListOptions{
 		Page:           1,
 		Size:           10,
 		OrganizationID: org.ID,
@@ -167,7 +167,7 @@ func (s *UserServiceSuite) TestList_OrganizationMembers_MissingOrganizationPermi
 
 	s.revokeUserPermissionForOrganization(org, s.users[0])
 
-	_, err := service.NewUserService().List(dto.UserListOptions{
+	_, err := service.NewUserService().List(service.UserListOptions{
 		Page:           1,
 		Size:           10,
 		OrganizationID: org.ID,
@@ -179,7 +179,7 @@ func (s *UserServiceSuite) TestList_OrganizationMembers_MissingOrganizationPermi
 func (s *UserServiceSuite) TestList_OrganizationMembersPaginate() {
 	org := s.createOrganization()
 
-	list, err := service.NewUserService().List(dto.UserListOptions{
+	list, err := service.NewUserService().List(service.UserListOptions{
 		Page:           1,
 		Size:           2,
 		OrganizationID: org.ID,
@@ -192,7 +192,7 @@ func (s *UserServiceSuite) TestList_OrganizationMembersPaginate() {
 	s.Equal(s.users[0].GetID(), list.Data[0].ID)
 	s.Equal(s.users[1].GetID(), list.Data[1].ID)
 
-	list, err = service.NewUserService().List(dto.UserListOptions{
+	list, err = service.NewUserService().List(service.UserListOptions{
 		Page:           2,
 		Size:           2,
 		OrganizationID: org.ID,
@@ -208,7 +208,7 @@ func (s *UserServiceSuite) TestList_OrganizationMembersPaginate() {
 func (s *UserServiceSuite) TestList_OrganizationMembersSortByEmailDescending() {
 	org := s.createOrganization()
 
-	list, err := service.NewUserService().List(dto.UserListOptions{
+	list, err := service.NewUserService().List(service.UserListOptions{
 		Page:           1,
 		Size:           3,
 		OrganizationID: org.ID,
@@ -224,7 +224,7 @@ func (s *UserServiceSuite) TestList_OrganizationMembersSortByEmailDescending() {
 func (s *UserServiceSuite) TestList_OrganizationMembersQuery() {
 	org := s.createOrganization()
 
-	list, err := service.NewUserService().List(dto.UserListOptions{
+	list, err := service.NewUserService().List(service.UserListOptions{
 		Page:           1,
 		Size:           10,
 		OrganizationID: org.ID,
@@ -241,7 +241,7 @@ func (s *UserServiceSuite) TestList_OrganizationMembersQuery() {
 func (s *UserServiceSuite) TestProbe_GroupMembers() {
 	group := s.createGroup()
 
-	probe, err := service.NewUserService().Probe(dto.UserListOptions{
+	probe, err := service.NewUserService().Probe(service.UserListOptions{
 		Page:    1,
 		Size:    10,
 		GroupID: group.ID,
@@ -256,7 +256,7 @@ func (s *UserServiceSuite) TestProbe_GroupMembers_MissingGroupPermission() {
 
 	s.revokeUserPermissionForGroup(group, s.users[0])
 
-	_, err := service.NewUserService().Probe(dto.UserListOptions{
+	_, err := service.NewUserService().Probe(service.UserListOptions{
 		Page:    1,
 		Size:    10,
 		GroupID: group.ID,
@@ -268,7 +268,7 @@ func (s *UserServiceSuite) TestProbe_GroupMembers_MissingGroupPermission() {
 func (s *UserServiceSuite) TestProbe_OrganizationMembers() {
 	org := s.createOrganization()
 
-	probe, err := service.NewUserService().Probe(dto.UserListOptions{
+	probe, err := service.NewUserService().Probe(service.UserListOptions{
 		Page:           1,
 		Size:           10,
 		OrganizationID: org.ID,
@@ -283,7 +283,7 @@ func (s *UserServiceSuite) TestProbe_OrganizationMembers_MissingOrganizationPerm
 
 	s.revokeUserPermissionForOrganization(org, s.users[0])
 
-	_, err := service.NewUserService().Probe(dto.UserListOptions{
+	_, err := service.NewUserService().Probe(service.UserListOptions{
 		Page:           1,
 		Size:           10,
 		OrganizationID: org.ID,

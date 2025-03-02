@@ -71,7 +71,7 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 		return err
 	}
 	if isGLTF {
-		if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 			Fields: []string{model.TaskFieldName},
 			Name:   helper.ToPtr("Extracting ZIP."),
 		}); err != nil {
@@ -94,7 +94,7 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 			// Do nothing, treat it as a ZIP file
 			return nil
 		}
-		if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 			Fields: []string{model.TaskFieldName},
 			Name:   helper.ToPtr("Converting to GLB."),
 		}); err != nil {
@@ -132,7 +132,7 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts dto.PipelineRunOptions
 	if err := p.s3.PutFile(glbKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{model.SnapshotFieldPreview},
 		Preview: &model.S3Object{

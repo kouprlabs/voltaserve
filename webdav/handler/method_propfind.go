@@ -66,8 +66,9 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 			func() int64 {
 				if file.Type == model.FileTypeFile && file.Snapshot != nil && file.Snapshot.Original != nil {
 					return file.Snapshot.Original.Size
+				} else {
+					return 0
 				}
-				return 0
 			}(),
 			helper.ToUTCString(&file.CreateTime),
 			helper.ToUTCString(file.UpdateTime),
@@ -126,8 +127,9 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 				func() int64 {
 					if item.Type == model.FileTypeFile && item.Snapshot != nil && item.Snapshot.Original != nil {
 						return item.Snapshot.Original.Size
+					} else {
+						return 0
 					}
-					return 0
 				}(),
 				helper.ToUTCString(item.UpdateTime),
 				helper.ToUTCString(&item.CreateTime),

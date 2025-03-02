@@ -119,7 +119,16 @@ func (svc *GroupService) Find(id string, userID string) (*dto.Group, error) {
 	return res, nil
 }
 
-func (svc *GroupService) List(opts dto.GroupListOptions, userID string) (*dto.GroupList, error) {
+type GroupListOptions struct {
+	Query          string
+	OrganizationID string
+	Page           uint64
+	Size           uint64
+	SortBy         string
+	SortOrder      string
+}
+
+func (svc *GroupService) List(opts GroupListOptions, userID string) (*dto.GroupList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -145,7 +154,7 @@ func (svc *GroupService) List(opts dto.GroupListOptions, userID string) (*dto.Gr
 	}, nil
 }
 
-func (svc *GroupService) Probe(opts dto.GroupListOptions, userID string) (*dto.GroupProbe, error) {
+func (svc *GroupService) Probe(opts GroupListOptions, userID string) (*dto.GroupProbe, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -274,7 +283,7 @@ func (svc *GroupService) checkUserIsMemberOfOrganization(userID string, organiza
 	return nil
 }
 
-func (svc *GroupService) findAll(opts dto.GroupListOptions, userID string) ([]model.Group, error) {
+func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.Group, error) {
 	var res []model.Group
 	var err error
 	if opts.Query == "" {
@@ -291,7 +300,7 @@ func (svc *GroupService) findAll(opts dto.GroupListOptions, userID string) ([]mo
 	return res, nil
 }
 
-func (svc *GroupService) load(opts dto.GroupListOptions, userID string) ([]model.Group, error) {
+func (svc *GroupService) load(opts GroupListOptions, userID string) ([]model.Group, error) {
 	var res []model.Group
 	if opts.OrganizationID == "" {
 		ids, err := svc.groupRepo.FindIDs()
@@ -315,7 +324,7 @@ func (svc *GroupService) load(opts dto.GroupListOptions, userID string) ([]model
 	return res, nil
 }
 
-func (svc *GroupService) search(opts dto.GroupListOptions, userID string) ([]model.Group, error) {
+func (svc *GroupService) search(opts GroupListOptions, userID string) ([]model.Group, error) {
 	var res []model.Group
 	count, err := svc.groupRepo.Count()
 	if err != nil {

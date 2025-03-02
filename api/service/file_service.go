@@ -36,6 +36,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
+	"github.com/kouprlabs/voltaserve/api/webhook"
 )
 
 type FileService struct {
@@ -100,11 +101,19 @@ func (svc *FileService) GetPathStringWithoutWorkspace(files []*dto.File) string 
 	return svc.fileFetch.getPathStringWithoutWorkspace(files)
 }
 
-func (svc *FileService) Probe(id string, opts dto.FileListOptions, userID string) (*dto.FileProbe, error) {
+type FileListOptions struct {
+	Page      uint64
+	Size      uint64
+	SortBy    string
+	SortOrder string
+	Query     *dto.FileQuery
+}
+
+func (svc *FileService) Probe(id string, opts FileListOptions, userID string) (*dto.FileProbe, error) {
 	return svc.fileList.probe(id, opts, userID)
 }
 
-func (svc *FileService) List(id string, opts dto.FileListOptions, userID string) (*dto.FileList, error) {
+func (svc *FileService) List(id string, opts FileListOptions, userID string) (*dto.FileList, error) {
 	return svc.fileList.list(id, opts, userID)
 }
 
@@ -678,7 +687,7 @@ func newFileList() *fileList {
 	}
 }
 
-func (svc *fileList) probe(id string, opts dto.FileListOptions, userID string) (*dto.FileProbe, error) {
+func (svc *fileList) probe(id string, opts FileListOptions, userID string) (*dto.FileProbe, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -704,7 +713,7 @@ func (svc *fileList) probe(id string, opts dto.FileListOptions, userID string) (
 	}, nil
 }
 
-func (svc *fileList) list(id string, opts dto.FileListOptions, userID string) (*dto.FileList, error) {
+func (svc *fileList) list(id string, opts FileListOptions, userID string) (*dto.FileList, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -788,7 +797,7 @@ func (svc *fileList) getChildren(id string) ([]model.File, error) {
 	return res, nil
 }
 
-func (svc *fileList) createList(data []model.File, parent model.File, opts dto.FileListOptions, userID string) (*dto.FileList, error) {
+func (svc *fileList) createList(data []model.File, parent model.File, opts FileListOptions, userID string) (*dto.FileList, error) {
 	var filtered []model.File
 	var err error
 	if opts.Query != nil {
@@ -2134,35 +2143,39 @@ func (svc *fileReprocess) runPipeline(file model.File, snapshot model.Snapshot, 
 }
 
 type fileStore struct {
-	fileCache      *cache.FileCache
-	fileCoreSvc    *fileCoreService
-	fileMapper     *fileMapper
-	workspaceCache *cache.WorkspaceCache
-	snapshotRepo   *repo.SnapshotRepo
-	snapshotCache  *cache.SnapshotCache
-	snapshotSvc    *SnapshotService
-	taskSvc        *TaskService
-	fileIdent      *infra.FileIdentifier
-	s3             infra.S3Manager
-	pipelineClient client.PipelineClient
+	fileCache       *cache.FileCache
+	fileCoreSvc     *fileCoreService
+	fileMapper      *fileMapper
+	workspaceCache  *cache.WorkspaceCache
+	snapshotRepo    *repo.SnapshotRepo
+	snapshotCache   *cache.SnapshotCache
+	snapshotSvc     *SnapshotService
+	snapshotWebhook *webhook.SnapshotWebhook
+	taskSvc         *TaskService
+	fileIdent       *infra.FileIdentifier
+	s3              infra.S3Manager
+	pipelineClient  client.PipelineClient
+	config          *config.Config
 }
 
 func newFileStore() *fileStore {
 	return &fileStore{
-		fileCache:      cache.NewFileCache(),
-		fileCoreSvc:    newFileCoreService(),
-		fileMapper:     newFileMapper(),
-		workspaceCache: cache.NewWorkspaceCache(),
-		snapshotRepo:   repo.NewSnapshotRepo(),
-		snapshotCache:  cache.NewSnapshotCache(),
-		snapshotSvc:    NewSnapshotService(),
-		taskSvc:        NewTaskService(),
-		fileIdent:      infra.NewFileIdentifier(),
-		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		fileCache:       cache.NewFileCache(),
+		fileCoreSvc:     newFileCoreService(),
+		fileMapper:      newFileMapper(),
+		workspaceCache:  cache.NewWorkspaceCache(),
+		snapshotRepo:    repo.NewSnapshotRepo(),
+		snapshotCache:   cache.NewSnapshotCache(),
+		snapshotSvc:     NewSnapshotService(),
+		snapshotWebhook: webhook.NewSnapshotWebhook(),
+		taskSvc:         NewTaskService(),
+		fileIdent:       infra.NewFileIdentifier(),
+		s3:              infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
 			config.GetConfig().Environment.IsTest,
 		),
+		config: config.GetConfig(),
 	}
 }
 
@@ -2191,6 +2204,11 @@ func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*d
 	}
 	if err := svc.assignSnapshotToFile(file, snapshot); err != nil {
 		return nil, err
+	}
+	if svc.config.SnapshotWebhook != "" {
+		if err := svc.snapshotWebhook.Call(snapshot, dto.SnapshotWebhookEventTypeCreate); err != nil {
+			logger.GetLogger().Error(err)
+		}
 	}
 	if !props.ExceedsProcessingLimit {
 		if err := svc.runPipeline(file, snapshot, props, userID); err != nil {
@@ -2609,8 +2627,8 @@ func (svc *fileFilterService) filterOthers(data []model.File, userID string) []m
 			if err != nil {
 				return false
 			}
-			if f.Snapshot != nil && f.Snapshot.Original == nil {
-				return false
+			if f.Snapshot == nil {
+				return true
 			}
 			if f.Snapshot != nil &&
 				!svc.fileIdent.IsImage(f.Snapshot.Original.Extension) &&

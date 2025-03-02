@@ -63,16 +63,12 @@ func main() {
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 
-	versionRouter := router.NewVersionRouter()
-	versionRouter.AppendRoutes(app)
+	router.NewVersionRouter().AppendRoutes(app)
 
 	v3 := app.Group("v3")
 
-	healthRouter := router.NewHealthRouter()
-	healthRouter.AppendRoutes(v3)
-
-	mosaicRouter := router.NewMosaicRouter()
-	mosaicRouter.AppendRoutes(v3.Group("mosaics"))
+	router.NewHealthRouter().AppendRoutes(v3)
+	router.NewMosaicRouter().AppendRoutes(v3.Group("mosaics"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

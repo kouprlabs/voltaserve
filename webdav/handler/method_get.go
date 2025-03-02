@@ -73,7 +73,6 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 			if !strings.Contains(err.Error(), "write: broken pipe") && !strings.Contains(err.Error(), "write: connection reset by peer") {
 				logger.GetLogger().Error(err)
 			}
-			return
 		}
 	} else {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
@@ -83,7 +82,6 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 			if !strings.Contains(err.Error(), "write: broken pipe") && !strings.Contains(err.Error(), "write: connection reset by peer") {
 				logger.GetLogger().Error(err)
 			}
-			return
 		}
 	}
 }

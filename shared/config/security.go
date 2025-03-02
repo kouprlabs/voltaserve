@@ -10,8 +10,19 @@
 
 package config
 
+import (
+	"os"
+	"strings"
+)
+
 type SecurityConfig struct {
 	JWTSigningKey string
 	CORSOrigins   []string
 	APIKey        string
+}
+
+func ReadSecurity(config *SecurityConfig) {
+	config.JWTSigningKey = os.Getenv("SECURITY_JWT_SIGNING_KEY")
+	config.CORSOrigins = strings.Split(os.Getenv("SECURITY_CORS_ORIGINS"), ",")
+	config.APIKey = os.Getenv("SECURITY_API_KEY")
 }

@@ -11,7 +11,6 @@
 package service
 
 import (
-	"bytes"
 	"path/filepath"
 
 	"github.com/kouprlabs/voltaserve/shared/client"
@@ -170,7 +169,7 @@ type MosaicDownloadTileOptions struct {
 	Extension string
 }
 
-func (svc *MosaicService) DownloadTileBuffer(fileID string, opts MosaicDownloadTileOptions, userID string) (*bytes.Buffer, model.Snapshot, error) {
+func (svc *MosaicService) DownloadTileBuffer(fileID string, opts MosaicDownloadTileOptions, userID string) ([]byte, model.Snapshot, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, nil, err

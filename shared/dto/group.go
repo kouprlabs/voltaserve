@@ -56,15 +56,6 @@ type GroupList struct {
 	Size          uint64   `json:"size"`
 }
 
-type GroupListOptions struct {
-	Query          string
-	OrganizationID string
-	Page           uint64
-	Size           uint64
-	SortBy         string
-	SortOrder      string
-}
-
 type GroupProbe struct {
 	TotalPages    uint64 `json:"totalPages"`
 	TotalElements uint64 `json:"totalElements"`

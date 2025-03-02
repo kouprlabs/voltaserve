@@ -57,7 +57,19 @@ func NewUserService() *UserService {
 	}
 }
 
-func (svc *UserService) List(opts dto.UserListOptions, userID string) (*dto.UserList, error) {
+type UserListOptions struct {
+	Query               string
+	OrganizationID      string
+	GroupID             string
+	ExcludeGroupMembers bool
+	ExcludeMe           bool
+	SortBy              string
+	SortOrder           string
+	Page                uint64
+	Size                uint64
+}
+
+func (svc *UserService) List(opts UserListOptions, userID string) (*dto.UserList, error) {
 	users, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -83,7 +95,7 @@ func (svc *UserService) List(opts dto.UserListOptions, userID string) (*dto.User
 	}, nil
 }
 
-func (svc *UserService) Probe(opts dto.UserListOptions, userID string) (*dto.UserProbe, error) {
+func (svc *UserService) Probe(opts UserListOptions, userID string) (*dto.UserProbe, error) {
 	users, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -130,7 +142,7 @@ func (svc *UserService) IsValidSortOrder(value string) bool {
 	return value == "" || value == dto.UserSortOrderAsc || value == dto.UserSortOrderDesc
 }
 
-func (svc *UserService) findAll(opts dto.UserListOptions, userID string) ([]model.User, error) {
+func (svc *UserService) findAll(opts UserListOptions, userID string) ([]model.User, error) {
 	if opts.OrganizationID == "" && opts.GroupID == "" {
 		return make([]model.User, 0), nil
 	}
@@ -178,7 +190,7 @@ func (svc *UserService) findAll(opts dto.UserListOptions, userID string) ([]mode
 	}
 }
 
-func (svc *UserService) load(opts dto.UserListOptions) ([]model.User, error) {
+func (svc *UserService) load(opts UserListOptions) ([]model.User, error) {
 	res := make([]model.User, 0)
 	var err error
 	if opts.OrganizationID != "" && opts.GroupID != "" && opts.ExcludeGroupMembers {
@@ -216,7 +228,7 @@ func (svc *UserService) load(opts dto.UserListOptions) ([]model.User, error) {
 	return res, nil
 }
 
-func (svc *UserService) search(opts dto.UserListOptions) ([]model.User, error) {
+func (svc *UserService) search(opts UserListOptions) ([]model.User, error) {
 	res := make([]model.User, 0)
 	var err error
 	count, err := svc.userRepo.Count()

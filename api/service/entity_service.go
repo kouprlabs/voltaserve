@@ -144,7 +144,7 @@ func (svc *EntityService) Delete(fileID string, userID string) (*dto.Task, error
 	return res, nil
 }
 
-func (svc *EntityService) List(fileID string, opts dto.EntityListOptions, userID string) (*dto.EntityList, error) {
+func (svc *EntityService) List(fileID string, opts EntityListOptions, userID string) (*dto.EntityList, error) {
 	all, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func (svc *EntityService) List(fileID string, opts dto.EntityListOptions, userID
 	}, nil
 }
 
-func (svc *EntityService) Probe(fileID string, opts dto.EntityListOptions, userID string) (*dto.EntityProbe, error) {
+func (svc *EntityService) Probe(fileID string, opts EntityListOptions, userID string) (*dto.EntityProbe, error) {
 	all, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
@@ -255,7 +255,15 @@ func (svc *EntityService) delete(task model.Task, snapshot model.Snapshot) {
 	}
 }
 
-func (svc *EntityService) findAll(fileID string, opts dto.EntityListOptions, userID string) ([]*dto.Entity, error) {
+type EntityListOptions struct {
+	Query     string `json:"query"`
+	Page      uint64 `json:"page"`
+	Size      uint64 `json:"size"`
+	SortBy    string `json:"sortBy"`
+	SortOrder string `json:"sortOrder"`
+}
+
+func (svc *EntityService) findAll(fileID string, opts EntityListOptions, userID string) ([]*dto.Entity, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err

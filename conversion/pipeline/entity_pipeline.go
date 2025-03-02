@@ -72,7 +72,7 @@ func (p *entityPipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *entityPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Extracting text."),
 	}); err != nil {
@@ -82,7 +82,7 @@ func (p *entityPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	if err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Collecting entities."),
 	}); err != nil {
@@ -91,7 +91,7 @@ func (p *entityPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	if err := p.collectEntities(*text, opts); err != nil {
 		return err
 	}
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(model.TaskStatusSuccess),
@@ -102,15 +102,15 @@ func (p *entityPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 }
 
 func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptions) (*string, error) {
-	/* Generate PDF/A */
+	// Generate PDF/A
 	var pdfPath string
 	if p.fileIdent.IsImage(opts.Key) {
-		/* Get DPI */
+		// Get DPI
 		dpi, err := p.imageProc.DPIFromImage(inputPath)
 		if err != nil {
 			dpi = helper.ToPtr(72)
 		}
-		/* Remove alpha channel */
+		// Remove alpha channel
 		noAlphaImagePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 		if err := p.imageProc.RemoveAlphaChannel(inputPath, noAlphaImagePath); err != nil {
 			return nil, err
@@ -122,7 +122,7 @@ func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptio
 				logger.GetLogger().Error(err)
 			}
 		}(noAlphaImagePath)
-		/* Convert to PDF/A */
+		// Convert to PDF/A
 		pdfPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
 		if err := p.ocrProc.SearchablePDFFromFile(noAlphaImagePath, opts.Payload["language"], *dpi, pdfPath); err != nil {
 			return nil, err
@@ -134,7 +134,7 @@ func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptio
 				logger.GetLogger().Error(err)
 			}
 		}(pdfPath)
-		/* Set OCR S3 object */
+		// Set OCR S3 object
 		stat, err := os.Stat(pdfPath)
 		if err != nil {
 			return nil, err
@@ -147,7 +147,7 @@ func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptio
 		if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 			return nil, err
 		}
-		if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 			Options: opts,
 			Fields:  []string{model.SnapshotFieldOCR},
 			OCR:     &s3Object,
@@ -159,12 +159,12 @@ func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptio
 	} else {
 		return nil, errors.New("unsupported file type")
 	}
-	/* Extract text */
+	// Extract text
 	text, err := p.pdfProc.TextFromPDF(pdfPath)
 	if text == nil || err != nil {
 		return nil, err
 	}
-	/* Set text S3 object */
+	// Set text S3 object
 	s3Object := model.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/text.txt",
@@ -173,7 +173,7 @@ func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptio
 	if err := p.s3.PutText(s3Object.Key, *text, "text/plain", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{model.SnapshotFieldText},
 		Text:    &s3Object,
@@ -210,7 +210,7 @@ func (p *entityPipeline) collectEntities(text string, opts dto.PipelineRunOption
 	if err := p.s3.PutText(s3Object.Key, content, "application/json", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 		Options:  opts,
 		Fields:   []string{model.SnapshotFieldEntities},
 		Entities: &s3Object,

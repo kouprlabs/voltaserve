@@ -64,7 +64,7 @@ func (p *glbPipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *glbPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
-	if err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
@@ -84,8 +84,8 @@ func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts dto.Pipel
 		return err
 	}
 	if filepath.Ext(inputPath) == filepath.Ext(opts.Key) {
-		/* The original is a .glb */
-		if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+		// The original is a .glb
+		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 			Options: opts,
 			Fields:  []string{model.SnapshotFieldPreview},
 			Preview: &model.S3Object{
@@ -97,8 +97,8 @@ func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts dto.Pipel
 			return err
 		}
 	} else {
-		/* The original is likely an .zip glTF file */
-		if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+		// The original is likely an .zip glTF file
+		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 			Options: opts,
 			Fields:  []string{model.SnapshotFieldPreview},
 			Preview: &model.S3Object{
@@ -140,7 +140,7 @@ func (p *glbPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOpti
 		if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 			return err
 		}
-		if err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
+		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
 			Options:   opts,
 			Fields:    []string{model.SnapshotFieldThumbnail},
 			Thumbnail: s3Object,

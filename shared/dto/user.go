@@ -44,18 +44,6 @@ type UserList struct {
 	Size          uint64  `json:"size"`
 }
 
-type UserListOptions struct {
-	Query               string
-	OrganizationID      string
-	GroupID             string
-	ExcludeGroupMembers bool
-	ExcludeMe           bool
-	SortBy              string
-	SortOrder           string
-	Page                uint64
-	Size                uint64
-}
-
 type UserProbe struct {
 	TotalPages    uint64 `json:"totalPages"`
 	TotalElements uint64 `json:"totalElements"`

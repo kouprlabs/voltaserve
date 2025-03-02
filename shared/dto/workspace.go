@@ -48,14 +48,6 @@ type WorkspaceList struct {
 	Size          uint64       `json:"size"`
 }
 
-type WorkspaceListOptions struct {
-	Query     string
-	Page      uint64
-	Size      uint64
-	SortBy    string
-	SortOrder string
-}
-
 type WorkspaceProbe struct {
 	TotalPages    uint64 `json:"totalPages"`
 	TotalElements uint64 `json:"totalElements"`

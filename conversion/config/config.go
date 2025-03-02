@@ -23,14 +23,10 @@ type Config struct {
 	LanguageURL     string
 	MosaicURL       string
 	EnableInstaller bool
-	Security        SecurityConfig
-	Limits          LimitsConfig
+	Security        config.SecurityConfig
 	S3              config.S3Config
 	Environment     config.EnvironmentConfig
-}
-
-type SecurityConfig struct {
-	APIKey string
+	Limits          LimitsConfig
 }
 
 type LimitsConfig struct {
@@ -46,10 +42,10 @@ func GetConfig() *Config {
 	readPort(cfg)
 	readEnableInstaller(cfg)
 	readURLs(cfg)
-	readSecurity(cfg)
-	readS3(cfg)
 	readLimits(cfg)
-	readEnvironment(cfg)
+	config.ReadSecurity(&cfg.Security)
+	config.ReadS3(&cfg.S3)
+	config.ReadEnvironment(&cfg.Environment)
 	return cfg
 }
 
@@ -76,24 +72,6 @@ func readURLs(config *Config) {
 	config.APIURL = os.Getenv("API_URL")
 	config.LanguageURL = os.Getenv("LANGUAGE_URL")
 	config.MosaicURL = os.Getenv("MOSAIC_URL")
-}
-
-func readSecurity(config *Config) {
-	config.Security.APIKey = os.Getenv("SECURITY_API_KEY")
-}
-
-func readS3(config *Config) {
-	config.S3.URL = os.Getenv("S3_URL")
-	config.S3.AccessKey = os.Getenv("S3_ACCESS_KEY")
-	config.S3.SecretKey = os.Getenv("S3_SECRET_KEY")
-	config.S3.Region = os.Getenv("S3_REGION")
-	if len(os.Getenv("S3_SECURE")) > 0 {
-		v, err := strconv.ParseBool(os.Getenv("S3_SECURE"))
-		if err != nil {
-			panic(err)
-		}
-		config.S3.Secure = v
-	}
 }
 
 func readLimits(config *Config) {
@@ -131,11 +109,5 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.ImageMosaicTriggerThresholdPixels = int(v)
-	}
-}
-
-func readEnvironment(config *Config) {
-	if os.Getenv("TEST") == "true" {
-		config.Environment.IsTest = true
 	}
 }

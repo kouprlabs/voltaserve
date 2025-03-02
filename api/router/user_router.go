@@ -20,7 +20,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 
@@ -195,7 +194,7 @@ func (r *UserRouter) getUserIDFromAccessToken(accessToken string) (string, bool,
 	}
 }
 
-func (r *UserRouter) parseListQueryParams(c *fiber.Ctx) (*dto.UserListOptions, error) {
+func (r *UserRouter) parseListQueryParams(c *fiber.Ctx) (*service.UserListOptions, error) {
 	var err error
 	var page uint64
 	if c.Query("page") == "" {
@@ -244,7 +243,7 @@ func (r *UserRouter) parseListQueryParams(c *fiber.Ctx) (*dto.UserListOptions, e
 	if err != nil {
 		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	return &dto.UserListOptions{
+	return &service.UserListOptions{
 		Query:               query,
 		OrganizationID:      c.Query("organization_id"),
 		GroupID:             c.Query("group_id"),

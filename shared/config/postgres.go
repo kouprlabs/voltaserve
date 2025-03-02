@@ -10,6 +10,12 @@
 
 package config
 
+import "os"
+
 type PostgresConfig struct {
 	URL string
+}
+
+func ReadPostgres(config *PostgresConfig) {
+	config.URL = os.Getenv("POSTGRES_URL")
 }

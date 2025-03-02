@@ -21,7 +21,8 @@ import (
 	"gopkg.in/gomail.v2"
 	"sigs.k8s.io/yaml"
 
-	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/shared/config"
+
 	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/templates"
 )
@@ -43,16 +44,16 @@ type mailTemplate struct {
 	config config.SMTPConfig
 }
 
-func NewMailTemplate(smtpConfig config.SMTPConfig) MailTemplate {
-	if config.GetConfig().Environment.IsTest {
+func NewMailTemplate(smtpConfig config.SMTPConfig, useMock bool) MailTemplate {
+	if useMock {
 		return newMockMailTemplate()
 	} else {
 		return newMailTemplate(smtpConfig)
 	}
 }
 
-func NewMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer) MailTemplate {
-	if config.GetConfig().Environment.IsTest {
+func NewMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer, useMock bool) MailTemplate {
+	if useMock {
 		return newMockMailTemplate()
 	} else {
 		return newMailTemplateWithDialer(smtpConfig, dialer)

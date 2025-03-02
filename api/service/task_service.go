@@ -123,7 +123,15 @@ func (svc *TaskService) Find(id string, userID string) (*dto.Task, error) {
 	return res, nil
 }
 
-func (svc *TaskService) List(opts dto.TaskListOptions, userID string) (*dto.TaskList, error) {
+type TaskListOptions struct {
+	Query     string
+	Page      uint64
+	Size      uint64
+	SortBy    string
+	SortOrder string
+}
+
+func (svc *TaskService) List(opts TaskListOptions, userID string) (*dto.TaskList, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -149,7 +157,7 @@ func (svc *TaskService) List(opts dto.TaskListOptions, userID string) (*dto.Task
 	}, nil
 }
 
-func (svc *TaskService) Probe(opts dto.TaskListOptions, userID string) (*dto.TaskProbe, error) {
+func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*dto.TaskProbe, error) {
 	all, err := svc.findAll(opts, userID)
 	if err != nil {
 		return nil, err
@@ -225,7 +233,7 @@ func (svc *TaskService) Delete(id string) error {
 	return svc.deleteAndSync(id)
 }
 
-func (svc *TaskService) findAll(opts dto.TaskListOptions, userID string) ([]model.Task, error) {
+func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Task, error) {
 	var res []model.Task
 	var err error
 	if opts.Query == "" {
@@ -255,7 +263,7 @@ func (svc *TaskService) load(userID string) ([]model.Task, error) {
 	return res, nil
 }
 
-func (svc *TaskService) search(opts dto.TaskListOptions, userID string) ([]model.Task, error) {
+func (svc *TaskService) search(opts TaskListOptions, userID string) ([]model.Task, error) {
 	var res []model.Task
 	count, err := svc.taskRepo.Count()
 	if err != nil {

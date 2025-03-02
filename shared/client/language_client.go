@@ -50,17 +50,13 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]dto.Entity, er
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
-	}
-	b, err = io.ReadAll(resp.Body)
+	b, err = JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
-	var res []dto.Entity
-	err = json.Unmarshal(b, &res)
-	if err != nil {
+	var entities []dto.Entity
+	if err := json.Unmarshal(b, &entities); err != nil {
 		return nil, err
 	}
-	return res, nil
+	return entities, nil
 }

@@ -30,14 +30,6 @@ type EntityCreateOptions struct {
 	Language string `json:"language" validate:"required"`
 }
 
-type EntityListOptions struct {
-	Query     string `json:"query"`
-	Page      uint64 `json:"page"`
-	Size      uint64 `json:"size"`
-	SortBy    string `json:"sortBy"`
-	SortOrder string `json:"sortOrder"`
-}
-
 type EntityList struct {
 	Data          []*Entity `json:"data"`
 	TotalPages    uint64    `json:"totalPages"`

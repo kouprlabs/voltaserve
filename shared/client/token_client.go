@@ -13,12 +13,10 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/logger"
@@ -79,34 +77,13 @@ func (cl *TokenClient) Exchange(options TokenExchangeOptions) (*dto.Token, error
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := cl.jsonResponseOrThrow(resp)
+	body, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var token dto.Token
-	if err = json.Unmarshal(body, &token); err != nil {
+	if err := json.Unmarshal(body, &token); err != nil {
 		return nil, err
 	}
 	return &token, nil
-}
-
-func (cl *TokenClient) jsonResponseOrThrow(resp *http.Response) ([]byte, error) {
-	if strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		if resp.StatusCode > 299 {
-			var errorResponse ErrorResponse
-			err = json.Unmarshal(body, &errorResponse)
-			if err != nil {
-				return nil, err
-			}
-			return nil, &errorResponse
-		} else {
-			return body, nil
-		}
-	} else {
-		return nil, errors.New("unexpected response format")
-	}
 }
