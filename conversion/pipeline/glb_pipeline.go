@@ -137,7 +137,7 @@ func (p *glbPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOpti
 			Image:  props,
 			Size:   stat.Size(),
 		}
-		if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
+		if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMIMEFromPath(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 			return err
 		}
 		if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{

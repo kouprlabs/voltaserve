@@ -129,7 +129,7 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts dto.PipelineRunOptions
 		return nil, err
 	}
 	glbKey := opts.SnapshotID + "/preview.glb"
-	if err := p.s3.PutFile(glbKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
+	if err := p.s3.PutFile(glbKey, outputPath, helper.DetectMIMEFromPath(outputPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
 	if _, err := p.snapshotClient.Patch(dto.SnapshotPatchOptions{
