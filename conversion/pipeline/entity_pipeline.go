@@ -13,8 +13,6 @@ package pipeline
 import (
 	"encoding/json"
 	"errors"
-	"os"
-	"path/filepath"
 
 	"github.com/minio/minio-go/v7"
 
@@ -25,7 +23,6 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/conversion/config"
-	"github.com/kouprlabs/voltaserve/conversion/logger"
 	"github.com/kouprlabs/voltaserve/conversion/processor"
 )
 
@@ -54,31 +51,27 @@ func NewEntityPipeline() Pipeline {
 }
 
 func (p *entityPipeline) Run(opts dto.PipelineRunOptions) error {
-	if opts.Payload == nil || opts.Payload["language"] == "" {
+	if opts.Language == nil {
 		return errors.New("language is undefined")
 	}
-	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
-	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
-		return err
-	}
-	defer func(path string) {
-		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
-			return
-		} else if err != nil {
-			logger.GetLogger().Error(err)
-		}
-	}(inputPath)
-	return p.RunFromLocalPath(inputPath, opts)
+	return p.RunFromLocalPath("", opts)
 }
 
-func (p *entityPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOptions) error {
+func (p *entityPipeline) RunFromLocalPath(_ string, opts dto.PipelineRunOptions) error {
 	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Extracting text."),
 	}); err != nil {
 		return err
 	}
-	text, err := p.extractText(inputPath, opts)
+	snapshot, err := p.snapshotClient.Find(opts.SnapshotID)
+	if err != nil {
+		return err
+	}
+	if snapshot.Text == nil {
+		return nil
+	}
+	text, err := p.s3.GetText(snapshot.Text.Key, opts.Bucket, minio.GetObjectOptions{})
 	if err != nil {
 		return err
 	}
@@ -88,7 +81,7 @@ func (p *entityPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	}); err != nil {
 		return err
 	}
-	if err := p.collectEntities(*text, opts); err != nil {
+	if err := p.patchEntities(text, opts); err != nil {
 		return err
 	}
 	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
@@ -101,87 +94,7 @@ func (p *entityPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	return nil
 }
 
-func (p *entityPipeline) extractText(inputPath string, opts dto.PipelineRunOptions) (*string, error) {
-	// Generate PDF/A
-	var pdfPath string
-	if p.fileIdent.IsImage(opts.Key) {
-		// Get DPI
-		dpi, err := p.imageProc.DPIFromImage(inputPath)
-		if err != nil {
-			dpi = helper.ToPtr(72)
-		}
-		// Remove alpha channel
-		noAlphaImagePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
-		if err := p.imageProc.RemoveAlphaChannel(inputPath, noAlphaImagePath); err != nil {
-			return nil, err
-		}
-		defer func(path string) {
-			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
-				return
-			} else if err != nil {
-				logger.GetLogger().Error(err)
-			}
-		}(noAlphaImagePath)
-		// Convert to PDF/A
-		pdfPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
-		if err := p.ocrProc.SearchablePDFFromFile(noAlphaImagePath, opts.Payload["language"], *dpi, pdfPath); err != nil {
-			return nil, err
-		}
-		defer func(path string) {
-			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
-				return
-			} else if err != nil {
-				logger.GetLogger().Error(err)
-			}
-		}(pdfPath)
-		// Set OCR S3 object
-		stat, err := os.Stat(pdfPath)
-		if err != nil {
-			return nil, err
-		}
-		s3Object := model.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.SnapshotID + "/ocr.pdf",
-			Size:   stat.Size(),
-		}
-		if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMIMEFromPath(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
-			return nil, err
-		}
-		if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
-			Fields: []string{model.SnapshotFieldOCR},
-			OCR:    &s3Object,
-		}); err != nil {
-			return nil, err
-		}
-	} else if p.fileIdent.IsPDF(opts.Key) || p.fileIdent.IsOffice(opts.Key) || p.fileIdent.IsPlainText(opts.Key) {
-		pdfPath = inputPath
-	} else {
-		return nil, errors.New("unsupported file type")
-	}
-	// Extract text
-	text, err := p.pdfProc.TextFromPDF(pdfPath)
-	if text == nil || err != nil {
-		return nil, err
-	}
-	// Set text S3 object
-	s3Object := model.S3Object{
-		Bucket: opts.Bucket,
-		Key:    opts.SnapshotID + "/text.txt",
-		Size:   int64(len(*text)),
-	}
-	if err := p.s3.PutText(s3Object.Key, *text, "text/plain", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
-		return nil, err
-	}
-	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
-		Fields: []string{model.SnapshotFieldText},
-		Text:   &s3Object,
-	}); err != nil {
-		return nil, err
-	}
-	return text, nil
-}
-
-func (p *entityPipeline) collectEntities(text string, opts dto.PipelineRunOptions) error {
+func (p *entityPipeline) patchEntities(text string, opts dto.PipelineRunOptions) error {
 	if len(text) == 0 {
 		return errors.New("text is empty")
 	}
@@ -190,7 +103,7 @@ func (p *entityPipeline) collectEntities(text string, opts dto.PipelineRunOption
 	}
 	res, err := p.languageClient.GetEntities(client.GetEntitiesOptions{
 		Text:     text,
-		Language: opts.Payload["language"],
+		Language: *opts.Language,
 	})
 	if err != nil {
 		return err

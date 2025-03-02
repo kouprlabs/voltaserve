@@ -73,7 +73,7 @@ func (p *officePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	}); err != nil {
 		return err
 	}
-	pdfPath, err := p.convertToPDF(inputPath, opts)
+	pdfPath, err := p.patchPreviewWithPDF(inputPath, opts)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (p *officePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRun
 	return p.pdfPipeline.RunFromLocalPath(*pdfPath, opts)
 }
 
-func (p *officePipeline) convertToPDF(inputPath string, opts dto.PipelineRunOptions) (*string, error) {
+func (p *officePipeline) patchPreviewWithPDF(inputPath string, opts dto.PipelineRunOptions) (*string, error) {
 	outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 	outputPath, err := p.officeProc.PDF(inputPath, outputDir)
 	if err != nil {

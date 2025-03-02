@@ -45,6 +45,7 @@ func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 }
 
 func (r *SnapshotRouter) AppendNonJWTRoutes(g fiber.Router) {
+	g.Get("/:id", r.Find)
 	g.Patch("/:id", r.Patch)
 }
 
@@ -143,6 +144,33 @@ func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
+// Find godoc
+//
+//	@Summary		Find
+//	@Description	Find
+//	@Tags			Snapshots
+//	@Id				snapshots_find
+//	@Produce		application/json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.SnapshotForWebhook
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/snapshots/{id} [get]
+func (r *SnapshotRouter) Find(c *fiber.Ctx) error {
+	apiKey := c.Query("api_key")
+	if apiKey == "" {
+		return errorpkg.NewMissingQueryParamError("api_key")
+	}
+	if apiKey != r.config.Security.APIKey {
+		return errorpkg.NewInvalidAPIKeyError()
+	}
+	res, err := r.snapshotSvc.Find(c.Params("id"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
 // Patch godoc
 //
 //	@Summary		Patch
@@ -153,7 +181,7 @@ func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
 //	@Param			api_key	query		string						true	"API Key"
 //	@Param			id		path		string						true	"ID"
 //	@Param			body	body		dto.SnapshotPatchOptions	true	"Body"
-//	@Success		200		{object}	dto.Snapshot
+//	@Success		200		{object}	dto.SnapshotForWebhook
 //	@Failure		401		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id} [patch]
@@ -172,11 +200,11 @@ func (r *SnapshotRouter) Patch(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	snapshot, err := r.snapshotSvc.Patch(c.Params("id"), *opts)
+	res, err := r.snapshotSvc.Patch(c.Params("id"), *opts)
 	if err != nil {
 		return err
 	}
-	return c.JSON(snapshot)
+	return c.JSON(res)
 }
 
 // GetLanguages godoc

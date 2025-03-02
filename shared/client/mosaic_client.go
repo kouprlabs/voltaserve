@@ -99,7 +99,13 @@ type MosaicGetMetadataOptions struct {
 }
 
 func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*dto.MosaicMetadata, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/v3/mosaics/%s/%s/metadata", cl.url, opts.S3Bucket, opts.S3Key))
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/mosaics/%s/%s/metadata", cl.url, opts.S3Bucket, opts.S3Key), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -147,11 +153,19 @@ type MosaicDownloadTileOptions struct {
 }
 
 func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) ([]byte, error) {
-	resp, err := http.Get(
+	req, err := http.NewRequest(
+		"GET",
 		fmt.Sprintf(
 			"%s/v3/mosaics/%s/%s/zoom_level/%d/row/%d/column/%d/extension/%s",
 			cl.url, opts.S3Bucket, opts.S3Key, opts.ZoomLevel, opts.Row, opts.Column, opts.Extension,
-		))
+		),
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}

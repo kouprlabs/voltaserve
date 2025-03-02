@@ -30,11 +30,10 @@ type Config struct {
 }
 
 type LimitsConfig struct {
-	ExternalCommandTimeoutSeconds     int
-	ImagePreviewMaxWidth              int
-	ImagePreviewMaxHeight             int
-	MultipartBodyLengthLimitMB        int
-	ImageMosaicTriggerThresholdPixels int
+	ExternalCommandTimeoutSeconds int
+	ImagePreviewMaxWidth          int
+	ImagePreviewMaxHeight         int
+	MultipartBodyLengthLimitMB    int
 }
 
 func GetConfig() *Config {
@@ -102,12 +101,5 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.MultipartBodyLengthLimitMB = int(v)
-	}
-	if len(os.Getenv("LIMITS_IMAGE_MOSAIC_TRIGGER_THRESHOLD_PIXELS")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_IMAGE_MOSAIC_TRIGGER_THRESHOLD_PIXELS"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Limits.ImageMosaicTriggerThresholdPixels = int(v)
 	}
 }

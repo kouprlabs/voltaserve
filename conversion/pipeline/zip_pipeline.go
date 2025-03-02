@@ -100,7 +100,7 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 		}); err != nil {
 			return err
 		}
-		glbPath, err := p.convertToGLB(*gltfPath, opts)
+		glbPath, err := p.patchPreviewWithGLB(*gltfPath, opts)
 		if err != nil {
 			return err
 		}
@@ -119,7 +119,7 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 	return nil
 }
 
-func (p *zipPipeline) convertToGLB(inputPath string, opts dto.PipelineRunOptions) (*string, error) {
+func (p *zipPipeline) patchPreviewWithGLB(inputPath string, opts dto.PipelineRunOptions) (*string, error) {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".glb")
 	if err := p.gltfProc.ToGLB(inputPath, outputPath); err != nil {
 		return nil, err

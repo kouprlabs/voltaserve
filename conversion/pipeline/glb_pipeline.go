@@ -70,15 +70,14 @@ func (p *glbPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 	}); err != nil {
 		return err
 	}
-	// We don't consider failing to create the thumbnail an error
-	_ = p.createThumbnail(inputPath, opts)
-	if err := p.patchSnapshotPreviewField(inputPath, opts); err != nil {
+	_ = p.patchThumbnail(inputPath, opts)
+	if err := p.patchPreview(inputPath, opts); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts dto.PipelineRunOptions) error {
+func (p *glbPipeline) patchPreview(inputPath string, opts dto.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
@@ -111,7 +110,7 @@ func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts dto.Pipel
 	return nil
 }
 
-func (p *glbPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
+func (p *glbPipeline) patchThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	defer func(path string) {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {

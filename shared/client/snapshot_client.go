@@ -33,7 +33,34 @@ func NewSnapshotClient(url string, apiKey string) *SnapshotClient {
 	}
 }
 
-func (cl *SnapshotClient) Patch(id string, opts dto.SnapshotPatchOptions) (*dto.Snapshot, error) {
+func (cl *SnapshotClient) Find(id string) (*dto.SnapshotWithS3Objects, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/snapshots/%s?api_key=%s", cl.url, id, cl.apiKey), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	c := &http.Client{}
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
+			logger.GetLogger().Error(err)
+		}
+	}(resp.Body)
+	b, err := JsonResponseOrError(resp)
+	if err != nil {
+		return nil, err
+	}
+	var res dto.SnapshotWithS3Objects
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (cl *SnapshotClient) Patch(id string, opts dto.SnapshotPatchOptions) (*dto.SnapshotWithS3Objects, error) {
 	b, err := json.Marshal(opts)
 	if err != nil {
 		return nil, err
@@ -61,7 +88,7 @@ func (cl *SnapshotClient) Patch(id string, opts dto.SnapshotPatchOptions) (*dto.
 	if err != nil {
 		return nil, err
 	}
-	var res dto.Snapshot
+	var res dto.SnapshotWithS3Objects
 	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}

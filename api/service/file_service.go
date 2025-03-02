@@ -2136,6 +2136,8 @@ func (svc *fileReprocess) runPipeline(file model.File, snapshot model.Snapshot, 
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
 		Key:        snapshot.GetOriginal().Key,
+		Intent:     snapshot.GetIntent(),
+		Language:   snapshot.GetLanguage(),
 	}); err != nil {
 		return err
 	}
@@ -2210,7 +2212,7 @@ func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*d
 	if svc.config.SnapshotWebhook != "" {
 		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
 			EventType: dto.SnapshotWebhookEventTypeCreate,
-			Snapshot:  svc.snapshotMapper.mapForWebhook(snapshot),
+			Snapshot:  svc.snapshotMapper.mapWithS3Objects(snapshot),
 		}); err != nil {
 			logger.GetLogger().Error(err)
 		} else {
@@ -2358,6 +2360,8 @@ func (svc *fileStore) runPipeline(file model.File, snapshot model.Snapshot, prop
 		SnapshotID: snapshot.GetID(),
 		Bucket:     props.Original.Bucket,
 		Key:        props.Original.Key,
+		Intent:     snapshot.GetIntent(),
+		Language:   snapshot.GetLanguage(),
 	}); err != nil {
 		return err
 	}

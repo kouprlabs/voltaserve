@@ -95,7 +95,7 @@ type SnapshotLanguage struct {
 	Name    string `json:"name"`
 }
 
-type SnapshotForWebhook struct {
+type SnapshotWithS3Objects struct {
 	ID         string          `json:"id"`
 	Version    int64           `json:"version"`
 	Original   *model.S3Object `json:"original,omitempty"`
@@ -119,7 +119,7 @@ const (
 )
 
 type SnapshotWebhookOptions struct {
-	EventType string              `json:"eventType"          validate:"required"`
-	Fields    []string            `json:"fields"`
-	Snapshot  *SnapshotForWebhook `json:"snapshot,omitempty"`
+	EventType string                 `json:"eventType"          validate:"required"`
+	Fields    []string               `json:"fields"`
+	Snapshot  *SnapshotWithS3Objects `json:"snapshot,omitempty"`
 }

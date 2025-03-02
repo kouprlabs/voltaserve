@@ -72,14 +72,14 @@ func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts dto.Pipelin
 	}
 	// Here we intentionally ignore the error, as the media file may contain just audio
 	// Additionally, we don't consider failing to create the thumbnail an error
-	_ = p.createThumbnail(inputPath, opts)
+	_ = p.patchThumbnail(inputPath, opts)
 	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Saving preview."),
 	}); err != nil {
 		return err
 	}
-	if err := p.saveOriginalAsPreview(inputPath, opts); err != nil {
+	if err := p.patchPreviewWithOriginal(inputPath, opts); err != nil {
 		return err
 	}
 	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
@@ -92,7 +92,7 @@ func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts dto.Pipelin
 	return nil
 }
 
-func (p *audioVideoPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
+func (p *audioVideoPipeline) patchThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	defer func(path string) {
 		_, err := os.Stat(path)
@@ -131,7 +131,7 @@ func (p *audioVideoPipeline) createThumbnail(inputPath string, opts dto.Pipeline
 	return nil
 }
 
-func (p *audioVideoPipeline) saveOriginalAsPreview(inputPath string, opts dto.PipelineRunOptions) error {
+func (p *audioVideoPipeline) patchPreviewWithOriginal(inputPath string, opts dto.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err

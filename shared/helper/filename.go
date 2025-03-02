@@ -23,3 +23,13 @@ func FilenameWithoutExtension(name string) string {
 	withExt := filepath.Base(name)
 	return withExt[0 : len(withExt)-len(filepath.Ext(name))]
 }
+
+func FilenameWithNewExtension(name string, ext string) string {
+	withExt := filepath.Base(name)
+	withoutExt := withExt[0 : len(withExt)-len(filepath.Ext(name))]
+	if ext == "" {
+		return withoutExt
+	} else {
+		return fmt.Sprintf("%s.%s", withoutExt, ext)
+	}
+}

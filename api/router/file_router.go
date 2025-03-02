@@ -918,7 +918,7 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", helper.DetectMIMEFromBytes(buf.Bytes()))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", helper.FilenameWithNewExtension(res.File.GetName(), extension)))
 	if res.RangeInterval != nil {
 		res.RangeInterval.ApplyToFiberContext(c)
 		c.Status(http.StatusPartialContent)

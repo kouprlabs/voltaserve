@@ -29,8 +29,9 @@ import (
 )
 
 type imagePipeline struct {
-	mosaicPipeline Pipeline
 	imageProc      *processor.ImageProcessor
+	ocrProc        *processor.OCRProcessor
+	pdfProc        *processor.PDFProcessor
 	s3             infra.S3Manager
 	taskClient     *client.TaskClient
 	snapshotClient *client.SnapshotClient
@@ -40,8 +41,9 @@ type imagePipeline struct {
 
 func NewImagePipeline() Pipeline {
 	return &imagePipeline{
-		mosaicPipeline: NewMosaicPipeline(),
 		imageProc:      processor.NewImageProcessor(),
+		ocrProc:        processor.NewOCRProcessor(),
+		pdfProc:        processor.NewPDFProcessor(),
 		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		taskClient:     client.NewTaskClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
 		snapshotClient: client.NewSnapshotClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
@@ -72,7 +74,7 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunO
 	}); err != nil {
 		return err
 	}
-	imageProps, err := p.measureImageDimensions(inputPath, opts)
+	imageProps, err := p.patchOriginalWithImageDimensions(inputPath, opts)
 	if err != nil {
 		return err
 	}
@@ -84,14 +86,14 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunO
 		}); err != nil {
 			return err
 		}
-		jpegPath, err := p.convertTIFFToJPEG(inputPath, *imageProps, opts)
+		jpegPath, err := p.patchPreviewWithJPEG(inputPath, *imageProps, opts)
 		if err != nil {
 			return err
 		}
 		imagePath = *jpegPath
 	} else {
 		imagePath = inputPath
-		if err := p.saveOriginalAsPreview(imagePath, *imageProps, opts); err != nil {
+		if err := p.patchPreviewWithOriginal(imagePath, *imageProps, opts); err != nil {
 			return err
 		}
 	}
@@ -108,27 +110,21 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunO
 	}); err != nil {
 		return err
 	}
-	// We don't consider failing the creation of the thumbnail an error
-	_ = p.createThumbnail(imagePath, opts)
-	// Automatically trigger mosaic pipeline if the image exceeds the pixels threshold
-	if imageProps.Width >= p.config.Limits.ImageMosaicTriggerThresholdPixels ||
-		imageProps.Height >= p.config.Limits.ImageMosaicTriggerThresholdPixels {
-		if err := p.mosaicPipeline.RunFromLocalPath(imagePath, opts); err != nil {
-			return err
-		}
-	} else {
-		if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
-			Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
-			Name:   helper.ToPtr("Done."),
-			Status: helper.ToPtr(model.TaskStatusSuccess),
-		}); err != nil {
-			return err
-		}
+	_ = p.patchThumbnail(imagePath, opts)
+	if opts.Intent != nil && *opts.Intent == model.SnapshotIntentDocument {
+		_ = p.patchText(imagePath, opts)
+	}
+	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
+		Fields: []string{model.TaskFieldName, model.TaskFieldStatus},
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(model.TaskStatusSuccess),
+	}); err != nil {
+		return err
 	}
 	return nil
 }
 
-func (p *imagePipeline) measureImageDimensions(inputPath string, opts dto.PipelineRunOptions) (*model.ImageProps, error) {
+func (p *imagePipeline) patchOriginalWithImageDimensions(inputPath string, opts dto.PipelineRunOptions) (*model.ImageProps, error) {
 	imageProps, err := p.imageProc.MeasureImage(inputPath)
 	if err != nil {
 		return nil, err
@@ -151,7 +147,7 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts dto.Pipeli
 	return imageProps, nil
 }
 
-func (p *imagePipeline) createThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
+func (p *imagePipeline) patchThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 	res, err := p.imageProc.Thumbnail(inputPath, p.config.Limits.ImagePreviewMaxWidth, p.config.Limits.ImagePreviewMaxHeight, outputPath)
 	if err != nil {
@@ -193,7 +189,7 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts dto.PipelineRunOp
 	return nil
 }
 
-func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps model.ImageProps, opts dto.PipelineRunOptions) (*string, error) {
+func (p *imagePipeline) patchPreviewWithJPEG(inputPath string, imageProps model.ImageProps, opts dto.PipelineRunOptions) (*string, error) {
 	jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
 	if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
 		return nil, err
@@ -220,7 +216,7 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps model.Ima
 	return &jpegPath, nil
 }
 
-func (p *imagePipeline) saveOriginalAsPreview(inputPath string, imageProps model.ImageProps, opts dto.PipelineRunOptions) error {
+func (p *imagePipeline) patchPreviewWithOriginal(inputPath string, imageProps model.ImageProps, opts dto.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
@@ -233,6 +229,83 @@ func (p *imagePipeline) saveOriginalAsPreview(inputPath string, imageProps model
 			Size:   stat.Size(),
 			Image:  &imageProps,
 		},
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *imagePipeline) patchText(inputPath string, opts dto.PipelineRunOptions) error {
+	// Generate PDF/A
+	var pdfPath string
+	// Get DPI
+	dpi, err := p.imageProc.DPIFromImage(inputPath)
+	if err != nil {
+		dpi = helper.ToPtr(72)
+	}
+	// Remove alpha channel
+	noAlphaImagePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
+	if err := p.imageProc.RemoveAlphaChannel(inputPath, noAlphaImagePath); err != nil {
+		return err
+	}
+	defer func(path string) {
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			logger.GetLogger().Error(err)
+		}
+	}(noAlphaImagePath)
+	// Convert to PDF/A
+	pdfPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
+	if err := p.ocrProc.SearchablePDFFromFile(noAlphaImagePath, *opts.Language, *dpi, pdfPath); err != nil {
+		return err
+	}
+	defer func(path string) {
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			logger.GetLogger().Error(err)
+		}
+	}(pdfPath)
+	// Set OCR S3 object
+	stat, err := os.Stat(pdfPath)
+	if err != nil {
+		return err
+	}
+	s3Object := model.S3Object{
+		Bucket: opts.Bucket,
+		Key:    opts.SnapshotID + "/ocr.pdf",
+		Size:   stat.Size(),
+	}
+	if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMIMEFromPath(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
+		return err
+	}
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldOCR},
+		OCR:    &s3Object,
+	}); err != nil {
+		return err
+	}
+	// Extract text
+	text, err := p.pdfProc.TextFromPDF(pdfPath)
+	if err != nil {
+		return err
+	}
+	if text == nil || len(*text) == 0 {
+		return nil
+	}
+	// Set text S3 object
+	s3Object = model.S3Object{
+		Bucket: opts.Bucket,
+		Key:    opts.SnapshotID + "/text.txt",
+		Size:   int64(len(*text)),
+	}
+	if err := p.s3.PutText(s3Object.Key, *text, "text/plain", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
+		return err
+	}
+	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
+		Fields: []string{model.SnapshotFieldText},
+		Text:   &s3Object,
 	}); err != nil {
 		return err
 	}
