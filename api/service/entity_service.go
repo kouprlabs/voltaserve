@@ -195,7 +195,8 @@ func (svc *EntityService) runPipeline(snapshot model.Snapshot, task model.Task) 
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetPreview().Bucket,
 		Key:        key,
-		Payload:    map[string]string{"language": *snapshot.GetLanguage()},
+		Intent:     snapshot.GetIntent(),
+		Language:   snapshot.GetLanguage(),
 	}); err != nil {
 		return err
 	}

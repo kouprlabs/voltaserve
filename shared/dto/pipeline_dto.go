@@ -23,9 +23,11 @@ const (
 
 type PipelineRunOptions struct {
 	PipelineID *string           `json:"pipelineId,omitempty"`
-	TaskID     string            `json:"taskId"`
+	TaskID     string            `json:"taskId"               validate:"required"`
 	SnapshotID string            `json:"snapshotId"           validate:"required"`
-	Bucket     string            `json:"bucket"`
-	Key        string            `json:"key"`
+	Bucket     string            `json:"bucket"               validate:"required"`
+	Key        string            `json:"key"                  validate:"required"`
+	Intent     *string           `json:"intent,omitempty"`
+	Language   *string           `json:"language,omitempty"`
 	Payload    map[string]string `json:"payload,omitempty"`
 }

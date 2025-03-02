@@ -76,7 +76,7 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 			Extension: ".pdf",
 		},
 	}
-	if err := p.patchSnapshotPreviewField(inputPath, &document, opts); err != nil {
+	if err := p.patchPreviewWithOriginal(inputPath, &document, opts); err != nil {
 		return err
 	}
 	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
@@ -85,8 +85,7 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 	}); err != nil {
 		return err
 	}
-	// We don't consider failing the creation of the thumbnail an error
-	_ = p.createThumbnail(inputPath, opts)
+	_ = p.patchThumbnail(inputPath, opts)
 	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
 		Fields: []string{model.TaskFieldName},
 		Name:   helper.ToPtr("Saving preview."),
@@ -99,7 +98,7 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 	}); err != nil {
 		return err
 	}
-	if err := p.extractText(inputPath, opts); err != nil {
+	if err := p.patchText(inputPath, opts); err != nil {
 		return err
 	}
 	if _, err := p.taskClient.Patch(opts.TaskID, dto.TaskPatchOptions{
@@ -112,7 +111,7 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 	return nil
 }
 
-func (p *pdfPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
+func (p *pdfPipeline) patchThumbnail(inputPath string, opts dto.PipelineRunOptions) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	if err := p.pdfProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return err
@@ -150,15 +149,15 @@ func (p *pdfPipeline) createThumbnail(inputPath string, opts dto.PipelineRunOpti
 	return nil
 }
 
-func (p *pdfPipeline) extractText(inputPath string, opts dto.PipelineRunOptions) error {
+func (p *pdfPipeline) patchText(inputPath string, opts dto.PipelineRunOptions) error {
 	text, err := p.pdfProc.TextFromPDF(inputPath)
 	if err != nil {
-		logger.GetLogger().Named(logger.StrPipeline).Errorw(err.Error())
-	}
-	key := opts.SnapshotID + "/text.txt"
-	if text == nil || err != nil {
 		return err
 	}
+	if text == nil {
+		return nil
+	}
+	key := opts.SnapshotID + "/text.txt"
 	if err := p.s3.PutText(key, *text, "text/plain", opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
@@ -175,7 +174,7 @@ func (p *pdfPipeline) extractText(inputPath string, opts dto.PipelineRunOptions)
 	return nil
 }
 
-func (p *pdfPipeline) patchSnapshotPreviewField(inputPath string, document *model.DocumentProps, opts dto.PipelineRunOptions) error {
+func (p *pdfPipeline) patchPreviewWithOriginal(inputPath string, document *model.DocumentProps, opts dto.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err

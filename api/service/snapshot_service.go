@@ -204,7 +204,15 @@ func (svc *SnapshotService) Detach(id string, userID string) (*dto.File, error) 
 	return res, nil
 }
 
-func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dto.Snapshot, error) {
+func (svc *SnapshotService) Find(id string) (*dto.SnapshotWithS3Objects, error) {
+	snapshot, err := svc.snapshotCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	return svc.snapshotMapper.mapWithS3Objects(snapshot), nil
+}
+
+func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dto.SnapshotWithS3Objects, error) {
 	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
 		Original:  opts.Original,
 		Fields:    opts.Fields,
@@ -242,12 +250,12 @@ func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dt
 		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
 			EventType: dto.SnapshotWebhookEventTypePatch,
 			Fields:    opts.Fields,
-			Snapshot:  svc.snapshotMapper.mapForWebhook(snapshot),
+			Snapshot:  svc.snapshotMapper.mapWithS3Objects(snapshot),
 		}); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}
-	return svc.snapshotMapper.mapOne(snapshot), nil
+	return svc.snapshotMapper.mapWithS3Objects(snapshot), nil
 }
 
 func (svc *SnapshotService) GetLanguages() ([]*dto.SnapshotLanguage, error) {
@@ -562,8 +570,8 @@ func (mp *snapshotMapper) mapS3Object(o *model.S3Object) *dto.SnapshotDownloadab
 	return download
 }
 
-func (mp *snapshotMapper) mapForWebhook(m model.Snapshot) *dto.SnapshotForWebhook {
-	return &dto.SnapshotForWebhook{
+func (mp *snapshotMapper) mapWithS3Objects(m model.Snapshot) *dto.SnapshotWithS3Objects {
+	return &dto.SnapshotWithS3Objects{
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
 		Original:   m.GetOriginal(),

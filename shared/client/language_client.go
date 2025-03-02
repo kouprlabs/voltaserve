@@ -41,7 +41,13 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]dto.Entity, er
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.Post(fmt.Sprintf("%s/v3/entities", cl.url), "application/json", bytes.NewBuffer(b))
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/entities", cl.url), bytes.NewBuffer(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}

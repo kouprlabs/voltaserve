@@ -484,23 +484,6 @@ definitions:
       extension:
         type: string
     type: object
-  dto.PipelineRunOptions:
-    properties:
-      bucket:
-        type: string
-      key:
-        type: string
-      payload:
-        additionalProperties:
-          type: string
-        type: object
-      pipelineId:
-        type: string
-      snapshotId:
-        type: string
-      taskId:
-        type: string
-    type: object
   dto.Snapshot:
     properties:
       capabilities:
@@ -521,12 +504,10 @@ definitions:
         $ref: '#/definitions/dto.SnapshotDownloadable'
       preview:
         $ref: '#/definitions/dto.SnapshotDownloadable'
-      status:
-        type: string
       summary:
         type: string
       task:
-        $ref: '#/definitions/dto.SnapshotTaskInfo'
+        $ref: '#/definitions/dto.Task'
       text:
         $ref: '#/definitions/dto.SnapshotDownloadable'
       thumbnail:
@@ -598,17 +579,19 @@ definitions:
         items:
           type: string
         type: array
+      intent:
+        type: string
+      language:
+        type: string
       mosaic:
         $ref: '#/definitions/model.S3Object'
       ocr:
         $ref: '#/definitions/model.S3Object'
-      options:
-        $ref: '#/definitions/dto.PipelineRunOptions'
       original:
         $ref: '#/definitions/model.S3Object'
       preview:
         $ref: '#/definitions/model.S3Object'
-      status:
+      summary:
         type: string
       taskId:
         type: string
@@ -624,12 +607,38 @@ definitions:
       totalPages:
         type: integer
     type: object
-  dto.SnapshotTaskInfo:
+  dto.SnapshotWithS3Objects:
     properties:
+      createTime:
+        type: string
+      entities:
+        $ref: '#/definitions/model.S3Object'
       id:
         type: string
-      isPending:
-        type: boolean
+      intent:
+        type: string
+      language:
+        type: string
+      mosaic:
+        $ref: '#/definitions/model.S3Object'
+      ocr:
+        $ref: '#/definitions/model.S3Object'
+      original:
+        $ref: '#/definitions/model.S3Object'
+      preview:
+        $ref: '#/definitions/model.S3Object'
+      summary:
+        type: string
+      taskId:
+        type: string
+      text:
+        $ref: '#/definitions/model.S3Object'
+      thumbnail:
+        $ref: '#/definitions/model.S3Object'
+      updateTime:
+        type: string
+      version:
+        type: integer
     type: object
   dto.StorageUsage:
     properties:
@@ -3305,6 +3314,33 @@ paths:
       tags:
       - Snapshots
   /snapshots/{id}:
+    get:
+      description: Find
+      operationId: snapshots_find
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SnapshotWithS3Objects'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Find
+      tags:
+      - Snapshots
     patch:
       description: Patch
       operationId: snapshots_patch
@@ -3331,7 +3367,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Snapshot'
+            $ref: '#/definitions/dto.SnapshotWithS3Objects'
         "401":
           description: Unauthorized
           schema:

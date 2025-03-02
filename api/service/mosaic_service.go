@@ -208,6 +208,8 @@ func (svc *MosaicService) runPipeline(snapshot model.Snapshot, task model.Task) 
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetPreview().Bucket,
 		Key:        snapshot.GetPreview().Key,
+		Intent:     snapshot.GetIntent(),
+		Language:   snapshot.GetLanguage(),
 	}); err != nil {
 		return err
 	}
