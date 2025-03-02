@@ -22,3 +22,7 @@ func RemoveNonNumeric(s string) string {
 	}
 	return strings.TrimSpace(reg.ReplaceAllString(s, ""))
 }
+
+func RemoveWhitespace(s string) string {
+	return strings.Join(strings.Fields(s), "")
+}

@@ -119,7 +119,7 @@ const (
 )
 
 type SnapshotWebhookOptions struct {
-	EventType string              `json:"eventType"`
+	EventType string              `json:"eventType"          validate:"required"`
 	Fields    []string            `json:"fields"`
 	Snapshot  *SnapshotForWebhook `json:"snapshot,omitempty"`
 }

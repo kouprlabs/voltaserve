@@ -2213,6 +2213,11 @@ func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*d
 			Snapshot:  svc.snapshotMapper.mapForWebhook(snapshot),
 		}); err != nil {
 			logger.GetLogger().Error(err)
+		} else {
+			snapshot, err = svc.snapshotCache.Get(snapshot.GetID())
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	if !props.ExceedsProcessingLimit {
