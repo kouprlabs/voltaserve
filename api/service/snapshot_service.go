@@ -28,38 +28,41 @@ import (
 	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
+	"github.com/kouprlabs/voltaserve/api/webhook"
 )
 
 type SnapshotService struct {
-	snapshotRepo   *repo.SnapshotRepo
-	snapshotCache  *cache.SnapshotCache
-	snapshotMapper *snapshotMapper
-	fileCache      *cache.FileCache
-	fileGuard      *guard.FileGuard
-	fileRepo       *repo.FileRepo
-	fileSearch     *search.FileSearch
-	fileMapper     *fileMapper
-	taskRepo       *repo.TaskRepo
-	taskCache      *cache.TaskCache
-	s3             infra.S3Manager
-	config         *config.Config
-	languages      []*dto.SnapshotLanguage
+	snapshotRepo    *repo.SnapshotRepo
+	snapshotCache   *cache.SnapshotCache
+	snapshotMapper  *snapshotMapper
+	snapshotWebhook *webhook.SnapshotWebhook
+	fileCache       *cache.FileCache
+	fileGuard       *guard.FileGuard
+	fileRepo        *repo.FileRepo
+	fileSearch      *search.FileSearch
+	fileMapper      *fileMapper
+	taskRepo        *repo.TaskRepo
+	taskCache       *cache.TaskCache
+	s3              infra.S3Manager
+	config          *config.Config
+	languages       []*dto.SnapshotLanguage
 }
 
 func NewSnapshotService() *SnapshotService {
 	return &SnapshotService{
-		snapshotRepo:   repo.NewSnapshotRepo(),
-		snapshotCache:  cache.NewSnapshotCache(),
-		snapshotMapper: newSnapshotMapper(),
-		fileCache:      cache.NewFileCache(),
-		fileGuard:      guard.NewFileGuard(),
-		fileSearch:     search.NewFileSearch(),
-		fileMapper:     newFileMapper(),
-		fileRepo:       repo.NewFileRepo(),
-		taskRepo:       repo.NewTaskRepo(),
-		taskCache:      cache.NewTaskCache(),
-		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
-		config:         config.GetConfig(),
+		snapshotRepo:    repo.NewSnapshotRepo(),
+		snapshotCache:   cache.NewSnapshotCache(),
+		snapshotMapper:  newSnapshotMapper(),
+		snapshotWebhook: webhook.NewSnapshotWebhook(),
+		fileCache:       cache.NewFileCache(),
+		fileGuard:       guard.NewFileGuard(),
+		fileSearch:      search.NewFileSearch(),
+		fileMapper:      newFileMapper(),
+		fileRepo:        repo.NewFileRepo(),
+		taskRepo:        repo.NewTaskRepo(),
+		taskCache:       cache.NewTaskCache(),
+		s3:              infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		config:          config.GetConfig(),
 		languages: []*dto.SnapshotLanguage{
 			{ID: "ara", ISO6393: "ara", Name: "Arabic"},
 			{ID: "chi_sim", ISO6393: "zho", Name: "Chinese Simplified"},
@@ -236,6 +239,11 @@ func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dt
 		}
 		if err = svc.fileSearch.Update([]model.File{file}); err != nil {
 			return nil, err
+		}
+	}
+	if svc.config.SnapshotWebhook != "" {
+		if err := svc.snapshotWebhook.Call(snapshot, dto.SnapshotWebhookEventTypeUpdated); err != nil {
+			logger.GetLogger().Error(err)
 		}
 	}
 	return svc.snapshotMapper.mapOne(snapshot), nil

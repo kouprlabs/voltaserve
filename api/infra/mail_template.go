@@ -44,16 +44,16 @@ type mailTemplate struct {
 	config config.SMTPConfig
 }
 
-func NewMailTemplate(smtpConfig config.SMTPConfig, isTest bool) MailTemplate {
-	if isTest {
+func NewMailTemplate(smtpConfig config.SMTPConfig, useMock bool) MailTemplate {
+	if useMock {
 		return newMockMailTemplate()
 	} else {
 		return newMailTemplate(smtpConfig)
 	}
 }
 
-func NewMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer, isTest bool) MailTemplate {
-	if isTest {
+func NewMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer, useMock bool) MailTemplate {
+	if useMock {
 		return newMockMailTemplate()
 	} else {
 		return newMailTemplateWithDialer(smtpConfig, dialer)

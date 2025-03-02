@@ -99,7 +99,7 @@ func (s *MailTemplateSuite) TestSend() {
 			mt := infra.NewMailTemplateWithDialer(config.SMTPConfig{
 				SenderName:    "Voltaserve",
 				SenderAddress: "voltaserve@example.com",
-			}, dialMock, true)
+			}, dialMock, false)
 
 			// gomail is non-deterministic in its headers, so we'll brute force our expected body.
 			s.EventuallyWithT(func(t *assert.CollectT) {
