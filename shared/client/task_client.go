@@ -34,14 +34,14 @@ func NewTaskClient(url string, apiKey string) *TaskClient {
 }
 
 func (cl *TaskClient) Create(opts dto.TaskCreateOptions) (*dto.Task, error) {
-	body, err := json.Marshal(opts)
+	b, err := json.Marshal(opts)
 	if err != nil {
 		return nil, err
 	}
 	req, err := http.NewRequest(
 		"POST",
 		fmt.Sprintf("%s/v3/tasks?api_key=%s", cl.url, cl.apiKey),
-		bytes.NewBuffer(body),
+		bytes.NewBuffer(b),
 	)
 	if err != nil {
 		return nil, err
@@ -58,21 +58,21 @@ func (cl *TaskClient) Create(opts dto.TaskCreateOptions) (*dto.Task, error) {
 		}
 	}(resp.Body)
 	var task dto.Task
-	if err := json.Unmarshal(body, &task); err != nil {
+	if err := json.Unmarshal(b, &task); err != nil {
 		return nil, err
 	}
 	return &task, nil
 }
 
 func (cl *TaskClient) Patch(id string, opts dto.TaskPatchOptions) (*dto.Task, error) {
-	body, err := json.Marshal(opts)
+	b, err := json.Marshal(opts)
 	if err != nil {
 		return nil, err
 	}
 	req, err := http.NewRequest(
 		"PATCH",
 		fmt.Sprintf("%s/v3/tasks/%s?api_key=%s", cl.url, id, cl.apiKey),
-		bytes.NewBuffer(body),
+		bytes.NewBuffer(b),
 	)
 	if err != nil {
 		return nil, err
@@ -88,12 +88,12 @@ func (cl *TaskClient) Patch(id string, opts dto.TaskPatchOptions) (*dto.Task, er
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	body, err = JsonResponseOrError(resp)
+	b, err = JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var task dto.Task
-	if err := json.Unmarshal(body, &task); err != nil {
+	if err := json.Unmarshal(b, &task); err != nil {
 		return nil, err
 	}
 	return &task, nil

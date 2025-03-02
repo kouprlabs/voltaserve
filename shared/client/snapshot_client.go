@@ -34,7 +34,7 @@ func NewSnapshotClient(url string, apiKey string) *SnapshotClient {
 }
 
 func (cl *SnapshotClient) Patch(opts dto.SnapshotPatchOptions) (*dto.Snapshot, error) {
-	body, err := json.Marshal(opts)
+	b, err := json.Marshal(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (cl *SnapshotClient) Patch(opts dto.SnapshotPatchOptions) (*dto.Snapshot, e
 			opts.Options.SnapshotID,
 			cl.apiKey,
 		),
-		bytes.NewBuffer(body),
+		bytes.NewBuffer(b),
 	)
 	if err != nil {
 		return nil, err
@@ -61,12 +61,12 @@ func (cl *SnapshotClient) Patch(opts dto.SnapshotPatchOptions) (*dto.Snapshot, e
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	body, err = JsonResponseOrError(resp)
+	b, err = JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var snapshot dto.Snapshot
-	if err := json.Unmarshal(body, &snapshot); err != nil {
+	if err := json.Unmarshal(b, &snapshot); err != nil {
 		return nil, err
 	}
 	return &snapshot, nil

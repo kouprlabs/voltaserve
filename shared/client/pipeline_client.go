@@ -42,11 +42,11 @@ func newPipelineClient(url string) *pipelineClient {
 }
 
 func (cl *pipelineClient) Run(opts *dto.PipelineRunOptions) error {
-	body, err := json.Marshal(opts)
+	b, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/pipelines/run", cl.url), bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/pipelines/run", cl.url), bytes.NewBuffer(b))
 	if err != nil {
 		return err
 	}

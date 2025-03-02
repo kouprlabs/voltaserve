@@ -11,7 +11,6 @@
 package client
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,18 +23,18 @@ import (
 func JsonResponseOrError(resp *http.Response) ([]byte, error) {
 	contentType := resp.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
-		body, err := io.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
 		if resp.StatusCode > 299 {
-			var errorResponse ErrorResponse
-			if err := json.Unmarshal(body, &errorResponse); err != nil {
+			var errorResponse errorpkg.ErrorResponse
+			if err := json.Unmarshal(b, &errorResponse); err != nil {
 				return nil, err
 			}
 			return nil, &errorResponse
 		} else {
-			return body, nil
+			return b, nil
 		}
 	} else {
 		return nil, errorpkg.NewInternalServerError(fmt.Errorf("unexpected response Content-Type: %s", contentType))
@@ -45,82 +44,67 @@ func JsonResponseOrError(resp *http.Response) ([]byte, error) {
 func TextResponseOrError(resp *http.Response) ([]byte, error) {
 	contentType := resp.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "text/plain") {
-		body, err := io.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
 		if resp.StatusCode > 299 {
-			var errorResponse ErrorResponse
-			if err := json.Unmarshal(body, &errorResponse); err != nil {
+			var errorResponse errorpkg.ErrorResponse
+			if err := json.Unmarshal(b, &errorResponse); err != nil {
 				return nil, err
 			}
 			return nil, &errorResponse
 		} else {
-			return body, nil
+			return b, nil
 		}
 	} else {
 		return nil, errorpkg.NewInternalServerError(fmt.Errorf("unexpected response Content-Type: %s", contentType))
 	}
 }
 
-func OctetStreamResponseOrError(resp *http.Response) ([]byte, error) {
-	contentType := resp.Header.Get("Content-Type")
-	if strings.HasPrefix(contentType, "application/octet-stream") {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
+func ByteResponseOrError(resp *http.Response) ([]byte, error) {
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode > 299 {
+		var errorResponse errorpkg.ErrorResponse
+		if err := json.Unmarshal(b, &errorResponse); err != nil {
 			return nil, err
 		}
-		if resp.StatusCode > 299 {
-			var errorResponse ErrorResponse
-			if err := json.Unmarshal(body, &errorResponse); err != nil {
-				return nil, err
-			}
-			return nil, &errorResponse
-		} else {
-			buf := &bytes.Buffer{}
-			_, err := io.Copy(buf, resp.Body)
-			if err != nil {
-				return nil, err
-			}
-			return buf.Bytes(), nil
-		}
+		return nil, &errorResponse
 	} else {
-		return nil, errorpkg.NewInternalServerError(fmt.Errorf("unexpected response Content-Type: %s", contentType))
+		return b, nil
 	}
 }
 
-func OctetStreamResponseWithWriterOrError(resp *http.Response, w io.Writer) error {
-	contentType := resp.Header.Get("Content-Type")
-	if strings.HasPrefix(contentType, "application/octet-stream") {
-		body, err := io.ReadAll(resp.Body)
+func ByteResponseWithWriterOrError(resp *http.Response, w io.Writer) error {
+	if resp.StatusCode > 299 {
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
-		if resp.StatusCode > 299 {
-			var errorResponse ErrorResponse
-			if err := json.Unmarshal(body, &errorResponse); err != nil {
-				return err
-			}
-			return &errorResponse
-		} else {
-			if _, err := io.Copy(w, resp.Body); err != nil {
-				return err
-			}
-			return nil
+		var errorResponse errorpkg.ErrorResponse
+		if err := json.Unmarshal(b, &errorResponse); err != nil {
+			return err
 		}
+		return &errorResponse
 	} else {
-		return errorpkg.NewInternalServerError(fmt.Errorf("unexpected response Content-Type: %s", contentType))
+		if _, err := io.Copy(w, resp.Body); err != nil {
+			return err
+		}
+		return nil
 	}
 }
 
 func SuccessfulResponseOrError(resp *http.Response) error {
 	if resp.StatusCode > 299 {
-		body, err := io.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
-		var errorResponse ErrorResponse
-		if err := json.Unmarshal(body, &errorResponse); err != nil {
+		var errorResponse errorpkg.ErrorResponse
+		if err := json.Unmarshal(b, &errorResponse); err != nil {
 			return err
 		}
 		return &errorResponse

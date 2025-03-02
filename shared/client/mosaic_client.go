@@ -160,5 +160,5 @@ func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) ([]by
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	return OctetStreamResponseOrError(resp)
+	return ByteResponseOrError(resp)
 }

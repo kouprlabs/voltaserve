@@ -90,7 +90,7 @@ type FileCreateFromS3Options struct {
 }
 
 func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*dto.File, error) {
-	body, err := json.Marshal(opts) //nolint:musttag // Not needed
+	b, err := json.Marshal(opts) //nolint:musttag // Not needed
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*dto.File, err
 	}
 	req, err := http.NewRequest("POST",
 		cl.url+"/v3/files/create_from_s3?"+args.Encode(),
-		bytes.NewBuffer(body))
+		bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
@@ -125,12 +125,12 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*dto.File, err
 			return
 		}
 	}(resp.Body)
-	body, err = JsonResponseOrError(resp)
+	b, err = JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
 	var file dto.File
-	if err := json.Unmarshal(body, &file); err != nil {
+	if err := json.Unmarshal(b, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
@@ -382,5 +382,5 @@ func (cl *FileClient) DownloadOriginal(file *dto.File, w io.Writer, rangeHeader 
 			logger.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	return OctetStreamResponseWithWriterOrError(resp, w)
+	return ByteResponseWithWriterOrError(resp, w)
 }

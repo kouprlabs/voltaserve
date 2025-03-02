@@ -37,11 +37,11 @@ type GetEntitiesOptions struct {
 }
 
 func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]dto.Entity, error) {
-	body, err := json.Marshal(opts)
+	b, err := json.Marshal(opts)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.Post(fmt.Sprintf("%s/v3/entities", cl.url), "application/json", bytes.NewBuffer(body))
+	resp, err := http.Post(fmt.Sprintf("%s/v3/entities", cl.url), "application/json", bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]dto.Entity, er
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	b, err := JsonResponseOrError(resp)
+	b, err = JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
