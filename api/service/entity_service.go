@@ -39,21 +39,19 @@ type EntityService struct {
 	taskSvc        *TaskService
 	taskMapper     *taskMapper
 	s3             infra.S3Manager
-	languageClient *client.LanguageClient
 	pipelineClient client.PipelineClient
 	fileIdent      *infra.FileIdentifier
 }
 
 func NewEntityService() *EntityService {
 	return &EntityService{
-		snapshotCache:  cache.NewSnapshotCache(),
-		snapshotSvc:    NewSnapshotService(),
-		fileCache:      cache.NewFileCache(),
-		fileGuard:      guard.NewFileGuard(),
-		taskSvc:        NewTaskService(),
-		taskMapper:     newTaskMapper(),
-		s3:             infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
-		languageClient: client.NewLanguageClient(config.GetConfig().LanguageURL),
+		snapshotCache: cache.NewSnapshotCache(),
+		snapshotSvc:   NewSnapshotService(),
+		fileCache:     cache.NewFileCache(),
+		fileGuard:     guard.NewFileGuard(),
+		taskSvc:       NewTaskService(),
+		taskMapper:    newTaskMapper(),
+		s3:            infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
 			config.GetConfig().Environment.IsTest,
