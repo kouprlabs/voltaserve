@@ -93,7 +93,7 @@ func (mgr *meilisearchManager) createFileIndex() error {
 		return err
 	}
 	if _, err := meilisearchClient.Index(FileSearchIndex).UpdateSettings(&meilisearch.Settings{
-		SearchableAttributes: []string{"name", "text"},
+		SearchableAttributes: []string{"name", "text", "summary"},
 		FilterableAttributes: []string{
 			"id",
 			"workspaceId",

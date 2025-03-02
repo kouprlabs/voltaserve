@@ -24,6 +24,7 @@ type File interface {
 	GetUserPermissions() []CoreUserPermission
 	GetGroupPermissions() []CoreGroupPermission
 	GetText() *string
+	GetSummary() *string
 	GetSnapshotID() *string
 	GetCreateTime() string
 	GetUpdateTime() *string
@@ -33,6 +34,7 @@ type File interface {
 	SetType(string)
 	SetName(string)
 	SetText(*string)
+	SetSummary(*string)
 	SetSnapshotID(*string)
 	SetUserPermissions([]CoreUserPermission)
 	SetGroupPermissions([]CoreGroupPermission)
