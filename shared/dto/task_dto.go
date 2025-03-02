@@ -30,6 +30,7 @@ type Task struct {
 	IsIndeterminate bool              `json:"isIndeterminate"`
 	UserID          string            `json:"userId"`
 	Status          string            `json:"status"`
+	IsDismissible   bool              `json:"isDismissible"`
 	Payload         map[string]string `json:"payload,omitempty"`
 	CreateTime      string            `json:"createTime"`
 	UpdateTime      *string           `json:"updateTime,omitempty"`

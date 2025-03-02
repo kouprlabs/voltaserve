@@ -84,7 +84,7 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
                 <Text noOfLines={3}>{task.name}</Text>
               ) : null}
             </div>
-            {task.error ? (
+            {task.isDismissible ? (
               <IconButton
                 icon={<IconClose />}
                 size="xs"
@@ -116,7 +116,9 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
               </AccordionItem>
             </Accordion>
           ) : null}
-          <RelativeDate date={new Date(task.createTime)} />
+          <Text className={cx('text-gray-500')}>
+            <RelativeDate date={new Date(task.createTime)} />
+          </Text>
         </div>
       </CardBody>
     </Card>

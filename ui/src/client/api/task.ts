@@ -30,6 +30,7 @@ export type Task = {
   isIndeterminate: boolean
   userId: string
   status: TaskStatus
+  isDismissible: boolean
   payload?: TaskPayload
   createTime: string
   updateTime?: string

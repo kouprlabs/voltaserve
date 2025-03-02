@@ -198,7 +198,7 @@ func (svc *TaskService) Dismiss(id string, userID string) error {
 	if task.GetUserID() != userID {
 		return errorpkg.NewTaskBelongsToAnotherUserError(nil)
 	}
-	if !task.HasError() {
+	if task.GetStatus() != model.TaskStatusSuccess && task.GetStatus() != model.TaskStatusError {
 		return errorpkg.NewTaskIsRunningError(nil)
 	}
 	return svc.deleteAndSync(id)
@@ -218,7 +218,7 @@ func (svc *TaskService) DismissAll(userID string) (*dto.TaskDismissAllResult, er
 		Failed:    make([]string, 0),
 	}
 	for _, t := range authorized {
-		if t.HasError() {
+		if t.GetStatus() == model.TaskStatusSuccess || t.GetStatus() == model.TaskStatusError {
 			if err := svc.deleteAndSync(t.GetID()); err != nil {
 				res.Failed = append(res.Failed, t.GetID())
 			} else {
@@ -472,6 +472,7 @@ func (mp *taskMapper) mapOne(m model.Task) (*dto.Task, error) {
 		IsIndeterminate: m.GetIsIndeterminate(),
 		UserID:          m.GetUserID(),
 		Status:          m.GetStatus(),
+		IsDismissible:   m.GetStatus() == model.TaskStatusSuccess || m.GetStatus() == model.TaskStatusError,
 		Payload:         m.GetPayload(),
 		CreateTime:      m.GetCreateTime(),
 		UpdateTime:      m.GetUpdateTime(),

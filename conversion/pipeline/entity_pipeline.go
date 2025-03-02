@@ -58,14 +58,6 @@ func (p *entityPipeline) Run(opts dto.PipelineRunOptions) error {
 }
 
 func (p *entityPipeline) RunFromLocalPath(_ string, opts dto.PipelineRunOptions) error {
-	if opts.TaskID != nil {
-		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
-			Fields: []string{model.TaskFieldName},
-			Name:   helper.ToPtr("Extracting text."),
-		}); err != nil {
-			return err
-		}
-	}
 	snapshot, err := p.snapshotClient.Find(opts.SnapshotID)
 	if err != nil {
 		return err
@@ -73,7 +65,7 @@ func (p *entityPipeline) RunFromLocalPath(_ string, opts dto.PipelineRunOptions)
 	if snapshot.Text == nil {
 		return nil
 	}
-	text, err := p.s3.GetText(snapshot.Text.Key, opts.Bucket, minio.GetObjectOptions{})
+	text, err := p.s3.GetText(snapshot.Text.Key, snapshot.Text.Bucket, minio.GetObjectOptions{})
 	if err != nil {
 		return err
 	}

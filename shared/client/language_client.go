@@ -41,7 +41,7 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]dto.Entity, er
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/entities", cl.url), bytes.NewBuffer(b))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/entities", cl.url), bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
