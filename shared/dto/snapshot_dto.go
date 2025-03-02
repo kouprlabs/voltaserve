@@ -116,10 +116,11 @@ type SnapshotForWebhook struct {
 
 const (
 	SnapshotWebhookEventTypeCreate = "create"
-	SnapshotWebhookEventTypeUpdate = "update"
+	SnapshotWebhookEventTypePatch  = "patch"
 )
 
 type SnapshotWebhookOptions struct {
 	EventType string              `json:"eventType"`
+	Fields    []string            `json:"fields"`
 	Snapshot  *SnapshotForWebhook `json:"snapshot,omitempty"`
 }

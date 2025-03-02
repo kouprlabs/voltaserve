@@ -34,11 +34,8 @@ func NewSnapshotWebhook() *SnapshotWebhook {
 	}
 }
 
-func (wh *SnapshotWebhook) Call(snapshot *dto.SnapshotForWebhook, eventType string) error {
-	b, err := json.Marshal(dto.SnapshotWebhookOptions{
-		EventType: eventType,
-		Snapshot:  snapshot,
-	})
+func (wh *SnapshotWebhook) Call(opts dto.SnapshotWebhookOptions) error {
+	b, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}
