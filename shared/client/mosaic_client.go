@@ -72,25 +72,25 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*dto.MosaicMetadata, e
 		return nil, err
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	body, err := JsonResponseOrError(resp)
+	b, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
-	var mosaicMetadata dto.MosaicMetadata
-	if err := json.Unmarshal(body, &mosaicMetadata); err != nil {
+	var res dto.MosaicMetadata
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &mosaicMetadata, nil
+	return &res, nil
 }
 
 type MosaicGetMetadataOptions struct {
@@ -103,20 +103,20 @@ func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*dto.MosaicM
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	body, err := JsonResponseOrError(resp)
+	b, err := JsonResponseOrError(resp)
 	if err != nil {
 		return nil, err
 	}
-	var mosaicMetadata dto.MosaicMetadata
-	if err := json.Unmarshal(body, &mosaicMetadata); err != nil {
+	var res dto.MosaicMetadata
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &mosaicMetadata, nil
+	return &res, nil
 }
 
 type MosaicDeleteOptions struct {
@@ -129,8 +129,8 @@ func (cl *MosaicClient) Delete(opts MosaicDeleteOptions) error {
 	if err != nil {
 		return err
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return err
 	}
@@ -155,8 +155,8 @@ func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) ([]by
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)

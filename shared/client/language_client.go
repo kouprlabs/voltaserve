@@ -45,8 +45,8 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]dto.Entity, er
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
@@ -54,9 +54,9 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]dto.Entity, er
 	if err != nil {
 		return nil, err
 	}
-	var entities []dto.Entity
-	if err := json.Unmarshal(b, &entities); err != nil {
+	var res []dto.Entity
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return entities, nil
+	return res, nil
 }

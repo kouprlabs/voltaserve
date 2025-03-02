@@ -47,21 +47,21 @@ func (cl *TaskClient) Create(opts dto.TaskCreateOptions) (*dto.Task, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	var task dto.Task
-	if err := json.Unmarshal(b, &task); err != nil {
+	var res dto.Task
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &task, nil
+	return &res, nil
 }
 
 func (cl *TaskClient) Patch(id string, opts dto.TaskPatchOptions) (*dto.Task, error) {
@@ -78,13 +78,13 @@ func (cl *TaskClient) Patch(id string, opts dto.TaskPatchOptions) (*dto.Task, er
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
@@ -92,11 +92,11 @@ func (cl *TaskClient) Patch(id string, opts dto.TaskPatchOptions) (*dto.Task, er
 	if err != nil {
 		return nil, err
 	}
-	var task dto.Task
-	if err := json.Unmarshal(b, &task); err != nil {
+	var res dto.Task
+	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
-	return &task, nil
+	return &res, nil
 }
 
 func (cl *TaskClient) Delete(id string) error {
@@ -109,8 +109,8 @@ func (cl *TaskClient) Delete(id string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return err
 	}

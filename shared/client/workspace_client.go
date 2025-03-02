@@ -35,13 +35,13 @@ func (cl *WorkspaceClient) GetBucket(id string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return "", err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)

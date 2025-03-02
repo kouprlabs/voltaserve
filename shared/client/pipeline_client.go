@@ -51,8 +51,8 @@ func (cl *pipelineClient) Run(opts *dto.PipelineRunOptions) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return err
 	}

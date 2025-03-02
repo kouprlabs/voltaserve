@@ -2150,6 +2150,7 @@ type fileStore struct {
 	snapshotRepo    *repo.SnapshotRepo
 	snapshotCache   *cache.SnapshotCache
 	snapshotSvc     *SnapshotService
+	snapshotMapper  *snapshotMapper
 	snapshotWebhook *webhook.SnapshotWebhook
 	taskSvc         *TaskService
 	fileIdent       *infra.FileIdentifier
@@ -2167,6 +2168,7 @@ func newFileStore() *fileStore {
 		snapshotRepo:    repo.NewSnapshotRepo(),
 		snapshotCache:   cache.NewSnapshotCache(),
 		snapshotSvc:     NewSnapshotService(),
+		snapshotMapper:  newSnapshotMapper(),
 		snapshotWebhook: webhook.NewSnapshotWebhook(),
 		taskSvc:         NewTaskService(),
 		fileIdent:       infra.NewFileIdentifier(),
@@ -2206,7 +2208,7 @@ func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*d
 		return nil, err
 	}
 	if svc.config.SnapshotWebhook != "" {
-		if err := svc.snapshotWebhook.Call(snapshot, dto.SnapshotWebhookEventTypeCreate); err != nil {
+		if err := svc.snapshotWebhook.Call(svc.snapshotMapper.mapOne(snapshot), dto.SnapshotWebhookEventTypeCreate); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}

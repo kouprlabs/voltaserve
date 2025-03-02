@@ -19,7 +19,6 @@ import (
 
 	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
-	"github.com/kouprlabs/voltaserve/shared/model"
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/logger"
@@ -35,8 +34,8 @@ func NewSnapshotWebhook() *SnapshotWebhook {
 	}
 }
 
-func (wh *SnapshotWebhook) Call(snapshot model.Snapshot, eventType string) error {
-	body, err := json.Marshal(dto.SnapshotWebhookOptions{
+func (wh *SnapshotWebhook) Call(snapshot *dto.Snapshot, eventType string) error {
+	b, err := json.Marshal(dto.SnapshotWebhookOptions{
 		EventType: eventType,
 		Snapshot:  snapshot,
 	})
@@ -46,19 +45,19 @@ func (wh *SnapshotWebhook) Call(snapshot model.Snapshot, eventType string) error
 	req, err := http.NewRequest(
 		"POST",
 		fmt.Sprintf("%s?api_key=%s", config.GetConfig().SnapshotWebhook, wh.config.Security.APIKey),
-		bytes.NewBuffer(body),
+		bytes.NewBuffer(b),
 	)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	cl := &http.Client{}
-	resp, err := cl.Do(req)
+	c := &http.Client{}
+	resp, err := c.Do(req)
 	if err != nil {
 		return err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
+	defer func(rc io.ReadCloser) {
+		if err := rc.Close(); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)

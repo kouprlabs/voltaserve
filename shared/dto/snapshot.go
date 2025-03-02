@@ -102,6 +102,6 @@ const (
 )
 
 type SnapshotWebhookOptions struct {
-	EventType string         `json:"eventType"`
-	Snapshot  model.Snapshot `json:"snapshot"`
+	EventType string    `json:"eventType"`
+	Snapshot  *Snapshot `json:"snapshot,omitempty"`
 }
