@@ -97,8 +97,8 @@ type SnapshotLanguage struct {
 }
 
 const (
-	SnapshotWebhookEventTypeCreated = "created"
-	SnapshotWebhookEventTypeUpdated = "updated"
+	SnapshotWebhookEventTypeCreate = "create"
+	SnapshotWebhookEventTypeUpdate = "update"
 )
 
 type SnapshotWebhookOptions struct {

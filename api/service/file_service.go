@@ -2206,7 +2206,7 @@ func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*d
 		return nil, err
 	}
 	if svc.config.SnapshotWebhook != "" {
-		if err := svc.snapshotWebhook.Call(snapshot, dto.SnapshotWebhookEventTypeCreated); err != nil {
+		if err := svc.snapshotWebhook.Call(snapshot, dto.SnapshotWebhookEventTypeCreate); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}
