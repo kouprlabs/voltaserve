@@ -242,7 +242,11 @@ func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dt
 		}
 	}
 	if svc.config.SnapshotWebhook != "" {
-		if err := svc.snapshotWebhook.Call(svc.snapshotMapper.mapForWebhook(snapshot), dto.SnapshotWebhookEventTypeUpdate); err != nil {
+		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
+			EventType: dto.SnapshotWebhookEventTypePatch,
+			Fields:    opts.Fields,
+			Snapshot:  svc.snapshotMapper.mapForWebhook(snapshot),
+		}); err != nil {
 			logger.GetLogger().Error(err)
 		}
 	}
