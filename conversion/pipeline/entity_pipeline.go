@@ -65,7 +65,7 @@ func (p *entityPipeline) RunFromLocalPath(_ string, opts dto.PipelineRunOptions)
 	if snapshot.Text == nil {
 		return nil
 	}
-	text, err := p.s3.GetText(snapshot.Text.Key, opts.Bucket, minio.GetObjectOptions{})
+	text, err := p.s3.GetText(snapshot.Text.Key, snapshot.Text.Bucket, minio.GetObjectOptions{})
 	if err != nil {
 		return err
 	}
