@@ -44,12 +44,7 @@ import {
 } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import downloadFile from '@/lib/helpers/download-file'
-import {
-  isImage,
-  isMicrosoftOffice,
-  isOpenOffice,
-  isPDF,
-} from '@/lib/helpers/file-extension'
+import { isImage } from '@/lib/helpers/file-extension'
 import mapFileList from '@/lib/helpers/map-file-list'
 import { isMacOS as helperIsMacOS } from '@/lib/helpers/os'
 import { isTaskPending } from '@/lib/helpers/task'
@@ -116,10 +111,6 @@ const FileMenu = ({
     () =>
       file?.type === 'file' &&
       !isTaskPending(file.snapshot?.task) &&
-      (isPDF(file.snapshot?.original.extension) ||
-        isMicrosoftOffice(file.snapshot?.original.extension) ||
-        isOpenOffice(file.snapshot?.original.extension) ||
-        isImage(file.snapshot?.original.extension)) &&
       ((geViewerPermission(file.permission) &&
         file.snapshot?.capabilities.entities) ||
         geEditorPermission(file.permission)),
