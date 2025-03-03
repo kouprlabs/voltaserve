@@ -44,12 +44,7 @@ import {
 } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import downloadFile from '@/lib/helpers/download-file'
-import {
-  isImage,
-  isMicrosoftOffice,
-  isOpenOffice,
-  isPDF,
-} from '@/lib/helpers/file-extension'
+import { isImage } from '@/lib/helpers/file-extension'
 import mapFileList from '@/lib/helpers/map-file-list'
 import { isMacOS as helperIsMacOS } from '@/lib/helpers/os'
 import { isTaskPending } from '@/lib/helpers/task'
