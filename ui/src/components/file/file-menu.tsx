@@ -26,6 +26,7 @@ import {
   MenuItem,
   MenuList,
   MenuOptionGroup,
+  Portal,
 } from '@chakra-ui/react'
 import {
   IconArrowTopRight,
@@ -290,233 +291,235 @@ const FileMenu = ({
             onClick={handleMenuButtonClick}
           />
         ) : null}
-        <MenuList
-          ref={menuListRef}
-          zIndex="dropdown"
-          style={style as CSSProperties | undefined}
-        >
-          {isToolsAuthorized ? (
+        <Portal>
+          <MenuList
+            ref={menuListRef}
+            zIndex="dropdown"
+            style={style as CSSProperties | undefined}
+          >
+            {isToolsAuthorized ? (
+              <MenuOptionGroup>
+                {isInsightsAuthorized ? (
+                  <MenuItem
+                    icon={<IconVisibility />}
+                    onClick={(event: MouseEvent) => {
+                      event.stopPropagation()
+                      dispatch(insightsModalDidOpen())
+                    }}
+                  >
+                    Insights
+                  </MenuItem>
+                ) : null}
+                {isMosaicAuthorized ? (
+                  <MenuItem
+                    icon={<IconModeHeat />}
+                    onClick={(event: MouseEvent) => {
+                      event.stopPropagation()
+                      dispatch(mosaicModalDidOpen())
+                    }}
+                  >
+                    Mosaic
+                  </MenuItem>
+                ) : null}
+              </MenuOptionGroup>
+            ) : null}
+            {isToolsAuthorized ? <MenuDivider /> : null}
+            {isManagementAuthorized ? (
+              <MenuOptionGroup>
+                {isSharingAuthorized ? (
+                  <MenuItem
+                    icon={<IconGroup />}
+                    onClick={(event: MouseEvent) => {
+                      event.stopPropagation()
+                      dispatch(sharingModalDidOpen())
+                    }}
+                  >
+                    Sharing
+                  </MenuItem>
+                ) : null}
+                {isSnapshotsAuthorized ? (
+                  <MenuItem
+                    icon={<IconHistory />}
+                    onClick={(event: MouseEvent) => {
+                      event.stopPropagation()
+                      dispatch(listModalDidOpen())
+                    }}
+                  >
+                    Snapshots
+                  </MenuItem>
+                ) : null}
+                {isUploadAuthorized ? (
+                  <MenuItem
+                    icon={<IconUpload />}
+                    onClick={(event: MouseEvent) => {
+                      event.stopPropagation()
+                      const singleId = file?.id
+                      uploadInputRef?.current?.click()
+                      if (singleId) {
+                        dispatch(selectionUpdated([singleId]))
+                      }
+                    }}
+                  >
+                    Upload
+                  </MenuItem>
+                ) : null}
+                {isDownloadAuthorized ? (
+                  <MenuItem
+                    icon={<IconDownload />}
+                    onClick={async (event: MouseEvent) => {
+                      event.stopPropagation()
+                      if (file) {
+                        await downloadFile(file)
+                      }
+                    }}
+                  >
+                    Download
+                  </MenuItem>
+                ) : null}
+              </MenuOptionGroup>
+            ) : null}
+            {isManagementAuthorized ? <MenuDivider /> : null}
             <MenuOptionGroup>
-              {isInsightsAuthorized ? (
-                <MenuItem
-                  icon={<IconVisibility />}
-                  onClick={(event: MouseEvent) => {
-                    event.stopPropagation()
-                    dispatch(insightsModalDidOpen())
-                  }}
-                >
-                  Insights
-                </MenuItem>
-              ) : null}
-              {isMosaicAuthorized ? (
-                <MenuItem
-                  icon={<IconModeHeat />}
-                  onClick={(event: MouseEvent) => {
-                    event.stopPropagation()
-                    dispatch(mosaicModalDidOpen())
-                  }}
-                >
-                  Mosaic
-                </MenuItem>
-              ) : null}
-            </MenuOptionGroup>
-          ) : null}
-          {isToolsAuthorized ? <MenuDivider /> : null}
-          {isManagementAuthorized ? (
-            <MenuOptionGroup>
-              {isSharingAuthorized ? (
-                <MenuItem
-                  icon={<IconGroup />}
-                  onClick={(event: MouseEvent) => {
-                    event.stopPropagation()
-                    dispatch(sharingModalDidOpen())
-                  }}
-                >
-                  Sharing
-                </MenuItem>
-              ) : null}
-              {isSnapshotsAuthorized ? (
-                <MenuItem
-                  icon={<IconHistory />}
-                  onClick={(event: MouseEvent) => {
-                    event.stopPropagation()
-                    dispatch(listModalDidOpen())
-                  }}
-                >
-                  Snapshots
-                </MenuItem>
-              ) : null}
-              {isUploadAuthorized ? (
-                <MenuItem
-                  icon={<IconUpload />}
-                  onClick={(event: MouseEvent) => {
-                    event.stopPropagation()
-                    const singleId = file?.id
-                    uploadInputRef?.current?.click()
-                    if (singleId) {
-                      dispatch(selectionUpdated([singleId]))
-                    }
-                  }}
-                >
-                  Upload
-                </MenuItem>
-              ) : null}
-              {isDownloadAuthorized ? (
-                <MenuItem
-                  icon={<IconDownload />}
-                  onClick={async (event: MouseEvent) => {
-                    event.stopPropagation()
-                    if (file) {
-                      await downloadFile(file)
-                    }
-                  }}
-                >
-                  Download
-                </MenuItem>
-              ) : null}
-            </MenuOptionGroup>
-          ) : null}
-          {isManagementAuthorized ? <MenuDivider /> : null}
-          <MenuOptionGroup>
-            <MenuItem
-              icon={<IconDelete />}
-              className={cx('text-red-500')}
-              isDisabled={!isDeleteAuthorized}
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(deleteModalDidOpen())
-              }}
-            >
-              <div className={cx('flex', 'flex-row', 'justify-between')}>
-                <span>Delete</span>
-                {isMacOS ? (
-                  <div>
-                    <Kbd>delete</Kbd>
-                  </div>
-                ) : (
-                  <div>
-                    <Kbd>Del</Kbd>
-                  </div>
-                )}
-              </div>
-            </MenuItem>
-            <MenuItem
-              icon={<IconEdit />}
-              isDisabled={!isRenameAuthorized}
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(renameModalDidOpen())
-              }}
-            >
-              <div className={cx('flex', 'flex-row', 'justify-between')}>
-                <span>Rename</span>
-                {isMacOS ? (
-                  <div>
-                    <Kbd>⌘</Kbd>+<Kbd>E</Kbd>
-                  </div>
-                ) : (
-                  <div>
-                    <Kbd>F2</Kbd>
-                  </div>
-                )}
-              </div>
-            </MenuItem>
-            <MenuItem
-              icon={<IconArrowTopRight />}
-              isDisabled={!isMoveAuthorized}
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(moveModalDidOpen())
-              }}
-            >
-              <div className={cx('flex', 'flex-row', 'justify-between')}>
-                <span>Move</span>
-                {isMacOS ? (
-                  <div>
-                    <Kbd>⌘</Kbd>+<Kbd>X</Kbd>
-                  </div>
-                ) : (
-                  <div>
-                    <Kbd>Ctrl</Kbd>+<Kbd>X</Kbd>
-                  </div>
-                )}
-              </div>
-            </MenuItem>
-            <MenuItem
-              icon={<IconFileCopy />}
-              isDisabled={!isCopyAuthorized}
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(copyModalDidOpen())
-              }}
-            >
-              <div className={cx('flex', 'flex-row', 'justify-between')}>
-                <span>Copy</span>
-                {isMacOS ? (
-                  <div>
-                    <Kbd>⌘</Kbd>+<Kbd>C</Kbd>
-                  </div>
-                ) : (
-                  <div>
-                    <Kbd>Ctrl</Kbd>+<Kbd>C</Kbd>
-                  </div>
-                )}
-              </div>
-            </MenuItem>
-          </MenuOptionGroup>
-          {isToolbarMode ? (
-            <MenuOptionGroup>
-              <MenuDivider />
               <MenuItem
-                icon={<IconSelectCheckBox />}
-                onClick={handleSelectAllClick}
+                icon={<IconDelete />}
+                className={cx('text-red-500')}
+                isDisabled={!isDeleteAuthorized}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(deleteModalDidOpen())
+                }}
               >
                 <div className={cx('flex', 'flex-row', 'justify-between')}>
-                  <span>Select All</span>
+                  <span>Delete</span>
                   {isMacOS ? (
                     <div>
-                      <Kbd>⌘</Kbd>+<Kbd>A</Kbd>
+                      <Kbd>delete</Kbd>
                     </div>
                   ) : (
                     <div>
-                      <Kbd>Ctrl</Kbd>+<Kbd>A</Kbd>
+                      <Kbd>Del</Kbd>
                     </div>
                   )}
                 </div>
               </MenuItem>
               <MenuItem
-                icon={<IconCheckBoxOutlineBlank />}
-                onClick={() => dispatch(selectionUpdated([]))}
+                icon={<IconEdit />}
+                isDisabled={!isRenameAuthorized}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(renameModalDidOpen())
+                }}
               >
-                Unselect All
+                <div className={cx('flex', 'flex-row', 'justify-between')}>
+                  <span>Rename</span>
+                  {isMacOS ? (
+                    <div>
+                      <Kbd>⌘</Kbd>+<Kbd>E</Kbd>
+                    </div>
+                  ) : (
+                    <div>
+                      <Kbd>F2</Kbd>
+                    </div>
+                  )}
+                </div>
+              </MenuItem>
+              <MenuItem
+                icon={<IconArrowTopRight />}
+                isDisabled={!isMoveAuthorized}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(moveModalDidOpen())
+                }}
+              >
+                <div className={cx('flex', 'flex-row', 'justify-between')}>
+                  <span>Move</span>
+                  {isMacOS ? (
+                    <div>
+                      <Kbd>⌘</Kbd>+<Kbd>X</Kbd>
+                    </div>
+                  ) : (
+                    <div>
+                      <Kbd>Ctrl</Kbd>+<Kbd>X</Kbd>
+                    </div>
+                  )}
+                </div>
+              </MenuItem>
+              <MenuItem
+                icon={<IconFileCopy />}
+                isDisabled={!isCopyAuthorized}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(copyModalDidOpen())
+                }}
+              >
+                <div className={cx('flex', 'flex-row', 'justify-between')}>
+                  <span>Copy</span>
+                  {isMacOS ? (
+                    <div>
+                      <Kbd>⌘</Kbd>+<Kbd>C</Kbd>
+                    </div>
+                  ) : (
+                    <div>
+                      <Kbd>Ctrl</Kbd>+<Kbd>C</Kbd>
+                    </div>
+                  )}
+                </div>
               </MenuItem>
             </MenuOptionGroup>
-          ) : null}
-          <MenuOptionGroup>
-            <MenuDivider />
-            <MenuItem
-              icon={<IconInfo />}
-              isDisabled={!isInfoAuthorized}
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(infoModalDidOpen())
-              }}
-            >
-              <div className={cx('flex', 'flex-row', 'justify-between')}>
-                <span>Info</span>
-                {isMacOS ? (
-                  <div>
-                    <Kbd>⌘</Kbd>+<Kbd>I</Kbd>
+            {isToolbarMode ? (
+              <MenuOptionGroup>
+                <MenuDivider />
+                <MenuItem
+                  icon={<IconSelectCheckBox />}
+                  onClick={handleSelectAllClick}
+                >
+                  <div className={cx('flex', 'flex-row', 'justify-between')}>
+                    <span>Select All</span>
+                    {isMacOS ? (
+                      <div>
+                        <Kbd>⌘</Kbd>+<Kbd>A</Kbd>
+                      </div>
+                    ) : (
+                      <div>
+                        <Kbd>Ctrl</Kbd>+<Kbd>A</Kbd>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div>
-                    <Kbd>Ctrl</Kbd>+<Kbd>I</Kbd>
-                  </div>
-                )}
-              </div>
-            </MenuItem>
-          </MenuOptionGroup>
-        </MenuList>
+                </MenuItem>
+                <MenuItem
+                  icon={<IconCheckBoxOutlineBlank />}
+                  onClick={() => dispatch(selectionUpdated([]))}
+                >
+                  Unselect All
+                </MenuItem>
+              </MenuOptionGroup>
+            ) : null}
+            <MenuOptionGroup>
+              <MenuDivider />
+              <MenuItem
+                icon={<IconInfo />}
+                isDisabled={!isInfoAuthorized}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(infoModalDidOpen())
+                }}
+              >
+                <div className={cx('flex', 'flex-row', 'justify-between')}>
+                  <span>Info</span>
+                  {isMacOS ? (
+                    <div>
+                      <Kbd>⌘</Kbd>+<Kbd>I</Kbd>
+                    </div>
+                  ) : (
+                    <div>
+                      <Kbd>Ctrl</Kbd>+<Kbd>I</Kbd>
+                    </div>
+                  )}
+                </div>
+              </MenuItem>
+            </MenuOptionGroup>
+          </MenuList>
+        </Portal>
       </Menu>
       <input
         ref={uploadInputRef}
