@@ -129,9 +129,13 @@ const ListItem = ({
     (event: MouseEvent) => {
       if (event) {
         event.preventDefault()
-        onContextMenu?.(event)
-        if (!isSelected) {
+        if (isSelected) {
+          onContextMenu?.(event)
+        } else {
           handleIconClick(event)
+          setTimeout(() => {
+            onContextMenu?.(event)
+          }, 100)
         }
       }
     },
