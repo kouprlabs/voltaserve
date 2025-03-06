@@ -261,7 +261,6 @@ const FileMenu = ({
             variant="solid"
             title="File menu"
             aria-label="File menu"
-            // onClick={handleMenuButtonClick}
           />
         ) : null}
         <Portal>
