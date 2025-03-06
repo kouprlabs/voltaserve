@@ -7,7 +7,16 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { ChangeEvent, MouseEvent, useCallback, useMemo, useRef } from 'react'
+import {
+  ChangeEvent,
+  CSSProperties,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   IconButton,
   Kbd,
@@ -34,6 +43,7 @@ import {
   IconSelectCheckBox,
   IconUpload,
   IconVisibility,
+  variables,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { FileAPI } from '@/client/api/file'
@@ -177,7 +187,42 @@ const FileMenu = ({
     isDownloadAuthorized,
   ])
   const isMacOS = useMemo(() => helperIsMacOS(), [])
+  const [safePosition, setSafePosition] = useState<FileMenuPosition | null>()
   const uploadInputRef = useRef<HTMLInputElement>(null)
+  const menuListRef = useRef<HTMLDivElement>(null)
+  const style = useMemo(() => {
+    if (!isToolbarMode && safePosition) {
+      return {
+        position: 'absolute',
+        left: safePosition.x,
+        top: safePosition.y,
+      }
+    }
+  }, [isToolbarMode, safePosition])
+
+  useEffect(() => {
+    if (isOpen && selection.length > 0 && menuListRef.current && position) {
+      const rect = new DOMRect(
+        position.x,
+        position.y,
+        menuListRef.current.offsetWidth,
+        menuListRef.current.offsetHeight,
+      )
+      setSafePosition({
+        x: position.x,
+        y:
+          position.y -
+          Math.max(0, rect.bottom - window.innerHeight) -
+          parseInt(variables.spacing.replace('px', ''), 10),
+      })
+    }
+  }, [isOpen, selection, menuListRef.current, position])
+
+  useEffect(() => {
+    if (!isOpen && !menuListRef.current) {
+      setSafePosition(null)
+    }
+  }, [isOpen, menuListRef.current])
 
   const handleUploadInputChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -220,16 +265,9 @@ const FileMenu = ({
         ) : null}
         <Portal>
           <MenuList
+            ref={menuListRef}
             zIndex="dropdown"
-            style={
-              position
-                ? {
-                    position: 'absolute',
-                    left: position?.x,
-                    top: position?.y,
-                  }
-                : undefined
-            }
+            style={style as CSSProperties | undefined}
           >
             {isToolsAuthorized ? (
               <MenuOptionGroup>
