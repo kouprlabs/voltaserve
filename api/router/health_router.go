@@ -27,7 +27,7 @@ func NewHealthRouter() *HealthRouter {
 }
 
 func (r *HealthRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/health", r.Get)
+	g.Get("/", r.Get)
 }
 
 // Get godoc

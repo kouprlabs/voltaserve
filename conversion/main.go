@@ -11,14 +11,11 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/log"
 	"github.com/joho/godotenv"
 
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
@@ -28,18 +25,6 @@ import (
 	"github.com/kouprlabs/voltaserve/conversion/router"
 	"github.com/kouprlabs/voltaserve/conversion/runtime"
 )
-
-func ErrorHandler(c *fiber.Ctx, err error) error {
-	var e *errorpkg.ErrorResponse
-	if errors.As(err, &e) {
-		var v *errorpkg.ErrorResponse
-		errors.As(err, &v)
-		return c.Status(v.Status).JSON(v)
-	} else {
-		log.Error(err)
-		return c.Status(http.StatusInternalServerError).JSON(errorpkg.NewInternalServerError(err))
-	}
-}
 
 //	@title		Voltaserve Conversion
 //	@version	3.0.0
@@ -71,21 +56,21 @@ func main() {
 	})
 
 	app := fiber.New(fiber.Config{
-		ErrorHandler: ErrorHandler,
+		ErrorHandler: errorpkg.ErrorHandler,
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 
 	router.NewVersionRouter().AppendRoutes(app)
 
-	v3 := app.Group("v3")
+	group := app.Group("v3")
 
 	router.NewHealthRouter(router.HealthRouterOptions{
 		Installer: installer,
-	}).AppendRoutes(v3)
+	}).AppendRoutes(group)
 
 	router.NewPipelineRouter(router.NewPipelineRouterOptions{
 		Scheduler: scheduler,
-	}).AppendRoutes(v3)
+	}).AppendRoutes(group)
 
 	scheduler.Start()
 	installer.Start()

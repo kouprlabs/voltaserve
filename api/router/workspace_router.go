@@ -50,9 +50,6 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
 	g.Patch("/:id/storage_capacity", r.PatchStorageCapacity)
-}
-
-func (r *WorkspaceRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/bucket", r.GetBucket)
 }
 
