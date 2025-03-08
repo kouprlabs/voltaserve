@@ -19,7 +19,7 @@ func MatchPath(pattern, path string) bool {
 	if len(patternSegments) != len(pathSegments) {
 		return false
 	}
-	for i := 0; i < len(patternSegments); i++ {
+	for i := range patternSegments {
 		patternPart := patternSegments[i]
 		pathPart := pathSegments[i]
 		// If the pattern part is a dynamic segment (starts with ":"), skip comparison
@@ -34,7 +34,7 @@ func MatchPath(pattern, path string) bool {
 			if len(patternSubparts) != len(pathSubparts) {
 				return false
 			}
-			for j := 0; j < len(patternSubparts); j++ {
+			for j := range patternSubparts {
 				if !strings.HasPrefix(patternSubparts[j], ":") && patternSubparts[j] != pathSubparts[j] {
 					return false
 				}

@@ -12,9 +12,11 @@ package errorpkg
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v2"
-	"github.com/kouprlabs/voltaserve/shared/logger"
 	"net/http"
+
+	"github.com/gofiber/fiber/v2"
+
+	"github.com/kouprlabs/voltaserve/shared/logger"
 )
 
 func ErrorHandler(c *fiber.Ctx, err error) error {
