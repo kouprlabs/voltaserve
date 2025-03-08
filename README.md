@@ -95,18 +95,18 @@ We recommend the following third-party applications:
 Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](.env) file to match your hostname (it can optionally be an IP address as well):
 
 ```properties
-VOLTASERVE_HOSTNAME="my-hostname"
+VOLTASERVE_HOSTNAME="your-hostname"
 ```
 
 Update the following environment variables in [.env](.env) file to match your SMTP server:
 
 ```properties
-VOLTASERVE_SMTP_HOST="my-smtp-hostname"
+VOLTASERVE_SMTP_HOST="your-smtp-hostname"
 VOLTASERVE_SMTP_PORT=587
 VOLTASERVE_SMTP_SECURE=true
-VOLTASERVE_SMTP_USERNAME="my-smtp-user"
-VOLTASERVE_SMTP_PASSWORD="my-smtp-password"
-VOLTASERVE_SMTP_SENDER_ADDRESS="no-reply@my-domain"
+VOLTASERVE_SMTP_USERNAME="your-smtp-user"
+VOLTASERVE_SMTP_PASSWORD="your-smtp-password"
+VOLTASERVE_SMTP_SENDER_ADDRESS="no-reply@your-domain"
 VOLTASERVE_SMTP_SENDER_NAME="Voltaserve"
 ```
 
@@ -157,7 +157,7 @@ VOLTASERVE_HOSTNAME="192.168.1.100"
 Or any custom hostname, like:
 
 ```properties
-VOLTASERVE_HOSTNAME="my-hostname"
+VOLTASERVE_HOSTNAME="your-hostname"
 ```
 
 ## Development
