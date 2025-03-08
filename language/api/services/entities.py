@@ -43,6 +43,9 @@ class EntityExtractor:
         Returns:
             list: A list of entities
         """
+        max_length = 1_000_000
+        if len(text) > max_length:
+            text = text[:max_length]
         return [
             {"text": re.sub(r"\n+", " ", ent.text).strip(), "label": ent.label_}
             for doc in self.nlp.pipe([text], disable=["tagger"])

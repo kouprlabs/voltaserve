@@ -246,14 +246,9 @@ func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dt
 			return nil, err
 		}
 	}
-	if svc.config.SnapshotWebhook != "" {
-		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
-			EventType: dto.SnapshotWebhookEventTypePatch,
-			Fields:    opts.Fields,
-			Snapshot:  svc.snapshotMapper.mapWithS3Objects(snapshot),
-		}); err != nil {
-			logger.GetLogger().Error(err)
-		}
+	snapshot, err = svc.callSnapshotHookWithPatchEvent(snapshot, opts.Fields)
+	if err != nil {
+		return nil, err
 	}
 	return svc.snapshotMapper.mapWithS3Objects(snapshot), nil
 }
@@ -449,6 +444,24 @@ func (svc *SnapshotService) deleteFromRepo(snapshots []model.Snapshot) {
 	}
 }
 
+func (svc *SnapshotService) callSnapshotHookWithPatchEvent(snapshot model.Snapshot, fields []string) (model.Snapshot, error) {
+	if svc.config.SnapshotWebhook != "" {
+		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
+			EventType: dto.SnapshotWebhookEventTypePatch,
+			Fields:    fields,
+			Snapshot:  svc.snapshotMapper.mapWithS3Objects(snapshot),
+		}); err != nil {
+			logger.GetLogger().Error(err)
+		} else {
+			snapshot, err = svc.snapshotCache.Get(snapshot.GetID())
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return snapshot, nil
+}
+
 func (svc *SnapshotService) isTaskPending(snapshot model.Snapshot) (bool, error) {
 	return isTaskPending(snapshot, svc.taskCache)
 }
@@ -489,12 +502,14 @@ func isTaskPending(snapshot model.Snapshot, taskCache *cache.TaskCache) (bool, e
 type snapshotMapper struct {
 	taskCache  *cache.TaskCache
 	taskMapper *taskMapper
+	fileIdent  *infra.FileIdentifier
 }
 
 func newSnapshotMapper() *snapshotMapper {
 	return &snapshotMapper{
 		taskCache:  cache.NewTaskCache(),
 		taskMapper: newTaskMapper(),
+		fileIdent:  infra.NewFileIdentifier(),
 	}
 }
 
@@ -541,6 +556,19 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *dto.Snapshot {
 		task, err := mp.taskCache.Get(*m.GetTaskID())
 		if err == nil {
 			s.Task, _ = mp.taskMapper.mapOne(task)
+		}
+	}
+	if m.HasOriginal() && m.GetIntent() == nil {
+		if mp.fileIdent.IsDocument(m.GetOriginal().Key) {
+			s.Intent = helper.ToPtr(model.SnapshotIntentDocument)
+		} else if mp.fileIdent.IsImage(m.GetOriginal().Key) {
+			s.Intent = helper.ToPtr(model.SnapshotIntentImage)
+		} else if mp.fileIdent.IsAudio(m.GetOriginal().Key) {
+			s.Intent = helper.ToPtr(model.SnapshotIntentAudio)
+		} else if mp.fileIdent.IsVideo(m.GetOriginal().Key) {
+			s.Intent = helper.ToPtr(model.SnapshotIntentVideo)
+		} else if mp.fileIdent.Is3D(m.GetOriginal().Key) {
+			s.Intent = helper.ToPtr(model.SnapshotIntent3D)
 		}
 	}
 	return s

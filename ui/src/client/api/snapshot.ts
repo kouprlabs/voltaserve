@@ -61,6 +61,10 @@ export enum SnapshotSortOrder {
 
 export enum SnapshotIntent {
   Document = 'document',
+  Image = 'image',
+  Video = 'video',
+  Audio = 'audio',
+  _3D = '3d',
 }
 
 export type SnapshotCapabilities = {

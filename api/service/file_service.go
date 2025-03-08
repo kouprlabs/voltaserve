@@ -2209,18 +2209,9 @@ func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*d
 	if err := svc.assignSnapshotToFile(file, snapshot); err != nil {
 		return nil, err
 	}
-	if svc.config.SnapshotWebhook != "" {
-		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
-			EventType: dto.SnapshotWebhookEventTypeCreate,
-			Snapshot:  svc.snapshotMapper.mapWithS3Objects(snapshot),
-		}); err != nil {
-			logger.GetLogger().Error(err)
-		} else {
-			snapshot, err = svc.snapshotCache.Get(snapshot.GetID())
-			if err != nil {
-				return nil, err
-			}
-		}
+	snapshot, err = svc.callSnapshotHookWithCreateEvent(snapshot)
+	if err != nil {
+		return nil, err
 	}
 	if !props.ExceedsProcessingLimit {
 		if err := svc.runPipeline(file, snapshot, props, userID); err != nil {
@@ -2344,6 +2335,23 @@ func (svc *fileStore) createTask(file model.File, userID string) (model.Task, er
 		return nil, err
 	}
 	return res, nil
+}
+
+func (svc *fileStore) callSnapshotHookWithCreateEvent(snapshot model.Snapshot) (model.Snapshot, error) {
+	if svc.config.SnapshotWebhook != "" {
+		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
+			EventType: dto.SnapshotWebhookEventTypeCreate,
+			Snapshot:  svc.snapshotMapper.mapWithS3Objects(snapshot),
+		}); err != nil {
+			logger.GetLogger().Error(err)
+		} else {
+			snapshot, err = svc.snapshotCache.Get(snapshot.GetID())
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return snapshot, nil
 }
 
 func (svc *fileStore) runPipeline(file model.File, snapshot model.Snapshot, props fileStoreProperties, userID string) error {

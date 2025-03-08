@@ -96,9 +96,6 @@ func (p *entityPipeline) patchEntities(text string, opts dto.PipelineRunOptions)
 	if len(text) == 0 {
 		return errors.New("text is empty")
 	}
-	if len(text) > 1000000 {
-		return errors.New("text exceeds supported limit of 1000K characters")
-	}
 	res, err := p.languageClient.GetEntities(client.GetEntitiesOptions{
 		Text:     text,
 		Language: *opts.Language,

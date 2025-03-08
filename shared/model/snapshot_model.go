@@ -26,6 +26,10 @@ const (
 
 const (
 	SnapshotIntentDocument = "document"
+	SnapshotIntentImage    = "image"
+	SnapshotIntentVideo    = "video"
+	SnapshotIntentAudio    = "audio"
+	SnapshotIntent3D       = "3d"
 )
 
 type Snapshot interface {
