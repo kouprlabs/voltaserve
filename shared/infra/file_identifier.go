@@ -31,7 +31,7 @@ func (fi *FileIdentifier) IsPDF(path string) bool {
 }
 
 func (fi *FileIdentifier) IsOffice(path string) bool {
-	extensions := []string{
+	for _, v := range []string{
 		".xls",
 		".doc",
 		".ppt",
@@ -52,10 +52,8 @@ func (fi *FileIdentifier) IsOffice(path string) bool {
 		".numbers",
 		".key",
 		".rtf",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
+	} {
+		if strings.ToLower(filepath.Ext(path)) == v {
 			return true
 		}
 	}
@@ -63,7 +61,7 @@ func (fi *FileIdentifier) IsOffice(path string) bool {
 }
 
 func (fi *FileIdentifier) IsPlainText(path string) bool {
-	extensions := []string{
+	for _, v := range []string{
 		".txt",
 		".html",
 		".js",
@@ -87,74 +85,106 @@ func (fi *FileIdentifier) IsPlainText(path string) bool {
 		".toml",
 		".md",
 		".csv",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
+	} {
+		if strings.ToLower(filepath.Ext(path)) == v {
 			return true
 		}
 	}
 	return false
+}
+
+func (fi *FileIdentifier) IsDocument(path string) bool {
+	return fi.IsPDF(path) || fi.IsOffice(path) || fi.IsPlainText(path)
 }
 
 func (fi *FileIdentifier) IsImage(path string) bool {
-	extensions := []string{
-		".xpm",
-		".png",
+	return fi.IsJPEG(path) ||
+		fi.IsPNG(path) ||
+		fi.IsTIFF(path) ||
+		fi.IsGIF(path) ||
+		fi.IsWebP(path) ||
+		fi.IsXPM(path) ||
+		fi.IsBMP(path) ||
+		fi.IsICO(path) ||
+		fi.IsSVG(path) ||
+		fi.IsHEIF(path) ||
+		fi.IsXCF(path)
+}
+
+func (fi *FileIdentifier) IsJPEG(path string) bool {
+	for _, v := range []string{
 		".jpg",
 		".jpeg",
+		".jpe",
+		".jfif",
+		".jif",
 		".jp2",
-		".gif",
-		".webp",
-		".tiff",
-		".tif",
-		".bmp",
-		".ico",
-		".heif",
-		".xcf",
-		".svg",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
+	} {
+		if strings.ToLower(filepath.Ext(path)) == v {
 			return true
 		}
 	}
 	return false
 }
 
-func (fi *FileIdentifier) IsJPEG(path string) bool {
-	path = strings.ToLower(path)
-	return filepath.Ext(path) == ".jpg" ||
-		filepath.Ext(path) == ".jpeg" ||
-		filepath.Ext(path) == ".jpe" ||
-		filepath.Ext(path) == ".jfif" ||
-		filepath.Ext(path) == ".jif"
-}
-
 func (fi *FileIdentifier) IsPNG(path string) bool {
-	path = strings.ToLower(path)
-	return filepath.Ext(path) == ".png"
+	return filepath.Ext(strings.ToLower(path)) == ".png"
 }
 
 func (fi *FileIdentifier) IsTIFF(path string) bool {
-	path = strings.ToLower(path)
-	return filepath.Ext(path) == ".tiff" ||
-		filepath.Ext(path) == ".tif"
+	for _, v := range []string{
+		".tiff",
+		".tif",
+	} {
+		if strings.ToLower(filepath.Ext(path)) == v {
+			return true
+		}
+	}
+	return false
+}
+
+func (fi *FileIdentifier) IsGIF(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".gif"
+}
+
+func (fi *FileIdentifier) IsWebP(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".webp"
+}
+
+func (fi *FileIdentifier) IsXPM(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".xpm"
+}
+
+func (fi *FileIdentifier) IsBMP(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".bmp"
+}
+
+func (fi *FileIdentifier) IsICO(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".ico"
+}
+
+func (fi *FileIdentifier) IsSVG(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".svg"
+}
+
+func (fi *FileIdentifier) IsHEIF(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".heif"
+}
+
+func (fi *FileIdentifier) IsXCF(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".xcf"
 }
 
 func (fi *FileIdentifier) IsNonAlphaChannelImage(path string) bool {
-	extensions := []string{
+	for _, v := range []string{
 		".jpg",
 		".jpeg",
 		".gif",
 		".tiff",
 		".tif",
 		".bmp",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
+	} {
+		if strings.ToLower(filepath.Ext(path)) == v {
 			return true
 		}
 	}
@@ -162,7 +192,7 @@ func (fi *FileIdentifier) IsNonAlphaChannelImage(path string) bool {
 }
 
 func (fi *FileIdentifier) IsVideo(path string) bool {
-	extensions := []string{
+	for _, v := range []string{
 		".ogv",
 		".mpeg",
 		".mov",
@@ -176,10 +206,8 @@ func (fi *FileIdentifier) IsVideo(path string) bool {
 		".mkv",
 		".asf",
 		".m4v",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
+	} {
+		if strings.ToLower(filepath.Ext(path)) == v {
 			return true
 		}
 	}
@@ -187,7 +215,7 @@ func (fi *FileIdentifier) IsVideo(path string) bool {
 }
 
 func (fi *FileIdentifier) IsAudio(path string) bool {
-	extensions := []string{
+	for _, v := range []string{
 		".oga",
 		".ogg",
 		".mp3",
@@ -203,10 +231,8 @@ func (fi *FileIdentifier) IsAudio(path string) bool {
 		"voc",
 		".m4a",
 		".qcp",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
+	} {
+		if strings.ToLower(filepath.Ext(path)) == v {
 			return true
 		}
 	}
@@ -214,26 +240,72 @@ func (fi *FileIdentifier) IsAudio(path string) bool {
 }
 
 func (fi *FileIdentifier) IsGLB(path string) bool {
-	extensions := []string{
-		".glb",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
+	return filepath.Ext(strings.ToLower(path)) == ".glb"
+}
+
+func (fi *FileIdentifier) IsOBJ(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".obj"
+}
+
+func (fi *FileIdentifier) IsFBX(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".fbx"
+}
+
+func (fi *FileIdentifier) IsSTL(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".stl"
+}
+
+func (fi *FileIdentifier) IsPLY(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".ply"
+}
+
+func (fi *FileIdentifier) IsSTEP(path string) bool {
+	for _, v := range []string{
+		".step",
+		".stp",
+	} {
+		if strings.ToLower(filepath.Ext(path)) == v {
 			return true
 		}
 	}
 	return false
 }
 
+func (fi *FileIdentifier) Is3DS(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".3ds"
+}
+
+func (fi *FileIdentifier) IsBLEND(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".blend"
+}
+
+func (fi *FileIdentifier) IsMAX(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".max"
+}
+
+func (fi *FileIdentifier) IsC4D(path string) bool {
+	return filepath.Ext(strings.ToLower(path)) == ".c4d"
+}
+
+func (fi *FileIdentifier) Is3D(path string) bool {
+	return fi.IsGLB(path) ||
+		fi.IsOBJ(path) ||
+		fi.IsFBX(path) ||
+		fi.IsSTL(path) ||
+		fi.IsPLY(path) ||
+		fi.IsSTEP(path) ||
+		fi.Is3DS(path) ||
+		fi.IsBLEND(path) ||
+		fi.IsMAX(path) ||
+		fi.IsC4D(path)
+}
+
 func (fi *FileIdentifier) IsZIP(path string) bool {
-	extensions := []string{
+	for _, v := range []string{
 		".zip",
 		".zipx",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
+	} {
+		if strings.ToLower(filepath.Ext(path)) == v {
 			return true
 		}
 	}
@@ -248,6 +320,9 @@ type GLTF struct {
 
 // IsGLTF inspects a ZIP archive to see if it contains a glTF 2.0 structure.
 func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
+	if !fi.IsZIP(path) {
+		return false, nil
+	}
 	zipFile, err := zip.OpenReader(path)
 	if err != nil {
 		return false, err

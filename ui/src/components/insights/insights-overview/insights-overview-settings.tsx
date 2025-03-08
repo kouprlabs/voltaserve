@@ -11,6 +11,7 @@ import { useCallback, useMemo } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import { IconBolt, IconDelete, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
+import { SnapshotIntent } from '@/client'
 import { EntityAPI } from '@/client/api/entity'
 import { FileAPI } from '@/client/api/file'
 import {
@@ -43,6 +44,7 @@ const InsightsOverviewSettings = () => {
   const canCollect = useMemo(() => {
     return (
       !isTaskPending(file?.snapshot?.task) &&
+      file?.snapshot?.intent == SnapshotIntent.Document &&
       geEditorPermission(file?.permission ?? NONE_PERMISSION)
     )
   }, [file])

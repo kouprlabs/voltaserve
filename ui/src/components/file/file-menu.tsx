@@ -46,6 +46,7 @@ import {
   variables,
 } from '@koupr/ui'
 import cx from 'classnames'
+import { SnapshotIntent } from '@/client'
 import { FileAPI } from '@/client/api/file'
 import {
   geEditorPermission,
@@ -58,7 +59,7 @@ import { isImage } from '@/lib/helpers/file-extension'
 import mapFileList from '@/lib/helpers/map-file-list'
 import { isMacOS as helperIsMacOS } from '@/lib/helpers/os'
 import { isTaskPending } from '@/lib/helpers/task'
-import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
+import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   copyModalDidOpen,
@@ -121,6 +122,9 @@ const FileMenu = ({
     () =>
       file?.type === 'file' &&
       !isTaskPending(file.snapshot?.task) &&
+      (file?.snapshot?.capabilities.entities ||
+        file?.snapshot?.capabilities.summary ||
+        file?.snapshot?.intent == SnapshotIntent.Document) &&
       ((geViewerPermission(file.permission) &&
         file.snapshot?.capabilities.entities) ||
         geEditorPermission(file.permission)),

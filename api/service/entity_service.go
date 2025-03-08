@@ -240,17 +240,17 @@ func (svc *EntityService) delete(task model.Task, snapshot model.Snapshot) {
 			logger.GetLogger().Error(err)
 			return
 		}
-	} else {
-		if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
-			logger.GetLogger().Error(err)
-			return
-		}
 	}
 	snapshot.SetEntities(nil)
 	snapshot.SetTaskID(nil)
 	if err := svc.snapshotSvc.saveAndSync(snapshot); err != nil {
 		logger.GetLogger().Error(err)
 		return
+	} else {
+		if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
+			logger.GetLogger().Error(err)
+			return
+		}
 	}
 }
 
