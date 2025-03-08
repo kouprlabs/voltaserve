@@ -558,16 +558,16 @@ func (mp *snapshotMapper) mapOne(m model.Snapshot) *dto.Snapshot {
 			s.Task, _ = mp.taskMapper.mapOne(task)
 		}
 	}
-	if m.GetIntent() == nil {
-		if mp.fileIdent.IsDocument(s.Original.Extension) {
+	if m.HasOriginal() && m.GetIntent() == nil {
+		if mp.fileIdent.IsDocument(m.GetOriginal().Key) {
 			s.Intent = helper.ToPtr(model.SnapshotIntentDocument)
-		} else if mp.fileIdent.IsImage(s.Original.Extension) {
+		} else if mp.fileIdent.IsImage(m.GetOriginal().Key) {
 			s.Intent = helper.ToPtr(model.SnapshotIntentImage)
-		} else if mp.fileIdent.IsAudio(s.Original.Extension) {
+		} else if mp.fileIdent.IsAudio(m.GetOriginal().Key) {
 			s.Intent = helper.ToPtr(model.SnapshotIntentAudio)
-		} else if mp.fileIdent.IsVideo(s.Original.Extension) {
+		} else if mp.fileIdent.IsVideo(m.GetOriginal().Key) {
 			s.Intent = helper.ToPtr(model.SnapshotIntentVideo)
-		} else if mp.fileIdent.Is3D(s.Original.Extension) {
+		} else if mp.fileIdent.Is3D(m.GetOriginal().Key) {
 			s.Intent = helper.ToPtr(model.SnapshotIntent3D)
 		}
 	}
