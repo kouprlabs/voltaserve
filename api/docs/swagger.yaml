@@ -630,7 +630,7 @@ definitions:
       summary:
         type: string
       taskId:
-        type: string
+        $ref: '#/definitions/dto.Task'
       text:
         $ref: '#/definitions/model.S3Object'
       thumbnail:
@@ -657,6 +657,8 @@ definitions:
         type: string
       id:
         type: string
+      isDismissible:
+        type: boolean
       isIndeterminate:
         type: boolean
       name:
@@ -3685,8 +3687,8 @@ paths:
       tags:
       - Tasks
     get:
-      description: Get
-      operationId: tasks_get
+      description: Find
+      operationId: tasks_find
       parameters:
       - description: ID
         in: path
@@ -3708,7 +3710,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get
+      summary: Find
       tags:
       - Tasks
     patch:
@@ -3909,7 +3911,7 @@ paths:
       summary: List
       tags:
       - Users
-  /users/{id}/picture{ext}:
+  /users/{id}/picture.{extension}:
     get:
       description: Download Picture
       operationId: users_download_picture
