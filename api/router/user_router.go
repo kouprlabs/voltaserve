@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -46,7 +47,7 @@ const (
 func (r *UserRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Get("/probe", r.Probe)
-	g.Get("/:id/picture:extension", r.DownloadPicture)
+	g.Get("/:id/picture.:extension", r.DownloadPicture)
 }
 
 // List godoc
@@ -123,7 +124,7 @@ func (r *UserRouter) Probe(c *fiber.Ctx) error {
 //	@Failure		400				{object}	errorpkg.ErrorResponse
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/users/{id}/picture{ext} [get]
+//	@Router			/users/{id}/picture.{extension} [get]
 func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -155,7 +156,7 @@ func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
 	if c.Query("invitation_id") != "" {
 		invitationID = helper.ToPtr(c.Query("invitation_id"))
 	}
-	b, ext, mime, err := r.userSvc.ExtractPicture(id, service.ExtractPictureJustification{
+	b, extension, mime, err := r.userSvc.ExtractPicture(id, service.ExtractPictureJustification{
 		OrganizationID: orgID,
 		GroupID:        groupID,
 		InvitationID:   invitationID,
@@ -163,11 +164,11 @@ func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if *ext != c.Params("extension") {
+	if !strings.EqualFold(strings.TrimPrefix(*extension, "."), c.Params("extension")) {
 		return errorpkg.NewPictureNotFoundError(nil)
 	}
 	c.Set("Content-Type", *mime)
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"picture%s\"", *ext))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"picture%s\"", *extension))
 	return c.Send(b)
 }
 

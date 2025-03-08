@@ -77,7 +77,7 @@ func main() {
 			{Path: "/" + v + "/tasks", Method: "POST"},
 			{Path: "/" + v + "/tasks/:id", Method: "DELETE"},
 			{Path: "/" + v + "/tasks/:id", Method: "PATCH"},
-			{Path: "/" + v + "/users/:id/picture:extension", Method: "GET"},
+			{Path: "/" + v + "/users/:id/picture.:extension", Method: "GET"},
 		} {
 			if helper.MatchPath(route.Path, c.Path()) && c.Method() == route.Method {
 				return c.Next()
