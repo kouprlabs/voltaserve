@@ -89,9 +89,6 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/revoke_group_permission", r.RevokeGroupPermission)
 	g.Get("/:id/user_permissions", r.FindUserPermissions)
 	g.Get("/:id/group_permissions", r.FindGroupPermissions)
-}
-
-func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original.:extension", r.DownloadOriginal)
 	g.Get("/:id/preview.:extension", r.DownloadPreview)
 	g.Get("/:id/text.:extension", r.DownloadText)

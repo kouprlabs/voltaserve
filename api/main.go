@@ -11,9 +11,7 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 
@@ -26,19 +24,8 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/helper"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/router"
 )
-
-func ErrorHandler(c *fiber.Ctx, err error) error {
-	var errorResponse *errorpkg.ErrorResponse
-	if errors.As(err, &errorResponse) {
-		return c.Status(errorResponse.Status).JSON(errorResponse)
-	} else {
-		logger.GetLogger().Error(err)
-		return c.Status(http.StatusInternalServerError).JSON(errorpkg.NewInternalServerError(err))
-	}
-}
 
 //	@title		Voltaserve API
 //	@version	3.0.0
@@ -58,10 +45,12 @@ func main() {
 		}
 	}
 
+	v := "v3"
+
 	cfg := config.GetConfig()
 
 	app := fiber.New(fiber.Config{
-		ErrorHandler: ErrorHandler,
+		ErrorHandler: errorpkg.ErrorHandler,
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.FileUploadMB)),
 	})
 
@@ -69,52 +58,52 @@ func main() {
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
+	app.Use(func(c *fiber.Ctx) error {
+		for _, route := range []struct {
+			Path   string
+			Method string
+		}{
+			{Path: "/" + v + "/workspaces/:id/bucket", Method: "GET"},
+			{Path: "/" + v + "/files/:id/original.:extension", Method: "GET"},
+			{Path: "/" + v + "/files/:id/preview.:extension", Method: "GET"},
+			{Path: "/" + v + "/files/:id/text.:extension", Method: "GET"},
+			{Path: "/" + v + "/files/:id/ocr.:extension", Method: "GET"},
+			{Path: "/" + v + "/files/:id/thumbnail.:extension", Method: "GET"},
+			{Path: "/" + v + "/files/create_from_s3", Method: "POST"},
+			{Path: "/" + v + "/files/:id/patch_from_s3", Method: "PATCH"},
+			{Path: "/" + v + "/snapshots/:id", Method: "GET"},
+			{Path: "/" + v + "/snapshots/:id", Method: "PATCH"},
+			{Path: "/" + v + "/mosaics/:file_id/zoom_level/:zoom_level/row/:row/column/:column/extension/:extension", Method: "GET"},
+			{Path: "/" + v + "/tasks", Method: "POST"},
+			{Path: "/" + v + "/tasks/:id", Method: "DELETE"},
+			{Path: "/" + v + "/tasks/:id", Method: "PATCH"},
+			{Path: "/" + v + "/users/:id/picture:extension", Method: "GET"},
+		} {
+			if helper.MatchPath(route.Path, c.Path()) && c.Method() == route.Method {
+				return c.Next()
+			}
+		}
+		return jwtware.New(jwtware.Config{
+			SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
+		})(c)
+	})
+
 	router.NewVersionRouter().AppendRoutes(app)
 
-	v3 := app.Group("v3")
+	group := app.Group(v)
 
-	router.NewHealthRouter().AppendRoutes(v3)
-
-	workspaceGroup := v3.Group("workspaces")
-	workspaceRouter := router.NewWorkspaceRouter()
-	workspaceRouter.AppendNonJWTRoutes(workspaceGroup)
-
-	fileGroup := v3.Group("files")
-	fileRouter := router.NewFileRouter()
-	fileRouter.AppendNonJWTRoutes(fileGroup)
-
-	snapshotGroup := v3.Group("snapshots")
-	snapshotRouter := router.NewSnapshotRouter()
-	snapshotRouter.AppendNonJWTRoutes(snapshotGroup)
-
-	mosaicGroup := v3.Group("mosaics")
-	mosaicRouter := router.NewMosaicRouter()
-	mosaicRouter.AppendNonJWTRoutes(mosaicGroup)
-
-	taskGroup := v3.Group("tasks")
-	taskRouter := router.NewTaskRouter()
-	taskRouter.AppendNonJWTRoutes(taskGroup)
-
-	userGroup := v3.Group("users")
-	userRouter := router.NewUserRouter()
-	userRouter.AppendNonJWTRoutes(userGroup)
-
-	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
-	}))
-
-	workspaceRouter.AppendRoutes(workspaceGroup)
-	fileRouter.AppendRoutes(fileGroup)
-	snapshotRouter.AppendRoutes(snapshotGroup)
-	mosaicRouter.AppendRoutes(mosaicGroup)
-	taskRouter.AppendRoutes(taskGroup)
-	userRouter.AppendRoutes(userGroup)
-
-	router.NewInvitationRouter().AppendRoutes(v3.Group("invitations"))
-	router.NewOrganizationRouter().AppendRoutes(v3.Group("organizations"))
-	router.NewStorageRouter().AppendRoutes(v3.Group("storage"))
-	router.NewGroupRouter().AppendRoutes(v3.Group("groups"))
-	router.NewEntityRouter().AppendRoutes(v3.Group("entities"))
+	router.NewHealthRouter().AppendRoutes(group.Group("health"))
+	router.NewWorkspaceRouter().AppendRoutes(group.Group("workspaces"))
+	router.NewFileRouter().AppendRoutes(group.Group("files"))
+	router.NewSnapshotRouter().AppendRoutes(group.Group("snapshots"))
+	router.NewMosaicRouter().AppendRoutes(group.Group("mosaics"))
+	router.NewTaskRouter().AppendRoutes(group.Group("tasks"))
+	router.NewUserRouter().AppendRoutes(group.Group("users"))
+	router.NewInvitationRouter().AppendRoutes(group.Group("invitations"))
+	router.NewOrganizationRouter().AppendRoutes(group.Group("organizations"))
+	router.NewStorageRouter().AppendRoutes(group.Group("storage"))
+	router.NewGroupRouter().AppendRoutes(group.Group("groups"))
+	router.NewEntityRouter().AppendRoutes(group.Group("entities"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

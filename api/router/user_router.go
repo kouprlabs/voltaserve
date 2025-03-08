@@ -46,9 +46,6 @@ const (
 func (r *UserRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Get("/probe", r.Probe)
-}
-
-func (r *UserRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/picture:extension", r.DownloadPicture)
 }
 

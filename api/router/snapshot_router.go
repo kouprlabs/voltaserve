@@ -42,9 +42,6 @@ func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/probe", r.Probe)
 	g.Post("/:id/activate", r.Activate)
 	g.Post("/:id/detach", r.Detach)
-}
-
-func (r *SnapshotRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id", r.Find)
 	g.Patch("/:id", r.Patch)
 }

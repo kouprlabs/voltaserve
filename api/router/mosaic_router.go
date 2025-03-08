@@ -44,9 +44,6 @@ func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:file_id", r.Create)
 	g.Delete("/:file_id", r.Delete)
 	g.Get("/:file_id/metadata", r.GetMetadata)
-}
-
-func (r *MosaicRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:file_id/zoom_level/:zoom_level/row/:row/column/:column/extension/:extension", r.DownloadTile)
 }
 

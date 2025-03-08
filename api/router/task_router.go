@@ -45,9 +45,6 @@ func (r *TaskRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/dismiss", r.DismissAll)
 	g.Get("/:id", r.Find)
 	g.Post("/:id/dismiss", r.Dismiss)
-}
-
-func (r *TaskRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id", r.Patch)

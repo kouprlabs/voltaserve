@@ -21,7 +21,7 @@ export type Snapshot = {
   text?: SnapshotDownloadable
   thumbnail?: SnapshotDownloadable
   summary?: string
-  intent?: string
+  intent?: SnapshotIntent
   language?: string
   capabilities: SnapshotCapabilities
   isActive: boolean
@@ -57,6 +57,10 @@ export enum SnapshotSortBy {
 export enum SnapshotSortOrder {
   Asc = 'asc',
   Desc = 'desc',
+}
+
+export enum SnapshotIntent {
+  Document = 'document',
 }
 
 export type SnapshotCapabilities = {
