@@ -18,10 +18,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/router"
 	"github.com/kouprlabs/voltaserve/conversion/runtime"
-	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 )
 
 //	@title		Voltaserve Conversion
