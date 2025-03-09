@@ -9,6 +9,7 @@
 // AGPL-3.0-only in the root of this repository.
 import cx from 'classnames'
 import { File, FileType } from '@/client/api/file'
+import FileInfoDocument from '@/components/file/info/file-info-document'
 import FileInfoItemCount from '@/components/file/info/file-info-item-count'
 import FileInfoCreateTime from './file-info-create-time'
 import FileInfoExtension from './file-info-extension'
@@ -26,6 +27,7 @@ const FileInfoEmbed = ({ file }: FileInfoEmbedProps) => (
   <div className={cx('flex', 'flex-col', 'gap-1')}>
     <FileInfoName file={file} />
     <FileInfoImage file={file} />
+    <FileInfoDocument file={file} />
     <FileInfoExtension file={file} />
     {file.type === FileType.Folder ? <FileInfoItemCount file={file} /> : null}
     <FileInfoStorage file={file} />

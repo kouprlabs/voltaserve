@@ -19,7 +19,6 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
-	"github.com/kouprlabs/voltaserve/shared/helper"
 
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/router"
@@ -46,9 +45,13 @@ func main() {
 
 	cfg := config.GetConfig()
 
-	schedulerOpts := runtime.NewDefaultSchedulerOptions()
-	pipelineWorkers := flag.Int("pipeline-workers", schedulerOpts.PipelineWorkerCount, "Number of pipeline workers")
+	pipelineWorkers := flag.Int(
+		"pipeline-workers",
+		runtime.NewDefaultSchedulerOptions().PipelineWorkerCount,
+		"Number of pipeline workers",
+	)
 	flag.Parse()
+
 	installer := runtime.NewInstaller()
 	scheduler := runtime.NewScheduler(runtime.SchedulerOptions{
 		PipelineWorkerCount: *pipelineWorkers,
@@ -57,7 +60,6 @@ func main() {
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: errorpkg.ErrorHandler,
-		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 
 	router.NewVersionRouter().AppendRoutes(app)

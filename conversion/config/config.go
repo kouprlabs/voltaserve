@@ -33,7 +33,6 @@ type LimitsConfig struct {
 	ExternalCommandTimeoutSeconds int
 	ImagePreviewMaxWidth          int
 	ImagePreviewMaxHeight         int
-	MultipartBodyLengthLimitMB    int
 }
 
 func GetConfig() *Config {
@@ -94,12 +93,5 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.ImagePreviewMaxHeight = int(v)
-	}
-	if len(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Limits.MultipartBodyLengthLimitMB = int(v)
 	}
 }

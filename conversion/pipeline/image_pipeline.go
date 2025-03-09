@@ -280,10 +280,20 @@ func (p *imagePipeline) patchText(inputPath string, opts dto.PipelineRunOptions)
 	if err != nil {
 		return err
 	}
+	count, err := p.pdfProc.CountPages(pdfPath)
+	if err != nil {
+		return err
+	}
 	s3Object := model.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/ocr.pdf",
 		Size:   stat.Size(),
+		Document: &model.DocumentProps{
+			Pages: &model.PagesProps{
+				Count:     *count,
+				Extension: ".pdf",
+			},
+		},
 	}
 	if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMIMEFromPath(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err

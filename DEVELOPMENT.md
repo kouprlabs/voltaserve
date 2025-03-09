@@ -33,16 +33,22 @@ Run the [migrations/migrate]() tool in the newly created database.
 
 ### From Binaries
 
-#### PostgreSQL
+#### CockroachDB
 
-Download and run [PostgreSQL](https://www.postgresql.org).
+Download the [binary archive](https://www.cockroachlabs.com/docs/releases) and extract the archive.
+
+Start CockroachDB:
+
+```shell
+./cockroach start-single-node --insecure --http-addr=0.0.0.0:18080
+```
 
 Using DBeaver or any PostgreSQL GUI, connect with `root` and no password, then create a user and database:
 
 ```sql
 CREATE DATABASE voltaserve;
-CREATE USER voltaserve WITH PASSWORD 'voltaserve';
-ALTER DATABASE voltaserve OWNER TO voltaserve;
+CREATE USER voltaserve;
+GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
 ```
 
 Run the [migrations/migrate]() tool in the newly created database.

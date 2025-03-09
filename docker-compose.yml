@@ -9,24 +9,25 @@
 # AGPL-3.0-only in the root of this repository.
 
 volumes:
-  postgres:
+  cockroach:
   minio:
   meilisearch:
   redis:
 
 services:
-  postgres:
-    image: postgres:17.2
+  cockroach:
+    image: cockroachdb/cockroach:latest-v24.3
     ports:
-      - ${VOLTASERVE_POSTGRES_PORT}:5432
+      - ${VOLTASERVE_POSTGRES_PORT}:26257
+      - ${VOLTASERVE_COCKROACH_CONSOLE_PORT}:8080
     environment:
-      POSTGRES_USER: voltaserve
-      POSTGRES_DB: voltaserve
-      POSTGRES_PASSWORD: voltaserve
+      COCKROACH_DATABASE: voltaserve
+      COCKROACH_USER: voltaserve
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - cockroach:/cockroach/cockroach-data
+    command: start-single-node --insecure
     healthcheck:
-      test: pg_isready -U postgres || exit 1
+      test: cockroach sql --insecure --execute='SELECT 1;' || exit 1
   minio:
     image: minio/minio:RELEASE.2024-11-07T00-52-20Z
     ports:
@@ -75,7 +76,7 @@ services:
       - CONVERSION_URL=http://conversion:8083
       - LANGUAGE_URL=http://language:8084
       - MOSAIC_URL=http://mosaic:8085
-      - POSTGRES_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - S3_URL=minio:9000
       - SEARCH_URL=http://meilisearch:7700
       - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
@@ -90,7 +91,7 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8080/v3/health || exit 1
     depends_on:
-      - postgres
+      - cockroach
       - redis
       - minio
       - meilisearch
@@ -103,7 +104,7 @@ services:
       - ${VOLTASERVE_IDP_PORT}:8081
     environment:
       - PORT=8081
-      - POSTGRES_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - SEARCH_URL=http://meilisearch:7700
       - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
@@ -116,7 +117,7 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8081/v3/health || exit 1
     depends_on:
-      - postgres
+      - cockroach
       - meilisearch
       - minio
     restart: on-failure
@@ -202,8 +203,8 @@ services:
     environment:
       - PORT=8086
       - HOST=0.0.0.0
-      - POSTGRES_URL=postgres
-      - POSTGRES_PORT=5432
+      - POSTGRES_URL=cockroach
+      - POSTGRES_PORT=26257
       - POSTGRES_NAME=voltaserve
       - POSTGRES_USER=voltaserve
       - POSTGRES_PASSWORD=voltaserve
@@ -227,14 +228,14 @@ services:
       - conversion
       - language
       - mosaic
-      - postgres
+      - cockroach
     restart: on-failure
   migrations:
     image: voltaserve/migrations:${VOLTASERVE_VERSION}
     build:
       context: ./migrations
     environment:
-      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - DATABASE_URL=postgresql://voltaserve@cockroach:26257/voltaserve
     depends_on:
-      - postgres
+      - cockroach
     restart: on-failure
