@@ -9,5 +9,5 @@ cargo build --release
 Run locally:
 
 ```shell
-./target/release/migrate up --database-url="postgresql://voltaserve:voltaserve@localhost:5432/voltaserve"
+./target/release/migrate up --database-url="postgresql://voltaserve@127.0.0.1:26257/voltaserve"
 ```
