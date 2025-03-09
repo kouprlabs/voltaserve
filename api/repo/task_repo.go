@@ -263,6 +263,19 @@ func (repo *TaskRepo) Count() (int64, error) {
 	return count, nil
 }
 
+func (repo *TaskRepo) CountByUserID(userID string) (int64, error) {
+	var count int64
+	db := repo.db.
+		Model(&taskEntity{}).
+		Where("user_id = ?", userID).
+		Where("status = ? OR status = ?", model.TaskStatusWaiting, model.TaskStatusRunning).
+		Count(&count)
+	if db.Error != nil {
+		return -1, db.Error
+	}
+	return count, nil
+}
+
 func (repo *TaskRepo) FindIDs(userID string) ([]string, error) {
 	type Value struct {
 		Result string
@@ -279,18 +292,6 @@ func (repo *TaskRepo) FindIDs(userID string) ([]string, error) {
 		res = append(res, v.Result)
 	}
 	return res, nil
-}
-
-func (repo *TaskRepo) CountByEmail(userID string) (int64, error) {
-	var count int64
-	db := repo.db.
-		Model(&taskEntity{}).
-		Where("user_id = ?", userID).
-		Count(&count)
-	if db.Error != nil {
-		return -1, db.Error
-	}
-	return count, nil
 }
 
 func (repo *TaskRepo) Save(task model.Task) error {

@@ -184,7 +184,7 @@ func (svc *TaskService) IsValidSortOrder(value string) bool {
 func (svc *TaskService) Count(userID string) (*int64, error) {
 	var res int64
 	var err error
-	if res, err = svc.taskRepo.CountByEmail(userID); err != nil {
+	if res, err = svc.taskRepo.CountByUserID(userID); err != nil {
 		return nil, err
 	}
 	return &res, nil
