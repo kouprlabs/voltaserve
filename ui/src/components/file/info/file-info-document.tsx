@@ -25,7 +25,7 @@ const FileInfoDocument = ({ file }: FileInfoDocumentProps) => {
     <Stat>
       <StatLabel>Document pages</StatLabel>
       <StatNumber className={cx('text-base')}>
-        {document.pages?.count}
+        {document.page?.count}
       </StatNumber>
     </Stat>
   )

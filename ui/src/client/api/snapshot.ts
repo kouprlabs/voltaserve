@@ -91,16 +91,16 @@ export type ImageProps = {
 }
 
 export type DocumentProps = {
-  pages?: PagesProps
-  thumbnails?: ThumbnailsProps
+  page?: PageProps
+  thumbnail?: ThumbnailProps
 }
 
-export type PagesProps = {
+export type PageProps = {
   count: number
   extension: string
 }
 
-export type ThumbnailsProps = {
+export type ThumbnailProps = {
   extension: string
 }
 

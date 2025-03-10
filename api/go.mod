@@ -13,7 +13,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gosimple/slug v1.14.0
 	github.com/joho/godotenv v1.5.1
-	github.com/kouprlabs/voltaserve/shared v0.0.0-20250309033035-a41e0a8afcee
+	github.com/kouprlabs/voltaserve/shared v0.0.0-20250310210257-54d86ee4b40d
 	github.com/minio/minio-go/v7 v7.0.87
 	github.com/reactivex/rxgo/v2 v2.5.0
 	github.com/stretchr/testify v1.10.0
@@ -114,6 +114,8 @@ require (
 	google.golang.org/protobuf v1.36.4 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/datatypes v1.2.5 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect
 	gorm.io/driver/postgres v1.5.11 // indirect
+	gorm.io/gorm v1.25.12 // indirect
 )
