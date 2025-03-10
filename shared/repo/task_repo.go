@@ -17,13 +17,12 @@ import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/logger"
 )
 
 type taskEntity struct {
@@ -193,12 +192,9 @@ type TaskRepo struct {
 	db *gorm.DB
 }
 
-func NewTaskRepo() *TaskRepo {
+func NewTaskRepo(postgres config.PostgresConfig, environment config.EnvironmentConfig) *TaskRepo {
 	return &TaskRepo{
-		db: infra.NewPostgresManager(
-			config.GetConfig().Postgres,
-			config.GetConfig().Environment,
-		).GetDBOrPanic(),
+		db: infra.NewPostgresManager(postgres, environment).GetDBOrPanic(),
 	}
 }
 

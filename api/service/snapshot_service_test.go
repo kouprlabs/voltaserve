@@ -16,13 +16,14 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
@@ -244,9 +245,16 @@ func (s *SnapshotServiceSuite) TestPatch() {
 		Version:    1,
 		CreateTime: helper.NewTimeString(),
 	})
-	err := repo.NewSnapshotRepo().Insert(snapshot)
+	err := repo.NewSnapshotRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).Insert(snapshot)
 	s.Require().NoError(err)
-	err = cache.NewSnapshotCache().Set(snapshot)
+	err = cache.NewSnapshotCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Set(snapshot)
 	s.Require().NoError(err)
 
 	patched, err := service.NewSnapshotService().Patch(snapshot.GetID(), dto.SnapshotPatchOptions{
@@ -276,11 +284,21 @@ func (s *SnapshotServiceSuite) createSnapshots(fileID string) []model.Snapshot {
 		}),
 	}
 	for _, snapshot := range res {
-		err := repo.NewSnapshotRepo().Insert(snapshot)
+		err := repo.NewSnapshotRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		).Insert(snapshot)
 		s.Require().NoError(err)
-		err = cache.NewSnapshotCache().Set(snapshot)
+		err = cache.NewSnapshotCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		).Set(snapshot)
 		s.Require().NoError(err)
-		err = repo.NewSnapshotRepo().MapWithFile(snapshot.GetID(), fileID)
+		err = repo.NewSnapshotRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		).MapWithFile(snapshot.GetID(), fileID)
 		s.Require().NoError(err)
 	}
 	return res
@@ -292,21 +310,42 @@ func (s *SnapshotServiceSuite) createSnapshot(fileID string) model.Snapshot {
 		Version:    1,
 		CreateTime: helper.NewTimeString(),
 	})
-	err := repo.NewSnapshotRepo().Insert(res)
+	err := repo.NewSnapshotRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).Insert(res)
 	s.Require().NoError(err)
-	err = cache.NewSnapshotCache().Set(res)
+	err = cache.NewSnapshotCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Set(res)
 	s.Require().NoError(err)
-	err = repo.NewSnapshotRepo().MapWithFile(res.GetID(), fileID)
+	err = repo.NewSnapshotRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).MapWithFile(res.GetID(), fileID)
 	s.Require().NoError(err)
 	return res
 }
 
 func (s *SnapshotServiceSuite) revokeUserPermissionForFile(file *dto.File, user model.User) {
-	err := repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
+	err := repo.NewFileRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(
+		[]model.File{cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		).GetOrNil(file.ID)},
 		user.GetID(),
 	)
 	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
+	_, err = cache.NewFileCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(file.ID)
 	s.Require().NoError(err)
 }

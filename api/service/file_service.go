@@ -23,19 +23,19 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/reactivex/rxgo/v2"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
+	"github.com/kouprlabs/voltaserve/shared/search"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/logger"
-	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/search"
 	"github.com/kouprlabs/voltaserve/api/webhook"
 )
 
@@ -226,14 +226,38 @@ type fileCreate struct {
 
 func newFileCreate() *fileCreate {
 	return &fileCreate{
-		fileRepo:       repo.NewFileRepo(),
-		fileSearch:     search.NewFileSearch(),
-		fileCache:      cache.NewFileCache(),
-		fileGuard:      guard.NewFileGuard(),
-		fileMapper:     newFileMapper(),
-		fileCoreSvc:    newFileCoreService(),
-		workspaceCache: cache.NewWorkspaceCache(),
-		workspaceGuard: guard.NewWorkspaceGuard(),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileSearch: search.NewFileSearch(
+			config.GetConfig().Postgres,
+			config.GetConfig().Search,
+			config.GetConfig().S3,
+			config.GetConfig().Environment,
+		),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileMapper:  newFileMapper(),
+		fileCoreSvc: newFileCoreService(),
+		workspaceCache: cache.NewWorkspaceCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		workspaceGuard: guard.NewWorkspaceGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 
@@ -377,17 +401,43 @@ type fileFetch struct {
 
 func newFileFetch() *fileFetch {
 	return &fileFetch{
-		fileCache:       cache.NewFileCache(),
-		fileRepo:        repo.NewFileRepo(),
-		fileSearch:      search.NewFileSearch(),
-		fileGuard:       guard.NewFileGuard(),
-		fileMapper:      newFileMapper(),
-		fileCoreSvc:     newFileCoreService(),
-		fileIdent:       infra.NewFileIdentifier(),
-		userRepo:        repo.NewUserRepo(),
-		workspaceRepo:   repo.NewWorkspaceRepo(),
-		workspaceSvc:    NewWorkspaceService(),
-		workspaceGuard:  guard.NewWorkspaceGuard(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileSearch: search.NewFileSearch(
+			config.GetConfig().Postgres,
+			config.GetConfig().Search,
+			config.GetConfig().S3,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileMapper:  newFileMapper(),
+		fileCoreSvc: newFileCoreService(),
+		fileIdent:   infra.NewFileIdentifier(),
+		userRepo: repo.NewUserRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		workspaceRepo: repo.NewWorkspaceRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		workspaceSvc: NewWorkspaceService(),
+		workspaceGuard: guard.NewWorkspaceGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		workspaceMapper: newWorkspaceMapper(),
 	}
 }
@@ -674,16 +724,39 @@ type fileList struct {
 
 func newFileList() *fileList {
 	return &fileList{
-		fileCache:      cache.NewFileCache(),
-		fileRepo:       repo.NewFileRepo(),
-		fileSearch:     search.NewFileSearch(),
-		fileGuard:      guard.NewFileGuard(),
-		fileCoreSvc:    newFileCoreService(),
-		fileFilterSvc:  newFileFilterService(),
-		fileSortSvc:    newFileSortService(),
-		fileMapper:     newFileMapper(),
-		workspaceRepo:  repo.NewWorkspaceRepo(),
-		workspaceGuard: guard.NewWorkspaceGuard(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileSearch: search.NewFileSearch(
+			config.GetConfig().Postgres,
+			config.GetConfig().Search,
+			config.GetConfig().S3,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileCoreSvc:   newFileCoreService(),
+		fileFilterSvc: newFileFilterService(),
+		fileSortSvc:   newFileSortService(),
+		fileMapper:    newFileMapper(),
+		workspaceRepo: repo.NewWorkspaceRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		workspaceGuard: guard.NewWorkspaceGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 
@@ -857,9 +930,20 @@ type fileCompute struct {
 
 func newFileCompute() *fileCompute {
 	return &fileCompute{
-		fileCache: cache.NewFileCache(),
-		fileRepo:  repo.NewFileRepo(),
-		fileGuard: guard.NewFileGuard(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 
@@ -909,14 +993,33 @@ type fileCopy struct {
 
 func newFileCopy() *fileCopy {
 	return &fileCopy{
-		fileRepo:     repo.NewFileRepo(),
-		fileSearch:   search.NewFileSearch(),
-		fileCache:    cache.NewFileCache(),
-		fileGuard:    guard.NewFileGuard(),
-		fileMapper:   newFileMapper(),
-		fileCoreSvc:  newFileCoreService(),
-		taskSvc:      NewTaskService(),
-		snapshotRepo: repo.NewSnapshotRepo(),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileSearch: search.NewFileSearch(
+			config.GetConfig().Postgres,
+			config.GetConfig().Search,
+			config.GetConfig().S3,
+			config.GetConfig().Environment,
+		),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileMapper:  newFileMapper(),
+		fileCoreSvc: newFileCoreService(),
+		taskSvc:     NewTaskService(),
+		snapshotRepo: repo.NewSnapshotRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
 	}
 }
 
@@ -1174,14 +1277,37 @@ type fileDelete struct {
 
 func newFileDelete() *fileDelete {
 	return &fileDelete{
-		fileRepo:       repo.NewFileRepo(),
-		fileCache:      cache.NewFileCache(),
-		fileSearch:     search.NewFileSearch(),
-		fileGuard:      guard.NewFileGuard(),
-		workspaceCache: cache.NewWorkspaceCache(),
-		taskSvc:        NewTaskService(),
-		snapshotRepo:   repo.NewSnapshotRepo(),
-		snapshotSvc:    NewSnapshotService(),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileSearch: search.NewFileSearch(
+			config.GetConfig().Postgres,
+			config.GetConfig().Search,
+			config.GetConfig().S3,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		workspaceCache: cache.NewWorkspaceCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		taskSvc: NewTaskService(),
+		snapshotRepo: repo.NewSnapshotRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		snapshotSvc: NewSnapshotService(),
 	}
 }
 
@@ -1343,10 +1469,22 @@ type fileDownload struct {
 
 func newFileDownload() *fileDownload {
 	return &fileDownload{
-		fileCache:     cache.NewFileCache(),
-		fileGuard:     guard.NewFileGuard(),
-		snapshotCache: cache.NewSnapshotCache(),
-		s3:            infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		snapshotCache: cache.NewSnapshotCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		s3: infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 	}
 }
 
@@ -1539,10 +1677,26 @@ type fileMove struct {
 
 func newFileMove() *fileMove {
 	return &fileMove{
-		fileRepo:    repo.NewFileRepo(),
-		fileSearch:  search.NewFileSearch(),
-		fileCache:   cache.NewFileCache(),
-		fileGuard:   guard.NewFileGuard(),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileSearch: search.NewFileSearch(
+			config.GetConfig().Postgres,
+			config.GetConfig().Search,
+			config.GetConfig().S3,
+			config.GetConfig().Environment,
+		),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		fileMapper:  newFileMapper(),
 		fileCoreSvc: newFileCoreService(),
 		taskSvc:     NewTaskService(),
@@ -1686,9 +1840,20 @@ type filePatch struct {
 
 func newFilePatch() *filePatch {
 	return &filePatch{
-		fileCache:   cache.NewFileCache(),
-		fileRepo:    repo.NewFileRepo(),
-		fileGuard:   guard.NewFileGuard(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		fileCoreSvc: newFileCoreService(),
 		fileMapper:  newFileMapper(),
 	}
@@ -1742,18 +1907,50 @@ type filePermission struct {
 
 func newFilePermission() *filePermission {
 	return &filePermission{
-		fileCache:      cache.NewFileCache(),
-		fileRepo:       repo.NewFileRepo(),
-		fileGuard:      guard.NewFileGuard(),
-		fileCoreSvc:    newFileCoreService(),
-		userRepo:       repo.NewUserRepo(),
-		userMapper:     newUserMapper(),
-		workspaceRepo:  repo.NewWorkspaceRepo(),
-		workspaceCache: cache.NewWorkspaceCache(),
-		groupCache:     cache.NewGroupCache(),
-		groupGuard:     guard.NewGroupGuard(),
-		groupMapper:    newGroupMapper(),
-		permissionRepo: repo.NewPermissionRepo(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileCoreSvc: newFileCoreService(),
+		userRepo: repo.NewUserRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		userMapper: newUserMapper(),
+		workspaceRepo: repo.NewWorkspaceRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		workspaceCache: cache.NewWorkspaceCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		groupCache: cache.NewGroupCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		groupGuard: guard.NewGroupGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		groupMapper: newGroupMapper(),
+		permissionRepo: repo.NewPermissionRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
 	}
 }
 
@@ -1995,15 +2192,34 @@ type fileReprocess struct {
 
 func newFileReprocess() *fileReprocess {
 	return &fileReprocess{
-		fileCache:     cache.NewFileCache(),
-		fileRepo:      repo.NewFileRepo(),
-		fileGuard:     guard.NewFileGuard(),
-		fileCoreSvc:   newFileCoreService(),
-		snapshotCache: cache.NewSnapshotCache(),
-		snapshotSvc:   NewSnapshotService(),
-		taskCache:     cache.NewTaskCache(),
-		taskSvc:       NewTaskService(),
-		fileIdent:     infra.NewFileIdentifier(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileCoreSvc: newFileCoreService(),
+		snapshotCache: cache.NewSnapshotCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		snapshotSvc: NewSnapshotService(),
+		taskCache: cache.NewTaskCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		taskSvc:   NewTaskService(),
+		fileIdent: infra.NewFileIdentifier(),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
 			config.GetConfig().Environment.IsTest,
@@ -2163,12 +2379,27 @@ type fileStore struct {
 
 func newFileStore() *fileStore {
 	return &fileStore{
-		fileCache:       cache.NewFileCache(),
-		fileCoreSvc:     newFileCoreService(),
-		fileMapper:      newFileMapper(),
-		workspaceCache:  cache.NewWorkspaceCache(),
-		snapshotRepo:    repo.NewSnapshotRepo(),
-		snapshotCache:   cache.NewSnapshotCache(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileCoreSvc: newFileCoreService(),
+		fileMapper:  newFileMapper(),
+		workspaceCache: cache.NewWorkspaceCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		snapshotRepo: repo.NewSnapshotRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		snapshotCache: cache.NewSnapshotCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		snapshotSvc:     NewSnapshotService(),
 		snapshotMapper:  newSnapshotMapper(),
 		snapshotWebhook: webhook.NewSnapshotWebhook(),
@@ -2387,12 +2618,28 @@ type fileCoreService struct {
 
 func newFileCoreService() *fileCoreService {
 	return &fileCoreService{
-		fileRepo:   repo.NewFileRepo(),
-		fileCache:  cache.NewFileCache(),
-		fileSearch: search.NewFileSearch(),
-		fileGuard:  guard.NewFileGuard(),
-		fileIdent:  infra.NewFileIdentifier(),
-		config:     config.GetConfig(),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileSearch: search.NewFileSearch(
+			config.GetConfig().Postgres,
+			config.GetConfig().Search,
+			config.GetConfig().S3,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileIdent: infra.NewFileIdentifier(),
+		config:    config.GetConfig(),
 	}
 }
 
@@ -2494,8 +2741,15 @@ type fileFilterService struct {
 
 func newFileFilterService() *fileFilterService {
 	return &fileFilterService{
-		fileRepo:   repo.NewFileRepo(),
-		fileGuard:  guard.NewFileGuard(),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		fileMapper: newFileMapper(),
 		fileIdent:  infra.NewFileIdentifier(),
 	}
@@ -2859,10 +3113,21 @@ type fileMapper struct {
 
 func newFileMapper() *fileMapper {
 	return &fileMapper{
-		groupCache:     cache.NewGroupCache(),
+		groupCache: cache.NewGroupCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		snapshotMapper: newSnapshotMapper(),
-		snapshotCache:  cache.NewSnapshotCache(),
-		snapshotRepo:   repo.NewSnapshotRepo(),
+		snapshotCache: cache.NewSnapshotCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		snapshotRepo: repo.NewSnapshotRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
 	}
 }
 

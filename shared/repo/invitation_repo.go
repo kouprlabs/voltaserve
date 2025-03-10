@@ -15,12 +15,11 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type invitationEntity struct {
@@ -134,13 +133,10 @@ type InvitationRepo struct {
 	userRepo *UserRepo
 }
 
-func NewInvitationRepo() *InvitationRepo {
+func NewInvitationRepo(postgres config.PostgresConfig, environment config.EnvironmentConfig) *InvitationRepo {
 	return &InvitationRepo{
-		db: infra.NewPostgresManager(
-			config.GetConfig().Postgres,
-			config.GetConfig().Environment,
-		).GetDBOrPanic(),
-		userRepo: NewUserRepo(),
+		db:       infra.NewPostgresManager(postgres, environment).GetDBOrPanic(),
+		userRepo: NewUserRepo(postgres, environment),
 	}
 }
 

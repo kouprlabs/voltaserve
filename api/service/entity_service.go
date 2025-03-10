@@ -17,18 +17,18 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/logger"
-	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 type EntityService struct {
@@ -45,13 +45,25 @@ type EntityService struct {
 
 func NewEntityService() *EntityService {
 	return &EntityService{
-		snapshotCache: cache.NewSnapshotCache(),
-		snapshotSvc:   NewSnapshotService(),
-		fileCache:     cache.NewFileCache(),
-		fileGuard:     guard.NewFileGuard(),
-		taskSvc:       NewTaskService(),
-		taskMapper:    newTaskMapper(),
-		s3:            infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		snapshotCache: cache.NewSnapshotCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		snapshotSvc: NewSnapshotService(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		taskSvc:    NewTaskService(),
+		taskMapper: newTaskMapper(),
+		s3:         infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
 			config.GetConfig().Environment.IsTest,

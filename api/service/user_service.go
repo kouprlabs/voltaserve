@@ -14,17 +14,17 @@ import (
 	"slices"
 	"sort"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
+	"github.com/kouprlabs/voltaserve/shared/search"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 type UserService struct {
@@ -43,17 +43,48 @@ type UserService struct {
 
 func NewUserService() *UserService {
 	return &UserService{
-		userMapper:     newUserMapper(),
-		userRepo:       repo.NewUserRepo(),
-		userSearch:     search.NewUserSearch(),
-		orgRepo:        repo.NewOrganizationRepo(),
-		orgCache:       cache.NewOrganizationCache(),
-		orgGuard:       guard.NewOrganizationGuard(),
-		groupRepo:      repo.NewGroupRepo(),
-		groupGuard:     guard.NewGroupGuard(),
-		groupCache:     cache.NewGroupCache(),
-		invitationRepo: repo.NewInvitationRepo(),
-		config:         config.GetConfig(),
+		userMapper: newUserMapper(),
+		userRepo: repo.NewUserRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		userSearch: search.NewUserSearch(
+			config.GetConfig().Search,
+			config.GetConfig().Environment,
+		),
+		orgRepo: repo.NewOrganizationRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		orgCache: cache.NewOrganizationCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgGuard: guard.NewOrganizationGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		groupRepo: repo.NewGroupRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		groupGuard: guard.NewGroupGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		groupCache: cache.NewGroupCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		invitationRepo: repo.NewInvitationRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		config: config.GetConfig(),
 	}
 }
 

@@ -17,11 +17,12 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type RedisSuite struct {
@@ -38,10 +39,18 @@ func (s *RedisSuite) TestSetAndGet() {
 		Name: "file",
 		Type: model.FileTypeFile,
 	}
-	err := cache.NewFileCache().Set(repo.NewFileModelWithOptions(opts))
+	err := cache.NewFileCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Set(repo.NewFileModelWithOptions(opts))
 	s.Require().NoError(err)
 
-	file, err := cache.NewFileCache().Get(opts.ID)
+	file, err := cache.NewFileCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Get(opts.ID)
 	s.Require().NoError(err)
 	s.Equal(opts.ID, file.GetID())
 	s.Equal(opts.Name, file.GetName())

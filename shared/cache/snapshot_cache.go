@@ -13,52 +13,51 @@ package cache
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
-type TaskCache struct {
-	redis     *infra.RedisManager
-	taskRepo  *repo.TaskRepo
-	keyPrefix string
+type SnapshotCache struct {
+	redis        *infra.RedisManager
+	snapshotRepo *repo.SnapshotRepo
+	keyPrefix    string
 }
 
-func NewTaskCache() *TaskCache {
-	return &TaskCache{
-		taskRepo:  repo.NewTaskRepo(),
-		redis:     infra.NewRedisManager(config.GetConfig().Redis),
-		keyPrefix: "task:",
+func NewSnapshotCache(postgres config.PostgresConfig, redis config.RedisConfig, environment config.EnvironmentConfig) *SnapshotCache {
+	return &SnapshotCache{
+		redis:        infra.NewRedisManager(redis),
+		snapshotRepo: repo.NewSnapshotRepo(postgres, environment),
+		keyPrefix:    "snapshot:",
 	}
 }
 
-func (c *TaskCache) Set(file model.Task) error {
-	b, err := json.Marshal(file)
+func (c *SnapshotCache) Set(snapshot model.Snapshot) error {
+	b, err := json.Marshal(snapshot)
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+file.GetID(), string(b))
+	err = c.redis.Set(c.keyPrefix+snapshot.GetID(), string(b))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *TaskCache) Get(id string) (model.Task, error) {
+func (c *SnapshotCache) Get(id string) (model.Snapshot, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	task := repo.NewTaskModel()
-	if err = json.Unmarshal([]byte(value), &task); err != nil {
+	res := repo.NewSnapshotModel()
+	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}
-	return task, nil
+	return res, nil
 }
 
-func (c *TaskCache) GetOrNil(id string) model.Task {
+func (c *SnapshotCache) GetOrNil(id string) model.Snapshot {
 	res, err := c.Get(id)
 	if err != nil {
 		return nil
@@ -66,8 +65,8 @@ func (c *TaskCache) GetOrNil(id string) model.Task {
 	return res
 }
 
-func (c *TaskCache) Refresh(id string) (model.Task, error) {
-	res, err := c.taskRepo.Find(id)
+func (c *SnapshotCache) Refresh(id string) (model.Snapshot, error) {
+	res, err := c.snapshotRepo.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +76,7 @@ func (c *TaskCache) Refresh(id string) (model.Task, error) {
 	return res, nil
 }
 
-func (c *TaskCache) Delete(id string) error {
+func (c *SnapshotCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
 		return nil
 	}

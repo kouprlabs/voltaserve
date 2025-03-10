@@ -17,13 +17,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
@@ -366,7 +367,11 @@ func (s *WorkspaceServiceSuite) TestPatchName_InsufficientPermissions() {
 	s.Equal(
 		errorpkg.NewWorkspacePermissionError(
 			s.users[0].GetID(),
-			cache.NewWorkspaceCache().GetOrNil(workspace.ID),
+			cache.NewWorkspaceCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(workspace.ID),
 			model.PermissionEditor,
 		).Error(),
 		err.Error(),
@@ -443,7 +448,11 @@ func (s *WorkspaceServiceSuite) TestPatchStorageCapacity_InsufficientPermission(
 	s.Equal(
 		errorpkg.NewWorkspacePermissionError(
 			s.users[0].GetID(),
-			cache.NewWorkspaceCache().GetOrNil(workspace.ID),
+			cache.NewWorkspaceCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(workspace.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -523,7 +532,11 @@ func (s *WorkspaceServiceSuite) TestDelete_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewWorkspacePermissionError(
 			s.users[0].GetID(),
-			cache.NewWorkspaceCache().GetOrNil(workspace.ID),
+			cache.NewWorkspaceCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(workspace.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -599,22 +612,43 @@ func (s *WorkspaceServiceSuite) TestHasEnoughSpaceForByteSize_NonExistentWorkspa
 }
 
 func (s *WorkspaceServiceSuite) grantUserPermissionForWorkspace(workspace *dto.Workspace, user model.User, permission string) {
-	err := repo.NewWorkspaceRepo().GrantUserPermission(workspace.ID, user.GetID(), permission)
+	err := repo.NewWorkspaceRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).GrantUserPermission(workspace.ID, user.GetID(), permission)
 	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
+	_, err = cache.NewWorkspaceCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(workspace.ID)
 	s.Require().NoError(err)
 }
 
 func (s *WorkspaceServiceSuite) revokeUserPermissionForWorkspace(workspace *dto.Workspace, user model.User) {
-	err := repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, user.GetID())
+	err := repo.NewWorkspaceRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(workspace.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
+	_, err = cache.NewWorkspaceCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(workspace.ID)
 	s.Require().NoError(err)
 }
 
 func (s *WorkspaceServiceSuite) revokeUserPermissionForOrganization(org *dto.Organization, user model.User) {
-	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	err := repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(org.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	_, err = cache.NewOrganizationCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(org.ID)
 	s.Require().NoError(err)
 }

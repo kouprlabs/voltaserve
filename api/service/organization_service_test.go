@@ -16,14 +16,15 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
@@ -284,7 +285,11 @@ func (s *OrganizationServiceSuite) TestPatchName_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewOrganizationPermissionError(
 			s.users[0].GetID(),
-			cache.NewOrganizationCache().GetOrNil(org.ID),
+			cache.NewOrganizationCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(org.ID),
 			model.PermissionEditor,
 		).Error(),
 		err.Error(),
@@ -337,7 +342,11 @@ func (s *OrganizationServiceSuite) TestDelete_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewOrganizationPermissionError(
 			s.users[0].GetID(),
-			cache.NewOrganizationCache().GetOrNil(org.ID),
+			cache.NewOrganizationCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(org.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -356,12 +365,23 @@ func (s *OrganizationServiceSuite) TestRemoveMember() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
+	err = repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
 	s.Require().NoError(err)
 
 	err = service.NewOrganizationService().RemoveMember(org.ID, s.users[1].GetID(), s.users[0].GetID())
 	s.Require().NoError(err)
-	s.False(guard.NewOrganizationGuard().IsAuthorized(s.users[1].GetID(), cache.NewOrganizationCache().GetOrNil(org.ID), model.PermissionEditor))
+	s.False(guard.NewOrganizationGuard(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).IsAuthorized(s.users[1].GetID(), cache.NewOrganizationCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).GetOrNil(org.ID), model.PermissionEditor))
 }
 
 func (s *OrganizationServiceSuite) TestRemoveMember_MissingPermission() {
@@ -370,7 +390,10 @@ func (s *OrganizationServiceSuite) TestRemoveMember_MissingPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
+	err = repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
 	s.Require().NoError(err)
 
 	s.revokeUserPermissionForOrganization(org, s.users[0])
@@ -386,7 +409,10 @@ func (s *OrganizationServiceSuite) TestRemoveMember_InsufficientPermission() {
 	}, s.users[0].GetID())
 	s.Require().NoError(err)
 
-	err = repo.NewOrganizationRepo().GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
+	err = repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).GrantUserPermission(org.ID, s.users[1].GetID(), model.PermissionEditor)
 	s.Require().NoError(err)
 
 	s.grantUserPermissionForOrganization(org, s.users[0], model.PermissionViewer)
@@ -396,7 +422,11 @@ func (s *OrganizationServiceSuite) TestRemoveMember_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewOrganizationPermissionError(
 			s.users[0].GetID(),
-			cache.NewOrganizationCache().GetOrNil(org.ID),
+			cache.NewOrganizationCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(org.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -422,19 +452,37 @@ func (s *OrganizationServiceSuite) TestRemoveMember_LastOwnerOfOrganization() {
 
 	err = service.NewOrganizationService().RemoveMember(org.ID, s.users[0].GetID(), s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(cache.NewOrganizationCache().GetOrNil(org.ID)).Error(), err.Error())
+	s.Equal(errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(cache.NewOrganizationCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).GetOrNil(org.ID)).Error(), err.Error())
 }
 
 func (s *OrganizationServiceSuite) grantUserPermissionForOrganization(org *dto.Organization, user model.User, permission string) {
-	err := repo.NewOrganizationRepo().GrantUserPermission(org.ID, user.GetID(), permission)
+	err := repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).GrantUserPermission(org.ID, user.GetID(), permission)
 	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	_, err = cache.NewOrganizationCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(org.ID)
 	s.Require().NoError(err)
 }
 
 func (s *OrganizationServiceSuite) revokeUserPermissionForOrganization(org *dto.Organization, user model.User) {
-	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	err := repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(org.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	_, err = cache.NewOrganizationCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(org.ID)
 	s.Require().NoError(err)
 }

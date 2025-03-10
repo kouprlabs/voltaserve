@@ -15,11 +15,10 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type userEntity struct {
@@ -82,12 +81,9 @@ type UserRepo struct {
 	db *gorm.DB
 }
 
-func NewUserRepo() *UserRepo {
+func NewUserRepo(postgres config.PostgresConfig, environment config.EnvironmentConfig) *UserRepo {
 	return &UserRepo{
-		db: infra.NewPostgresManager(
-			config.GetConfig().Postgres,
-			config.GetConfig().Environment,
-		).GetDBOrPanic(),
+		db: infra.NewPostgresManager(postgres, environment).GetDBOrPanic(),
 	}
 }
 

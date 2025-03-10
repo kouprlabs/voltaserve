@@ -13,17 +13,15 @@ package search
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
 type TaskSearch struct {
-	index    string
-	search   infra.SearchManager
-	taskRepo *repo.TaskRepo
+	index  string
+	search infra.SearchManager
 }
 
 type taskEntity struct {
@@ -42,11 +40,10 @@ func (t taskEntity) GetID() string {
 	return t.ID
 }
 
-func NewTaskSearch() *TaskSearch {
+func NewTaskSearch(search config.SearchConfig, environment config.EnvironmentConfig) *TaskSearch {
 	return &TaskSearch{
-		index:    infra.TaskSearchIndex,
-		search:   infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
-		taskRepo: repo.NewTaskRepo(),
+		index:  infra.TaskSearchIndex,
+		search: infra.NewSearchManager(search, environment),
 	}
 }
 

@@ -15,17 +15,17 @@ import (
 	"slices"
 	"sort"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
+	"github.com/kouprlabs/voltaserve/shared/search"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 type GroupService struct {
@@ -50,23 +50,72 @@ type GroupService struct {
 
 func NewGroupService() *GroupService {
 	return &GroupService{
-		groupRepo:      repo.NewGroupRepo(),
-		groupGuard:     guard.NewGroupGuard(),
-		groupCache:     cache.NewGroupCache(),
-		groupSearch:    search.NewGroupSearch(),
-		groupMapper:    newGroupMapper(),
-		userRepo:       repo.NewUserRepo(),
-		userSearch:     search.NewUserSearch(),
-		userMapper:     newUserMapper(),
-		workspaceRepo:  repo.NewWorkspaceRepo(),
-		workspaceCache: cache.NewWorkspaceCache(),
-		fileRepo:       repo.NewFileRepo(),
-		fileCache:      cache.NewFileCache(),
-		orgRepo:        repo.NewOrganizationRepo(),
-		orgGuard:       guard.NewOrganizationGuard(),
-		orgCache:       cache.NewOrganizationCache(),
-		fileGuard:      guard.NewFileGuard(),
-		config:         config.GetConfig(),
+		groupRepo: repo.NewGroupRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		groupGuard: guard.NewGroupGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		groupCache: cache.NewGroupCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		groupSearch: search.NewGroupSearch(
+			config.GetConfig().Search,
+			config.GetConfig().Environment,
+		),
+		groupMapper: newGroupMapper(),
+		userRepo: repo.NewUserRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		userSearch: search.NewUserSearch(
+			config.GetConfig().Search,
+			config.GetConfig().Environment,
+		),
+		userMapper: newUserMapper(),
+		workspaceRepo: repo.NewWorkspaceRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		workspaceCache: cache.NewWorkspaceCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgRepo: repo.NewOrganizationRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		orgGuard: guard.NewOrganizationGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgCache: cache.NewOrganizationCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		config: config.GetConfig(),
 	}
 }
 
@@ -467,9 +516,17 @@ type groupMapper struct {
 
 func newGroupMapper() *groupMapper {
 	return &groupMapper{
-		orgCache:   cache.NewOrganizationCache(),
-		orgMapper:  newOrganizationMapper(),
-		groupCache: cache.NewGroupCache(),
+		orgCache: cache.NewOrganizationCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgMapper: newOrganizationMapper(),
+		groupCache: cache.NewGroupCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 

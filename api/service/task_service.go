@@ -15,16 +15,17 @@ import (
 	"slices"
 	"sort"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
+	"github.com/kouprlabs/voltaserve/shared/search"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/logger"
-	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 type TaskService struct {
@@ -40,14 +41,38 @@ type TaskService struct {
 
 func NewTaskService() *TaskService {
 	return &TaskService{
-		taskMapper:    newTaskMapper(),
-		taskCache:     cache.NewTaskCache(),
-		taskSearch:    search.NewTaskSearch(),
-		taskRepo:      repo.NewTaskRepo(),
-		snapshotRepo:  repo.NewSnapshotRepo(),
-		snapshotCache: cache.NewSnapshotCache(),
-		fileRepo:      repo.NewFileRepo(),
-		fileCache:     cache.NewFileCache(),
+		taskMapper: newTaskMapper(),
+		taskCache: cache.NewTaskCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		taskSearch: search.NewTaskSearch(
+			config.GetConfig().Search,
+			config.GetConfig().Environment,
+		),
+		taskRepo: repo.NewTaskRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		snapshotRepo: repo.NewSnapshotRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		snapshotCache: cache.NewSnapshotCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 
@@ -459,7 +484,11 @@ type taskMapper struct {
 
 func newTaskMapper() *taskMapper {
 	return &taskMapper{
-		groupCache: cache.NewTaskCache(),
+		groupCache: cache.NewTaskCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 

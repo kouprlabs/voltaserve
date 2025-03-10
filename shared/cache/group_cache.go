@@ -13,52 +13,51 @@ package cache
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
-type FileCache struct {
+type GroupCache struct {
 	redis     *infra.RedisManager
-	fileRepo  *repo.FileRepo
+	groupRepo *repo.GroupRepo
 	keyPrefix string
 }
 
-func NewFileCache() *FileCache {
-	return &FileCache{
-		fileRepo:  repo.NewFileRepo(),
-		redis:     infra.NewRedisManager(config.GetConfig().Redis),
-		keyPrefix: "file:",
+func NewGroupCache(postgres config.PostgresConfig, redis config.RedisConfig, environment config.EnvironmentConfig) *GroupCache {
+	return &GroupCache{
+		redis:     infra.NewRedisManager(redis),
+		groupRepo: repo.NewGroupRepo(postgres, environment),
+		keyPrefix: "group:",
 	}
 }
 
-func (c *FileCache) Set(file model.File) error {
-	b, err := json.Marshal(file)
+func (c *GroupCache) Set(workspace model.Group) error {
+	b, err := json.Marshal(workspace)
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+file.GetID(), string(b))
+	err = c.redis.Set(c.keyPrefix+workspace.GetID(), string(b))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *FileCache) Get(id string) (model.File, error) {
+func (c *GroupCache) Get(id string) (model.Group, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	res := repo.NewFileModel()
+	res := repo.NewGroupModel()
 	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (c *FileCache) GetOrNil(id string) model.File {
+func (c *GroupCache) GetOrNil(id string) model.Group {
 	res, err := c.Get(id)
 	if err != nil {
 		return nil
@@ -66,8 +65,8 @@ func (c *FileCache) GetOrNil(id string) model.File {
 	return res
 }
 
-func (c *FileCache) Refresh(id string) (model.File, error) {
-	res, err := c.fileRepo.Find(id)
+func (c *GroupCache) Refresh(id string) (model.Group, error) {
+	res, err := c.groupRepo.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -77,20 +76,9 @@ func (c *FileCache) Refresh(id string) (model.File, error) {
 	return res, nil
 }
 
-func (c *FileCache) RefreshWithExisting(file model.File, userID string) (model.File, error) {
-	err := c.fileRepo.PopulateModelFieldsForUser([]model.File{file}, userID)
-	if err != nil {
-		return nil, err
-	}
-	if err = c.Set(file); err != nil {
-		return nil, err
-	}
-	return file, nil
-}
-
-func (c *FileCache) Delete(id string) error {
+func (c *GroupCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
-		return nil
+		return err
 	}
 	return nil
 }

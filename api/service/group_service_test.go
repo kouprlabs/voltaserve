@@ -16,13 +16,14 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
@@ -344,7 +345,11 @@ func (s *GroupServiceSuite) TestPatchName_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewGroupPermissionError(
 			s.users[0].GetID(),
-			cache.NewGroupCache().GetOrNil(group.ID),
+			cache.NewGroupCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(group.ID),
 			model.PermissionEditor,
 		).Error(),
 		err.Error(),
@@ -406,7 +411,11 @@ func (s *GroupServiceSuite) TestDelete_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewGroupPermissionError(
 			s.users[0].GetID(),
-			cache.NewGroupCache().GetOrNil(group.ID),
+			cache.NewGroupCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(group.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -491,7 +500,11 @@ func (s *GroupServiceSuite) TestAddMember_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewGroupPermissionError(
 			s.users[0].GetID(),
-			cache.NewGroupCache().GetOrNil(group.ID),
+			cache.NewGroupCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(group.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -602,7 +615,11 @@ func (s *GroupServiceSuite) TestRemoveMember_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewGroupPermissionError(
 			s.users[0].GetID(),
-			cache.NewGroupCache().GetOrNil(group.ID),
+			cache.NewGroupCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(group.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -631,7 +648,11 @@ func (s *GroupServiceSuite) TestRemoveMember_LastOwnerOfGroup() {
 	s.Require().Error(err)
 	s.Equal(
 		errorpkg.NewCannotRemoveSoleOwnerOfGroupError(
-			cache.NewGroupCache().GetOrNil(group.ID),
+			cache.NewGroupCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(group.ID),
 		).Error(),
 		err.Error(),
 	)
@@ -653,22 +674,43 @@ func (s *GroupServiceSuite) TestRemoveMember_NonMemberOfOrganization() {
 }
 
 func (s *GroupServiceSuite) grantUserPermissionForGroup(group *dto.Group, user model.User, permission string) {
-	err := repo.NewGroupRepo().GrantUserPermission(group.ID, user.GetID(), permission)
+	err := repo.NewGroupRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).GrantUserPermission(group.ID, user.GetID(), permission)
 	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
+	_, err = cache.NewGroupCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(group.ID)
 	s.Require().NoError(err)
 }
 
 func (s *GroupServiceSuite) revokeUserPermissionForGroup(group *dto.Group, user model.User) {
-	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, user.GetID())
+	err := repo.NewGroupRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(group.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
+	_, err = cache.NewGroupCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(group.ID)
 	s.Require().NoError(err)
 }
 
 func (s *GroupServiceSuite) revokeUserPermissionForOrganization(org *dto.Organization, user model.User) {
-	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	err := repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(org.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	_, err = cache.NewOrganizationCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(org.ID)
 	s.Require().NoError(err)
 }

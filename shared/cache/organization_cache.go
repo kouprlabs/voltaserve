@@ -13,11 +13,10 @@ package cache
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
 type OrganizationCache struct {
@@ -26,10 +25,10 @@ type OrganizationCache struct {
 	keyPrefix string
 }
 
-func NewOrganizationCache() *OrganizationCache {
+func NewOrganizationCache(postgres config.PostgresConfig, redis config.RedisConfig, environment config.EnvironmentConfig) *OrganizationCache {
 	return &OrganizationCache{
-		redis:     infra.NewRedisManager(config.GetConfig().Redis),
-		orgRepo:   repo.NewOrganizationRepo(),
+		redis:     infra.NewRedisManager(redis),
+		orgRepo:   repo.NewOrganizationRepo(postgres, environment),
 		keyPrefix: "organization:",
 	}
 }

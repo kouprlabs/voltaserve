@@ -17,13 +17,14 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
@@ -281,7 +282,11 @@ func (s *InvitationServiceSuite) TestListOutgoing_InsufficientOrganizationPermis
 	s.Equal(
 		errorpkg.NewOrganizationPermissionError(
 			s.users[0].GetID(),
-			cache.NewOrganizationCache().GetOrNil(org.ID),
+			cache.NewOrganizationCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(org.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -398,7 +403,11 @@ func (s *InvitationServiceSuite) TestProbeOutgoing_InsufficientOrganizationPermi
 	s.Equal(
 		errorpkg.NewOrganizationPermissionError(
 			s.users[0].GetID(),
-			cache.NewOrganizationCache().GetOrNil(org.ID),
+			cache.NewOrganizationCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(org.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -434,7 +443,10 @@ func (s *InvitationServiceSuite) TestAccept_AlreadyAccepted() {
 	s.Require().Error(err)
 	s.Equal(
 		errorpkg.NewCannotAcceptNonPendingInvitationError(
-			repo.NewInvitationRepo().FindOrNil(invitations[0].ID),
+			repo.NewInvitationRepo(
+				config.GetConfig().Postgres,
+				config.GetConfig().Environment,
+			).FindOrNil(invitations[0].ID),
 		).Error(),
 		err.Error(),
 	)
@@ -454,7 +466,10 @@ func (s *InvitationServiceSuite) TestAccept_UnauthorizedUser() {
 	s.Equal(
 		errorpkg.NewUserNotAllowedToAcceptInvitationError(
 			s.users[0],
-			repo.NewInvitationRepo().FindOrNil(invitations[0].ID),
+			repo.NewInvitationRepo(
+				config.GetConfig().Postgres,
+				config.GetConfig().Environment,
+			).FindOrNil(invitations[0].ID),
 		).Error(),
 		err.Error(),
 	)
@@ -489,7 +504,10 @@ func (s *InvitationServiceSuite) TestDecline_AlreadyDeclined() {
 	s.Require().Error(err)
 	s.Equal(
 		errorpkg.NewCannotDeclineNonPendingInvitationError(
-			repo.NewInvitationRepo().FindOrNil(invitations[0].ID),
+			repo.NewInvitationRepo(
+				config.GetConfig().Postgres,
+				config.GetConfig().Environment,
+			).FindOrNil(invitations[0].ID),
 		).Error(),
 		err.Error(),
 	)
@@ -509,7 +527,10 @@ func (s *InvitationServiceSuite) TestDecline_UnauthorizedUser() {
 	s.Equal(
 		errorpkg.NewUserNotAllowedToDeclineInvitationError(
 			s.users[0],
-			repo.NewInvitationRepo().FindOrNil(invitations[0].ID),
+			repo.NewInvitationRepo(
+				config.GetConfig().Postgres,
+				config.GetConfig().Environment,
+			).FindOrNil(invitations[0].ID),
 		).Error(),
 		err.Error(),
 	)
@@ -555,22 +576,39 @@ func (s *InvitationServiceSuite) TestDelete_UnauthorizedUser() {
 	s.Equal(
 		errorpkg.NewUserNotAllowedToDeleteInvitationError(
 			s.users[1],
-			repo.NewInvitationRepo().FindOrNil(invitations[0].ID),
+			repo.NewInvitationRepo(
+				config.GetConfig().Postgres,
+				config.GetConfig().Environment,
+			).FindOrNil(invitations[0].ID),
 		).Error(),
 		err.Error(),
 	)
 }
 
 func (s *InvitationServiceSuite) grantUserPermissionForOrganization(org *dto.Organization, user model.User, permission string) {
-	err := repo.NewOrganizationRepo().GrantUserPermission(org.ID, user.GetID(), permission)
+	err := repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).GrantUserPermission(org.ID, user.GetID(), permission)
 	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	_, err = cache.NewOrganizationCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(org.ID)
 	s.Require().NoError(err)
 }
 
 func (s *InvitationServiceSuite) revokeUserPermissionForOrganization(org *dto.Organization, user model.User) {
-	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	err := repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(org.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	_, err = cache.NewOrganizationCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(org.ID)
 	s.Require().NoError(err)
 }
