@@ -14,18 +14,18 @@ import (
 	"errors"
 	"sort"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
+	"github.com/kouprlabs/voltaserve/shared/search"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/logger"
-	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 type OrganizationService struct {
@@ -48,21 +48,55 @@ type OrganizationService struct {
 
 func NewOrganizationService() *OrganizationService {
 	return &OrganizationService{
-		orgRepo:        repo.NewOrganizationRepo(),
-		orgCache:       cache.NewOrganizationCache(),
-		orgGuard:       guard.NewOrganizationGuard(),
-		orgSearch:      search.NewOrganizationSearch(),
-		orgMapper:      newOrganizationMapper(),
-		userSearch:     search.NewUserSearch(),
-		userRepo:       repo.NewUserRepo(),
-		groupCache:     cache.NewGroupCache(),
-		groupRepo:      repo.NewGroupRepo(),
-		groupService:   NewGroupService(),
-		groupMapper:    newGroupMapper(),
-		userMapper:     newUserMapper(),
-		workspaceCache: cache.NewWorkspaceCache(),
-		workspaceRepo:  repo.NewWorkspaceRepo(),
-		config:         config.GetConfig(),
+		orgRepo: repo.NewOrganizationRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		orgCache: cache.NewOrganizationCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgGuard: guard.NewOrganizationGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgSearch: search.NewOrganizationSearch(
+			config.GetConfig().Search,
+			config.GetConfig().Environment,
+		),
+		orgMapper: newOrganizationMapper(),
+		userSearch: search.NewUserSearch(
+			config.GetConfig().Search,
+			config.GetConfig().Environment,
+		),
+		userRepo: repo.NewUserRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		groupCache: cache.NewGroupCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		groupRepo: repo.NewGroupRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		groupService: NewGroupService(),
+		groupMapper:  newGroupMapper(),
+		userMapper:   newUserMapper(),
+		workspaceCache: cache.NewWorkspaceCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		workspaceRepo: repo.NewWorkspaceRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		config: config.GetConfig(),
 	}
 }
 
@@ -447,7 +481,11 @@ type organizationMapper struct {
 
 func newOrganizationMapper() *organizationMapper {
 	return &organizationMapper{
-		groupCache: cache.NewGroupCache(),
+		groupCache: cache.NewGroupCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 

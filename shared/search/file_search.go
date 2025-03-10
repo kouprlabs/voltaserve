@@ -15,11 +15,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
 type FileSearch struct {
@@ -46,12 +45,12 @@ func (f fileEntity) GetID() string {
 	return f.ID
 }
 
-func NewFileSearch() *FileSearch {
+func NewFileSearch(postgres config.PostgresConfig, search config.SearchConfig, s3 config.S3Config, environment config.EnvironmentConfig) *FileSearch {
 	return &FileSearch{
 		index:        infra.FileSearchIndex,
-		search:       infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
-		s3:           infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
-		snapshotRepo: repo.NewSnapshotRepo(),
+		search:       infra.NewSearchManager(search, environment),
+		s3:           infra.NewS3Manager(s3, environment),
+		snapshotRepo: repo.NewSnapshotRepo(postgres, environment),
 	}
 }
 

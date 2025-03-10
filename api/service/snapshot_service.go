@@ -16,18 +16,18 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
+	"github.com/kouprlabs/voltaserve/shared/search"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/logger"
-	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/search"
 	"github.com/kouprlabs/voltaserve/api/webhook"
 )
 
@@ -50,19 +50,49 @@ type SnapshotService struct {
 
 func NewSnapshotService() *SnapshotService {
 	return &SnapshotService{
-		snapshotRepo:    repo.NewSnapshotRepo(),
-		snapshotCache:   cache.NewSnapshotCache(),
+		snapshotRepo: repo.NewSnapshotRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		snapshotCache: cache.NewSnapshotCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		snapshotMapper:  newSnapshotMapper(),
 		snapshotWebhook: webhook.NewSnapshotWebhook(),
-		fileCache:       cache.NewFileCache(),
-		fileGuard:       guard.NewFileGuard(),
-		fileSearch:      search.NewFileSearch(),
-		fileMapper:      newFileMapper(),
-		fileRepo:        repo.NewFileRepo(),
-		taskRepo:        repo.NewTaskRepo(),
-		taskCache:       cache.NewTaskCache(),
-		s3:              infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
-		config:          config.GetConfig(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileSearch: search.NewFileSearch(
+			config.GetConfig().Postgres,
+			config.GetConfig().Search,
+			config.GetConfig().S3,
+			config.GetConfig().Environment,
+		),
+		fileMapper: newFileMapper(),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		taskRepo: repo.NewTaskRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		taskCache: cache.NewTaskCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		s3:     infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		config: config.GetConfig(),
 		languages: []*dto.SnapshotLanguage{
 			{ID: "ara", ISO6393: "ara", Name: "Arabic"},
 			{ID: "chi_sim", ISO6393: "zho", Name: "Chinese Simplified"},
@@ -507,7 +537,11 @@ type snapshotMapper struct {
 
 func newSnapshotMapper() *snapshotMapper {
 	return &snapshotMapper{
-		taskCache:  cache.NewTaskCache(),
+		taskCache: cache.NewTaskCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		taskMapper: newTaskMapper(),
 		fileIdent:  infra.NewFileIdentifier(),
 	}

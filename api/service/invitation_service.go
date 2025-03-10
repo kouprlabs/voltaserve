@@ -14,16 +14,16 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/infra"
-	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 type InvitationService struct {
@@ -41,13 +41,30 @@ type InvitationService struct {
 
 func NewInvitationService() *InvitationService {
 	return &InvitationService{
-		orgRepo:          repo.NewOrganizationRepo(),
-		orgCache:         cache.NewOrganizationCache(),
-		orgGuard:         guard.NewOrganizationGuard(),
-		orgSvc:           NewOrganizationService(),
-		invitationRepo:   repo.NewInvitationRepo(),
+		orgRepo: repo.NewOrganizationRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		orgCache: cache.NewOrganizationCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgGuard: guard.NewOrganizationGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgSvc: NewOrganizationService(),
+		invitationRepo: repo.NewInvitationRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
 		invitationMapper: newInvitationMapper(),
-		userRepo:         repo.NewUserRepo(),
+		userRepo: repo.NewUserRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
 		mailTmpl: infra.NewMailTemplate(
 			config.GetConfig().SMTP,
 			config.GetConfig().Environment.IsTest,
@@ -452,8 +469,15 @@ type invitationMapper struct {
 
 func newInvitationMapper() *invitationMapper {
 	return &invitationMapper{
-		orgCache:   cache.NewOrganizationCache(),
-		userRepo:   repo.NewUserRepo(),
+		orgCache: cache.NewOrganizationCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		userRepo: repo.NewUserRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
 		userMapper: newUserMapper(),
 		orgMapper:  newOrganizationMapper(),
 	}

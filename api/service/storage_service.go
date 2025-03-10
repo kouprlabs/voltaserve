@@ -11,12 +11,13 @@
 package service
 
 import (
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 type StorageService struct {
@@ -31,13 +32,35 @@ type StorageService struct {
 
 func NewStorageService() *StorageService {
 	return &StorageService{
-		workspaceRepo:  repo.NewWorkspaceRepo(),
-		workspaceCache: cache.NewWorkspaceCache(),
-		workspaceGuard: guard.NewWorkspaceGuard(),
-		fileRepo:       repo.NewFileRepo(),
-		fileCache:      cache.NewFileCache(),
-		fileGuard:      guard.NewFileGuard(),
-		storageMapper:  newStorageMapper(),
+		workspaceRepo: repo.NewWorkspaceRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		workspaceCache: cache.NewWorkspaceCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		workspaceGuard: guard.NewWorkspaceGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		storageMapper: newStorageMapper(),
 	}
 }
 

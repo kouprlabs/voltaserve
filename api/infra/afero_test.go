@@ -21,12 +21,12 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
@@ -79,7 +79,11 @@ func (s *AferoSuite) TestUploadAndDownload() {
 	file, err := s.uploadFile(
 		filePath,
 		stat.Size(),
-		cache.NewWorkspaceCache().GetOrNil(s.workspace.ID).GetBucket(),
+		cache.NewWorkspaceCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		).GetOrNil(s.workspace.ID).GetBucket(),
 		emptyFile.ID,
 		snapshotID,
 		s.users[0].GetID(),

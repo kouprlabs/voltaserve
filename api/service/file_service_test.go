@@ -20,13 +20,14 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
@@ -154,9 +155,16 @@ func (s *FileServiceTestSuite) TestCreate_InsufficientParentPermission() {
 	s.Require().NoError(err)
 	workspace, err := test.CreateWorkspace(org.ID, s.users[0].GetID())
 	s.Require().NoError(err)
-	err = repo.NewFileRepo().GrantUserPermission(workspace.RootID, s.users[0].GetID(), model.PermissionViewer)
+	err = repo.NewFileRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).GrantUserPermission(workspace.RootID, s.users[0].GetID(), model.PermissionViewer)
 	s.Require().NoError(err)
-	root, err := cache.NewFileCache().Refresh(workspace.RootID)
+	root, err := cache.NewFileCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(workspace.RootID)
 	s.Require().NoError(err)
 	_, err = service.NewFileService().Create(service.FileCreateOptions{
 		WorkspaceID: workspace.ID,
@@ -1044,7 +1052,11 @@ func (s *FileServiceTestSuite) TestCount_NotAFolder() {
 
 	_, err = service.NewFileService().GetCount(file.ID, s.users[0].GetID())
 	s.Require().Error(err)
-	s.Equal(errorpkg.NewFileIsNotAFolderError(cache.NewFileCache().GetOrNil(file.ID)).Error(), err.Error())
+	s.Equal(errorpkg.NewFileIsNotAFolderError(cache.NewFileCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).GetOrNil(file.ID)).Error(), err.Error())
 }
 
 func (s *FileServiceTestSuite) TestCount_MissingPermission() {
@@ -1155,7 +1167,11 @@ func (s *FileServiceTestSuite) TestCopy_InsufficientSourcePermission() {
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(file.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(file.ID),
 			model.PermissionEditor,
 		).Error(),
 		err.Error(),
@@ -1216,7 +1232,11 @@ func (s *FileServiceTestSuite) TestCopy_InsufficientTargetPermission() {
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(folder.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(folder.ID),
 			model.PermissionEditor,
 		).Error(),
 		err.Error(),
@@ -1284,7 +1304,11 @@ func (s *FileServiceTestSuite) TestDelete_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(file.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(file.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -1441,7 +1465,11 @@ func (s *FileServiceTestSuite) TestMove_InsufficientSourcePermission() {
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(file.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(file.ID),
 			model.PermissionEditor,
 		).Error(),
 		err.Error(),
@@ -1516,7 +1544,11 @@ func (s *FileServiceTestSuite) TestMove_InsufficientTargetPermission() {
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(folderB.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(folderB.ID),
 			model.PermissionEditor,
 		).Error(),
 		err.Error(),
@@ -1582,7 +1614,11 @@ func (s *FileServiceTestSuite) TestPatchName_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(file.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(file.ID),
 			model.PermissionEditor,
 		).Error(),
 		err.Error(),
@@ -1646,7 +1682,11 @@ func (s *FileServiceTestSuite) TestGrantUserPermission_InsufficientPermission() 
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(file.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(file.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -1719,7 +1759,11 @@ func (s *FileServiceTestSuite) TestRevokeUserPermission_InsufficientPermission()
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(file.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(file.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -1823,7 +1867,11 @@ func (s *FileServiceTestSuite) TestGrantGroupPermission_InsufficientFilePermissi
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(file.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(file.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -1933,7 +1981,11 @@ func (s *FileServiceTestSuite) TestRevokeGroupPermission_InsufficientFilePermiss
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(file.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(file.ID),
 			model.PermissionOwner,
 		).Error(),
 		err.Error(),
@@ -2031,7 +2083,11 @@ func (s *FileServiceTestSuite) TestReprocess_InsufficientPermission() {
 	s.Equal(
 		errorpkg.NewFilePermissionError(
 			s.users[0].GetID(),
-			cache.NewFileCache().GetOrNil(file.ID),
+			cache.NewFileCache(
+				config.GetConfig().Postgres,
+				config.GetConfig().Redis,
+				config.GetConfig().Environment,
+			).GetOrNil(file.ID),
 			model.PermissionEditor,
 		).Error(),
 		err.Error(),
@@ -2039,32 +2095,64 @@ func (s *FileServiceTestSuite) TestReprocess_InsufficientPermission() {
 }
 
 func (s *FileServiceTestSuite) grantUserPermissionForFile(file *dto.File, user model.User, permission string) {
-	err := repo.NewFileRepo().GrantUserPermission(file.ID, user.GetID(), permission)
+	err := repo.NewFileRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).GrantUserPermission(file.ID, user.GetID(), permission)
 	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
+	_, err = cache.NewFileCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(file.ID)
 	s.Require().NoError(err)
 }
 
 func (s *FileServiceTestSuite) revokeUserPermissionForFile(file *dto.File, user model.User) {
-	err := repo.NewFileRepo().RevokeUserPermission(
-		[]model.File{cache.NewFileCache().GetOrNil(file.ID)},
+	err := repo.NewFileRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(
+		[]model.File{cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		).GetOrNil(file.ID)},
 		user.GetID(),
 	)
 	s.Require().NoError(err)
-	_, err = cache.NewFileCache().Refresh(file.ID)
+	_, err = cache.NewFileCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(file.ID)
 	s.Require().NoError(err)
 }
 
 func (s *FileServiceTestSuite) revokeUserPermissionForGroup(group *dto.Group, user model.User) {
-	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, user.GetID())
+	err := repo.NewGroupRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(group.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
+	_, err = cache.NewGroupCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(group.ID)
 	s.Require().NoError(err)
 }
 
 func (s *FileServiceTestSuite) revokeUserPermissionForWorkspace(workspace *dto.Workspace, user model.User) {
-	err := repo.NewWorkspaceRepo().RevokeUserPermission(workspace.ID, user.GetID())
+	err := repo.NewWorkspaceRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(workspace.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewWorkspaceCache().Refresh(workspace.ID)
+	_, err = cache.NewWorkspaceCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(workspace.ID)
 	s.Require().NoError(err)
 }

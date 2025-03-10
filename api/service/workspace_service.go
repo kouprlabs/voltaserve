@@ -17,17 +17,17 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
+	"github.com/kouprlabs/voltaserve/shared/search"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
-	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 type WorkspaceService struct {
@@ -48,19 +48,52 @@ type WorkspaceService struct {
 
 func NewWorkspaceService() *WorkspaceService {
 	return &WorkspaceService{
-		workspaceRepo:   repo.NewWorkspaceRepo(),
-		workspaceCache:  cache.NewWorkspaceCache(),
-		workspaceSearch: search.NewWorkspaceSearch(),
-		workspaceGuard:  guard.NewWorkspaceGuard(),
+		workspaceRepo: repo.NewWorkspaceRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		workspaceCache: cache.NewWorkspaceCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		workspaceSearch: search.NewWorkspaceSearch(
+			config.GetConfig().Search,
+			config.GetConfig().Environment,
+		),
+		workspaceGuard: guard.NewWorkspaceGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		workspaceMapper: newWorkspaceMapper(),
-		orgCache:        cache.NewOrganizationCache(),
-		orgGuard:        guard.NewOrganizationGuard(),
-		fileRepo:        repo.NewFileRepo(),
-		fileCache:       cache.NewFileCache(),
-		fileGuard:       guard.NewFileGuard(),
-		fileMapper:      newFileMapper(),
-		s3:              infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
-		config:          config.GetConfig(),
+		orgCache: cache.NewOrganizationCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgGuard: guard.NewOrganizationGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileRepo: repo.NewFileRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileMapper: newFileMapper(),
+		s3:         infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		config:     config.GetConfig(),
 	}
 }
 
@@ -490,9 +523,17 @@ type workspaceMapper struct {
 
 func newWorkspaceMapper() *workspaceMapper {
 	return &workspaceMapper{
-		orgCache:   cache.NewOrganizationCache(),
-		orgMapper:  newOrganizationMapper(),
-		groupCache: cache.NewGroupCache(),
+		orgCache: cache.NewOrganizationCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		orgMapper: newOrganizationMapper(),
+		groupCache: cache.NewGroupCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 

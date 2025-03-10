@@ -11,10 +11,11 @@
 package guard
 
 import (
+	"github.com/kouprlabs/voltaserve/shared/cache"
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/model"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/logger"
 )
 
@@ -22,9 +23,9 @@ type FileGuard struct {
 	groupCache *cache.GroupCache
 }
 
-func NewFileGuard() *FileGuard {
+func NewFileGuard(postgres config.PostgresConfig, redis config.RedisConfig, environment config.EnvironmentConfig) *FileGuard {
 	return &FileGuard{
-		groupCache: cache.NewGroupCache(),
+		groupCache: cache.NewGroupCache(postgres, redis, environment),
 	}
 }
 

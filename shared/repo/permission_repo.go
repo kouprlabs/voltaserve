@@ -13,11 +13,10 @@ package repo
 import (
 	"gorm.io/gorm"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type userPermissionEntity struct {
@@ -208,12 +207,9 @@ type PermissionRepo struct {
 	db *gorm.DB
 }
 
-func NewPermissionRepo() *PermissionRepo {
+func NewPermissionRepo(postgres config.PostgresConfig, environment config.EnvironmentConfig) *PermissionRepo {
 	return &PermissionRepo{
-		db: infra.NewPostgresManager(
-			config.GetConfig().Postgres,
-			config.GetConfig().Environment,
-		).GetDBOrPanic(),
+		db: infra.NewPostgresManager(postgres, environment).GetDBOrPanic(),
 	}
 }
 

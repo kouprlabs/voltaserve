@@ -15,12 +15,11 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type fileEntity struct {
@@ -202,13 +201,10 @@ type FileRepo struct {
 	permissionRepo *PermissionRepo
 }
 
-func NewFileRepo() *FileRepo {
+func NewFileRepo(postgres config.PostgresConfig, environment config.EnvironmentConfig) *FileRepo {
 	return &FileRepo{
-		db: infra.NewPostgresManager(
-			config.GetConfig().Postgres,
-			config.GetConfig().Environment,
-		).GetDBOrPanic(),
-		permissionRepo: NewPermissionRepo(),
+		db:             infra.NewPostgresManager(postgres, environment).GetDBOrPanic(),
+		permissionRepo: NewPermissionRepo(postgres, environment),
 	}
 }
 

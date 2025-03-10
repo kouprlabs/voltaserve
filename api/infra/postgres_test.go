@@ -19,8 +19,9 @@ import (
 
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type PostgresSuite struct {
@@ -32,27 +33,39 @@ func TestPostgresSuite(t *testing.T) {
 }
 
 func (s *PostgresSuite) TestInsertAndFind() {
-	org, err := repo.NewOrganizationRepo().Insert(repo.OrganizationInsertOptions{
+	org, err := repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewID(),
 		Name: "organization",
 	})
 	s.Require().NoError(err)
 
-	workspace, err := repo.NewWorkspaceRepo().Insert(repo.WorkspaceInsertOptions{
+	workspace, err := repo.NewWorkspaceRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).Insert(repo.WorkspaceInsertOptions{
 		ID:             helper.NewID(),
 		Name:           "workspace",
 		OrganizationID: org.GetID(),
 	})
 	s.Require().NoError(err)
 
-	file, err := repo.NewFileRepo().Insert(repo.FileInsertOptions{
+	file, err := repo.NewFileRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).Insert(repo.FileInsertOptions{
 		Name:        "file",
 		Type:        model.FileTypeFile,
 		WorkspaceID: workspace.GetID(),
 	})
 	s.Require().NoError(err)
 
-	foundFile, err := repo.NewFileRepo().Find(file.GetID())
+	foundFile, err := repo.NewFileRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).Find(file.GetID())
 	s.Require().NoError(err)
 	s.Equal(file.GetID(), foundFile.GetID())
 }

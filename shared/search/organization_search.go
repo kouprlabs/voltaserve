@@ -13,17 +13,15 @@ package search
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
 type OrganizationSearch struct {
-	index   string
-	search  infra.SearchManager
-	orgRepo *repo.OrganizationRepo
+	index  string
+	search infra.SearchManager
 }
 
 type organizationEntity struct {
@@ -38,11 +36,10 @@ func (o organizationEntity) GetID() string {
 	return o.ID
 }
 
-func NewOrganizationSearch() *OrganizationSearch {
+func NewOrganizationSearch(search config.SearchConfig, environment config.EnvironmentConfig) *OrganizationSearch {
 	return &OrganizationSearch{
-		index:   infra.OrganizationSearchIndex,
-		search:  infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
-		orgRepo: repo.NewOrganizationRepo(),
+		index:  infra.OrganizationSearchIndex,
+		search: infra.NewSearchManager(search, environment),
 	}
 }
 

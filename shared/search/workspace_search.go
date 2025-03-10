@@ -13,17 +13,15 @@ package search
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
 type WorkspaceSearch struct {
-	index         string
-	search        infra.SearchManager
-	workspaceRepo *repo.WorkspaceRepo
+	index  string
+	search infra.SearchManager
 }
 
 type workspaceEntity struct {
@@ -41,11 +39,10 @@ func (w workspaceEntity) GetID() string {
 	return w.ID
 }
 
-func NewWorkspaceSearch() *WorkspaceSearch {
+func NewWorkspaceSearch(search config.SearchConfig, environment config.EnvironmentConfig) *WorkspaceSearch {
 	return &WorkspaceSearch{
-		index:         infra.WorkspaceSearchIndex,
-		search:        infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
-		workspaceRepo: repo.NewWorkspaceRepo(),
+		index:  infra.WorkspaceSearchIndex,
+		search: infra.NewSearchManager(search, environment),
 	}
 }
 

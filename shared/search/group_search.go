@@ -13,17 +13,15 @@ package search
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
 type GroupSearch struct {
-	index     string
-	search    infra.SearchManager
-	groupRepo *repo.GroupRepo
+	index  string
+	search infra.SearchManager
 }
 
 type groupEntity struct {
@@ -39,11 +37,10 @@ func (g groupEntity) GetID() string {
 	return g.ID
 }
 
-func NewGroupSearch() *GroupSearch {
+func NewGroupSearch(search config.SearchConfig, environment config.EnvironmentConfig) *GroupSearch {
 	return &GroupSearch{
-		index:     infra.GroupSearchIndex,
-		search:    infra.NewSearchManager(config.GetConfig().Search, config.GetConfig().Environment),
-		groupRepo: repo.NewGroupRepo(),
+		index:  infra.GroupSearchIndex,
+		search: infra.NewSearchManager(search, environment),
 	}
 }
 

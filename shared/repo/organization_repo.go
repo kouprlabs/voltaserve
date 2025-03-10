@@ -15,12 +15,11 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type organizationEntity struct {
@@ -146,14 +145,11 @@ type OrganizationRepo struct {
 	permissionRepo *PermissionRepo
 }
 
-func NewOrganizationRepo() *OrganizationRepo {
+func NewOrganizationRepo(postgres config.PostgresConfig, environment config.EnvironmentConfig) *OrganizationRepo {
 	return &OrganizationRepo{
-		db: infra.NewPostgresManager(
-			config.GetConfig().Postgres,
-			config.GetConfig().Environment,
-		).GetDBOrPanic(),
-		groupRepo:      NewGroupRepo(),
-		permissionRepo: NewPermissionRepo(),
+		db:             infra.NewPostgresManager(postgres, environment).GetDBOrPanic(),
+		groupRepo:      NewGroupRepo(postgres, environment),
+		permissionRepo: NewPermissionRepo(postgres, environment),
 	}
 }
 

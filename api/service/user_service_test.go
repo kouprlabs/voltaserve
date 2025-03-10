@@ -15,14 +15,14 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 	"github.com/kouprlabs/voltaserve/api/test"
 )
@@ -342,15 +342,29 @@ func (s *UserServiceSuite) createOrganization() *dto.Organization {
 }
 
 func (s *UserServiceSuite) revokeUserPermissionForOrganization(org *dto.Organization, user model.User) {
-	err := repo.NewOrganizationRepo().RevokeUserPermission(org.ID, user.GetID())
+	err := repo.NewOrganizationRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(org.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewOrganizationCache().Refresh(org.ID)
+	_, err = cache.NewOrganizationCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(org.ID)
 	s.Require().NoError(err)
 }
 
 func (s *UserServiceSuite) revokeUserPermissionForGroup(group *dto.Group, user model.User) {
-	err := repo.NewGroupRepo().RevokeUserPermission(group.ID, user.GetID())
+	err := repo.NewGroupRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	).RevokeUserPermission(group.ID, user.GetID())
 	s.Require().NoError(err)
-	_, err = cache.NewGroupCache().Refresh(group.ID)
+	_, err = cache.NewGroupCache(
+		config.GetConfig().Postgres,
+		config.GetConfig().Redis,
+		config.GetConfig().Environment,
+	).Refresh(group.ID)
 	s.Require().NoError(err)
 }

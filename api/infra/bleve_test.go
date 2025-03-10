@@ -19,9 +19,10 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
+	"github.com/kouprlabs/voltaserve/shared/search"
 
-	"github.com/kouprlabs/voltaserve/api/repo"
-	"github.com/kouprlabs/voltaserve/api/search"
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type BleveSuite struct {
@@ -38,17 +39,26 @@ func (s *BleveSuite) TestQuery() {
 		{ID: "org_b", Name: "hello world"},
 	}
 	for _, v := range values {
-		err := search.NewOrganizationSearch().Index([]model.Organization{repo.NewOrganizationModelWithOptions(v)})
+		err := search.NewOrganizationSearch(
+			config.GetConfig().Search,
+			config.GetConfig().Environment,
+		).Index([]model.Organization{repo.NewOrganizationModelWithOptions(v)})
 		s.Require().NoError(err)
 	}
 
-	hits, err := search.NewOrganizationSearch().Query("foo", infra.SearchQueryOptions{Limit: 10})
+	hits, err := search.NewOrganizationSearch(
+		config.GetConfig().Search,
+		config.GetConfig().Environment,
+	).Query("foo", infra.SearchQueryOptions{Limit: 10})
 	s.Require().NoError(err)
 	if s.Len(hits, 1) {
 		s.Equal("org_a", hits[0].GetID())
 	}
 
-	hits, err = search.NewOrganizationSearch().Query("world", infra.SearchQueryOptions{Limit: 10})
+	hits, err = search.NewOrganizationSearch(
+		config.GetConfig().Search,
+		config.GetConfig().Environment,
+	).Query("world", infra.SearchQueryOptions{Limit: 10})
 	s.Require().NoError(err)
 	if s.Len(hits, 1) {
 		s.Equal("org_b", hits[0].GetID())
@@ -80,11 +90,21 @@ func (s *BleveSuite) TestFilter() {
 		},
 	}
 	for _, v := range values {
-		err := search.NewFileSearch().Index([]model.File{repo.NewFileModelWithOptions(v)})
+		err := search.NewFileSearch(
+			config.GetConfig().Postgres,
+			config.GetConfig().Search,
+			config.GetConfig().S3,
+			config.GetConfig().Environment,
+		).Index([]model.File{repo.NewFileModelWithOptions(v)})
 		s.Require().NoError(err)
 	}
 
-	hits, err := search.NewFileSearch().Query("strawberry", infra.SearchQueryOptions{
+	hits, err := search.NewFileSearch(
+		config.GetConfig().Postgres,
+		config.GetConfig().Search,
+		config.GetConfig().S3,
+		config.GetConfig().Environment,
+	).Query("strawberry", infra.SearchQueryOptions{
 		Limit:  10,
 		Filter: fmt.Sprintf("workspaceId=\"workspace_b\" AND type=\"%s\"", model.FileTypeFile),
 	})

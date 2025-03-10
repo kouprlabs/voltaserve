@@ -13,52 +13,51 @@ package cache
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
-type SnapshotCache struct {
-	redis        *infra.RedisManager
-	snapshotRepo *repo.SnapshotRepo
-	keyPrefix    string
+type WorkspaceCache struct {
+	redis         *infra.RedisManager
+	workspaceRepo *repo.WorkspaceRepo
+	keyPrefix     string
 }
 
-func NewSnapshotCache() *SnapshotCache {
-	return &SnapshotCache{
-		snapshotRepo: repo.NewSnapshotRepo(),
-		redis:        infra.NewRedisManager(config.GetConfig().Redis),
-		keyPrefix:    "snapshot:",
+func NewWorkspaceCache(postgres config.PostgresConfig, redis config.RedisConfig, environment config.EnvironmentConfig) *WorkspaceCache {
+	return &WorkspaceCache{
+		redis:         infra.NewRedisManager(redis),
+		workspaceRepo: repo.NewWorkspaceRepo(postgres, environment),
+		keyPrefix:     "workspace:",
 	}
 }
 
-func (c *SnapshotCache) Set(snapshot model.Snapshot) error {
-	b, err := json.Marshal(snapshot)
+func (c *WorkspaceCache) Set(workspace model.Workspace) error {
+	b, err := json.Marshal(workspace)
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+snapshot.GetID(), string(b))
+	err = c.redis.Set(c.keyPrefix+workspace.GetID(), string(b))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *SnapshotCache) Get(id string) (model.Snapshot, error) {
+func (c *WorkspaceCache) Get(id string) (model.Workspace, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	res := repo.NewSnapshotModel()
+	res := repo.NewWorkspaceModel()
 	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (c *SnapshotCache) GetOrNil(id string) model.Snapshot {
+func (c *WorkspaceCache) GetOrNil(id string) model.Workspace {
 	res, err := c.Get(id)
 	if err != nil {
 		return nil
@@ -66,8 +65,8 @@ func (c *SnapshotCache) GetOrNil(id string) model.Snapshot {
 	return res
 }
 
-func (c *SnapshotCache) Refresh(id string) (model.Snapshot, error) {
-	res, err := c.snapshotRepo.Find(id)
+func (c *WorkspaceCache) Refresh(id string) (model.Workspace, error) {
+	res, err := c.workspaceRepo.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -77,9 +76,9 @@ func (c *SnapshotCache) Refresh(id string) (model.Snapshot, error) {
 	return res, nil
 }
 
-func (c *SnapshotCache) Delete(id string) error {
+func (c *WorkspaceCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
-		return nil
+		return err
 	}
 	return nil
 }

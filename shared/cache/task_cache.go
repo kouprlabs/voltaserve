@@ -13,52 +13,51 @@ package cache
 import (
 	"encoding/json"
 
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 )
 
-type WorkspaceCache struct {
-	redis         *infra.RedisManager
-	workspaceRepo *repo.WorkspaceRepo
-	keyPrefix     string
+type TaskCache struct {
+	redis     *infra.RedisManager
+	taskRepo  *repo.TaskRepo
+	keyPrefix string
 }
 
-func NewWorkspaceCache() *WorkspaceCache {
-	return &WorkspaceCache{
-		redis:         infra.NewRedisManager(config.GetConfig().Redis),
-		workspaceRepo: repo.NewWorkspaceRepo(),
-		keyPrefix:     "workspace:",
+func NewTaskCache(postgres config.PostgresConfig, redis config.RedisConfig, environment config.EnvironmentConfig) *TaskCache {
+	return &TaskCache{
+		redis:     infra.NewRedisManager(redis),
+		taskRepo:  repo.NewTaskRepo(postgres, environment),
+		keyPrefix: "task:",
 	}
 }
 
-func (c *WorkspaceCache) Set(workspace model.Workspace) error {
-	b, err := json.Marshal(workspace)
+func (c *TaskCache) Set(file model.Task) error {
+	b, err := json.Marshal(file)
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+workspace.GetID(), string(b))
+	err = c.redis.Set(c.keyPrefix+file.GetID(), string(b))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *WorkspaceCache) Get(id string) (model.Workspace, error) {
+func (c *TaskCache) Get(id string) (model.Task, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	res := repo.NewWorkspaceModel()
-	if err = json.Unmarshal([]byte(value), &res); err != nil {
+	task := repo.NewTaskModel()
+	if err = json.Unmarshal([]byte(value), &task); err != nil {
 		return nil, err
 	}
-	return res, nil
+	return task, nil
 }
 
-func (c *WorkspaceCache) GetOrNil(id string) model.Workspace {
+func (c *TaskCache) GetOrNil(id string) model.Task {
 	res, err := c.Get(id)
 	if err != nil {
 		return nil
@@ -66,8 +65,8 @@ func (c *WorkspaceCache) GetOrNil(id string) model.Workspace {
 	return res
 }
 
-func (c *WorkspaceCache) Refresh(id string) (model.Workspace, error) {
-	res, err := c.workspaceRepo.Find(id)
+func (c *TaskCache) Refresh(id string) (model.Task, error) {
+	res, err := c.taskRepo.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -77,9 +76,9 @@ func (c *WorkspaceCache) Refresh(id string) (model.Workspace, error) {
 	return res, nil
 }
 
-func (c *WorkspaceCache) Delete(id string) error {
+func (c *TaskCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
-		return err
+		return nil
 	}
 	return nil
 }

@@ -13,17 +13,17 @@ package service
 import (
 	"path/filepath"
 
+	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
-	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/logger"
-	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 type MosaicService struct {
@@ -39,13 +39,25 @@ type MosaicService struct {
 
 func NewMosaicService() *MosaicService {
 	return &MosaicService{
-		snapshotCache: cache.NewSnapshotCache(),
-		snapshotSvc:   NewSnapshotService(),
-		fileCache:     cache.NewFileCache(),
-		fileGuard:     guard.NewFileGuard(),
-		taskSvc:       NewTaskService(),
-		taskMapper:    newTaskMapper(),
-		mosaicClient:  client.NewMosaicClient(config.GetConfig().MosaicURL),
+		snapshotCache: cache.NewSnapshotCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		snapshotSvc: NewSnapshotService(),
+		fileCache: cache.NewFileCache(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileGuard: guard.NewFileGuard(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		taskSvc:      NewTaskService(),
+		taskMapper:   newTaskMapper(),
+		mosaicClient: client.NewMosaicClient(config.GetConfig().MosaicURL),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
 			config.GetConfig().Environment.IsTest,

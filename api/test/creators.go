@@ -17,9 +17,9 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
+	"github.com/kouprlabs/voltaserve/shared/repo"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -40,7 +40,10 @@ func CreateUsers(count int) ([]model.User, error) {
 		ids = append(ids, id)
 	}
 	var res []model.User
-	userRepo := repo.NewUserRepo()
+	userRepo := repo.NewUserRepo(
+		config.GetConfig().Postgres,
+		config.GetConfig().Environment,
+	)
 	for _, id := range ids {
 		user, err := userRepo.Find(id)
 		if err != nil {
