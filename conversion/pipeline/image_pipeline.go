@@ -289,7 +289,7 @@ func (p *imagePipeline) patchText(inputPath string, opts dto.PipelineRunOptions)
 		Key:    opts.SnapshotID + "/ocr.pdf",
 		Size:   stat.Size(),
 		Document: &model.DocumentProps{
-			Pages: &model.PagesProps{
+			Page: &model.PageProps{
 				Count:     *count,
 				Extension: ".pdf",
 			},

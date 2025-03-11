@@ -86,16 +86,16 @@ type ImageProps struct {
 }
 
 type DocumentProps struct {
-	Pages      *PagesProps      `json:"pages,omitempty"`
-	Thumbnails *ThumbnailsProps `json:"thumbnails,omitempty"`
+	Page      *PageProps      `json:"page,omitempty"`
+	Thumbnail *ThumbnailProps `json:"thumbnail,omitempty"`
 }
 
-type PagesProps struct {
+type PageProps struct {
 	Count     int    `json:"count"`
 	Extension string `json:"extension"`
 }
 
-type ThumbnailsProps struct {
+type ThumbnailProps struct {
 	Extension string `json:"extension"`
 }
 

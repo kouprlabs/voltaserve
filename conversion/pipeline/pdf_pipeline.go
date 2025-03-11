@@ -71,7 +71,7 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunOpt
 		return err
 	}
 	document := model.DocumentProps{
-		Pages: &model.PagesProps{
+		Page: &model.PageProps{
 			Count:     *count,
 			Extension: ".pdf",
 		},
