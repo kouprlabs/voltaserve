@@ -24,6 +24,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/guard"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 
@@ -37,7 +38,7 @@ type EntityService struct {
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
 	taskSvc        *TaskService
-	taskMapper     *taskMapper
+	taskMapper     *mapper.TaskMapper
 	s3             infra.S3Manager
 	pipelineClient client.PipelineClient
 	fileIdent      *infra.FileIdentifier
@@ -61,9 +62,13 @@ func NewEntityService() *EntityService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		taskSvc:    NewTaskService(),
-		taskMapper: newTaskMapper(),
-		s3:         infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		taskSvc: NewTaskService(),
+		taskMapper: mapper.NewTaskMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		s3: infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
 			config.GetConfig().Environment.IsTest,
@@ -106,7 +111,7 @@ func (svc *EntityService) Create(fileID string, opts dto.EntityCreateOptions, us
 	if err := svc.runPipeline(snapshot, task); err != nil {
 		return nil, err
 	}
-	res, err := svc.taskMapper.mapOne(task)
+	res, err := svc.taskMapper.MapOne(task)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +152,7 @@ func (svc *EntityService) Delete(fileID string, userID string) (*dto.Task, error
 		return nil, err
 	}
 	go svc.delete(task, snapshot)
-	res, err := svc.taskMapper.mapOne(task)
+	res, err := svc.taskMapper.MapOne(task)
 	if err != nil {
 		return nil, err
 	}

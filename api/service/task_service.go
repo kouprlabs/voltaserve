@@ -20,6 +20,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 	"github.com/kouprlabs/voltaserve/shared/search"
@@ -29,7 +30,7 @@ import (
 )
 
 type TaskService struct {
-	taskMapper    *taskMapper
+	taskMapper    *mapper.TaskMapper
 	taskCache     *cache.TaskCache
 	taskSearch    *search.TaskSearch
 	taskRepo      *repo.TaskRepo
@@ -41,7 +42,11 @@ type TaskService struct {
 
 func NewTaskService() *TaskService {
 	return &TaskService{
-		taskMapper: newTaskMapper(),
+		taskMapper: mapper.NewTaskMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		taskCache: cache.NewTaskCache(
 			config.GetConfig().Postgres,
 			config.GetConfig().Redis,
@@ -90,7 +95,7 @@ func (svc *TaskService) Create(opts dto.TaskCreateOptions) (*dto.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.taskMapper.mapOne(task)
+	res, err := svc.taskMapper.MapOne(task)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +131,7 @@ func (svc *TaskService) Patch(id string, opts dto.TaskPatchOptions) (*dto.Task, 
 	if err := svc.saveAndSync(task); err != nil {
 		return nil, err
 	}
-	res, err := svc.taskMapper.mapOne(task)
+	res, err := svc.taskMapper.MapOne(task)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +146,7 @@ func (svc *TaskService) Find(id string, userID string) (*dto.Task, error) {
 	if task.GetUserID() != userID {
 		return nil, errorpkg.NewTaskNotFoundError(nil)
 	}
-	res, err := svc.taskMapper.mapOne(task)
+	res, err := svc.taskMapper.MapOne(task)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +174,7 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*dto.TaskList
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped, err := svc.taskMapper.mapMany(paged)
+	mapped, err := svc.taskMapper.MapMany(paged)
 	if err != nil {
 		return nil, err
 	}
@@ -476,51 +481,4 @@ func (svc *TaskService) deleteAndSync(id string) error {
 		return err
 	}
 	return nil
-}
-
-type taskMapper struct {
-	groupCache *cache.TaskCache
-}
-
-func newTaskMapper() *taskMapper {
-	return &taskMapper{
-		groupCache: cache.NewTaskCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-	}
-}
-
-func (mp *taskMapper) mapOne(m model.Task) (*dto.Task, error) {
-	return &dto.Task{
-		ID:              m.GetID(),
-		Name:            m.GetName(),
-		Error:           m.GetError(),
-		Percentage:      m.GetPercentage(),
-		IsIndeterminate: m.GetIsIndeterminate(),
-		UserID:          m.GetUserID(),
-		Status:          m.GetStatus(),
-		IsDismissible:   m.GetStatus() == model.TaskStatusSuccess || m.GetStatus() == model.TaskStatusError,
-		Payload:         m.GetPayload(),
-		CreateTime:      m.GetCreateTime(),
-		UpdateTime:      m.GetUpdateTime(),
-	}, nil
-}
-
-func (mp *taskMapper) mapMany(tasks []model.Task) ([]*dto.Task, error) {
-	res := make([]*dto.Task, 0)
-	for _, task := range tasks {
-		t, err := mp.mapOne(task)
-		if err != nil {
-			var e *errorpkg.ErrorResponse
-			if errors.As(err, &e) && e.Code == errorpkg.NewTaskNotFoundError(nil).Code {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-		res = append(res, t)
-	}
-	return res, nil
 }

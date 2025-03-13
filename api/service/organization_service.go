@@ -20,6 +20,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/guard"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 	"github.com/kouprlabs/voltaserve/shared/search"
@@ -32,7 +33,7 @@ type OrganizationService struct {
 	orgRepo        *repo.OrganizationRepo
 	orgCache       *cache.OrganizationCache
 	orgGuard       *guard.OrganizationGuard
-	orgMapper      *organizationMapper
+	orgMapper      *mapper.OrganizationMapper
 	orgSearch      *search.OrganizationSearch
 	userSearch     *search.UserSearch
 	userMapper     *userMapper
@@ -40,7 +41,7 @@ type OrganizationService struct {
 	groupCache     *cache.GroupCache
 	groupRepo      *repo.GroupRepo
 	groupService   *GroupService
-	groupMapper    *groupMapper
+	groupMapper    *mapper.GroupMapper
 	workspaceCache *cache.WorkspaceCache
 	workspaceRepo  *repo.WorkspaceRepo
 	config         *config.Config
@@ -66,7 +67,11 @@ func NewOrganizationService() *OrganizationService {
 			config.GetConfig().Search,
 			config.GetConfig().Environment,
 		),
-		orgMapper: newOrganizationMapper(),
+		orgMapper: mapper.NewOrganizationMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		userSearch: search.NewUserSearch(
 			config.GetConfig().Search,
 			config.GetConfig().Environment,
@@ -85,8 +90,12 @@ func NewOrganizationService() *OrganizationService {
 			config.GetConfig().Environment,
 		),
 		groupService: NewGroupService(),
-		groupMapper:  newGroupMapper(),
-		userMapper:   newUserMapper(),
+		groupMapper: mapper.NewGroupMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		userMapper: newUserMapper(),
 		workspaceCache: cache.NewWorkspaceCache(
 			config.GetConfig().Postgres,
 			config.GetConfig().Redis,
@@ -118,7 +127,7 @@ func (svc *OrganizationService) Create(opts dto.OrganizationCreateOptions, userI
 	if err := svc.orgSearch.Index([]model.Organization{org}); err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.mapOne(org, userID)
+	res, err := svc.orgMapper.MapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +142,7 @@ func (svc *OrganizationService) Find(id string, userID string) (*dto.Organizatio
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.mapOne(org, userID)
+	res, err := svc.orgMapper.MapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +170,7 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped, err := svc.orgMapper.mapMany(paged, userID)
+	mapped, err := svc.orgMapper.MapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +210,7 @@ func (svc *OrganizationService) PatchName(id string, name string, userID string)
 	if err := svc.sync(org); err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.mapOne(org, userID)
+	res, err := svc.orgMapper.MapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -473,62 +482,4 @@ func (svc *OrganizationService) sync(org model.Organization) error {
 		return err
 	}
 	return nil
-}
-
-type organizationMapper struct {
-	groupCache *cache.GroupCache
-}
-
-func newOrganizationMapper() *organizationMapper {
-	return &organizationMapper{
-		groupCache: cache.NewGroupCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-	}
-}
-
-func (mp *organizationMapper) mapOne(m model.Organization, userID string) (*dto.Organization, error) {
-	res := &dto.Organization{
-		ID:         m.GetID(),
-		Name:       m.GetName(),
-		CreateTime: m.GetCreateTime(),
-		UpdateTime: m.GetUpdateTime(),
-	}
-	res.Permission = model.PermissionNone
-	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-			res.Permission = p.GetValue()
-		}
-	}
-	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupID())
-		if err != nil {
-			return nil, err
-		}
-		for _, u := range g.GetMembers() {
-			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-				res.Permission = p.GetValue()
-			}
-		}
-	}
-	return res, nil
-}
-
-func (mp *organizationMapper) mapMany(orgs []model.Organization, userID string) ([]*dto.Organization, error) {
-	res := make([]*dto.Organization, 0)
-	for _, org := range orgs {
-		o, err := mp.mapOne(org, userID)
-		if err != nil {
-			var e *errorpkg.ErrorResponse
-			if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-		res = append(res, o)
-	}
-	return res, nil
 }

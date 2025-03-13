@@ -21,6 +21,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/guard"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 	"github.com/kouprlabs/voltaserve/shared/search"
@@ -32,7 +33,7 @@ type GroupService struct {
 	groupRepo      *repo.GroupRepo
 	groupGuard     *guard.GroupGuard
 	groupSearch    *search.GroupSearch
-	groupMapper    *groupMapper
+	groupMapper    *mapper.GroupMapper
 	groupCache     *cache.GroupCache
 	userRepo       *repo.UserRepo
 	userSearch     *search.UserSearch
@@ -68,7 +69,11 @@ func NewGroupService() *GroupService {
 			config.GetConfig().Search,
 			config.GetConfig().Environment,
 		),
-		groupMapper: newGroupMapper(),
+		groupMapper: mapper.NewGroupMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		userRepo: repo.NewUserRepo(
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
@@ -146,7 +151,7 @@ func (svc *GroupService) Create(opts dto.GroupCreateOptions, userID string) (*dt
 	if err := svc.groupSearch.Index([]model.Group{group}); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapOne(group, userID)
+	res, err := svc.groupMapper.MapOne(group, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +166,7 @@ func (svc *GroupService) Find(id string, userID string) (*dto.Group, error) {
 	if err := svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapOne(group, userID)
+	res, err := svc.groupMapper.MapOne(group, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +195,7 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*dto.GroupL
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped, err := svc.groupMapper.mapMany(paged, userID)
+	mapped, err := svc.groupMapper.MapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +235,7 @@ func (svc *GroupService) PatchName(id string, name string, userID string) (*dto.
 	if err := svc.sync(group); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapOne(group, userID)
+	res, err := svc.groupMapper.MapOne(group, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -506,79 +511,4 @@ func (svc *GroupService) sync(group model.Group) error {
 		return err
 	}
 	return nil
-}
-
-type groupMapper struct {
-	orgCache   *cache.OrganizationCache
-	orgMapper  *organizationMapper
-	groupCache *cache.GroupCache
-}
-
-func newGroupMapper() *groupMapper {
-	return &groupMapper{
-		orgCache: cache.NewOrganizationCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-		orgMapper: newOrganizationMapper(),
-		groupCache: cache.NewGroupCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-	}
-}
-
-func (mp *groupMapper) mapOne(m model.Group, userID string) (*dto.Group, error) {
-	org, err := mp.orgCache.Get(m.GetOrganizationID())
-	if err != nil {
-		return nil, err
-	}
-	o, err := mp.orgMapper.mapOne(org, userID)
-	if err != nil {
-		return nil, err
-	}
-	res := &dto.Group{
-		ID:           m.GetID(),
-		Name:         m.GetName(),
-		Organization: *o,
-		CreateTime:   m.GetCreateTime(),
-		UpdateTime:   m.GetUpdateTime(),
-	}
-	res.Permission = model.PermissionNone
-	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-			res.Permission = p.GetValue()
-		}
-	}
-	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupID())
-		if err != nil {
-			return nil, err
-		}
-		for _, u := range g.GetMembers() {
-			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-				res.Permission = p.GetValue()
-			}
-		}
-	}
-	return res, nil
-}
-
-func (mp *groupMapper) mapMany(groups []model.Group, userID string) ([]*dto.Group, error) {
-	res := make([]*dto.Group, 0)
-	for _, group := range groups {
-		g, err := mp.mapOne(group, userID)
-		if err != nil {
-			var e *errorpkg.ErrorResponse
-			if errors.As(err, &e) && e.Code == errorpkg.NewGroupNotFoundError(nil).Code {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-		res = append(res, g)
-	}
-	return res, nil
 }

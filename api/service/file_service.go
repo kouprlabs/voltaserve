@@ -30,6 +30,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/guard"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 	"github.com/kouprlabs/voltaserve/shared/search"
@@ -218,7 +219,7 @@ type fileCreate struct {
 	fileSearch     *search.FileSearch
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
-	fileMapper     *fileMapper
+	fileMapper     *mapper.FileMapper
 	fileCoreSvc    *fileCoreService
 	workspaceCache *cache.WorkspaceCache
 	workspaceGuard *guard.WorkspaceGuard
@@ -246,7 +247,11 @@ func newFileCreate() *fileCreate {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		fileMapper:  newFileMapper(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		fileCoreSvc: newFileCoreService(),
 		workspaceCache: cache.NewWorkspaceCache(
 			config.GetConfig().Postgres,
@@ -336,7 +341,7 @@ func (svc *fileCreate) performCreate(opts FileCreateOptions, failOnDuplicateName
 			if failOnDuplicateName {
 				return nil, errorpkg.NewFileWithSimilarNameExistsError()
 			} else {
-				res, err := svc.fileMapper.mapOne(existing, userID)
+				res, err := svc.fileMapper.MapOne(existing, userID)
 				if err != nil {
 					return nil, err
 				}
@@ -363,7 +368,7 @@ func (svc *fileCreate) performCreate(opts FileCreateOptions, failOnDuplicateName
 	if err = svc.fileSearch.Index([]model.File{file}); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -389,14 +394,14 @@ type fileFetch struct {
 	fileRepo        *repo.FileRepo
 	fileSearch      *search.FileSearch
 	fileGuard       *guard.FileGuard
-	fileMapper      *fileMapper
+	fileMapper      *mapper.FileMapper
 	fileCoreSvc     *fileCoreService
 	fileIdent       *infra.FileIdentifier
 	userRepo        *repo.UserRepo
 	workspaceRepo   *repo.WorkspaceRepo
 	workspaceSvc    *WorkspaceService
 	workspaceGuard  *guard.WorkspaceGuard
-	workspaceMapper *workspaceMapper
+	workspaceMapper *mapper.WorkspaceMapper
 }
 
 func newFileFetch() *fileFetch {
@@ -421,7 +426,11 @@ func newFileFetch() *fileFetch {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		fileMapper:  newFileMapper(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		fileCoreSvc: newFileCoreService(),
 		fileIdent:   infra.NewFileIdentifier(),
 		userRepo: repo.NewUserRepo(
@@ -438,7 +447,11 @@ func newFileFetch() *fileFetch {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		workspaceMapper: newWorkspaceMapper(),
+		workspaceMapper: mapper.NewWorkspaceMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 
@@ -452,7 +465,7 @@ func (svc *fileFetch) find(ids []string, userID string) ([]*dto.File, error) {
 		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 			return nil, err
 		}
-		mapped, err := svc.fileMapper.mapOne(file, userID)
+		mapped, err := svc.fileMapper.MapOne(file, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -490,7 +503,7 @@ func (svc *fileFetch) findByPath(path string, userID string) (*dto.File, error) 
 	if err := svc.validatePathForFileType(path, file.GetType()); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -520,7 +533,7 @@ func (svc *fileFetch) listByPath(path string, userID string) ([]*dto.File, error
 		if err != nil {
 			return nil, err
 		}
-		res, err := svc.fileMapper.mapMany(children, userID)
+		res, err := svc.fileMapper.MapMany(children, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -554,7 +567,7 @@ func (svc *fileFetch) findPath(id string, userID string) ([]*dto.File, error) {
 		if err = svc.fileGuard.Authorize(userID, leaf, model.PermissionViewer); err != nil {
 			return nil, err
 		}
-		f, err := svc.fileMapper.mapOne(leaf, userID)
+		f, err := svc.fileMapper.MapOne(leaf, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -584,7 +597,7 @@ func (svc *fileFetch) getWorkspacesAsFiles(userID string) ([]*dto.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	mapped, err := svc.workspaceMapper.mapMany(loaded, userID)
+	mapped, err := svc.workspaceMapper.MapMany(loaded, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -717,7 +730,7 @@ type fileList struct {
 	fileCoreSvc    *fileCoreService
 	fileFilterSvc  *fileFilterService
 	fileSortSvc    *fileSortService
-	fileMapper     *fileMapper
+	fileMapper     *mapper.FileMapper
 	workspaceRepo  *repo.WorkspaceRepo
 	workspaceGuard *guard.WorkspaceGuard
 }
@@ -747,7 +760,11 @@ func newFileList() *fileList {
 		fileCoreSvc:   newFileCoreService(),
 		fileFilterSvc: newFileFilterService(),
 		fileSortSvc:   newFileSortService(),
-		fileMapper:    newFileMapper(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		workspaceRepo: repo.NewWorkspaceRepo(
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
@@ -893,7 +910,7 @@ func (svc *fileList) createList(data []model.File, parent model.File, opts FileL
 	}
 	sorted := svc.fileSortSvc.sort(authorized, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped, err := svc.fileMapper.mapMany(paged, userID)
+	mapped, err := svc.fileMapper.MapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -985,7 +1002,7 @@ type fileCopy struct {
 	fileSearch   *search.FileSearch
 	fileCache    *cache.FileCache
 	fileGuard    *guard.FileGuard
-	fileMapper   *fileMapper
+	fileMapper   *mapper.FileMapper
 	fileCoreSvc  *fileCoreService
 	taskSvc      *TaskService
 	snapshotRepo *repo.SnapshotRepo
@@ -1013,7 +1030,11 @@ func newFileCopy() *fileCopy {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		fileMapper:  newFileMapper(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		fileCoreSvc: newFileCoreService(),
 		taskSvc:     NewTaskService(),
 		snapshotRepo: repo.NewSnapshotRepo(
@@ -1085,7 +1106,7 @@ func (svc *fileCopy) performCopy(source model.File, target model.File, userID st
 	if err := svc.refreshUpdateTime(target); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(cloneResult.Root, userID)
+	res, err := svc.fileMapper.MapOne(cloneResult.Root, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1670,7 +1691,7 @@ type fileMove struct {
 	fileSearch  *search.FileSearch
 	fileCache   *cache.FileCache
 	fileGuard   *guard.FileGuard
-	fileMapper  *fileMapper
+	fileMapper  *mapper.FileMapper
 	fileCoreSvc *fileCoreService
 	taskSvc     *TaskService
 }
@@ -1697,7 +1718,11 @@ func newFileMove() *fileMove {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		fileMapper:  newFileMapper(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		fileCoreSvc: newFileCoreService(),
 		taskSvc:     NewTaskService(),
 	}
@@ -1754,7 +1779,7 @@ func (svc *fileMove) performMove(source model.File, target model.File, userID st
 	if err := svc.refreshUpdateAndCreateTime(source, target); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(source, userID)
+	res, err := svc.fileMapper.MapOne(source, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1835,7 +1860,7 @@ type filePatch struct {
 	fileRepo    *repo.FileRepo
 	fileGuard   *guard.FileGuard
 	fileCoreSvc *fileCoreService
-	fileMapper  *fileMapper
+	fileMapper  *mapper.FileMapper
 }
 
 func newFilePatch() *filePatch {
@@ -1855,7 +1880,11 @@ func newFilePatch() *filePatch {
 			config.GetConfig().Environment,
 		),
 		fileCoreSvc: newFileCoreService(),
-		fileMapper:  newFileMapper(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 
@@ -1883,7 +1912,7 @@ func (svc *filePatch) patchName(id string, name string, userID string) (*dto.Fil
 	if err := svc.fileCoreSvc.sync(file); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1901,7 +1930,7 @@ type filePermission struct {
 	workspaceCache *cache.WorkspaceCache
 	groupCache     *cache.GroupCache
 	groupGuard     *guard.GroupGuard
-	groupMapper    *groupMapper
+	groupMapper    *mapper.GroupMapper
 	permissionRepo *repo.PermissionRepo
 }
 
@@ -1946,7 +1975,11 @@ func newFilePermission() *filePermission {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		groupMapper: newGroupMapper(),
+		groupMapper: mapper.NewGroupMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		permissionRepo: repo.NewPermissionRepo(
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
@@ -2164,7 +2197,7 @@ func (svc *filePermission) findGroupPermissions(id string, userID string) ([]*dt
 		if err != nil {
 			return nil, err
 		}
-		g, err := svc.groupMapper.mapOne(m, userID)
+		g, err := svc.groupMapper.MapOne(m, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -2363,12 +2396,12 @@ func (svc *fileReprocess) runPipeline(file model.File, snapshot model.Snapshot, 
 type fileStore struct {
 	fileCache       *cache.FileCache
 	fileCoreSvc     *fileCoreService
-	fileMapper      *fileMapper
+	fileMapper      *mapper.FileMapper
 	workspaceCache  *cache.WorkspaceCache
 	snapshotRepo    *repo.SnapshotRepo
 	snapshotCache   *cache.SnapshotCache
 	snapshotSvc     *SnapshotService
-	snapshotMapper  *snapshotMapper
+	snapshotMapper  *mapper.SnapshotMapper
 	snapshotWebhook *webhook.SnapshotWebhook
 	taskSvc         *TaskService
 	fileIdent       *infra.FileIdentifier
@@ -2385,7 +2418,11 @@ func newFileStore() *fileStore {
 			config.GetConfig().Environment,
 		),
 		fileCoreSvc: newFileCoreService(),
-		fileMapper:  newFileMapper(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		workspaceCache: cache.NewWorkspaceCache(
 			config.GetConfig().Postgres,
 			config.GetConfig().Redis,
@@ -2400,8 +2437,12 @@ func newFileStore() *fileStore {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		snapshotSvc:     NewSnapshotService(),
-		snapshotMapper:  newSnapshotMapper(),
+		snapshotSvc: NewSnapshotService(),
+		snapshotMapper: mapper.NewSnapshotMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		snapshotWebhook: webhook.NewSnapshotWebhook(),
 		taskSvc:         NewTaskService(),
 		fileIdent:       infra.NewFileIdentifier(),
@@ -2449,7 +2490,7 @@ func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*d
 			return nil, err
 		}
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -2572,7 +2613,7 @@ func (svc *fileStore) callSnapshotHookWithCreateEvent(snapshot model.Snapshot) (
 	if svc.config.SnapshotWebhook != "" {
 		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
 			EventType: dto.SnapshotWebhookEventTypeCreate,
-			Snapshot:  svc.snapshotMapper.mapWithS3Objects(snapshot),
+			Snapshot:  svc.snapshotMapper.MapWithS3Objects(snapshot),
 		}); err != nil {
 			logger.GetLogger().Error(err)
 		} else {
@@ -2735,7 +2776,7 @@ func (svc *fileCoreService) getProcessingLimitMB(path string) int {
 type fileFilterService struct {
 	fileRepo   *repo.FileRepo
 	fileGuard  *guard.FileGuard
-	fileMapper *fileMapper
+	fileMapper *mapper.FileMapper
 	fileIdent  *infra.FileIdentifier
 }
 
@@ -2750,8 +2791,12 @@ func newFileFilterService() *fileFilterService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		fileMapper: newFileMapper(),
-		fileIdent:  infra.NewFileIdentifier(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		fileIdent: infra.NewFileIdentifier(),
 	}
 }
 
@@ -2784,7 +2829,7 @@ func (svc *fileFilterService) filterFiles(data []model.File) []model.File {
 func (svc *fileFilterService) filterImages(data []model.File, userID string) []model.File {
 	images, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2807,7 +2852,7 @@ func (svc *fileFilterService) filterImages(data []model.File, userID string) []m
 func (svc *fileFilterService) filterPDFs(data []model.File, userID string) []model.File {
 	pdfs, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2830,7 +2875,7 @@ func (svc *fileFilterService) filterPDFs(data []model.File, userID string) []mod
 func (svc *fileFilterService) filterDocuments(data []model.File, userID string) []model.File {
 	documents, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2853,7 +2898,7 @@ func (svc *fileFilterService) filterDocuments(data []model.File, userID string) 
 func (svc *fileFilterService) filterVideos(data []model.File, userID string) []model.File {
 	videos, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2876,7 +2921,7 @@ func (svc *fileFilterService) filterVideos(data []model.File, userID string) []m
 func (svc *fileFilterService) filterTexts(data []model.File, userID string) []model.File {
 	texts, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2899,7 +2944,7 @@ func (svc *fileFilterService) filterTexts(data []model.File, userID string) []mo
 func (svc *fileFilterService) filterOthers(data []model.File, userID string) []model.File {
 	others, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.mapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2983,13 +3028,17 @@ func (svc *fileFilterService) filterWithQuery(data []model.File, opts dto.FileQu
 }
 
 type fileSortService struct {
-	fileMapper    *fileMapper
+	fileMapper    *mapper.FileMapper
 	fileFilterSvc *fileFilterService
 }
 
 func newFileSortService() *fileSortService {
 	return &fileSortService{
-		fileMapper:    newFileMapper(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		fileFilterSvc: newFileFilterService(),
 	}
 }
@@ -3022,11 +3071,11 @@ func (svc *fileSortService) sortByName(data []model.File, sortOrder string) []mo
 
 func (svc *fileSortService) sortBySize(data []model.File, sortOrder string, userID string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
-		fileA, err := svc.fileMapper.mapOne(data[i], userID)
+		fileA, err := svc.fileMapper.MapOne(data[i], userID)
 		if err != nil {
 			return false
 		}
-		fileB, err := svc.fileMapper.mapOne(data[j], userID)
+		fileB, err := svc.fileMapper.MapOne(data[j], userID)
 		if err != nil {
 			return false
 		}
@@ -3102,101 +3151,4 @@ func (svc *fileSortService) isValidSortBy(value string) bool {
 
 func (svc *fileSortService) isValidSortOrder(value string) bool {
 	return value == "" || value == dto.FileSortOrderAsc || value == dto.FileSortOrderDesc
-}
-
-type fileMapper struct {
-	groupCache     *cache.GroupCache
-	snapshotMapper *snapshotMapper
-	snapshotCache  *cache.SnapshotCache
-	snapshotRepo   *repo.SnapshotRepo
-}
-
-func newFileMapper() *fileMapper {
-	return &fileMapper{
-		groupCache: cache.NewGroupCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-		snapshotMapper: newSnapshotMapper(),
-		snapshotCache: cache.NewSnapshotCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-		snapshotRepo: repo.NewSnapshotRepo(
-			config.GetConfig().Postgres,
-			config.GetConfig().Environment,
-		),
-	}
-}
-
-func (mp *fileMapper) mapOne(m model.File, userID string) (*dto.File, error) {
-	res := &dto.File{
-		ID:          m.GetID(),
-		WorkspaceID: m.GetWorkspaceID(),
-		Name:        m.GetName(),
-		Type:        m.GetType(),
-		ParentID:    m.GetParentID(),
-		CreateTime:  m.GetCreateTime(),
-		UpdateTime:  m.GetUpdateTime(),
-	}
-	if m.GetSnapshotID() != nil {
-		snapshot, err := mp.snapshotCache.Get(*m.GetSnapshotID())
-		if err != nil {
-			return nil, err
-		}
-		res.Snapshot = mp.snapshotMapper.mapOne(snapshot)
-		res.Snapshot.IsActive = true
-	}
-	res.Permission = model.PermissionNone
-	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-			res.Permission = p.GetValue()
-		}
-	}
-	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupID())
-		if err != nil {
-			return nil, err
-		}
-		for _, u := range g.GetMembers() {
-			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-				res.Permission = p.GetValue()
-			}
-		}
-	}
-	shareCount := 0
-	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() != userID {
-			shareCount++
-		}
-	}
-	if res.Permission == model.PermissionOwner {
-		shareCount += len(m.GetGroupPermissions())
-		res.IsShared = new(bool)
-		if shareCount > 0 {
-			*res.IsShared = true
-		} else {
-			*res.IsShared = false
-		}
-	}
-	return res, nil
-}
-
-func (mp *fileMapper) mapMany(data []model.File, userID string) ([]*dto.File, error) {
-	res := make([]*dto.File, 0)
-	for _, file := range data {
-		f, err := mp.mapOne(file, userID)
-		if err != nil {
-			var e *errorpkg.ErrorResponse
-			if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-		res = append(res, f)
-	}
-	return res, nil
 }

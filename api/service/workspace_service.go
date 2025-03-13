@@ -23,6 +23,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/guard"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 	"github.com/kouprlabs/voltaserve/shared/search"
@@ -35,13 +36,13 @@ type WorkspaceService struct {
 	workspaceCache  *cache.WorkspaceCache
 	workspaceGuard  *guard.WorkspaceGuard
 	workspaceSearch *search.WorkspaceSearch
-	workspaceMapper *workspaceMapper
+	workspaceMapper *mapper.WorkspaceMapper
 	orgCache        *cache.OrganizationCache
 	orgGuard        *guard.OrganizationGuard
 	fileRepo        *repo.FileRepo
 	fileCache       *cache.FileCache
 	fileGuard       *guard.FileGuard
-	fileMapper      *fileMapper
+	fileMapper      *mapper.FileMapper
 	s3              infra.S3Manager
 	config          *config.Config
 }
@@ -66,7 +67,11 @@ func NewWorkspaceService() *WorkspaceService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		workspaceMapper: newWorkspaceMapper(),
+		workspaceMapper: mapper.NewWorkspaceMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		orgCache: cache.NewOrganizationCache(
 			config.GetConfig().Postgres,
 			config.GetConfig().Redis,
@@ -91,9 +96,13 @@ func NewWorkspaceService() *WorkspaceService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		fileMapper: newFileMapper(),
-		s3:         infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
-		config:     config.GetConfig(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		s3:     infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		config: config.GetConfig(),
 	}
 }
 
@@ -120,7 +129,7 @@ func (svc *WorkspaceService) Create(opts dto.WorkspaceCreateOptions, userID stri
 	if err = svc.workspaceSearch.Index([]model.Workspace{workspace}); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.mapOne(workspace, userID)
+	res, err := svc.workspaceMapper.MapOne(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +144,7 @@ func (svc *WorkspaceService) Find(id string, userID string) (*dto.Workspace, err
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.mapOne(workspace, userID)
+	res, err := svc.workspaceMapper.MapOne(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +172,7 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*dt
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped, err := svc.workspaceMapper.mapMany(paged, userID)
+	mapped, err := svc.workspaceMapper.MapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +211,7 @@ func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*
 	if err = svc.sync(workspace); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.mapOne(workspace, userID)
+	res, err := svc.workspaceMapper.MapOne(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +239,7 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	if err = svc.sync(workspace); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.mapOne(workspace, userID)
+	res, err := svc.workspaceMapper.MapOne(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -513,81 +522,4 @@ func (svc *WorkspaceService) sync(workspace model.Workspace) error {
 		return err
 	}
 	return nil
-}
-
-type workspaceMapper struct {
-	orgCache   *cache.OrganizationCache
-	orgMapper  *organizationMapper
-	groupCache *cache.GroupCache
-}
-
-func newWorkspaceMapper() *workspaceMapper {
-	return &workspaceMapper{
-		orgCache: cache.NewOrganizationCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-		orgMapper: newOrganizationMapper(),
-		groupCache: cache.NewGroupCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-	}
-}
-
-func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*dto.Workspace, error) {
-	org, err := mp.orgCache.Get(m.GetOrganizationID())
-	if err != nil {
-		return nil, err
-	}
-	o, err := mp.orgMapper.mapOne(org, userID)
-	if err != nil {
-		return nil, err
-	}
-	res := &dto.Workspace{
-		ID:              m.GetID(),
-		Name:            m.GetName(),
-		RootID:          m.GetRootID(),
-		StorageCapacity: m.GetStorageCapacity(),
-		Organization:    *o,
-		CreateTime:      m.GetCreateTime(),
-		UpdateTime:      m.GetUpdateTime(),
-	}
-	res.Permission = model.PermissionNone
-	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-			res.Permission = p.GetValue()
-		}
-	}
-	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupID())
-		if err != nil {
-			return nil, err
-		}
-		for _, u := range g.GetMembers() {
-			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
-				res.Permission = p.GetValue()
-			}
-		}
-	}
-	return res, nil
-}
-
-func (mp *workspaceMapper) mapMany(workspaces []model.Workspace, userID string) ([]*dto.Workspace, error) {
-	res := make([]*dto.Workspace, 0)
-	for _, workspace := range workspaces {
-		w, err := mp.mapOne(workspace, userID)
-		if err != nil {
-			var e *errorpkg.ErrorResponse
-			if errors.As(err, &e) && e.Code == errorpkg.NewWorkspaceNotFoundError(nil).Code {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-		res = append(res, w)
-	}
-	return res, nil
 }
