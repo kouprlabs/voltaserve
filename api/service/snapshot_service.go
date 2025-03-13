@@ -11,7 +11,6 @@
 package service
 
 import (
-	"path/filepath"
 	"sort"
 
 	"github.com/minio/minio-go/v7"
@@ -22,6 +21,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/guard"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 	"github.com/kouprlabs/voltaserve/shared/search"
@@ -34,13 +34,13 @@ import (
 type SnapshotService struct {
 	snapshotRepo    *repo.SnapshotRepo
 	snapshotCache   *cache.SnapshotCache
-	snapshotMapper  *snapshotMapper
+	snapshotMapper  *mapper.SnapshotMapper
 	snapshotWebhook *webhook.SnapshotWebhook
 	fileCache       *cache.FileCache
 	fileGuard       *guard.FileGuard
 	fileRepo        *repo.FileRepo
 	fileSearch      *search.FileSearch
-	fileMapper      *fileMapper
+	fileMapper      *mapper.FileMapper
 	taskRepo        *repo.TaskRepo
 	taskCache       *cache.TaskCache
 	s3              infra.S3Manager
@@ -59,7 +59,11 @@ func NewSnapshotService() *SnapshotService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		snapshotMapper:  newSnapshotMapper(),
+		snapshotMapper: mapper.NewSnapshotMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		snapshotWebhook: webhook.NewSnapshotWebhook(),
 		fileCache: cache.NewFileCache(
 			config.GetConfig().Postgres,
@@ -77,7 +81,11 @@ func NewSnapshotService() *SnapshotService {
 			config.GetConfig().S3,
 			config.GetConfig().Environment,
 		),
-		fileMapper: newFileMapper(),
+		fileMapper: mapper.NewFileMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		fileRepo: repo.NewFileRepo(
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
@@ -129,7 +137,7 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped := newSnapshotMapper().mapMany(paged, file.GetSnapshotID())
+	mapped := svc.snapshotMapper.MapMany(paged, file.GetSnapshotID())
 	return &dto.SnapshotList{
 		Data:          mapped,
 		TotalPages:    totalPages,
@@ -177,7 +185,7 @@ func (svc *SnapshotService) Activate(id string, userID string) (*dto.File, error
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +235,7 @@ func (svc *SnapshotService) Detach(id string, userID string) (*dto.File, error) 
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.mapOne(file, userID)
+	res, err := svc.fileMapper.MapOne(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +247,7 @@ func (svc *SnapshotService) Find(id string) (*dto.SnapshotWithS3Objects, error) 
 	if err != nil {
 		return nil, err
 	}
-	return svc.snapshotMapper.mapWithS3Objects(snapshot), nil
+	return svc.snapshotMapper.MapWithS3Objects(snapshot), nil
 }
 
 func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dto.SnapshotWithS3Objects, error) {
@@ -280,7 +288,7 @@ func (svc *SnapshotService) Patch(id string, opts dto.SnapshotPatchOptions) (*dt
 	if err != nil {
 		return nil, err
 	}
-	return svc.snapshotMapper.mapWithS3Objects(snapshot), nil
+	return svc.snapshotMapper.MapWithS3Objects(snapshot), nil
 }
 
 func (svc *SnapshotService) GetLanguages() ([]*dto.SnapshotLanguage, error) {
@@ -479,7 +487,7 @@ func (svc *SnapshotService) callSnapshotHookWithPatchEvent(snapshot model.Snapsh
 		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
 			EventType: dto.SnapshotWebhookEventTypePatch,
 			Fields:    fields,
-			Snapshot:  svc.snapshotMapper.mapWithS3Objects(snapshot),
+			Snapshot:  svc.snapshotMapper.MapWithS3Objects(snapshot),
 		}); err != nil {
 			logger.GetLogger().Error(err)
 		} else {
@@ -527,133 +535,4 @@ func isTaskPending(snapshot model.Snapshot, taskCache *cache.TaskCache) (bool, e
 		}
 	}
 	return false, nil
-}
-
-type snapshotMapper struct {
-	taskCache  *cache.TaskCache
-	taskMapper *taskMapper
-	fileIdent  *infra.FileIdentifier
-}
-
-func newSnapshotMapper() *snapshotMapper {
-	return &snapshotMapper{
-		taskCache: cache.NewTaskCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-		taskMapper: newTaskMapper(),
-		fileIdent:  infra.NewFileIdentifier(),
-	}
-}
-
-func (mp *snapshotMapper) mapOne(m model.Snapshot) *dto.Snapshot {
-	s := &dto.Snapshot{
-		ID:         m.GetID(),
-		Version:    m.GetVersion(),
-		Language:   m.GetLanguage(),
-		Summary:    m.GetSummary(),
-		Intent:     m.GetIntent(),
-		CreateTime: m.GetCreateTime(),
-		UpdateTime: m.GetUpdateTime(),
-	}
-	if m.HasOriginal() {
-		s.Original = mp.mapS3Object(m.GetOriginal())
-		s.Capabilities.Original = true
-	}
-	if m.HasPreview() {
-		s.Preview = mp.mapS3Object(m.GetPreview())
-		s.Capabilities.Preview = true
-	}
-	if m.HasOCR() {
-		s.OCR = mp.mapS3Object(m.GetOCR())
-		s.Capabilities.OCR = true
-	}
-	if m.HasText() {
-		s.Text = mp.mapS3Object(m.GetText())
-		s.Capabilities.Text = true
-	}
-	if m.HasThumbnail() {
-		s.Thumbnail = mp.mapS3Object(m.GetThumbnail())
-		s.Capabilities.Thumbnail = true
-	}
-	if m.GetSummary() != nil {
-		s.Capabilities.Summary = true
-	}
-	if m.HasEntities() {
-		s.Capabilities.Entities = true
-	}
-	if m.HasMosaic() {
-		s.Capabilities.Mosaic = true
-	}
-	if m.GetTaskID() != nil {
-		task, err := mp.taskCache.Get(*m.GetTaskID())
-		if err == nil {
-			s.Task, _ = mp.taskMapper.mapOne(task)
-		}
-	}
-	if m.HasOriginal() && m.GetIntent() == nil {
-		if mp.fileIdent.IsDocument(m.GetOriginal().Key) {
-			s.Intent = helper.ToPtr(model.SnapshotIntentDocument)
-		} else if mp.fileIdent.IsImage(m.GetOriginal().Key) {
-			s.Intent = helper.ToPtr(model.SnapshotIntentImage)
-		} else if mp.fileIdent.IsAudio(m.GetOriginal().Key) {
-			s.Intent = helper.ToPtr(model.SnapshotIntentAudio)
-		} else if mp.fileIdent.IsVideo(m.GetOriginal().Key) {
-			s.Intent = helper.ToPtr(model.SnapshotIntentVideo)
-		} else if mp.fileIdent.Is3D(m.GetOriginal().Key) {
-			s.Intent = helper.ToPtr(model.SnapshotIntent3D)
-		}
-	}
-	return s
-}
-
-func (mp *snapshotMapper) mapMany(snapshots []model.Snapshot, activeID *string) []*dto.Snapshot {
-	res := make([]*dto.Snapshot, 0)
-	for _, snapshot := range snapshots {
-		s := mp.mapOne(snapshot)
-		s.IsActive = activeID != nil && *activeID == snapshot.GetID()
-		res = append(res, s)
-	}
-	return res
-}
-
-func (mp *snapshotMapper) mapS3Object(o *model.S3Object) *dto.SnapshotDownloadable {
-	download := &dto.SnapshotDownloadable{
-		Extension: filepath.Ext(o.Key),
-		Size:      o.Size,
-	}
-	if o.Image != nil {
-		download.Image = o.Image
-	}
-	if o.Document != nil {
-		download.Document = o.Document
-	}
-	return download
-}
-
-func (mp *snapshotMapper) mapWithS3Objects(m model.Snapshot) *dto.SnapshotWithS3Objects {
-	s := &dto.SnapshotWithS3Objects{
-		ID:         m.GetID(),
-		Version:    m.GetVersion(),
-		Original:   m.GetOriginal(),
-		Preview:    m.GetPreview(),
-		OCR:        m.GetOCR(),
-		Text:       m.GetText(),
-		Thumbnail:  m.GetThumbnail(),
-		Entities:   m.GetEntities(),
-		Mosaic:     m.GetMosaic(),
-		Language:   m.GetLanguage(),
-		Summary:    m.GetSummary(),
-		Intent:     m.GetIntent(),
-		CreateTime: m.GetCreateTime(),
-		UpdateTime: m.GetUpdateTime(),
-	}
-	if m.GetTaskID() != nil {
-		task, err := mp.taskCache.Get(*m.GetTaskID())
-		if err == nil {
-			s.Task, _ = mp.taskMapper.mapOne(task)
-		}
-	}
-	return s
 }

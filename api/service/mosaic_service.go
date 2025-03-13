@@ -19,6 +19,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/guard"
 	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 
@@ -32,7 +33,7 @@ type MosaicService struct {
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
 	taskSvc        *TaskService
-	taskMapper     *taskMapper
+	taskMapper     *mapper.TaskMapper
 	mosaicClient   *client.MosaicClient
 	pipelineClient client.PipelineClient
 }
@@ -55,8 +56,12 @@ func NewMosaicService() *MosaicService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		taskSvc:      NewTaskService(),
-		taskMapper:   newTaskMapper(),
+		taskSvc: NewTaskService(),
+		taskMapper: mapper.NewTaskMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		mosaicClient: client.NewMosaicClient(config.GetConfig().MosaicURL),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
@@ -98,7 +103,7 @@ func (svc *MosaicService) Create(fileID string, userID string) (*dto.Task, error
 	if err := svc.runPipeline(snapshot, task); err != nil {
 		return nil, err
 	}
-	res, err := svc.taskMapper.mapOne(task)
+	res, err := svc.taskMapper.MapOne(task)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +144,7 @@ func (svc *MosaicService) Delete(fileID string, userID string) (*dto.Task, error
 		return nil, err
 	}
 	go svc.delete(task, snapshot)
-	res, err := svc.taskMapper.mapOne(task)
+	res, err := svc.taskMapper.MapOne(task)
 	if err != nil {
 		return nil, err
 	}

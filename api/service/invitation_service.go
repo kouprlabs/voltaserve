@@ -19,6 +19,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/guard"
 	"github.com/kouprlabs/voltaserve/shared/helper"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 
@@ -28,7 +29,7 @@ import (
 
 type InvitationService struct {
 	orgRepo          *repo.OrganizationRepo
-	orgMapper        *organizationMapper
+	orgMapper        *mapper.OrganizationMapper
 	invitationRepo   *repo.InvitationRepo
 	invitationMapper *invitationMapper
 	orgCache         *cache.OrganizationCache
@@ -69,8 +70,12 @@ func NewInvitationService() *InvitationService {
 			config.GetConfig().SMTP,
 			config.GetConfig().Environment.IsTest,
 		),
-		orgMapper: newOrganizationMapper(),
-		config:    config.GetConfig(),
+		orgMapper: mapper.NewOrganizationMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		config: config.GetConfig(),
 	}
 }
 
@@ -464,7 +469,7 @@ type invitationMapper struct {
 	orgCache   *cache.OrganizationCache
 	userRepo   *repo.UserRepo
 	userMapper *userMapper
-	orgMapper  *organizationMapper
+	orgMapper  *mapper.OrganizationMapper
 }
 
 func newInvitationMapper() *invitationMapper {
@@ -479,7 +484,11 @@ func newInvitationMapper() *invitationMapper {
 			config.GetConfig().Environment,
 		),
 		userMapper: newUserMapper(),
-		orgMapper:  newOrganizationMapper(),
+		orgMapper: mapper.NewOrganizationMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 	}
 }
 
@@ -492,7 +501,7 @@ func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*dto.Invi
 	if err != nil {
 		return nil, err
 	}
-	o, err := mp.orgMapper.mapOne(org, userID)
+	o, err := mp.orgMapper.MapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
