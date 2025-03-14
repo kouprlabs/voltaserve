@@ -204,19 +204,6 @@ func (repo *InvitationRepo) FindIncoming(email string) ([]model.Invitation, erro
 	return res, nil
 }
 
-func (repo *InvitationRepo) CountIncoming(email string) (int64, error) {
-	var count int64
-	db := repo.db.
-		Model(&invitationEntity{}).
-		Where("LOWER(email) = LOWER(?)", email).
-		Where("status = 'pending'").
-		Count(&count)
-	if db.Error != nil {
-		return -1, db.Error
-	}
-	return count, nil
-}
-
 func (repo *InvitationRepo) FindOutgoing(orgID string, userID string) ([]model.Invitation, error) {
 	var invitations []*invitationEntity
 	db := repo.db.
@@ -230,6 +217,19 @@ func (repo *InvitationRepo) FindOutgoing(orgID string, userID string) ([]model.I
 		res = append(res, inv)
 	}
 	return res, nil
+}
+
+func (repo *InvitationRepo) CountIncoming(email string) (int64, error) {
+	var count int64
+	db := repo.db.
+		Model(&invitationEntity{}).
+		Where("LOWER(email) = LOWER(?)", email).
+		Where("status = 'pending'").
+		Count(&count)
+	if db.Error != nil {
+		return -1, db.Error
+	}
+	return count, nil
 }
 
 func (repo *InvitationRepo) Save(org model.Invitation) error {

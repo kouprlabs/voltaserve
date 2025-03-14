@@ -35,7 +35,7 @@ func NewSnapshotMapper(postgres config.PostgresConfig, redis config.RedisConfig,
 	}
 }
 
-func (mp *SnapshotMapper) MapOne(m model.Snapshot) *dto.Snapshot {
+func (mp *SnapshotMapper) Map(m model.Snapshot) *dto.Snapshot {
 	s := &dto.Snapshot{
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
@@ -77,7 +77,7 @@ func (mp *SnapshotMapper) MapOne(m model.Snapshot) *dto.Snapshot {
 	if m.GetTaskID() != nil {
 		task, err := mp.taskCache.Get(*m.GetTaskID())
 		if err == nil {
-			s.Task, _ = mp.taskMapper.MapOne(task)
+			s.Task, _ = mp.taskMapper.Map(task)
 		}
 	}
 	if m.HasOriginal() && m.GetIntent() == nil {
@@ -99,7 +99,7 @@ func (mp *SnapshotMapper) MapOne(m model.Snapshot) *dto.Snapshot {
 func (mp *SnapshotMapper) MapMany(snapshots []model.Snapshot, activeID *string) []*dto.Snapshot {
 	res := make([]*dto.Snapshot, 0)
 	for _, snapshot := range snapshots {
-		s := mp.MapOne(snapshot)
+		s := mp.Map(snapshot)
 		s.IsActive = activeID != nil && *activeID == snapshot.GetID()
 		res = append(res, s)
 	}
@@ -140,7 +140,7 @@ func (mp *SnapshotMapper) MapWithS3Objects(m model.Snapshot) *dto.SnapshotWithS3
 	if m.GetTaskID() != nil {
 		task, err := mp.taskCache.Get(*m.GetTaskID())
 		if err == nil {
-			s.Task, _ = mp.taskMapper.MapOne(task)
+			s.Task, _ = mp.taskMapper.Map(task)
 		}
 	}
 	return s

@@ -422,18 +422,6 @@ func (repo *SnapshotRepo) FindOrNil(id string) model.Snapshot {
 	return res
 }
 
-func (repo *SnapshotRepo) find(id string) (*snapshotEntity, error) {
-	var res snapshotEntity
-	if db := repo.db.Where("id = ?", id).First(&res); db.Error != nil {
-		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
-			return nil, errorpkg.NewSnapshotNotFoundError(db.Error)
-		} else {
-			return nil, errorpkg.NewInternalServerError(db.Error)
-		}
-	}
-	return &res, nil
-}
-
 func (repo *SnapshotRepo) FindByVersion(version int64) (model.Snapshot, error) {
 	res := snapshotEntity{}
 	db := repo.db.Where("version = ?", version).First(&res)
@@ -445,6 +433,142 @@ func (repo *SnapshotRepo) FindByVersion(version int64) (model.Snapshot, error) {
 		}
 	}
 	return &res, nil
+}
+
+func (repo *SnapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {
+	var entities []*snapshotEntity
+	db := repo.db.
+		Raw(`SELECT * FROM snapshot s
+             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
+             WHERE sf.file_id = ? ORDER BY s.version`,
+			fileID).
+		Scan(&entities)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	var res []model.Snapshot
+	for _, s := range entities {
+		res = append(res, s)
+	}
+	return res, nil
+}
+
+func (repo *SnapshotRepo) FindExclusiveForFile(fileID string) ([]model.Snapshot, error) {
+	var entities []*snapshotEntity
+	db := repo.db.
+		Raw(`SELECT s.* FROM snapshot s
+             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
+             WHERE sf.file_id = ?
+             AND NOT EXISTS (SELECT 1 FROM snapshot_file sf2 WHERE sf2.snapshot_id = s.id AND sf2.file_id != ?)
+             ORDER BY s.version`,
+			fileID, fileID).
+		Scan(&entities)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	var res []model.Snapshot
+	for _, s := range entities {
+		res = append(res, s)
+	}
+	return res, nil
+}
+
+func (repo *SnapshotRepo) FindAllForTask(taskID string) ([]model.Snapshot, error) {
+	var entities []*snapshotEntity
+	db := repo.db.
+		Raw(`SELECT * FROM snapshot WHERE task_id = ?`, taskID).
+		Scan(&entities)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	var res []model.Snapshot
+	for _, s := range entities {
+		res = append(res, s)
+	}
+	return res, nil
+}
+
+func (repo *SnapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
+	var entities []*snapshotEntity
+	db := repo.db.
+		Raw(`SELECT * FROM snapshot s
+             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
+             WHERE sf.snapshot_id IS NULL`).
+		Scan(&entities)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	var res []model.Snapshot
+	for _, s := range entities {
+		res = append(res, s)
+	}
+	return res, nil
+}
+
+func (repo *SnapshotRepo) FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error) {
+	var entities []*snapshotEntity
+	db := repo.db.
+		Raw(`SELECT * FROM snapshot s
+             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
+             WHERE sf.file_id = ? AND s.version < ?
+             ORDER BY s.version DESC`,
+			fileID, version).
+		Scan(&entities)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	var res []model.Snapshot
+	for _, s := range entities {
+		res = append(res, s)
+	}
+	return res, nil
+}
+
+func (repo *SnapshotRepo) FindIDsByFile(fileID string) ([]string, error) {
+	type Value struct {
+		Result string
+	}
+	var values []Value
+	db := repo.db.
+		Raw("SELECT snapshot_id result FROM snapshot_file WHERE file_id = ?", fileID).
+		Scan(&values)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := make([]string, 0)
+	for _, v := range values {
+		res = append(res, v.Result)
+	}
+	return res, nil
+}
+
+func (repo *SnapshotRepo) FindLatestVersionForFile(fileID string) (int64, error) {
+	type Result struct {
+		Result int64
+	}
+	var res Result
+	if db := repo.db.
+		Raw(`SELECT coalesce(max(s.version), 0) result 
+             FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id
+             WHERE map.file_id = ?`,
+			fileID).
+		Scan(&res); db.Error != nil {
+		return -1, db.Error
+	}
+	return res.Result, nil
+}
+
+func (repo *SnapshotRepo) FindFileID(id string) (string, error) {
+	type Result struct {
+		Result string
+	}
+	var res Result
+	if db := repo.db.
+		Raw("SELECT file_id result FROM snapshot_file WHERE snapshot_id = ?", id).
+		Scan(&res); db.Error != nil {
+		return "", db.Error
+	}
+	return res.Result, nil
 }
 
 func (repo *SnapshotRepo) Insert(snapshot model.Snapshot) error {
@@ -568,113 +692,6 @@ func (repo *SnapshotRepo) DeleteMappingsForTree(fileID string) error {
 	return nil
 }
 
-func (repo *SnapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {
-	var entities []*snapshotEntity
-	db := repo.db.
-		Raw(`SELECT * FROM snapshot s
-             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
-             WHERE sf.file_id = ? ORDER BY s.version`,
-			fileID).
-		Scan(&entities)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	var res []model.Snapshot
-	for _, s := range entities {
-		res = append(res, s)
-	}
-	return res, nil
-}
-
-func (repo *SnapshotRepo) FindExclusiveForFile(fileID string) ([]model.Snapshot, error) {
-	var entities []*snapshotEntity
-	db := repo.db.
-		Raw(`SELECT s.* FROM snapshot s
-             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
-             WHERE sf.file_id = ?
-             AND NOT EXISTS (SELECT 1 FROM snapshot_file sf2 WHERE sf2.snapshot_id = s.id AND sf2.file_id != ?)
-             ORDER BY s.version`,
-			fileID, fileID).
-		Scan(&entities)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	var res []model.Snapshot
-	for _, s := range entities {
-		res = append(res, s)
-	}
-	return res, nil
-}
-
-func (repo *SnapshotRepo) FindAllForTask(taskID string) ([]model.Snapshot, error) {
-	var entities []*snapshotEntity
-	db := repo.db.
-		Raw(`SELECT * FROM snapshot WHERE task_id = ?`, taskID).
-		Scan(&entities)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	var res []model.Snapshot
-	for _, s := range entities {
-		res = append(res, s)
-	}
-	return res, nil
-}
-
-func (repo *SnapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
-	var entities []*snapshotEntity
-	db := repo.db.
-		Raw(`SELECT * FROM snapshot s
-             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
-             WHERE sf.snapshot_id IS NULL`).
-		Scan(&entities)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	var res []model.Snapshot
-	for _, s := range entities {
-		res = append(res, s)
-	}
-	return res, nil
-}
-
-func (repo *SnapshotRepo) FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error) {
-	var entities []*snapshotEntity
-	db := repo.db.
-		Raw(`SELECT * FROM snapshot s
-             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
-             WHERE sf.file_id = ? AND s.version < ?
-             ORDER BY s.version DESC`,
-			fileID, version).
-		Scan(&entities)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	var res []model.Snapshot
-	for _, s := range entities {
-		res = append(res, s)
-	}
-	return res, nil
-}
-
-func (repo *SnapshotRepo) FindIDsByFile(fileID string) ([]string, error) {
-	type Value struct {
-		Result string
-	}
-	var values []Value
-	db := repo.db.
-		Raw("SELECT snapshot_id result FROM snapshot_file WHERE file_id = ?", fileID).
-		Scan(&values)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	res := make([]string, 0)
-	for _, v := range values {
-		res = append(res, v.Result)
-	}
-	return res, nil
-}
-
 func (repo *SnapshotRepo) DeleteAllDangling() error {
 	if db := repo.db.
 		Exec(`DELETE FROM snapshot
@@ -683,35 +700,6 @@ func (repo *SnapshotRepo) DeleteAllDangling() error {
 		return db.Error
 	}
 	return nil
-}
-
-func (repo *SnapshotRepo) FindLatestVersionForFile(fileID string) (int64, error) {
-	type Result struct {
-		Result int64
-	}
-	var res Result
-	if db := repo.db.
-		Raw(`SELECT coalesce(max(s.version), 0) result 
-             FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id
-             WHERE map.file_id = ?`,
-			fileID).
-		Scan(&res); db.Error != nil {
-		return -1, db.Error
-	}
-	return res.Result, nil
-}
-
-func (repo *SnapshotRepo) FindFileID(id string) (string, error) {
-	type Result struct {
-		Result string
-	}
-	var res Result
-	if db := repo.db.
-		Raw("SELECT file_id result FROM snapshot_file WHERE snapshot_id = ?", id).
-		Scan(&res); db.Error != nil {
-		return "", db.Error
-	}
-	return res.Result, nil
 }
 
 func (repo *SnapshotRepo) CountAssociations(id string) (int64, error) {
@@ -740,4 +728,16 @@ func (repo *SnapshotRepo) Detach(id string, fileID string) error {
 		return db.Error
 	}
 	return nil
+}
+
+func (repo *SnapshotRepo) find(id string) (*snapshotEntity, error) {
+	var res snapshotEntity
+	if db := repo.db.Where("id = ?", id).First(&res); db.Error != nil {
+		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
+			return nil, errorpkg.NewSnapshotNotFoundError(db.Error)
+		} else {
+			return nil, errorpkg.NewInternalServerError(db.Error)
+		}
+	}
+	return &res, nil
 }

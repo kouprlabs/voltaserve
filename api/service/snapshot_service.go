@@ -185,7 +185,7 @@ func (svc *SnapshotService) Activate(id string, userID string) (*dto.File, error
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(file, userID)
+	res, err := svc.fileMapper.Map(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func (svc *SnapshotService) Detach(id string, userID string) (*dto.File, error) 
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(file, userID)
+	res, err := svc.fileMapper.Map(file, userID)
 	if err != nil {
 		return nil, err
 	}

@@ -250,6 +250,24 @@ func (repo *TaskRepo) FindOrNil(id string) model.Task {
 	return res
 }
 
+func (repo *TaskRepo) FindIDs(userID string) ([]string, error) {
+	type Value struct {
+		Result string
+	}
+	var values []Value
+	db := repo.db.
+		Raw("SELECT id result FROM task WHERE user_id = ? ORDER BY create_time DESC", userID).
+		Scan(&values)
+	if db.Error != nil {
+		return []string{}, db.Error
+	}
+	res := make([]string, 0)
+	for _, v := range values {
+		res = append(res, v.Result)
+	}
+	return res, nil
+}
+
 func (repo *TaskRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&taskEntity{}).Count(&count)
@@ -270,24 +288,6 @@ func (repo *TaskRepo) CountByUserID(userID string) (int64, error) {
 		return -1, db.Error
 	}
 	return count, nil
-}
-
-func (repo *TaskRepo) FindIDs(userID string) ([]string, error) {
-	type Value struct {
-		Result string
-	}
-	var values []Value
-	db := repo.db.
-		Raw("SELECT id result FROM task WHERE user_id = ? ORDER BY create_time DESC", userID).
-		Scan(&values)
-	if db.Error != nil {
-		return []string{}, db.Error
-	}
-	res := make([]string, 0)
-	for _, v := range values {
-		res = append(res, v.Result)
-	}
-	return res, nil
 }
 
 func (repo *TaskRepo) Save(task model.Task) error {

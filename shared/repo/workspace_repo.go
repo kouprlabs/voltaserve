@@ -250,6 +250,40 @@ func (repo *WorkspaceRepo) FindOrNil(id string) model.Workspace {
 	return res
 }
 
+func (repo *WorkspaceRepo) FindIDs() ([]string, error) {
+	type IDResult struct {
+		Result string
+	}
+	var ids []IDResult
+	db := repo.db.Raw("SELECT id result FROM workspace ORDER BY create_time DESC").Scan(&ids)
+	if db.Error != nil {
+		return []string{}, db.Error
+	}
+	res := make([]string, 0)
+	for _, id := range ids {
+		res = append(res, id.Result)
+	}
+	return res, nil
+}
+
+func (repo *WorkspaceRepo) FindIDsByOrganization(orgID string) ([]string, error) {
+	type IDResult struct {
+		Result string
+	}
+	var ids []IDResult
+	db := repo.db.
+		Raw("SELECT id result FROM workspace WHERE organization_id = ? ORDER BY create_time DESC", orgID).
+		Scan(&ids)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := make([]string, 0)
+	for _, id := range ids {
+		res = append(res, id.Result)
+	}
+	return res, nil
+}
+
 func (repo *WorkspaceRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&workspaceEntity{}).Count(&count)
@@ -314,40 +348,6 @@ func (repo *WorkspaceRepo) Delete(id string) error {
 		return db.Error
 	}
 	return nil
-}
-
-func (repo *WorkspaceRepo) FindIDs() ([]string, error) {
-	type IDResult struct {
-		Result string
-	}
-	var ids []IDResult
-	db := repo.db.Raw("SELECT id result FROM workspace ORDER BY create_time DESC").Scan(&ids)
-	if db.Error != nil {
-		return []string{}, db.Error
-	}
-	res := make([]string, 0)
-	for _, id := range ids {
-		res = append(res, id.Result)
-	}
-	return res, nil
-}
-
-func (repo *WorkspaceRepo) FindIDsByOrganization(orgID string) ([]string, error) {
-	type IDResult struct {
-		Result string
-	}
-	var ids []IDResult
-	db := repo.db.
-		Raw("SELECT id result FROM workspace WHERE organization_id = ? ORDER BY create_time DESC", orgID).
-		Scan(&ids)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	res := make([]string, 0)
-	for _, id := range ids {
-		res = append(res, id.Result)
-	}
-	return res, nil
 }
 
 func (repo *WorkspaceRepo) GrantUserPermission(id string, userID string, permission string) error {

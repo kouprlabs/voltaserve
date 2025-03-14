@@ -103,7 +103,7 @@ func (svc *MosaicService) Create(fileID string, userID string) (*dto.Task, error
 	if err := svc.runPipeline(snapshot, task); err != nil {
 		return nil, err
 	}
-	res, err := svc.taskMapper.MapOne(task)
+	res, err := svc.taskMapper.Map(task)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (svc *MosaicService) Delete(fileID string, userID string) (*dto.Task, error
 		return nil, err
 	}
 	go svc.delete(task, snapshot)
-	res, err := svc.taskMapper.MapOne(task)
+	res, err := svc.taskMapper.Map(task)
 	if err != nil {
 		return nil, err
 	}

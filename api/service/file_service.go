@@ -183,19 +183,19 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*dto.F
 }
 
 func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
-	return svc.filePermission.grantUserPermission(ids, assigneeID, permission, userID)
+	return svc.filePermission.grantUserPermissions(ids, assigneeID, permission, userID)
 }
 
 func (svc *FileService) RevokeUserPermission(ids []string, assigneeID string, userID string) error {
-	return svc.filePermission.revokeUserPermission(ids, assigneeID, userID)
+	return svc.filePermission.revokeUserPermissions(ids, assigneeID, userID)
 }
 
 func (svc *FileService) GrantGroupPermission(ids []string, groupID string, permission string, userID string) error {
-	return svc.filePermission.grantGroupPermission(ids, groupID, permission, userID)
+	return svc.filePermission.grantGroupPermissions(ids, groupID, permission, userID)
 }
 
 func (svc *FileService) RevokeGroupPermission(ids []string, groupID string, userID string) error {
-	return svc.filePermission.revokeGroupPermission(ids, groupID, userID)
+	return svc.filePermission.revokeGroupPermissions(ids, groupID, userID)
 }
 
 func (svc *FileService) FindUserPermissions(id string, userID string) ([]*dto.UserPermission, error) {
@@ -341,7 +341,7 @@ func (svc *fileCreate) performCreate(opts FileCreateOptions, failOnDuplicateName
 			if failOnDuplicateName {
 				return nil, errorpkg.NewFileWithSimilarNameExistsError()
 			} else {
-				res, err := svc.fileMapper.MapOne(existing, userID)
+				res, err := svc.fileMapper.Map(existing, userID)
 				if err != nil {
 					return nil, err
 				}
@@ -368,7 +368,7 @@ func (svc *fileCreate) performCreate(opts FileCreateOptions, failOnDuplicateName
 	if err = svc.fileSearch.Index([]model.File{file}); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(file, userID)
+	res, err := svc.fileMapper.Map(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -465,7 +465,7 @@ func (svc *fileFetch) find(ids []string, userID string) ([]*dto.File, error) {
 		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 			return nil, err
 		}
-		mapped, err := svc.fileMapper.MapOne(file, userID)
+		mapped, err := svc.fileMapper.Map(file, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -503,7 +503,7 @@ func (svc *fileFetch) findByPath(path string, userID string) (*dto.File, error) 
 	if err := svc.validatePathForFileType(path, file.GetType()); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(file, userID)
+	res, err := svc.fileMapper.Map(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -567,7 +567,7 @@ func (svc *fileFetch) findPath(id string, userID string) ([]*dto.File, error) {
 		if err = svc.fileGuard.Authorize(userID, leaf, model.PermissionViewer); err != nil {
 			return nil, err
 		}
-		f, err := svc.fileMapper.MapOne(leaf, userID)
+		f, err := svc.fileMapper.Map(leaf, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -1106,7 +1106,7 @@ func (svc *fileCopy) performCopy(source model.File, target model.File, userID st
 	if err := svc.refreshUpdateTime(target); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(cloneResult.Root, userID)
+	res, err := svc.fileMapper.Map(cloneResult.Root, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1779,7 +1779,7 @@ func (svc *fileMove) performMove(source model.File, target model.File, userID st
 	if err := svc.refreshUpdateAndCreateTime(source, target); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(source, userID)
+	res, err := svc.fileMapper.Map(source, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1912,7 +1912,7 @@ func (svc *filePatch) patchName(id string, name string, userID string) (*dto.Fil
 	if err := svc.fileCoreSvc.sync(file); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapOne(file, userID)
+	res, err := svc.fileMapper.Map(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1925,7 +1925,7 @@ type filePermission struct {
 	fileGuard      *guard.FileGuard
 	fileCoreSvc    *fileCoreService
 	userRepo       *repo.UserRepo
-	userMapper     *userMapper
+	userMapper     *mapper.UserMapper
 	workspaceRepo  *repo.WorkspaceRepo
 	workspaceCache *cache.WorkspaceCache
 	groupCache     *cache.GroupCache
@@ -1955,7 +1955,7 @@ func newFilePermission() *filePermission {
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
 		),
-		userMapper: newUserMapper(),
+		userMapper: mapper.NewUserMapper(),
 		workspaceRepo: repo.NewWorkspaceRepo(
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
@@ -1987,16 +1987,16 @@ func newFilePermission() *filePermission {
 	}
 }
 
-func (svc *filePermission) grantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
+func (svc *filePermission) grantUserPermissions(ids []string, assigneeID string, permission string, userID string) error {
 	for _, id := range ids {
-		if err := svc.grantOneUserPermission(id, assigneeID, permission, userID); err != nil {
+		if err := svc.grantUserPermission(id, assigneeID, permission, userID); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (svc *filePermission) grantOneUserPermission(id string, assigneeID string, permission string, userID string) error {
+func (svc *filePermission) grantUserPermission(id string, assigneeID string, permission string, userID string) error {
 	file, err := svc.authorizeUserPermission(id, assigneeID, userID)
 	if err != nil {
 		return err
@@ -2013,16 +2013,16 @@ func (svc *filePermission) grantOneUserPermission(id string, assigneeID string, 
 	return nil
 }
 
-func (svc *filePermission) revokeUserPermission(ids []string, assigneeID string, userID string) error {
+func (svc *filePermission) revokeUserPermissions(ids []string, assigneeID string, userID string) error {
 	for _, id := range ids {
-		if err := svc.revokeOneUserPermission(id, assigneeID, userID); err != nil {
+		if err := svc.revokeUserPermission(id, assigneeID, userID); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (svc *filePermission) revokeOneUserPermission(id string, assigneeID string, userID string) error {
+func (svc *filePermission) revokeUserPermission(id string, assigneeID string, userID string) error {
 	if _, err := svc.authorizeUserPermission(id, assigneeID, userID); err != nil {
 		return err
 	}
@@ -2041,16 +2041,16 @@ func (svc *filePermission) revokeOneUserPermission(id string, assigneeID string,
 	return nil
 }
 
-func (svc *filePermission) grantGroupPermission(ids []string, groupID string, permission string, userID string) error {
+func (svc *filePermission) grantGroupPermissions(ids []string, groupID string, permission string, userID string) error {
 	for _, id := range ids {
-		if err := svc.grantOneGroupPermission(id, groupID, permission, userID); err != nil {
+		if err := svc.grantGroupPermission(id, groupID, permission, userID); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (svc *filePermission) grantOneGroupPermission(id string, groupID string, permission string, userID string) error {
+func (svc *filePermission) grantGroupPermission(id string, groupID string, permission string, userID string) error {
 	file, _, err := svc.authorizeGroupPermission(id, groupID, userID)
 	if err != nil {
 		return err
@@ -2067,16 +2067,16 @@ func (svc *filePermission) grantOneGroupPermission(id string, groupID string, pe
 	return nil
 }
 
-func (svc *filePermission) revokeGroupPermission(ids []string, groupID string, userID string) error {
+func (svc *filePermission) revokeGroupPermissions(ids []string, groupID string, userID string) error {
 	for _, id := range ids {
-		if err := svc.revokeOneGroupPermission(id, groupID, userID); err != nil {
+		if err := svc.revokeGroupPermission(id, groupID, userID); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (svc *filePermission) revokeOneGroupPermission(id string, groupID string, userID string) error {
+func (svc *filePermission) revokeGroupPermission(id string, groupID string, userID string) error {
 	if _, _, err := svc.authorizeGroupPermission(id, groupID, userID); err != nil {
 		return err
 	}
@@ -2172,7 +2172,7 @@ func (svc *filePermission) findUserPermissions(id string, userID string) ([]*dto
 		}
 		res = append(res, &dto.UserPermission{
 			ID:         p.GetID(),
-			User:       svc.userMapper.mapOne(u),
+			User:       svc.userMapper.Map(u),
 			Permission: p.GetPermission(),
 		})
 	}
@@ -2197,7 +2197,7 @@ func (svc *filePermission) findGroupPermissions(id string, userID string) ([]*dt
 		if err != nil {
 			return nil, err
 		}
-		g, err := svc.groupMapper.MapOne(m, userID)
+		g, err := svc.groupMapper.Map(m, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -2490,7 +2490,7 @@ func (svc *fileStore) store(id string, opts FileStoreOptions, userID string) (*d
 			return nil, err
 		}
 	}
-	res, err := svc.fileMapper.MapOne(file, userID)
+	res, err := svc.fileMapper.Map(file, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -2730,7 +2730,6 @@ func (svc *fileCoreService) authorize(userID string, files []model.File, permiss
 func (svc *fileCoreService) authorizeIDs(userID string, ids []string, permission string) ([]model.File, error) {
 	var res []model.File
 	for _, id := range ids {
-		var f model.File
 		f, err := svc.fileCache.Get(id)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
@@ -2829,7 +2828,7 @@ func (svc *fileFilterService) filterFiles(data []model.File) []model.File {
 func (svc *fileFilterService) filterImages(data []model.File, userID string) []model.File {
 	images, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.Map(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2852,7 +2851,7 @@ func (svc *fileFilterService) filterImages(data []model.File, userID string) []m
 func (svc *fileFilterService) filterPDFs(data []model.File, userID string) []model.File {
 	pdfs, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.Map(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2875,7 +2874,7 @@ func (svc *fileFilterService) filterPDFs(data []model.File, userID string) []mod
 func (svc *fileFilterService) filterDocuments(data []model.File, userID string) []model.File {
 	documents, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.Map(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2898,7 +2897,7 @@ func (svc *fileFilterService) filterDocuments(data []model.File, userID string) 
 func (svc *fileFilterService) filterVideos(data []model.File, userID string) []model.File {
 	videos, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.Map(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2921,7 +2920,7 @@ func (svc *fileFilterService) filterVideos(data []model.File, userID string) []m
 func (svc *fileFilterService) filterTexts(data []model.File, userID string) []model.File {
 	texts, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.Map(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -2944,7 +2943,7 @@ func (svc *fileFilterService) filterTexts(data []model.File, userID string) []mo
 func (svc *fileFilterService) filterOthers(data []model.File, userID string) []model.File {
 	others, _ := rxgo.Just(data)().
 		Filter(func(file interface{}) bool {
-			f, err := svc.fileMapper.MapOne(file.(model.File), userID)
+			f, err := svc.fileMapper.Map(file.(model.File), userID)
 			if err != nil {
 				return false
 			}
@@ -3071,11 +3070,11 @@ func (svc *fileSortService) sortByName(data []model.File, sortOrder string) []mo
 
 func (svc *fileSortService) sortBySize(data []model.File, sortOrder string, userID string) []model.File {
 	sort.Slice(data, func(i, j int) bool {
-		fileA, err := svc.fileMapper.MapOne(data[i], userID)
+		fileA, err := svc.fileMapper.Map(data[i], userID)
 		if err != nil {
 			return false
 		}
-		fileB, err := svc.fileMapper.MapOne(data[j], userID)
+		fileB, err := svc.fileMapper.Map(data[j], userID)
 		if err != nil {
 			return false
 		}

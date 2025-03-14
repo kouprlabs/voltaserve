@@ -20,6 +20,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/guard"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
+	"github.com/kouprlabs/voltaserve/shared/mapper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 	"github.com/kouprlabs/voltaserve/shared/search"
@@ -28,7 +29,7 @@ import (
 )
 
 type UserService struct {
-	userMapper     *userMapper
+	userMapper     *mapper.UserMapper
 	userRepo       *repo.UserRepo
 	userSearch     *search.UserSearch
 	orgRepo        *repo.OrganizationRepo
@@ -43,7 +44,7 @@ type UserService struct {
 
 func NewUserService() *UserService {
 	return &UserService{
-		userMapper: newUserMapper(),
+		userMapper: mapper.NewUserMapper(),
 		userRepo: repo.NewUserRepo(
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
@@ -113,7 +114,7 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*dto.UserList
 	}
 	sorted := svc.sort(users, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped, err := svc.userMapper.mapMany(paged)
+	mapped, err := svc.userMapper.MapMany(paged)
 	if err != nil {
 		return nil, err
 	}
@@ -372,35 +373,4 @@ func (svc *UserService) findUserForPicture(id string, justification ExtractPictu
 		}
 	}
 	return user, nil
-}
-
-type userMapper struct{}
-
-func newUserMapper() *userMapper {
-	return &userMapper{}
-}
-
-func (mp *userMapper) mapOne(user model.User) *dto.User {
-	res := &dto.User{
-		ID:         user.GetID(),
-		FullName:   user.GetFullName(),
-		Email:      user.GetEmail(),
-		Username:   user.GetUsername(),
-		CreateTime: user.GetCreateTime(),
-		UpdateTime: user.GetUpdateTime(),
-	}
-	if user.GetPicture() != nil {
-		res.Picture = &dto.Picture{
-			Extension: helper.Base64ToExtension(*user.GetPicture()),
-		}
-	}
-	return res
-}
-
-func (mp *userMapper) mapMany(users []model.User) ([]*dto.User, error) {
-	res := make([]*dto.User, 0)
-	for _, user := range users {
-		res = append(res, mp.mapOne(user))
-	}
-	return res, nil
 }

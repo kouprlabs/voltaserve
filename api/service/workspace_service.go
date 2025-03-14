@@ -129,7 +129,7 @@ func (svc *WorkspaceService) Create(opts dto.WorkspaceCreateOptions, userID stri
 	if err = svc.workspaceSearch.Index([]model.Workspace{workspace}); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.MapOne(workspace, userID)
+	res, err := svc.workspaceMapper.Map(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (svc *WorkspaceService) Find(id string, userID string) (*dto.Workspace, err
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.MapOne(workspace, userID)
+	res, err := svc.workspaceMapper.Map(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +211,7 @@ func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*
 	if err = svc.sync(workspace); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.MapOne(workspace, userID)
+	res, err := svc.workspaceMapper.Map(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	if err = svc.sync(workspace); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.MapOne(workspace, userID)
+	res, err := svc.workspaceMapper.Map(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -443,7 +443,6 @@ func (svc *WorkspaceService) authorize(data []model.Workspace, userID string) ([
 func (svc *WorkspaceService) authorizeIDs(ids []string, userID string) ([]model.Workspace, error) {
 	var res []model.Workspace
 	for _, id := range ids {
-		var w model.Workspace
 		w, err := svc.workspaceCache.Get(id)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
