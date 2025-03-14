@@ -30,7 +30,7 @@ func NewOrganizationMapper(postgres config.PostgresConfig, redis config.RedisCon
 	}
 }
 
-func (mp *OrganizationMapper) MapOne(m model.Organization, userID string) (*dto.Organization, error) {
+func (mp *OrganizationMapper) Map(m model.Organization, userID string) (*dto.Organization, error) {
 	res := &dto.Organization{
 		ID:         m.GetID(),
 		Name:       m.GetName(),
@@ -60,7 +60,7 @@ func (mp *OrganizationMapper) MapOne(m model.Organization, userID string) (*dto.
 func (mp *OrganizationMapper) MapMany(orgs []model.Organization, userID string) ([]*dto.Organization, error) {
 	res := make([]*dto.Organization, 0)
 	for _, org := range orgs {
-		o, err := mp.MapOne(org, userID)
+		o, err := mp.Map(org, userID)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
 			if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {

@@ -30,7 +30,7 @@ func NewTaskMapper(postgres config.PostgresConfig, redis config.RedisConfig, env
 	}
 }
 
-func (mp *TaskMapper) MapOne(m model.Task) (*dto.Task, error) {
+func (mp *TaskMapper) Map(m model.Task) (*dto.Task, error) {
 	return &dto.Task{
 		ID:              m.GetID(),
 		Name:            m.GetName(),
@@ -49,7 +49,7 @@ func (mp *TaskMapper) MapOne(m model.Task) (*dto.Task, error) {
 func (mp *TaskMapper) MapMany(tasks []model.Task) ([]*dto.Task, error) {
 	res := make([]*dto.Task, 0)
 	for _, task := range tasks {
-		t, err := mp.MapOne(task)
+		t, err := mp.Map(task)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
 			if errors.As(err, &e) && e.Code == errorpkg.NewTaskNotFoundError(nil).Code {

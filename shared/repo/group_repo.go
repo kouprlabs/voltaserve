@@ -189,19 +189,6 @@ func (repo *GroupRepo) Insert(opts GroupInsertOptions) (model.Group, error) {
 	return res, nil
 }
 
-func (repo *GroupRepo) find(id string) (*groupEntity, error) {
-	res := groupEntity{}
-	db := repo.db.Where("id = ?", id).First(&res)
-	if db.Error != nil {
-		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
-			return nil, errorpkg.NewGroupNotFoundError(db.Error)
-		} else {
-			return nil, errorpkg.NewInternalServerError(db.Error)
-		}
-	}
-	return &res, nil
-}
-
 func (repo *GroupRepo) Find(id string) (model.Group, error) {
 	group, err := repo.find(id)
 	if err != nil {
@@ -219,15 +206,6 @@ func (repo *GroupRepo) FindOrNil(id string) model.Group {
 		return nil
 	}
 	return res
-}
-
-func (repo *GroupRepo) Count() (int64, error) {
-	var count int64
-	db := repo.db.Model(&groupEntity{}).Count(&count)
-	if db.Error != nil {
-		return -1, db.Error
-	}
-	return count, nil
 }
 
 func (repo *GroupRepo) FindIDsByFile(fileID string) ([]string, error) {
@@ -267,30 +245,6 @@ func (repo *GroupRepo) FindIDsByOrganization(id string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *GroupRepo) Save(group model.Group) error {
-	db := repo.db.Save(group)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
-func (repo *GroupRepo) Delete(id string) error {
-	db := repo.db.Exec(`DELETE FROM "group" WHERE id = ?`, id)
-	if db.Error != nil {
-		return db.Error
-	}
-	db = repo.db.Exec("DELETE FROM userpermission WHERE resource_id = ?", id)
-	if db.Error != nil {
-		return db.Error
-	}
-	db = repo.db.Exec("DELETE FROM grouppermission WHERE resource_id = ?", id)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
 func (repo *GroupRepo) FindIDs() ([]string, error) {
 	type Value struct {
 		Result string
@@ -323,6 +277,39 @@ func (repo *GroupRepo) FindMembers(id string) ([]model.User, error) {
 	return res, nil
 }
 
+func (repo *GroupRepo) Count() (int64, error) {
+	var count int64
+	db := repo.db.Model(&groupEntity{}).Count(&count)
+	if db.Error != nil {
+		return -1, db.Error
+	}
+	return count, nil
+}
+
+func (repo *GroupRepo) Save(group model.Group) error {
+	db := repo.db.Save(group)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *GroupRepo) Delete(id string) error {
+	db := repo.db.Exec(`DELETE FROM "group" WHERE id = ?`, id)
+	if db.Error != nil {
+		return db.Error
+	}
+	db = repo.db.Exec("DELETE FROM userpermission WHERE resource_id = ?", id)
+	if db.Error != nil {
+		return db.Error
+	}
+	db = repo.db.Exec("DELETE FROM grouppermission WHERE resource_id = ?", id)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
 func (repo *GroupRepo) CountOwners(id string) (int64, error) {
 	var count int64
 	db := repo.db.Model(&userPermissionEntity{}).
@@ -352,6 +339,19 @@ func (repo *GroupRepo) RevokeUserPermission(id string, userID string) error {
 		return db.Error
 	}
 	return nil
+}
+
+func (repo *GroupRepo) find(id string) (*groupEntity, error) {
+	res := groupEntity{}
+	db := repo.db.Where("id = ?", id).First(&res)
+	if db.Error != nil {
+		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
+			return nil, errorpkg.NewGroupNotFoundError(db.Error)
+		} else {
+			return nil, errorpkg.NewInternalServerError(db.Error)
+		}
+	}
+	return &res, nil
 }
 
 func (repo *GroupRepo) populateModelFields(groups []*groupEntity) error {

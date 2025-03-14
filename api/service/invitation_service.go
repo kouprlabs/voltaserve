@@ -31,7 +31,7 @@ type InvitationService struct {
 	orgRepo          *repo.OrganizationRepo
 	orgMapper        *mapper.OrganizationMapper
 	invitationRepo   *repo.InvitationRepo
-	invitationMapper *invitationMapper
+	invitationMapper *mapper.InvitationMapper
 	orgCache         *cache.OrganizationCache
 	orgGuard         *guard.OrganizationGuard
 	orgSvc           *OrganizationService
@@ -61,7 +61,11 @@ func NewInvitationService() *InvitationService {
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
 		),
-		invitationMapper: newInvitationMapper(),
+		invitationMapper: mapper.NewInvitationMapper(
+			config.GetConfig().Postgres,
+			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
 		userRepo: repo.NewUserRepo(
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
@@ -114,7 +118,7 @@ func (svc *InvitationService) Create(opts dto.InvitationCreateOptions, userID st
 	if err := svc.sendEmails(invitations, org, userID); err != nil {
 		return nil, err
 	}
-	res, err := svc.invitationMapper.mapMany(invitations, userID)
+	res, err := svc.invitationMapper.MapMany(invitations, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +149,7 @@ func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID st
 	}
 	sorted := svc.sort(invitations, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped, err := svc.invitationMapper.mapMany(paged, userID)
+	mapped, err := svc.invitationMapper.MapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +209,7 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOpti
 	}
 	sorted := svc.sort(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped, err := svc.invitationMapper.mapMany(paged, userID)
+	mapped, err := svc.invitationMapper.MapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -463,67 +467,4 @@ func (svc *InvitationService) paginate(data []model.Invitation, page, size uint6
 		endIndex = totalElements
 	}
 	return data[startIndex:endIndex], totalElements, totalPages
-}
-
-type invitationMapper struct {
-	orgCache   *cache.OrganizationCache
-	userRepo   *repo.UserRepo
-	userMapper *userMapper
-	orgMapper  *mapper.OrganizationMapper
-}
-
-func newInvitationMapper() *invitationMapper {
-	return &invitationMapper{
-		orgCache: cache.NewOrganizationCache(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-		userRepo: repo.NewUserRepo(
-			config.GetConfig().Postgres,
-			config.GetConfig().Environment,
-		),
-		userMapper: newUserMapper(),
-		orgMapper: mapper.NewOrganizationMapper(
-			config.GetConfig().Postgres,
-			config.GetConfig().Redis,
-			config.GetConfig().Environment,
-		),
-	}
-}
-
-func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*dto.Invitation, error) {
-	owner, err := mp.userRepo.Find(m.GetOwnerID())
-	if err != nil {
-		return nil, err
-	}
-	org, err := mp.orgCache.Get(m.GetOrganizationID())
-	if err != nil {
-		return nil, err
-	}
-	o, err := mp.orgMapper.MapOne(org, userID)
-	if err != nil {
-		return nil, err
-	}
-	return &dto.Invitation{
-		ID:           m.GetID(),
-		Owner:        mp.userMapper.mapOne(owner),
-		Email:        m.GetEmail(),
-		Organization: o,
-		Status:       m.GetStatus(),
-		CreateTime:   m.GetCreateTime(),
-		UpdateTime:   m.GetUpdateTime(),
-	}, nil
-}
-
-func (mp *invitationMapper) mapMany(invitations []model.Invitation, userID string) ([]*dto.Invitation, error) {
-	res := make([]*dto.Invitation, 0)
-	for _, invitation := range invitations {
-		i, err := mp.mapOne(invitation, userID)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, i)
-	}
-	return res, nil
 }

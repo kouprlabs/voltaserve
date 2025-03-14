@@ -34,12 +34,12 @@ func NewGroupMapper(postgres config.PostgresConfig, redis config.RedisConfig, en
 	}
 }
 
-func (mp *GroupMapper) MapOne(m model.Group, userID string) (*dto.Group, error) {
+func (mp *GroupMapper) Map(m model.Group, userID string) (*dto.Group, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
-	o, err := mp.orgMapper.MapOne(org, userID)
+	o, err := mp.orgMapper.Map(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (mp *GroupMapper) MapOne(m model.Group, userID string) (*dto.Group, error) 
 func (mp *GroupMapper) MapMany(groups []model.Group, userID string) ([]*dto.Group, error) {
 	res := make([]*dto.Group, 0)
 	for _, group := range groups {
-		g, err := mp.MapOne(group, userID)
+		g, err := mp.Map(group, userID)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
 			if errors.As(err, &e) && e.Code == errorpkg.NewGroupNotFoundError(nil).Code {

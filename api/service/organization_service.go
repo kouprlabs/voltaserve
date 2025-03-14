@@ -36,7 +36,7 @@ type OrganizationService struct {
 	orgMapper      *mapper.OrganizationMapper
 	orgSearch      *search.OrganizationSearch
 	userSearch     *search.UserSearch
-	userMapper     *userMapper
+	userMapper     *mapper.UserMapper
 	userRepo       *repo.UserRepo
 	groupCache     *cache.GroupCache
 	groupRepo      *repo.GroupRepo
@@ -95,7 +95,7 @@ func NewOrganizationService() *OrganizationService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		userMapper: newUserMapper(),
+		userMapper: mapper.NewUserMapper(),
 		workspaceCache: cache.NewWorkspaceCache(
 			config.GetConfig().Postgres,
 			config.GetConfig().Redis,
@@ -127,7 +127,7 @@ func (svc *OrganizationService) Create(opts dto.OrganizationCreateOptions, userI
 	if err := svc.orgSearch.Index([]model.Organization{org}); err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.MapOne(org, userID)
+	res, err := svc.orgMapper.Map(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (svc *OrganizationService) Find(id string, userID string) (*dto.Organizatio
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.MapOne(org, userID)
+	res, err := svc.orgMapper.Map(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func (svc *OrganizationService) PatchName(id string, name string, userID string)
 	if err := svc.sync(org); err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.MapOne(org, userID)
+	res, err := svc.orgMapper.Map(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -403,7 +403,6 @@ func (svc *OrganizationService) authorize(data []model.Organization, userID stri
 func (svc *OrganizationService) authorizeIDs(ids []string, userID string) ([]model.Organization, error) {
 	var res []model.Organization
 	for _, id := range ids {
-		var o model.Organization
 		o, err := svc.orgCache.Get(id)
 		if err != nil {
 			var e *errorpkg.ErrorResponse

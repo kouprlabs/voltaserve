@@ -34,12 +34,12 @@ func NewWorkspaceMapper(postgres config.PostgresConfig, redis config.RedisConfig
 	}
 }
 
-func (mp *WorkspaceMapper) MapOne(m model.Workspace, userID string) (*dto.Workspace, error) {
+func (mp *WorkspaceMapper) Map(m model.Workspace, userID string) (*dto.Workspace, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
-	o, err := mp.orgMapper.MapOne(org, userID)
+	o, err := mp.orgMapper.Map(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (mp *WorkspaceMapper) MapOne(m model.Workspace, userID string) (*dto.Worksp
 func (mp *WorkspaceMapper) MapMany(workspaces []model.Workspace, userID string) ([]*dto.Workspace, error) {
 	res := make([]*dto.Workspace, 0)
 	for _, workspace := range workspaces {
-		w, err := mp.MapOne(workspace, userID)
+		w, err := mp.Map(workspace, userID)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
 			if errors.As(err, &e) && e.Code == errorpkg.NewWorkspaceNotFoundError(nil).Code {

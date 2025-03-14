@@ -37,7 +37,7 @@ type GroupService struct {
 	groupCache     *cache.GroupCache
 	userRepo       *repo.UserRepo
 	userSearch     *search.UserSearch
-	userMapper     *userMapper
+	userMapper     *mapper.UserMapper
 	workspaceRepo  *repo.WorkspaceRepo
 	workspaceCache *cache.WorkspaceCache
 	fileRepo       *repo.FileRepo
@@ -82,7 +82,7 @@ func NewGroupService() *GroupService {
 			config.GetConfig().Search,
 			config.GetConfig().Environment,
 		),
-		userMapper: newUserMapper(),
+		userMapper: mapper.NewUserMapper(),
 		workspaceRepo: repo.NewWorkspaceRepo(
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
@@ -151,7 +151,7 @@ func (svc *GroupService) Create(opts dto.GroupCreateOptions, userID string) (*dt
 	if err := svc.groupSearch.Index([]model.Group{group}); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.MapOne(group, userID)
+	res, err := svc.groupMapper.Map(group, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func (svc *GroupService) Find(id string, userID string) (*dto.Group, error) {
 	if err := svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.MapOne(group, userID)
+	res, err := svc.groupMapper.Map(group, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func (svc *GroupService) PatchName(id string, name string, userID string) (*dto.
 	if err := svc.sync(group); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.MapOne(group, userID)
+	res, err := svc.groupMapper.Map(group, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -432,8 +432,7 @@ func (svc *GroupService) authorize(data []model.Group, userID string) ([]model.G
 func (svc *GroupService) authorizeIDs(ids []string, userID string) ([]model.Group, error) {
 	var res []model.Group
 	for _, id := range ids {
-		var o model.Group
-		o, err := svc.groupCache.Get(id)
+		g, err := svc.groupCache.Get(id)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
 			if errors.As(err, &e) && e.Code == errorpkg.NewGroupNotFoundError(nil).Code {
@@ -442,8 +441,8 @@ func (svc *GroupService) authorizeIDs(ids []string, userID string) ([]model.Grou
 				return nil, err
 			}
 		}
-		if svc.groupGuard.IsAuthorized(userID, o, model.PermissionViewer) {
-			res = append(res, o)
+		if svc.groupGuard.IsAuthorized(userID, g, model.PermissionViewer) {
+			res = append(res, g)
 		}
 	}
 	return res, nil

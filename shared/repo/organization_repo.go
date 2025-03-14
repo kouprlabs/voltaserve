@@ -173,19 +173,6 @@ func (repo *OrganizationRepo) Insert(opts OrganizationInsertOptions) (model.Orga
 	return res, nil
 }
 
-func (repo *OrganizationRepo) find(id string) (*organizationEntity, error) {
-	res := organizationEntity{}
-	db := repo.db.Where("id = ?", id).First(&res)
-	if db.Error != nil {
-		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
-			return nil, errorpkg.NewOrganizationNotFoundError(db.Error)
-		} else {
-			return nil, errorpkg.NewInternalServerError(db.Error)
-		}
-	}
-	return &res, nil
-}
-
 func (repo *OrganizationRepo) Find(id string) (model.Organization, error) {
 	org, err := repo.find(id)
 	if err != nil {
@@ -203,39 +190,6 @@ func (repo *OrganizationRepo) FindOrNil(id string) model.Organization {
 		return nil
 	}
 	return res
-}
-
-func (repo *OrganizationRepo) Count() (int64, error) {
-	var count int64
-	db := repo.db.Model(&organizationEntity{}).Count(&count)
-	if db.Error != nil {
-		return -1, db.Error
-	}
-	return count, nil
-}
-
-func (repo *OrganizationRepo) Save(org model.Organization) error {
-	db := repo.db.Save(org)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
-func (repo *OrganizationRepo) Delete(id string) error {
-	db := repo.db.Exec("DELETE FROM organization WHERE id = ?", id)
-	if db.Error != nil {
-		return db.Error
-	}
-	db = repo.db.Exec("DELETE FROM userpermission WHERE resource_id = ?", id)
-	if db.Error != nil {
-		return db.Error
-	}
-	db = repo.db.Exec("DELETE FROM grouppermission WHERE resource_id = ?", id)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
 }
 
 func (repo *OrganizationRepo) FindIDs() ([]string, error) {
@@ -289,6 +243,39 @@ func (repo *OrganizationRepo) FindGroups(id string) ([]model.Group, error) {
 	return res, nil
 }
 
+func (repo *OrganizationRepo) Count() (int64, error) {
+	var count int64
+	db := repo.db.Model(&organizationEntity{}).Count(&count)
+	if db.Error != nil {
+		return -1, db.Error
+	}
+	return count, nil
+}
+
+func (repo *OrganizationRepo) Save(org model.Organization) error {
+	db := repo.db.Save(org)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *OrganizationRepo) Delete(id string) error {
+	db := repo.db.Exec("DELETE FROM organization WHERE id = ?", id)
+	if db.Error != nil {
+		return db.Error
+	}
+	db = repo.db.Exec("DELETE FROM userpermission WHERE resource_id = ?", id)
+	if db.Error != nil {
+		return db.Error
+	}
+	db = repo.db.Exec("DELETE FROM grouppermission WHERE resource_id = ?", id)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
 func (repo *OrganizationRepo) CountOwners(id string) (int64, error) {
 	var count int64
 	db := repo.db.Model(&userPermissionEntity{}).
@@ -318,6 +305,19 @@ func (repo *OrganizationRepo) RevokeUserPermission(id string, userID string) err
 		return db.Error
 	}
 	return nil
+}
+
+func (repo *OrganizationRepo) find(id string) (*organizationEntity, error) {
+	res := organizationEntity{}
+	db := repo.db.Where("id = ?", id).First(&res)
+	if db.Error != nil {
+		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
+			return nil, errorpkg.NewOrganizationNotFoundError(db.Error)
+		} else {
+			return nil, errorpkg.NewInternalServerError(db.Error)
+		}
+	}
+	return &res, nil
 }
 
 func (repo *OrganizationRepo) populateModelFields(organizations []*organizationEntity) error {

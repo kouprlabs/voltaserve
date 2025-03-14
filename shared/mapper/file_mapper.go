@@ -37,7 +37,7 @@ func NewFileMapper(postgres config.PostgresConfig, redis config.RedisConfig, env
 	}
 }
 
-func (mp *FileMapper) MapOne(m model.File, userID string) (*dto.File, error) {
+func (mp *FileMapper) Map(m model.File, userID string) (*dto.File, error) {
 	res := &dto.File{
 		ID:          m.GetID(),
 		WorkspaceID: m.GetWorkspaceID(),
@@ -52,7 +52,7 @@ func (mp *FileMapper) MapOne(m model.File, userID string) (*dto.File, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.Snapshot = mp.snapshotMapper.MapOne(snapshot)
+		res.Snapshot = mp.snapshotMapper.Map(snapshot)
 		res.Snapshot.IsActive = true
 	}
 	res.Permission = model.PermissionNone
@@ -93,7 +93,7 @@ func (mp *FileMapper) MapOne(m model.File, userID string) (*dto.File, error) {
 func (mp *FileMapper) MapMany(data []model.File, userID string) ([]*dto.File, error) {
 	res := make([]*dto.File, 0)
 	for _, file := range data {
-		f, err := mp.MapOne(file, userID)
+		f, err := mp.Map(file, userID)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
 			if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {

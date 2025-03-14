@@ -260,24 +260,6 @@ func (repo *FileRepo) FindOrNil(id string) model.File {
 	return res
 }
 
-func (repo *FileRepo) find(id string) (*fileEntity, error) {
-	res := fileEntity{}
-	db := repo.db.
-		Raw("SELECT * FROM file WHERE id = ?", id).
-		Scan(&res)
-	if db.Error != nil {
-		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
-			return nil, errorpkg.NewFileNotFoundError(db.Error)
-		} else {
-			return nil, errorpkg.NewInternalServerError(db.Error)
-		}
-	}
-	if len(res.ID) == 0 {
-		return nil, errorpkg.NewFileNotFoundError(db.Error)
-	}
-	return &res, nil
-}
-
 func (repo *FileRepo) FindChildren(id string) ([]model.File, error) {
 	var entities []*fileEntity
 	db := repo.db.
@@ -361,22 +343,6 @@ func (repo *FileRepo) FindTreeIDs(id string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *FileRepo) DeleteChunk(ids []string) error {
-	if db := repo.db.Delete(&fileEntity{}, ids); db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
-func (repo *FileRepo) Count() (int64, error) {
-	var count int64
-	db := repo.db.Model(&fileEntity{}).Count(&count)
-	if db.Error != nil {
-		return -1, db.Error
-	}
-	return count, nil
-}
-
 func (repo *FileRepo) FindIDsByWorkspace(workspaceID string) ([]string, error) {
 	type IDResult struct {
 		Result string
@@ -411,6 +377,40 @@ func (repo *FileRepo) FindIDsBySnapshot(snapshotID string) ([]string, error) {
 		res = append(res, v.Result)
 	}
 	return res, nil
+}
+
+func (repo *FileRepo) FindChildrenIDs(id string) ([]string, error) {
+	type Value struct {
+		Result string
+	}
+	var values []Value
+	db := repo.db.
+		Raw("SELECT id result FROM file WHERE parent_id = ? ORDER BY create_time", id).
+		Scan(&values)
+	if db.Error != nil {
+		return []string{}, db.Error
+	}
+	res := make([]string, 0)
+	for _, v := range values {
+		res = append(res, v.Result)
+	}
+	return res, nil
+}
+
+func (repo *FileRepo) DeleteChunk(ids []string) error {
+	if db := repo.db.Delete(&fileEntity{}, ids); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *FileRepo) Count() (int64, error) {
+	var count int64
+	db := repo.db.Model(&fileEntity{}).Count(&count)
+	if db.Error != nil {
+		return -1, db.Error
+	}
+	return count, nil
 }
 
 func (repo *FileRepo) MoveSourceIntoTarget(targetID string, sourceID string) error {
@@ -463,24 +463,6 @@ func (repo *FileRepo) Delete(id string) error {
 		return db.Error
 	}
 	return nil
-}
-
-func (repo *FileRepo) FindChildrenIDs(id string) ([]string, error) {
-	type Value struct {
-		Result string
-	}
-	var values []Value
-	db := repo.db.
-		Raw("SELECT id result FROM file WHERE parent_id = ? ORDER BY create_time", id).
-		Scan(&values)
-	if db.Error != nil {
-		return []string{}, db.Error
-	}
-	res := make([]string, 0)
-	for _, v := range values {
-		res = append(res, v.Result)
-	}
-	return res, nil
 }
 
 func (repo *FileRepo) CountChildren(id string) (int64, error) {
@@ -683,6 +665,24 @@ func (repo *FileRepo) PopulateModelFieldsForUser(files []model.File, userID stri
 		f.SetGroupPermissions(make([]model.CoreGroupPermission, 0))
 	}
 	return nil
+}
+
+func (repo *FileRepo) find(id string) (*fileEntity, error) {
+	res := fileEntity{}
+	db := repo.db.
+		Raw("SELECT * FROM file WHERE id = ?", id).
+		Scan(&res)
+	if db.Error != nil {
+		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
+			return nil, errorpkg.NewFileNotFoundError(db.Error)
+		} else {
+			return nil, errorpkg.NewInternalServerError(db.Error)
+		}
+	}
+	if len(res.ID) == 0 {
+		return nil, errorpkg.NewFileNotFoundError(db.Error)
+	}
+	return &res, nil
 }
 
 func (repo *FileRepo) populateModelFields(entities []*fileEntity) error {

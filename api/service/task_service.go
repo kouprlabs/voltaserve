@@ -95,7 +95,7 @@ func (svc *TaskService) Create(opts dto.TaskCreateOptions) (*dto.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.taskMapper.MapOne(task)
+	res, err := svc.taskMapper.Map(task)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func (svc *TaskService) Patch(id string, opts dto.TaskPatchOptions) (*dto.Task, 
 	if err := svc.saveAndSync(task); err != nil {
 		return nil, err
 	}
-	res, err := svc.taskMapper.MapOne(task)
+	res, err := svc.taskMapper.Map(task)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (svc *TaskService) Find(id string, userID string) (*dto.Task, error) {
 	if task.GetUserID() != userID {
 		return nil, errorpkg.NewTaskNotFoundError(nil)
 	}
-	res, err := svc.taskMapper.MapOne(task)
+	res, err := svc.taskMapper.Map(task)
 	if err != nil {
 		return nil, err
 	}
@@ -337,7 +337,6 @@ func (svc *TaskService) authorize(data []model.Task, userID string) ([]model.Tas
 func (svc *TaskService) authorizeIDs(ids []string, userID string) ([]model.Task, error) {
 	var res []model.Task
 	for _, id := range ids {
-		var t model.Task
 		t, err := svc.taskCache.Get(id)
 		if err != nil {
 			var e *errorpkg.ErrorResponse
