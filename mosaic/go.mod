@@ -6,7 +6,7 @@ require (
 	github.com/anthonynsimon/bild v0.14.0
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/joho/godotenv v1.5.1
-	github.com/kouprlabs/voltaserve/shared v0.0.0-20250313214113-95d79699eb77
+	github.com/kouprlabs/voltaserve/shared v0.0.0-20250314192332-709740439e05
 	github.com/minio/minio-go/v7 v7.0.87
 	go.uber.org/zap v1.27.0
 )

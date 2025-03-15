@@ -27,8 +27,8 @@ type Group struct {
 	Image        *string      `json:"image,omitempty"`
 	Organization Organization `json:"organization"`
 	Permission   string       `json:"permission"`
-	CreateTime   string       `json:"createTime,omitempty"`
-	UpdateTime   *string      `json:"updateTime"`
+	CreateTime   string       `json:"createTime"`
+	UpdateTime   *string      `json:"updateTime,omitempty"`
 }
 
 type GroupCreateOptions struct {
@@ -48,6 +48,7 @@ type GroupAddMemberOptions struct {
 type GroupRemoveMemberOptions struct {
 	UserID string `json:"userId" validate:"required"`
 }
+
 type GroupList struct {
 	Data          []*Group `json:"data"`
 	TotalPages    uint64   `json:"totalPages"`
