@@ -33,12 +33,12 @@ func NewGroupCache(postgres config.PostgresConfig, redis config.RedisConfig, env
 	}
 }
 
-func (c *GroupCache) Set(workspace model.Group) error {
-	b, err := json.Marshal(workspace)
+func (c *GroupCache) Set(group model.Group) error {
+	b, err := json.Marshal(group)
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+workspace.GetID(), string(b))
+	err = c.redis.Set(c.keyPrefix+group.GetID(), string(b))
 	if err != nil {
 		return err
 	}

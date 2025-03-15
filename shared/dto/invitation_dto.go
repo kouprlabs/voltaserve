@@ -28,7 +28,7 @@ type Invitation struct {
 	Organization *Organization `json:"organization,omitempty"`
 	Status       string        `json:"status"`
 	CreateTime   string        `json:"createTime"`
-	UpdateTime   *string       `json:"updateTime"`
+	UpdateTime   *string       `json:"updateTime,omitempty"`
 }
 
 type InvitationCreateOptions struct {

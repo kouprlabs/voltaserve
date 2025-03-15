@@ -201,14 +201,13 @@ func NewInternalServerError(err error) *ErrorResponse {
 }
 
 func NewResourceNotFoundError(err error) *ErrorResponse {
-	return &ErrorResponse{
-		Code:        "resource_not_found",
-		Status:      http.StatusNotFound,
-		Message:     "Resource not found.",
-		UserMessage: "The requested resource could not be found.",
-		MoreInfo:    err.Error(),
-		Err:         err,
-	}
+	return NewErrorResponse(
+		"resource_not_found",
+		http.StatusNotFound,
+		"Resource not found.",
+		"The requested resource could not be found.",
+		err,
+	)
 }
 
 func NewOrganizationPermissionError(userID string, org model.Organization, permission string) *ErrorResponse {

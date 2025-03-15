@@ -29,7 +29,7 @@ type User struct {
 	Email      string   `json:"email"`
 	Username   string   `json:"username"`
 	CreateTime string   `json:"createTime"`
-	UpdateTime *string  `json:"updateTime"`
+	UpdateTime *string  `json:"updateTime,omitempty"`
 }
 
 type Picture struct {
