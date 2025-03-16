@@ -138,34 +138,6 @@ const AppBarSearch = () => {
           fileQuery.updateTimeBefore),
     )
   }, [isFiles, query])
-  const placeholder = useMemo(() => {
-    if (isWorkspaces || isConsoleWorkspaces) {
-      return 'Search Workspaces'
-    } else if (isFiles) {
-      return 'Search Files'
-    } else if (isGroups || isConsoleGroups) {
-      return 'Search Groups'
-    } else if (isOrgs || isConsoleOrganizations) {
-      return 'Search Organizations'
-    } else if (isOrgMembers) {
-      return 'Search Organization Members'
-    } else if (isGroupMembers) {
-      return 'Search Group Members'
-    } else if (isConsoleUsers) {
-      return 'Search Users'
-    }
-  }, [
-    isWorkspaces,
-    isFiles,
-    isGroups,
-    isOrgs,
-    isOrgMembers,
-    isGroupMembers,
-    isConsoleUsers,
-    isConsoleGroups,
-    isConsoleWorkspaces,
-    isConsoleOrganizations,
-  ])
   const [buffer, setBuffer] = useState(parsedQuery)
   const [isFocused, setIsFocused] = useState(false)
 
@@ -312,7 +284,7 @@ const AppBarSearch = () => {
         </InputLeftElement>
         <Input
           value={buffer}
-          placeholder={parsedQuery || placeholder}
+          placeholder={parsedQuery || 'Search'}
           variant="filled"
           onKeyDown={handleKeyDown}
           onChange={handleChange}
