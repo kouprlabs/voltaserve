@@ -63,7 +63,9 @@ jobs:
       checks: write
 
   build:
-    needs: [lint, tsc]
+    needs:
+      - lint
+      - tsc
     strategy:
       matrix:
         platform: ["arm64", "amd64"]
