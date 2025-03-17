@@ -33,10 +33,6 @@ jobs:
         run: npm i
         working-directory: ui
 
-      - name: Run TypeScript compiler
-        run: npm run tsc
-        working-directory: ui
-
       - name: Run ESLint
         run: npm run lint
         working-directory: ui
@@ -45,8 +41,31 @@ jobs:
       pull-requests: read
       checks: write
 
+  tsc:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+
+      - name: Install packages
+        run: npm i
+        working-directory: ui
+
+      - name: Run TypeScript compiler
+        run: npm run tsc
+        working-directory: ui
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: write
+
   build:
-    needs: lint
+    needs:
+      - lint
+      - tsc
     strategy:
       matrix:
         platform: ["arm64", "amd64"]
