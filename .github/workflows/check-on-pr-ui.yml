@@ -31,21 +31,19 @@ jobs:
           mkdir ui/dist
           touch ui/dist/index.html
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+      - name: Setup Node
+        uses: actions/setup-node@v4
 
       - name: Install packages
-        run: bun i
+        run: npm i
         working-directory: ui
 
       - name: Run TypeScript compiler
-        run: bun run tsc
+        run: npm run tsc
         working-directory: ui
 
       - name: Run ESLint
-        run: bun run lint
+        run: npm run lint
         working-directory: ui
     permissions:
       contents: read
