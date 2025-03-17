@@ -7,11 +7,11 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { FormSection } from '@koupr/ui'
+import { ReactNode } from 'react'
 
 export type Page = {
   path: string
-  component: React.ReactNode
+  component: ReactNode
   menu?: Tab
   tab?: Menu
 }
@@ -30,9 +30,4 @@ export type Extensions = {
 
 export type AccountExtensions = {
   pages?: Page[]
-  settings?: AccountSettingsExtensions
-}
-
-export type AccountSettingsExtensions = {
-  sections?: FormSection[]
 }

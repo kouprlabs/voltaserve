@@ -35,7 +35,6 @@ import AccountThemeSwitcher from '@/components/account/account-theme-switcher'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
-import { AccountExtensions } from '@/types/extensibility'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton
@@ -45,11 +44,7 @@ const EditButton = (props: IconButtonProps) => (
   />
 )
 
-export type AccountSettingsPageProps = {
-  extensions?: AccountExtensions
-}
-
-const AccountSettingsPage = ({ extensions }: AccountSettingsPageProps) => {
+const AccountSettingsPage = () => {
   const {
     data: user,
     error: userError,
@@ -75,7 +70,6 @@ const AccountSettingsPage = ({ extensions }: AccountSettingsPageProps) => {
         <>
           <Form
             sections={[
-              ...(extensions?.settings?.sections || []),
               {
                 title: 'Storage',
                 content: (
