@@ -55,7 +55,7 @@ export function createRouter({ extensions }: CreateRouterOptions) {
   const accountChildren: RouteObject[] = [
     {
       path: '/account/settings',
-      element: <AccountSettingsPage extensions={extensions?.account} />,
+      element: <AccountSettingsPage />,
     },
     {
       path: '/account/invitation',

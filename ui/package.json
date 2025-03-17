@@ -1,6 +1,6 @@
 {
   "name": "@voltaserve/ui",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "license": "BUSL-1.1",
   "type": "module",
   "source": "src/index.tsx",

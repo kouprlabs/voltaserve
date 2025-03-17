@@ -17,7 +17,7 @@ import { Voltaserve } from '@voltaserve/ui'
 import { createRoot } from 'react-dom/client'
 
 createRoot(document.getElementById('root') as HTMLElement).render(
-  <Voltaserve extensions={...} />
+  <Voltaserve extensions={/*...*/} />
 )
 ```
 
