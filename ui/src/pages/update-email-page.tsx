@@ -51,22 +51,19 @@ const UpdateEmailPage = () => {
           <Logo type="voltaserve" size="md" isGlossy={true} />
         </div>
         {!isCompleted && !isFailed ? (
-          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <Heading className={cx('text-heading')}>
-              Confirming your Email…
-            </Heading>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-0.5')}>
+            <span className={cx('text-center')}>Confirming your Email…</span>
             <Spinner />
           </div>
         ) : null}
         {isCompleted && !isFailed ? (
-          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <Heading className={cx('text-heading')}>Email confirmed</Heading>
-            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
-              <span>Click the link below to go back to your account.</span>
-              <ChakraLink as={Link} to="/account/settings">
-                Back to account
-              </ChakraLink>
-            </div>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-0.5')}>
+            <span className={cx('text-center')}>
+              Email confirmed. Click the link below to go back to your account.
+            </span>
+            <ChakraLink as={Link} to="/account/settings">
+              Back to account
+            </ChakraLink>
           </div>
         ) : null}
         {isFailed ? (

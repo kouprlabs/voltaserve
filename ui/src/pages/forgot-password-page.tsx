@@ -15,7 +15,6 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Heading,
 } from '@chakra-ui/react'
 import { Logo } from '@koupr/ui'
 import {
@@ -79,7 +78,6 @@ const ForgotPasswordPage = () => {
           <div className={cx('w-[64px]')}>
             <Logo type="voltaserve" size="md" isGlossy={true} />
           </div>
-          <Heading className={cx('text-heading')}>Forgot Password</Heading>
           {isCompleted ? (
             <span className={cx('text-center')}>
               If your email belongs to an account, you will receive the recovery
@@ -142,7 +140,7 @@ const ForgotPasswordPage = () => {
               >
                 <span>Password recovered?</span>
                 <ChakraLink as={Link} to="/sign-in">
-                  Sign In
+                  Sign in
                 </ChakraLink>
               </div>
             </>

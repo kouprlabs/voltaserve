@@ -9,7 +9,7 @@
 // AGPL-3.0-only in the root of this repository.
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Link as ChakraLink, Heading } from '@chakra-ui/react'
+import { Link as ChakraLink } from '@chakra-ui/react'
 import { Logo, Spinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -46,33 +46,30 @@ const ConfirmEmailPage = () => {
       <Helmet>
         <title>Confirm Email</title>
       </Helmet>
-      <div className={cx('flex', 'flex-col', 'items-center', 'gap-3')}>
+      <div className={cx('flex', 'flex-col', 'items-center', 'gap-2.5')}>
         <div className={cx('w-[64px]')}>
           <Logo type="voltaserve" size="md" isGlossy={true} />
         </div>
         {!isCompleted && !isFailed ? (
-          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <Heading className={cx('text-heading')}>
-              Confirming your Email…
-            </Heading>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-0.5')}>
+            <span className={cx('text-center')}>Confirming your Email…</span>
             <Spinner />
           </div>
         ) : null}
         {isCompleted && !isFailed ? (
-          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <Heading className={cx('text-heading')}>Email confirmed</Heading>
-            <div className={cx('flex', 'flex-col', 'items-center', 'gap-0.5')}>
-              <span>Click the link below to sign in.</span>
-              <ChakraLink as={Link} to="/sign-in">
-                Sign In
-              </ChakraLink>
-            </div>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-0.5')}>
+            <span className={cx('text-center')}>
+              Email confirmed. Click the link below to sign in.
+            </span>
+            <ChakraLink as={Link} to="/sign-in">
+              Sign in
+            </ChakraLink>
           </div>
         ) : null}
         {isFailed ? (
-          <Heading className={cx('text-heading')}>
+          <span className={cx('text-center')}>
             An error occurred while processing your request.
-          </Heading>
+          </span>
         ) : null}
       </div>
     </LayoutFull>
