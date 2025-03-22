@@ -15,7 +15,6 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Heading,
 } from '@chakra-ui/react'
 import { Logo } from '@koupr/ui'
 import {
@@ -101,7 +100,7 @@ const SignInPage = () => {
     <LayoutFull>
       <>
         <Helmet>
-          <title>Sign In to Voltaserve</title>
+          <title>Sign In</title>
         </Helmet>
         <div
           className={cx(
@@ -115,9 +114,6 @@ const SignInPage = () => {
           <div className={cx('w-[64px]')}>
             <Logo type="voltaserve" size="md" isGlossy={true} />
           </div>
-          <Heading className={cx('text-heading')}>
-            Sign In to Voltaserve
-          </Heading>
           <Formik
             initialValues={{
               email: '',
@@ -182,13 +178,13 @@ const SignInPage = () => {
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <span>{"Don't have an account yet?"}</span>
               <ChakraLink as={Link} to="/sign-up">
-                Sign Up
+                Sign up
               </ChakraLink>
             </div>
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <span>Cannot sign in?</span>
               <ChakraLink as={Link} to="/forgot-password">
-                Reset Password
+                Reset password
               </ChakraLink>
             </div>
           </div>

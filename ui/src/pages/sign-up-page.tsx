@@ -15,7 +15,6 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Heading,
 } from '@chakra-ui/react'
 import { Logo } from '@koupr/ui'
 import {
@@ -77,169 +76,156 @@ const SignUpPage = () => {
     <LayoutFull>
       <>
         <Helmet>
-          <title>Sign Up to Voltaserve</title>
+          <title>Sign Up</title>
         </Helmet>
-        {isConfirmationVisible ? (
-          <div
-            className={cx(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-2.5',
-              'w-full',
-            )}
-          >
-            <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-              <div className={cx('w-[64px]')}>
-                <Logo type="voltaserve" size="md" isGlossy={true} />
-              </div>
-              <Heading className={cx('text-heading')}>
-                Thanks! We just sent you a confirmation email
-              </Heading>
-              <span className={cx('text-center')}>
-                Just open your inbox, find the email, and click on the
-                confirmation link.
-              </span>
-            </div>
+        <div
+          className={cx(
+            'flex',
+            'flex-col',
+            'items-center',
+            'gap-2.5',
+            'w-full',
+          )}
+        >
+          <div className={cx('w-[64px]')}>
+            <Logo type="voltaserve" size="md" isGlossy={true} />
           </div>
-        ) : null}
-        {!isConfirmationVisible ? (
-          <div
-            className={cx(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-2.5',
-              'w-full',
-            )}
-          >
-            <div className={cx('w-[64px]')}>
-              <Logo type="voltaserve" size="md" isGlossy={true} />
-            </div>
-            <Heading className={cx('text-heading')}>
-              Sign Up to Voltaserve
-            </Heading>
-            <Formik
-              initialValues={{
-                fullName: '',
-                email: '',
-                password: '',
-                passwordConfirmation: '',
-              }}
-              validationSchema={formSchema}
-              validateOnBlur={false}
-              onSubmit={handleSubmit}
-            >
-              {({ errors, touched, isSubmitting, values }) => (
-                <Form className={cx('w-full')}>
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-col',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <Field name="fullName">
-                      {({ field }: FieldAttributes<FieldProps>) => (
-                        <FormControl
-                          isInvalid={Boolean(
-                            errors.fullName && touched.fullName,
-                          )}
-                        >
-                          <Input
-                            {...field}
-                            id="fullName"
-                            placeholder="Full name"
-                            disabled={isSubmitting}
-                          />
-                          <FormErrorMessage>{errors.fullName}</FormErrorMessage>
-                        </FormControl>
+          {isConfirmationVisible ? (
+            <span className={cx('text-center')}>
+              Thanks! We just sent you a confirmation email. Just open your
+              inbox, find the email, and click on the confirmation link.
+            </span>
+          ) : null}
+          {!isConfirmationVisible ? (
+            <>
+              <Formik
+                initialValues={{
+                  fullName: '',
+                  email: '',
+                  password: '',
+                  passwordConfirmation: '',
+                }}
+                validationSchema={formSchema}
+                validateOnBlur={false}
+                onSubmit={handleSubmit}
+              >
+                {({ errors, touched, isSubmitting, values }) => (
+                  <Form className={cx('w-full')}>
+                    <div
+                      className={cx(
+                        'flex',
+                        'flex-col',
+                        'items-center',
+                        'gap-1.5',
                       )}
-                    </Field>
-                    <Field name="email">
-                      {({ field }: FieldAttributes<FieldProps>) => (
-                        <FormControl
-                          isInvalid={Boolean(errors.email && touched.email)}
-                        >
-                          <Input
-                            {...field}
-                            id="email"
-                            placeholder="Email"
-                            disabled={isSubmitting}
-                          />
-                          <FormErrorMessage>{errors.email}</FormErrorMessage>
-                        </FormControl>
-                      )}
-                    </Field>
-                    <Field name="password">
-                      {({ field }: FieldAttributes<FieldProps>) => (
-                        <FormControl
-                          isInvalid={Boolean(
-                            errors.password && touched.password,
-                          )}
-                        >
-                          <Input
-                            {...field}
-                            id="password"
-                            placeholder="Password"
-                            type="password"
-                            disabled={isSubmitting}
-                          />
-                          <FormErrorMessage>{errors.password}</FormErrorMessage>
-                          {passwordRequirements ? (
-                            <div className="pt-1">
-                              <PasswordHints
-                                value={values.password}
-                                requirements={passwordRequirements}
-                              />
-                            </div>
-                          ) : null}
-                        </FormControl>
-                      )}
-                    </Field>
-                    <Field name="passwordConfirmation">
-                      {({ field }: FieldAttributes<FieldProps>) => (
-                        <FormControl
-                          isInvalid={Boolean(
-                            errors.passwordConfirmation &&
-                              touched.passwordConfirmation,
-                          )}
-                        >
-                          <Input
-                            {...field}
-                            id="passwordConfirmation"
-                            placeholder="Confirm password"
-                            type="password"
-                            disabled={isSubmitting}
-                          />
-                          <FormErrorMessage>
-                            {errors.passwordConfirmation}
-                          </FormErrorMessage>
-                        </FormControl>
-                      )}
-                    </Field>
-                    <Button
-                      className={cx('w-full')}
-                      variant="solid"
-                      colorScheme="blue"
-                      type="submit"
-                      isLoading={isSubmitting}
                     >
-                      Sign Up
-                    </Button>
-                  </div>
-                </Form>
-              )}
-            </Formik>
-            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
-              <span>Already a member?</span>
-              <ChakraLink as={Link} to="/sign-in">
-                Sign In
-              </ChakraLink>
-            </div>
-          </div>
-        ) : null}
+                      <Field name="fullName">
+                        {({ field }: FieldAttributes<FieldProps>) => (
+                          <FormControl
+                            isInvalid={Boolean(
+                              errors.fullName && touched.fullName,
+                            )}
+                          >
+                            <Input
+                              {...field}
+                              id="fullName"
+                              placeholder="Full name"
+                              disabled={isSubmitting}
+                            />
+                            <FormErrorMessage>
+                              {errors.fullName}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Field name="email">
+                        {({ field }: FieldAttributes<FieldProps>) => (
+                          <FormControl
+                            isInvalid={Boolean(errors.email && touched.email)}
+                          >
+                            <Input
+                              {...field}
+                              id="email"
+                              placeholder="Email"
+                              disabled={isSubmitting}
+                            />
+                            <FormErrorMessage>{errors.email}</FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Field name="password">
+                        {({ field }: FieldAttributes<FieldProps>) => (
+                          <FormControl
+                            isInvalid={Boolean(
+                              errors.password && touched.password,
+                            )}
+                          >
+                            <Input
+                              {...field}
+                              id="password"
+                              placeholder="Password"
+                              type="password"
+                              disabled={isSubmitting}
+                            />
+                            <FormErrorMessage>
+                              {errors.password}
+                            </FormErrorMessage>
+                            {passwordRequirements ? (
+                              <div className="pt-1">
+                                <PasswordHints
+                                  value={values.password}
+                                  requirements={passwordRequirements}
+                                />
+                              </div>
+                            ) : null}
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Field name="passwordConfirmation">
+                        {({ field }: FieldAttributes<FieldProps>) => (
+                          <FormControl
+                            isInvalid={Boolean(
+                              errors.passwordConfirmation &&
+                                touched.passwordConfirmation,
+                            )}
+                          >
+                            <Input
+                              {...field}
+                              id="passwordConfirmation"
+                              placeholder="Confirm password"
+                              type="password"
+                              disabled={isSubmitting}
+                            />
+                            <FormErrorMessage>
+                              {errors.passwordConfirmation}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Button
+                        className={cx('w-full')}
+                        variant="solid"
+                        colorScheme="blue"
+                        type="submit"
+                        isLoading={isSubmitting}
+                      >
+                        Sign Up
+                      </Button>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
+              <div
+                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
+              >
+                <span>Already a member?</span>
+                <ChakraLink as={Link} to="/sign-in">
+                  Sign in
+                </ChakraLink>
+              </div>
+            </>
+          ) : null}
+        </div>
       </>
     </LayoutFull>
   )

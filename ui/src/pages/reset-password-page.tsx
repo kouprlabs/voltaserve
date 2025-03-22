@@ -15,7 +15,6 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Heading,
 } from '@chakra-ui/react'
 import { Logo } from '@koupr/ui'
 import {
@@ -87,14 +86,13 @@ const ResetPasswordPage = () => {
           <div className={cx('w-[64px]')}>
             <Logo type="voltaserve" size="md" isGlossy={true} />
           </div>
-          <Heading className={cx('text-heading')}>Reset Password</Heading>
           {isCompleted ? (
-            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
+            <div className={cx('flex', 'flex-col', 'items-center', 'gap-0.5')}>
               <span className={cx('text-center')}>
                 Password successfully changed.
               </span>
               <ChakraLink as={Link} to="/sign-in">
-                Sign In
+                Sign in
               </ChakraLink>
             </div>
           ) : (
@@ -185,7 +183,7 @@ const ResetPasswordPage = () => {
               >
                 <span>Password already reset?</span>
                 <ChakraLink as={Link} to="/sign-in">
-                  Sign In
+                  Sign in
                 </ChakraLink>
               </div>
             </>
