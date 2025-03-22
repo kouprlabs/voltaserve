@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD033 MD041 -->
 <p align="center">
-  <img height="70" src=".assets/brand.svg?20250322132500" />
+  <img height="70" src=".assets/brand-20250322132500.svg" />
   <h1 align="center">Voltaserve Core</h1>
 </p>
 
