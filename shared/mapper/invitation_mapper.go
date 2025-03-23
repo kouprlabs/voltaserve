@@ -39,11 +39,7 @@ func (mp *InvitationMapper) Map(m model.Invitation, userID string) (*dto.Invitat
 	if err != nil {
 		return nil, err
 	}
-	org, err := mp.orgCache.Get(m.GetOrganizationID())
-	if err != nil {
-		return nil, err
-	}
-	o, err := mp.orgMapper.Map(org, userID)
+	org, err := mp.findOrganization(m.GetOrganizationID(), userID)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +47,7 @@ func (mp *InvitationMapper) Map(m model.Invitation, userID string) (*dto.Invitat
 		ID:           m.GetID(),
 		Owner:        mp.userMapper.Map(owner),
 		Email:        m.GetEmail(),
-		Organization: o,
+		Organization: org,
 		Status:       m.GetStatus(),
 		CreateTime:   m.GetCreateTime(),
 		UpdateTime:   m.GetUpdateTime(),
@@ -68,4 +64,12 @@ func (mp *InvitationMapper) MapMany(invitations []model.Invitation, userID strin
 		res = append(res, i)
 	}
 	return res, nil
+}
+
+func (mp *InvitationMapper) findOrganization(orgID string, userID string) (*dto.Organization, error) {
+	org, err := mp.orgCache.Get(orgID)
+	if err != nil {
+		return nil, err
+	}
+	return mp.orgMapper.Map(org, userID)
 }

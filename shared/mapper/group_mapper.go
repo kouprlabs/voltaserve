@@ -35,18 +35,14 @@ func NewGroupMapper(postgres config.PostgresConfig, redis config.RedisConfig, en
 }
 
 func (mp *GroupMapper) Map(m model.Group, userID string) (*dto.Group, error) {
-	org, err := mp.orgCache.Get(m.GetOrganizationID())
-	if err != nil {
-		return nil, err
-	}
-	o, err := mp.orgMapper.Map(org, userID)
+	org, err := mp.findOrganization(m.GetOrganizationID(), userID)
 	if err != nil {
 		return nil, err
 	}
 	res := &dto.Group{
 		ID:           m.GetID(),
 		Name:         m.GetName(),
-		Organization: *o,
+		Organization: *org,
 		CreateTime:   m.GetCreateTime(),
 		UpdateTime:   m.GetUpdateTime(),
 	}
@@ -85,4 +81,12 @@ func (mp *GroupMapper) MapMany(groups []model.Group, userID string) ([]*dto.Grou
 		res = append(res, g)
 	}
 	return res, nil
+}
+
+func (mp *GroupMapper) findOrganization(orgID string, userID string) (*dto.Organization, error) {
+	org, err := mp.orgCache.Get(orgID)
+	if err != nil {
+		return nil, err
+	}
+	return mp.orgMapper.Map(org, userID)
 }

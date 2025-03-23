@@ -128,9 +128,5 @@ func (mp *FileMapper) findWorkspace(workspaceID string, userID string) (*dto.Wor
 	if err != nil {
 		return nil, err
 	}
-	res, err := mp.workspaceMapper.Map(workspace, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	return mp.workspaceMapper.Map(workspace, userID)
 }

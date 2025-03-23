@@ -35,11 +35,7 @@ func NewWorkspaceMapper(postgres config.PostgresConfig, redis config.RedisConfig
 }
 
 func (mp *WorkspaceMapper) Map(m model.Workspace, userID string) (*dto.Workspace, error) {
-	org, err := mp.orgCache.Get(m.GetOrganizationID())
-	if err != nil {
-		return nil, err
-	}
-	o, err := mp.orgMapper.Map(org, userID)
+	org, err := mp.findOrganization(m.GetOrganizationID(), userID)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +44,7 @@ func (mp *WorkspaceMapper) Map(m model.Workspace, userID string) (*dto.Workspace
 		Name:            m.GetName(),
 		RootID:          m.GetRootID(),
 		StorageCapacity: m.GetStorageCapacity(),
-		Organization:    *o,
+		Organization:    *org,
 		CreateTime:      m.GetCreateTime(),
 		UpdateTime:      m.GetUpdateTime(),
 	}
@@ -87,4 +83,12 @@ func (mp *WorkspaceMapper) MapMany(workspaces []model.Workspace, userID string) 
 		res = append(res, w)
 	}
 	return res, nil
+}
+
+func (mp *WorkspaceMapper) findOrganization(orgID string, userID string) (*dto.Organization, error) {
+	org, err := mp.orgCache.Get(orgID)
+	if err != nil {
+		return nil, err
+	}
+	return mp.orgMapper.Map(org, userID)
 }
