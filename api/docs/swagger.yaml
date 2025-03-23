@@ -58,8 +58,8 @@ definitions:
         type: string
       updateTime:
         type: string
-      workspaceId:
-        type: string
+      workspace:
+        $ref: '#/definitions/dto.Workspace'
     type: object
   dto.FileCopyManyOptions:
     properties:

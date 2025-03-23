@@ -225,7 +225,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, fh.Size, userID)
+	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.Workspace.ID, fh.Size, userID)
 	if err != nil {
 		return err
 	}
@@ -1319,7 +1319,7 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 	if contentType == "" {
 		return errorpkg.NewMissingQueryParamError("content_type")
 	}
-	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.WorkspaceID, size, userID)
+	hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(file.Workspace.ID, size, userID)
 	if err != nil {
 		return err
 	}

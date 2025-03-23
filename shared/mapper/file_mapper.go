@@ -22,30 +22,63 @@ import (
 )
 
 type FileMapper struct {
-	groupCache     *cache.GroupCache
-	snapshotMapper *SnapshotMapper
-	snapshotCache  *cache.SnapshotCache
-	snapshotRepo   *repo.SnapshotRepo
+	groupCache      *cache.GroupCache
+	workspaceCache  *cache.WorkspaceCache
+	workspaceMapper *WorkspaceMapper
+	snapshotMapper  *SnapshotMapper
+	snapshotCache   *cache.SnapshotCache
+	snapshotRepo    *repo.SnapshotRepo
 }
 
 func NewFileMapper(postgres config.PostgresConfig, redis config.RedisConfig, environment config.EnvironmentConfig) *FileMapper {
 	return &FileMapper{
-		groupCache:     cache.NewGroupCache(postgres, redis, environment),
-		snapshotMapper: NewSnapshotMapper(postgres, redis, environment),
-		snapshotCache:  cache.NewSnapshotCache(postgres, redis, environment),
-		snapshotRepo:   repo.NewSnapshotRepo(postgres, environment),
+		groupCache:      cache.NewGroupCache(postgres, redis, environment),
+		workspaceCache:  cache.NewWorkspaceCache(postgres, redis, environment),
+		workspaceMapper: NewWorkspaceMapper(postgres, redis, environment),
+		snapshotMapper:  NewSnapshotMapper(postgres, redis, environment),
+		snapshotCache:   cache.NewSnapshotCache(postgres, redis, environment),
+		snapshotRepo:    repo.NewSnapshotRepo(postgres, environment),
 	}
 }
 
 func (mp *FileMapper) Map(m model.File, userID string) (*dto.File, error) {
+	workspace, err := mp.findWorkspace(m.GetWorkspaceID(), userID)
+	if err != nil {
+		return nil, err
+	}
+	return mp.mapWithWorkspace(m, workspace, userID)
+}
+
+func (mp *FileMapper) MapMany(data []model.File, workspaceID string, userID string) ([]*dto.File, error) {
+	res := make([]*dto.File, 0)
+	workspace, err := mp.findWorkspace(workspaceID, userID)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range data {
+		f, err := mp.mapWithWorkspace(file, workspace, userID)
+		if err != nil {
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+		res = append(res, f)
+	}
+	return res, nil
+}
+
+func (mp *FileMapper) mapWithWorkspace(m model.File, workspace *dto.Workspace, userID string) (*dto.File, error) {
 	res := &dto.File{
-		ID:          m.GetID(),
-		WorkspaceID: m.GetWorkspaceID(),
-		Name:        m.GetName(),
-		Type:        m.GetType(),
-		ParentID:    m.GetParentID(),
-		CreateTime:  m.GetCreateTime(),
-		UpdateTime:  m.GetUpdateTime(),
+		ID:         m.GetID(),
+		Workspace:  *workspace,
+		Name:       m.GetName(),
+		Type:       m.GetType(),
+		ParentID:   m.GetParentID(),
+		CreateTime: m.GetCreateTime(),
+		UpdateTime: m.GetUpdateTime(),
 	}
 	if m.GetSnapshotID() != nil {
 		snapshot, err := mp.snapshotCache.Get(*m.GetSnapshotID())
@@ -90,19 +123,14 @@ func (mp *FileMapper) Map(m model.File, userID string) (*dto.File, error) {
 	return res, nil
 }
 
-func (mp *FileMapper) MapMany(data []model.File, userID string) ([]*dto.File, error) {
-	res := make([]*dto.File, 0)
-	for _, file := range data {
-		f, err := mp.Map(file, userID)
-		if err != nil {
-			var e *errorpkg.ErrorResponse
-			if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {
-				continue
-			} else {
-				return nil, err
-			}
-		}
-		res = append(res, f)
+func (mp *FileMapper) findWorkspace(workspaceID string, userID string) (*dto.Workspace, error) {
+	workspace, err := mp.workspaceCache.Get(workspaceID)
+	if err != nil {
+		return nil, err
+	}
+	res, err := mp.workspaceMapper.Map(workspace, userID)
+	if err != nil {
+		return nil, err
 	}
 	return res, nil
 }
