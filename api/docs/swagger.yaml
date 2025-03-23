@@ -2075,36 +2075,6 @@ paths:
       summary: Create from S3
       tags:
       - Files
-  /files/find:
-    post:
-      description: Find Many
-      operationId: files_find_many
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/dto.File'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Find Many
-      tags:
-      - Files
   /files/grant_group_permission:
     post:
       consumes:

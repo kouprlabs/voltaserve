@@ -67,7 +67,6 @@ const (
 func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
 	g.Get("/list", r.ListByPath)
-	g.Post("/find", r.FindMany)
 	g.Post("/move", r.MoveMany)
 	g.Post("/copy", r.CopyMany)
 	g.Get("/", r.FindByPath)
@@ -276,40 +275,6 @@ func (r *FileRouter) Find(c *fiber.Ctx) error {
 		return errorpkg.NewFileNotFoundError(nil)
 	}
 	return c.JSON(res[0])
-}
-
-// FindMany godoc
-//
-//	@Summary		Find Many
-//	@Description	Find Many
-//	@Tags			Files
-//	@Id				files_find_many
-//	@Produce		application/json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		dto.File
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/find [post]
-func (r *FileRouter) FindMany(c *fiber.Ctx) error {
-	userID, err := helper.GetUserID(c)
-	if err != nil {
-		return err
-	}
-	opts := new(dto.FileFindManyOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	res, err := r.fileSvc.Find(opts.IDs, userID)
-	if err != nil {
-		return err
-	}
-	if len(res) == 0 {
-		return errorpkg.NewFileNotFoundError(nil)
-	}
-	return c.JSON(res)
 }
 
 // FindByPath godoc
