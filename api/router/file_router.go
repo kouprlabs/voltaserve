@@ -220,6 +220,9 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	if len(files) == 0 {
+		return errorpkg.NewFileNotFoundError(nil)
+	}
 	file := files[0]
 	fh, err := c.FormFile("file")
 	if err != nil {
@@ -1293,6 +1296,9 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 	files, err := r.fileSvc.Find([]string{c.Params("id")}, userID)
 	if err != nil {
 		return err
+	}
+	if len(files) == 0 {
+		return errorpkg.NewFileNotFoundError(nil)
 	}
 	file := files[0]
 	key := c.Query("key")
