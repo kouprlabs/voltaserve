@@ -2,19 +2,13 @@
 
 ## Prerequisites
 
-Install [Deno](https://deno.com).
-
-Install [Bun](https://bun.sh).
-
-Install [Node.js](https://nodejs.org).
-
-Install [Go](https://go.dev).
-
-Install [Rust](https://www.rust-lang.org).
-
-Install [Poetry](https://python-poetry.org/docs/#installation).
-
-Install [Python](https://www.python.org) 3.11 with [pyenv](https://github.com/pyenv/pyenv).
+- [Deno](https://deno.com)
+- [Bun](https://bun.sh)
+- [Node.js](https://nodejs.org)
+- [Go](https://go.dev)
+- [Rust](https://www.rust-lang.org)
+- [Poetry](https://python-poetry.org/docs/#installation)
+- [Python](https://www.python.org) 3.11 with [pyenv](https://github.com/pyenv/pyenv)
 
 ## Run Infrastructure Services
 

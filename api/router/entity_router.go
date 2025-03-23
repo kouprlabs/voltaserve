@@ -63,6 +63,10 @@ func (r *EntityRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/entities/{file_id} [post]
 func (r *EntityRouter) Create(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts := new(dto.EntityCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -70,7 +74,7 @@ func (r *EntityRouter) Create(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.entitySvc.Create(c.Params("file_id"), *opts, helper.GetUserID(c))
+	res, err := r.entitySvc.Create(c.Params("file_id"), *opts, userID)
 	if err != nil {
 		return err
 	}
@@ -91,7 +95,11 @@ func (r *EntityRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/entities/{file_id} [delete]
 func (r *EntityRouter) Delete(c *fiber.Ctx) error {
-	res, err := r.entitySvc.Delete(c.Params("file_id"), helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.entitySvc.Delete(c.Params("file_id"), userID)
 	if err != nil {
 		return err
 	}
@@ -116,11 +124,15 @@ func (r *EntityRouter) Delete(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/entities/{file_id} [get]
 func (r *EntityRouter) List(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.entitySvc.List(c.Params("file_id"), *opts, helper.GetUserID(c))
+	res, err := r.entitySvc.List(c.Params("file_id"), *opts, userID)
 	if err != nil {
 		return err
 	}
@@ -141,11 +153,15 @@ func (r *EntityRouter) List(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/entities/{file_id}/probe [get]
 func (r *EntityRouter) Probe(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.entitySvc.Probe(c.Params("file_id"), *opts, helper.GetUserID(c))
+	res, err := r.entitySvc.Probe(c.Params("file_id"), *opts, userID)
 	if err != nil {
 		return err
 	}

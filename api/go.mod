@@ -13,7 +13,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gosimple/slug v1.14.0
 	github.com/joho/godotenv v1.5.1
-	github.com/kouprlabs/voltaserve/shared v0.0.0-20250314192332-709740439e05
+	github.com/kouprlabs/voltaserve/shared v0.0.0-20250322122743-e2a53027cb8d
 	github.com/minio/minio-go/v7 v7.0.87
 	github.com/reactivex/rxgo/v2 v2.5.0
 	github.com/stretchr/testify v1.10.0

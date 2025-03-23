@@ -63,7 +63,10 @@ func (r *TaskRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id} [get]
 func (r *TaskRouter) Find(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	res, err := r.taskSvc.Find(c.Params("id"), userID)
 	if err != nil {
 		return err
@@ -89,11 +92,15 @@ func (r *TaskRouter) Find(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/tasks [get]
 func (r *TaskRouter) List(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.taskSvc.List(*opts, helper.GetUserID(c))
+	res, err := r.taskSvc.List(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -114,11 +121,15 @@ func (r *TaskRouter) List(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/probe [get]
 func (r *TaskRouter) Probe(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.taskSvc.Probe(*opts, helper.GetUserID(c))
+	res, err := r.taskSvc.Probe(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -136,7 +147,11 @@ func (r *TaskRouter) Probe(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/count [get]
 func (r *TaskRouter) GetCount(c *fiber.Ctx) error {
-	res, err := r.taskSvc.Count(helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.taskSvc.Count(userID)
 	if err != nil {
 		return err
 	}
@@ -156,7 +171,11 @@ func (r *TaskRouter) GetCount(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id}/dismiss [post]
 func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
-	if err := r.taskSvc.Dismiss(c.Params("id"), helper.GetUserID(c)); err != nil {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	if err := r.taskSvc.Dismiss(c.Params("id"), userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -173,7 +192,11 @@ func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/dismiss [post]
 func (r *TaskRouter) DismissAll(c *fiber.Ctx) error {
-	res, err := r.taskSvc.DismissAll(helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.taskSvc.DismissAll(userID)
 	if err != nil {
 		return err
 	}

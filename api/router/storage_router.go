@@ -46,7 +46,11 @@ func (r *StorageRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/storage/account_usage [get]
 func (r *StorageRouter) GetAccountUsage(c *fiber.Ctx) error {
-	res, err := r.storageSvc.GetAccountUsage(helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.storageSvc.GetAccountUsage(userID)
 	if err != nil {
 		return err
 	}
@@ -66,11 +70,15 @@ func (r *StorageRouter) GetAccountUsage(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/storage/workspace_usage [get]
 func (r *StorageRouter) GetWorkspaceUsage(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	id := c.Query("id")
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	res, err := r.storageSvc.GetWorkspaceUsage(id, helper.GetUserID(c))
+	res, err := r.storageSvc.GetWorkspaceUsage(id, userID)
 	if err != nil {
 		return err
 	}
@@ -90,11 +98,15 @@ func (r *StorageRouter) GetWorkspaceUsage(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/storage/file_usage [get]
 func (r *StorageRouter) GetFileUsage(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	id := c.Query("id")
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	res, err := r.storageSvc.GetFileUsage(id, helper.GetUserID(c))
+	res, err := r.storageSvc.GetFileUsage(id, userID)
 	if err != nil {
 		return err
 	}

@@ -888,10 +888,10 @@ definitions:
     type: object
   model.DocumentProps:
     properties:
-      pages:
-        $ref: '#/definitions/model.PagesProps'
-      thumbnails:
-        $ref: '#/definitions/model.ThumbnailsProps'
+      page:
+        $ref: '#/definitions/model.PageProps'
+      thumbnail:
+        $ref: '#/definitions/model.ThumbnailProps'
     type: object
   model.ImageProps:
     properties:
@@ -900,7 +900,7 @@ definitions:
       width:
         type: integer
     type: object
-  model.PagesProps:
+  model.PageProps:
     properties:
       count:
         type: integer
@@ -920,7 +920,7 @@ definitions:
       size:
         type: integer
     type: object
-  model.ThumbnailsProps:
+  model.ThumbnailProps:
     properties:
       extension:
         type: string

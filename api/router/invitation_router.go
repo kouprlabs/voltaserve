@@ -67,7 +67,10 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/invitations [post]
 func (r *InvitationRouter) Create(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts := new(dto.InvitationCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -98,11 +101,15 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming [get]
 func (r *InvitationRouter) ListIncoming(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseIncomingListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.invitationSvc.ListIncoming(*opts, helper.GetUserID(c))
+	res, err := r.invitationSvc.ListIncoming(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -122,11 +129,15 @@ func (r *InvitationRouter) ListIncoming(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming/probe [get]
 func (r *InvitationRouter) ProbeIncoming(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseIncomingListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.invitationSvc.ProbeIncoming(*opts, helper.GetUserID(c))
+	res, err := r.invitationSvc.ProbeIncoming(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -145,7 +156,11 @@ func (r *InvitationRouter) ProbeIncoming(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming/count [get]
 func (r *InvitationRouter) GetIncomingCount(c *fiber.Ctx) error {
-	res, err := r.invitationSvc.GetCountIncoming(helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.invitationSvc.GetCountIncoming(userID)
 	if err != nil {
 		return err
 	}
@@ -169,11 +184,15 @@ func (r *InvitationRouter) GetIncomingCount(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/outgoing [get]
 func (r *InvitationRouter) ListOutgoing(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseOutgoingListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.invitationSvc.ListOutgoing(c.Query("organization_id"), *opts, helper.GetUserID(c))
+	res, err := r.invitationSvc.ListOutgoing(c.Query("organization_id"), *opts, userID)
 	if err != nil {
 		return err
 	}
@@ -194,11 +213,15 @@ func (r *InvitationRouter) ListOutgoing(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/outgoing/probe [get]
 func (r *InvitationRouter) ProbeOutgoing(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseOutgoingListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.invitationSvc.ProbeOutgoing(c.Query("organization_id"), *opts, helper.GetUserID(c))
+	res, err := r.invitationSvc.ProbeOutgoing(c.Query("organization_id"), *opts, userID)
 	if err != nil {
 		return err
 	}
@@ -261,7 +284,10 @@ func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*service.
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/{id} [delete]
 func (r *InvitationRouter) Delete(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	if err := r.invitationSvc.Delete(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -281,7 +307,10 @@ func (r *InvitationRouter) Delete(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/{id}/resend [post]
 func (r *InvitationRouter) Resend(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	if err := r.invitationSvc.Resend(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -301,7 +330,10 @@ func (r *InvitationRouter) Resend(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/{id}/accept [post]
 func (r *InvitationRouter) Accept(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	if err := r.invitationSvc.Accept(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -321,7 +353,10 @@ func (r *InvitationRouter) Accept(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/{id}/decline [post]
 func (r *InvitationRouter) Decline(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	if err := r.invitationSvc.Decline(c.Params("id"), userID); err != nil {
 		return err
 	}

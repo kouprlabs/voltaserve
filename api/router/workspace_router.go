@@ -68,7 +68,10 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces [post]
 func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts := new(dto.WorkspaceCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -96,7 +99,11 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [get]
 func (r *WorkspaceRouter) Find(c *fiber.Ctx) error {
-	res, err := r.workspaceSvc.Find(c.Params("id"), helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.workspaceSvc.Find(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -121,11 +128,15 @@ func (r *WorkspaceRouter) Find(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces [get]
 func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.List(*opts, helper.GetUserID(c))
+	res, err := r.workspaceSvc.List(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -146,11 +157,15 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/probe [get]
 func (r *WorkspaceRouter) Probe(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.Probe(*opts, helper.GetUserID(c))
+	res, err := r.workspaceSvc.Probe(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -173,11 +188,15 @@ func (r *WorkspaceRouter) Probe(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_name [patch]
 func (r *WorkspaceRouter) PatchName(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts := new(dto.WorkspacePatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.PatchName(c.Params("id"), opts.Name, helper.GetUserID(c))
+	res, err := r.workspaceSvc.PatchName(c.Params("id"), opts.Name, userID)
 	if err != nil {
 		return err
 	}
@@ -200,11 +219,15 @@ func (r *WorkspaceRouter) PatchName(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/storage_capacity [patch]
 func (r *WorkspaceRouter) PatchStorageCapacity(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts := new(dto.WorkspacePatchStorageCapacityOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.PatchStorageCapacity(c.Params("id"), opts.StorageCapacity, helper.GetUserID(c))
+	res, err := r.workspaceSvc.PatchStorageCapacity(c.Params("id"), opts.StorageCapacity, userID)
 	if err != nil {
 		return err
 	}
@@ -224,8 +247,11 @@ func (r *WorkspaceRouter) PatchStorageCapacity(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [delete]
 func (r *WorkspaceRouter) Delete(c *fiber.Ctx) error {
-	err := r.workspaceSvc.Delete(c.Params("id"), helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
 	if err != nil {
+		return err
+	}
+	if err := r.workspaceSvc.Delete(c.Params("id"), userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

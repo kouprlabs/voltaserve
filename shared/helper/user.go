@@ -13,10 +13,16 @@ package helper
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 )
 
-func GetUserID(c *fiber.Ctx) string {
-	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	return claims["sub"].(string)
+func GetUserID(c *fiber.Ctx) (string, error) {
+	user := c.Locals("user")
+	if user == nil {
+		return "", errorpkg.NewUnauthorizedUserError()
+	}
+	token := user.(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	return claims.GetSubject()
 }

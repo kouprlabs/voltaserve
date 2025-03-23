@@ -10,7 +10,10 @@
 
 package helper
 
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
 func MatchPath(pattern, path string) bool {
 	// Split pattern and path into segments
@@ -22,6 +25,31 @@ func MatchPath(pattern, path string) bool {
 	for i := range patternSegments {
 		patternPart := patternSegments[i]
 		pathPart := pathSegments[i]
+		// If the path part is a known API segment
+		//nolint:godox
+		// FIXME: This is not reliable, we need a better detection mechanism
+		if strings.HasPrefix(patternPart, ":") && slices.Contains([]string{
+			"probe",
+			"list",
+			"find",
+			"copy",
+			"languages",
+			"account_usage",
+			"workspace_usage",
+			"file_usage",
+			"count",
+			"dismiss",
+			"incoming",
+			"outgoing",
+			"grant_user_permission",
+			"revoke_user_permission",
+			"grant_group_permission",
+			"revoke_group_permission",
+			"create_from_s3",
+			"version",
+		}, pathPart) {
+			return false
+		}
 		// If the pattern part is a dynamic segment (starts with ":"), skip comparison
 		if strings.HasPrefix(patternPart, ":") {
 			continue

@@ -65,7 +65,10 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups [post]
 func (r *GroupRouter) Create(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts := new(dto.GroupCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -93,7 +96,10 @@ func (r *GroupRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [get]
 func (r *GroupRouter) Find(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	res, err := r.groupSvc.Find(c.Params("id"), userID)
 	if err != nil {
 		return err
@@ -120,11 +126,15 @@ func (r *GroupRouter) Find(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/groups [get]
 func (r *GroupRouter) List(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.groupSvc.List(*opts, helper.GetUserID(c))
+	res, err := r.groupSvc.List(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -145,11 +155,15 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups/probe [get]
 func (r *GroupRouter) Probe(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.groupSvc.Probe(*opts, helper.GetUserID(c))
+	res, err := r.groupSvc.Probe(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -172,7 +186,10 @@ func (r *GroupRouter) Probe(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/name [patch]
 func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts := new(dto.GroupPatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -200,7 +217,10 @@ func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [delete]
 func (r *GroupRouter) Delete(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	if err := r.groupSvc.Delete(c.Params("id"), userID); err != nil {
 		return err
 	}
@@ -222,7 +242,10 @@ func (r *GroupRouter) Delete(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/members [post]
 func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts := new(dto.GroupAddMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
@@ -252,7 +275,10 @@ func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/members [delete]
 func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
-	userID := helper.GetUserID(c)
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts := new(dto.GroupRemoveMemberOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
