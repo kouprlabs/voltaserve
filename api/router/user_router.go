@@ -72,11 +72,15 @@ func (r *UserRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500						{object}	errorpkg.ErrorResponse
 //	@Router			/users [get]
 func (r *UserRouter) List(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.userSvc.List(*opts, helper.GetUserID(c))
+	res, err := r.userSvc.List(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -97,11 +101,15 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/users/probe [get]
 func (r *UserRouter) Probe(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.userSvc.Probe(*opts, helper.GetUserID(c))
+	res, err := r.userSvc.Probe(*opts, userID)
 	if err != nil {
 		return err
 	}

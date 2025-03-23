@@ -67,6 +67,10 @@ type FilePatchNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
 
+type FileFindManyOptions struct {
+	IDs []string `json:"ids" validate:"required"`
+}
+
 type FileCopyManyOptions struct {
 	SourceIDs []string `json:"sourceIds" validate:"required"`
 	TargetID  string   `json:"targetId"  validate:"required"`

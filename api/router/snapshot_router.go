@@ -64,11 +64,15 @@ func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots [get]
 func (r *SnapshotRouter) List(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.snapshotSvc.List(c.Query("file_id"), *opts, helper.GetUserID(c))
+	res, err := r.snapshotSvc.List(c.Query("file_id"), *opts, userID)
 	if err != nil {
 		return err
 	}
@@ -90,11 +94,15 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/probe [get]
 func (r *SnapshotRouter) Probe(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
 	opts, err := r.parseListQueryParams(c)
 	if err != nil {
 		return err
 	}
-	res, err := r.snapshotSvc.Probe(c.Query("file_id"), *opts, helper.GetUserID(c))
+	res, err := r.snapshotSvc.Probe(c.Query("file_id"), *opts, userID)
 	if err != nil {
 		return err
 	}
@@ -114,7 +122,11 @@ func (r *SnapshotRouter) Probe(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id}/activate [post]
 func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
-	res, err := r.snapshotSvc.Activate(c.Params("id"), helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.snapshotSvc.Activate(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -134,7 +146,11 @@ func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id}/detach [post]
 func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
-	res, err := r.snapshotSvc.Detach(c.Params("id"), helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.snapshotSvc.Detach(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}

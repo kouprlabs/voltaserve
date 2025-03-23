@@ -60,7 +60,11 @@ func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id} [post]
 func (r *MosaicRouter) Create(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.Create(c.Params("file_id"), helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.mosaicSvc.Create(c.Params("file_id"), userID)
 	if err != nil {
 		return err
 	}
@@ -80,7 +84,11 @@ func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id} [delete]
 func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.Delete(c.Params("file_id"), helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.mosaicSvc.Delete(c.Params("file_id"), userID)
 	if err != nil {
 		return err
 	}
@@ -100,7 +108,11 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id}/metadata [get]
 func (r *MosaicRouter) GetMetadata(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.GetMetadata(c.Params("file_id"), helper.GetUserID(c))
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.mosaicSvc.GetMetadata(c.Params("file_id"), userID)
 	if err != nil {
 		return err
 	}

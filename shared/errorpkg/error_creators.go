@@ -546,3 +546,13 @@ func NewInvalidAPIKeyError() *ErrorResponse {
 		nil,
 	)
 }
+
+func NewUnauthorizedUserError() *ErrorResponse {
+	return NewErrorResponse(
+		"unauthorized_user",
+		http.StatusUnauthorized,
+		"Unauthorized user.",
+		"Unauthorized user.",
+		nil,
+	)
+}
