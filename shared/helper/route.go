@@ -51,7 +51,7 @@ func MatchPath(pattern, path string) bool {
 			return false
 		}
 		// If the pattern part is a dynamic segment (starts with ":"), skip comparison
-		if strings.HasPrefix(patternPart, ":") && !slices.Contains([]string{"probe"}, patternPart) {
+		if strings.HasPrefix(patternPart, ":") {
 			continue
 		}
 		// If the pattern part contains a wildcard (e.g., "thumbnail.:extension"), handle it
