@@ -121,7 +121,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 	} else {
 		if _, err = cl.CreateFromS3(client.FileCreateFromS3Options{
 			Type:        model.FileTypeFile,
-			WorkspaceID: directory.WorkspaceID,
+			WorkspaceID: directory.Workspace.ID,
 			ParentID:    directory.ID,
 			Name:        name,
 			S3Reference: s3Reference,

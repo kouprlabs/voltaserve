@@ -8,6 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import useSWR, { SWRConfiguration } from 'swr'
+import { Workspace } from '@/client'
 import { apiFetcher } from '@/client/fetcher'
 import { AuthUser } from '@/client/idp/user'
 import { getAccessTokenOrRedirect } from '@/client/token'
@@ -37,13 +38,13 @@ export enum FileSortOrder {
 
 export type File = {
   id: string
-  workspaceId: string
   name: string
   type: FileType
   parentId: string
   permission: PermissionType
   isShared?: boolean
   snapshot?: Snapshot
+  workspace: Workspace
   createTime: string
   updateTime?: string
 }

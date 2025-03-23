@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/joho/godotenv v1.5.1
-	github.com/kouprlabs/voltaserve/shared v0.0.0-20250322122743-e2a53027cb8d
+	github.com/kouprlabs/voltaserve/shared v0.0.0-20250323141648-04535554bfd4
 	github.com/minio/minio-go/v7 v7.0.87
 	go.uber.org/zap v1.27.0
 )

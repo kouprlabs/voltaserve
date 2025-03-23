@@ -48,10 +48,10 @@ func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
 		handleError(err, w)
 		return
 	}
-	if rootDir.Name != "/" && rootDir.WorkspaceID != "" {
+	if rootDir.Name != "/" && rootDir.Workspace.ID != "" {
 		if _, err = cl.CreateFolder(client.FileCreateFolderOptions{
 			Type:        model.FileTypeFolder,
-			WorkspaceID: rootDir.WorkspaceID,
+			WorkspaceID: rootDir.Workspace.ID,
 			ParentID:    rootDir.ID,
 			Name:        helper.DecodeURIComponent(getSubPath(r.URL.Path)),
 		}); err != nil {

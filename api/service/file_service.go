@@ -533,7 +533,7 @@ func (svc *fileFetch) listByPath(path string, userID string) ([]*dto.File, error
 		if err != nil {
 			return nil, err
 		}
-		res, err := svc.fileMapper.MapMany(children, userID)
+		res, err := svc.fileMapper.MapMany(children, file.GetWorkspaceID(), userID)
 		if err != nil {
 			return nil, err
 		}
@@ -610,25 +610,30 @@ func (svc *fileFetch) getWorkspacesAsFiles(userID string) ([]*dto.File, error) {
 
 func (svc *fileFetch) getWorkspaceAsFile(workspace *dto.Workspace) *dto.File {
 	return &dto.File{
-		ID:          workspace.RootID,
-		WorkspaceID: workspace.ID,
-		Name:        svc.slugFromWorkspace(workspace.ID, workspace.Name),
-		Type:        model.FileTypeFolder,
-		Permission:  workspace.Permission,
-		CreateTime:  workspace.CreateTime,
-		UpdateTime:  workspace.UpdateTime,
+		ID:         workspace.RootID,
+		Workspace:  *workspace,
+		Name:       svc.slugFromWorkspace(workspace.ID, workspace.Name),
+		Type:       model.FileTypeFolder,
+		Permission: workspace.Permission,
+		CreateTime: workspace.CreateTime,
+		UpdateTime: workspace.UpdateTime,
 	}
 }
 
 func (svc *fileFetch) getUserAsFile(user model.User) *dto.File {
 	return &dto.File{
-		ID:          user.GetID(),
-		WorkspaceID: "",
-		Name:        "/",
-		Type:        model.FileTypeFolder,
-		Permission:  "owner",
-		CreateTime:  user.GetCreateTime(),
-		UpdateTime:  nil,
+		ID: user.GetID(),
+		Workspace: dto.Workspace{
+			ID:         user.GetID(),
+			RootID:     user.GetID(),
+			Name:       "root",
+			Permission: model.PermissionOwner,
+			CreateTime: user.GetCreateTime(),
+		},
+		Name:       "/",
+		Type:       model.FileTypeFolder,
+		Permission: model.PermissionOwner,
+		CreateTime: user.GetCreateTime(),
 	}
 }
 
@@ -910,7 +915,7 @@ func (svc *fileList) createList(data []model.File, parent model.File, opts FileL
 	}
 	sorted := svc.fileSortSvc.sort(authorized, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.paginate(sorted, opts.Page, opts.Size)
-	mapped, err := svc.fileMapper.MapMany(paged, userID)
+	mapped, err := svc.fileMapper.MapMany(paged, parent.GetWorkspaceID(), userID)
 	if err != nil {
 		return nil, err
 	}

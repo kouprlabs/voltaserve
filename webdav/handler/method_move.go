@@ -53,7 +53,7 @@ func (h *Handler) methodMove(w http.ResponseWriter, r *http.Request) {
 		handleError(err, w)
 		return
 	}
-	if sourceFile.WorkspaceID != targetFile.WorkspaceID {
+	if sourceFile.Workspace.ID != targetFile.Workspace.ID {
 		w.WriteHeader(http.StatusBadRequest)
 		if _, err := w.Write([]byte("Source and target files are in different workspaces")); err != nil {
 			handleError(err, w)

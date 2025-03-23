@@ -100,8 +100,8 @@ const ListItem = ({
   )
 
   const handleFolderLinkClick = useCallback(() => {
-    navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
-  }, [file.id, file.workspaceId, navigate])
+    navigate(`/workspace/${file.workspace.id}/file/${file.id}`)
+  }, [file.id, file.workspace.id, navigate])
 
   const handleFileLinkClick = useCallback(
     (event: MouseEvent) => {
@@ -114,7 +114,7 @@ const ListItem = ({
   const handleIconDoubleClick = useCallback(() => {
     dispatch(selectionUpdated([]))
     if (file.type === 'folder') {
-      navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
+      navigate(`/workspace/${file.workspace.id}/file/${file.id}`)
     } else if (
       file.type === 'file' &&
       (file.snapshot?.preview ||
