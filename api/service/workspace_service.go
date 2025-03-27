@@ -29,22 +29,24 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/search"
 
 	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/webhook"
 )
 
 type WorkspaceService struct {
-	workspaceRepo   *repo.WorkspaceRepo
-	workspaceCache  *cache.WorkspaceCache
-	workspaceGuard  *guard.WorkspaceGuard
-	workspaceSearch *search.WorkspaceSearch
-	workspaceMapper *mapper.WorkspaceMapper
-	orgCache        *cache.OrganizationCache
-	orgGuard        *guard.OrganizationGuard
-	fileRepo        *repo.FileRepo
-	fileCache       *cache.FileCache
-	fileGuard       *guard.FileGuard
-	fileMapper      *mapper.FileMapper
-	s3              infra.S3Manager
-	config          *config.Config
+	workspaceRepo    *repo.WorkspaceRepo
+	workspaceCache   *cache.WorkspaceCache
+	workspaceGuard   *guard.WorkspaceGuard
+	workspaceSearch  *search.WorkspaceSearch
+	workspaceMapper  *mapper.WorkspaceMapper
+	workspaceWebhook *webhook.WorkspaceWebhook
+	orgCache         *cache.OrganizationCache
+	orgGuard         *guard.OrganizationGuard
+	fileRepo         *repo.FileRepo
+	fileCache        *cache.FileCache
+	fileGuard        *guard.FileGuard
+	fileMapper       *mapper.FileMapper
+	s3               infra.S3Manager
+	config           *config.Config
 }
 
 func NewWorkspaceService() *WorkspaceService {
@@ -72,6 +74,7 @@ func NewWorkspaceService() *WorkspaceService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
+		workspaceWebhook: webhook.NewWorkspaceWebhook(),
 		orgCache: cache.NewOrganizationCache(
 			config.GetConfig().Postgres,
 			config.GetConfig().Redis,
@@ -107,12 +110,23 @@ func NewWorkspaceService() *WorkspaceService {
 }
 
 func (svc *WorkspaceService) Create(opts dto.WorkspaceCreateOptions, userID string) (*dto.Workspace, error) {
+	if opts.StorageCapacity == 0 {
+		opts.StorageCapacity = helper.MegabyteToByte(svc.config.Defaults.WorkspaceStorageCapacityMB)
+	}
 	org, err := svc.orgCache.Get(opts.OrganizationID)
 	if err != nil {
 		return nil, err
 	}
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionEditor); err != nil {
 		return nil, err
+	}
+	if svc.config.WorkspaceWebhook != "" {
+		if err := svc.workspaceWebhook.Call(dto.WorkspaceWebhookOptions{
+			EventType: dto.WorkspaceWebhookEventTypeCreate,
+			Create:    &opts,
+		}); err != nil {
+			return nil, err
+		}
 	}
 	workspace, err := svc.create(opts, userID)
 	if err != nil {
@@ -225,6 +239,16 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	}
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionOwner); err != nil {
 		return nil, err
+	}
+	if svc.config.WorkspaceWebhook != "" {
+		if err := svc.workspaceWebhook.Call(dto.WorkspaceWebhookOptions{
+			EventType: dto.WorkspaceWebhookEventTypePatchStorageCapacity,
+			PatchStorageCapacity: &dto.WorkspacePatchStorageCapacityOptions{
+				StorageCapacity: storageCapacity,
+			},
+		}); err != nil {
+			return nil, err
+		}
 	}
 	size, err := svc.fileRepo.ComputeSize(workspace.GetRootID())
 	if err != nil {
@@ -376,9 +400,6 @@ func (svc *WorkspaceService) create(opts dto.WorkspaceCreateOptions, userID stri
 	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
 	if err := svc.s3.CreateBucket(bucket); err != nil {
 		return nil, err
-	}
-	if opts.StorageCapacity == 0 {
-		opts.StorageCapacity = helper.MegabyteToByte(svc.config.Defaults.WorkspaceStorageCapacityMB)
 	}
 	res, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
 		ID:              helper.NewID(),
