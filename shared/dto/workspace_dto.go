@@ -60,3 +60,14 @@ type WorkspacePatchNameOptions struct {
 type WorkspacePatchStorageCapacityOptions struct {
 	StorageCapacity int64 `json:"storageCapacity" validate:"required,min=1"`
 }
+
+const (
+	WorkspaceWebhookEventTypeCreate               = "create"
+	WorkspaceWebhookEventTypePatchStorageCapacity = "patch_storage_capacity"
+)
+
+type WorkspaceWebhookOptions struct {
+	EventType            string                                `json:"eventType"            validate:"required"`
+	Create               *WorkspaceCreateOptions               `json:"create,omitempty"`
+	PatchStorageCapacity *WorkspacePatchStorageCapacityOptions `json:"patchStorageCapacity"`
+}

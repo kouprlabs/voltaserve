@@ -19,21 +19,22 @@ import (
 )
 
 type Config struct {
-	Port            int
-	PublicUIURL     string
-	ConversionURL   string
-	LanguageURL     string
-	MosaicURL       string
-	Postgres        config.PostgresConfig
-	Search          config.SearchConfig
-	Redis           config.RedisConfig
-	S3              config.S3Config
-	Security        config.SecurityConfig
-	Environment     config.EnvironmentConfig
-	SMTP            config.SMTPConfig
-	Limits          LimitsConfig
-	Defaults        DefaultsConfig
-	SnapshotWebhook string
+	Port             int
+	PublicUIURL      string
+	ConversionURL    string
+	LanguageURL      string
+	MosaicURL        string
+	Postgres         config.PostgresConfig
+	Search           config.SearchConfig
+	Redis            config.RedisConfig
+	S3               config.S3Config
+	Security         config.SecurityConfig
+	Environment      config.EnvironmentConfig
+	SMTP             config.SMTPConfig
+	Limits           LimitsConfig
+	Defaults         DefaultsConfig
+	SnapshotWebhook  string
+	WorkspaceWebhook string
 }
 
 type LimitsConfig struct {
@@ -141,4 +142,5 @@ func readDefaults(config *Config) {
 
 func readWebhooks(config *Config) {
 	config.SnapshotWebhook = os.Getenv("SNAPSHOT_WEBHOOK")
+	config.WorkspaceWebhook = os.Getenv("WORKSPACE_WEBHOOK")
 }
