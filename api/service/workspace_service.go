@@ -120,11 +120,13 @@ func (svc *WorkspaceService) Create(opts dto.WorkspaceCreateOptions, userID stri
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionEditor); err != nil {
 		return nil, err
 	}
-	if err := svc.workspaceWebhook.Call(dto.WorkspaceWebhookOptions{
-		EventType: dto.WorkspaceWebhookEventTypeCreate,
-		Create:    &opts,
-	}); err != nil {
-		return nil, err
+	if svc.config.WorkspaceWebhook != "" {
+		if err := svc.workspaceWebhook.Call(dto.WorkspaceWebhookOptions{
+			EventType: dto.WorkspaceWebhookEventTypeCreate,
+			Create:    &opts,
+		}); err != nil {
+			return nil, err
+		}
 	}
 	workspace, err := svc.create(opts, userID)
 	if err != nil {
@@ -238,13 +240,15 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	if err := svc.workspaceWebhook.Call(dto.WorkspaceWebhookOptions{
-		EventType: dto.WorkspaceWebhookEventTypePatchStorageCapacity,
-		PatchStorageCapacity: &dto.WorkspacePatchStorageCapacityOptions{
-			StorageCapacity: storageCapacity,
-		},
-	}); err != nil {
-		return nil, err
+	if svc.config.WorkspaceWebhook != "" {
+		if err := svc.workspaceWebhook.Call(dto.WorkspaceWebhookOptions{
+			EventType: dto.WorkspaceWebhookEventTypePatchStorageCapacity,
+			PatchStorageCapacity: &dto.WorkspacePatchStorageCapacityOptions{
+				StorageCapacity: storageCapacity,
+			},
+		}); err != nil {
+			return nil, err
+		}
 	}
 	size, err := svc.fileRepo.ComputeSize(workspace.GetRootID())
 	if err != nil {
