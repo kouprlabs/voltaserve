@@ -20,7 +20,7 @@ on:
       - "!idp/README.md"
 
 jobs:
-  lint:
+  check:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
@@ -30,8 +30,21 @@ jobs:
         uses: denoland/setup-deno@v2
 
       - name: Run check
-        run: deno task check
+        run: deno check .
         working-directory: idp
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: write
+
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
 
       - name: Run lint
         run: deno lint .

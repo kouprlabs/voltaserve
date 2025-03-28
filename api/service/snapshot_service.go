@@ -16,6 +16,7 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"github.com/kouprlabs/voltaserve/shared/cache"
+	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/guard"
@@ -28,24 +29,23 @@ import (
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/logger"
-	"github.com/kouprlabs/voltaserve/api/webhook"
 )
 
 type SnapshotService struct {
-	snapshotRepo    *repo.SnapshotRepo
-	snapshotCache   *cache.SnapshotCache
-	snapshotMapper  *mapper.SnapshotMapper
-	snapshotWebhook *webhook.SnapshotWebhook
-	fileCache       *cache.FileCache
-	fileGuard       *guard.FileGuard
-	fileRepo        *repo.FileRepo
-	fileSearch      *search.FileSearch
-	fileMapper      *mapper.FileMapper
-	taskRepo        *repo.TaskRepo
-	taskCache       *cache.TaskCache
-	s3              infra.S3Manager
-	config          *config.Config
-	languages       []*dto.SnapshotLanguage
+	snapshotRepo          *repo.SnapshotRepo
+	snapshotCache         *cache.SnapshotCache
+	snapshotMapper        *mapper.SnapshotMapper
+	snapshotWebhookClient *client.SnapshotWebhookClient
+	fileCache             *cache.FileCache
+	fileGuard             *guard.FileGuard
+	fileRepo              *repo.FileRepo
+	fileSearch            *search.FileSearch
+	fileMapper            *mapper.FileMapper
+	taskRepo              *repo.TaskRepo
+	taskCache             *cache.TaskCache
+	s3                    infra.S3Manager
+	config                *config.Config
+	languages             []*dto.SnapshotLanguage
 }
 
 func NewSnapshotService() *SnapshotService {
@@ -64,7 +64,9 @@ func NewSnapshotService() *SnapshotService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		snapshotWebhook: webhook.NewSnapshotWebhook(),
+		snapshotWebhookClient: client.NewSnapshotWebhookClient(
+			config.GetConfig().Security,
+		),
 		fileCache: cache.NewFileCache(
 			config.GetConfig().Postgres,
 			config.GetConfig().Redis,
@@ -484,7 +486,7 @@ func (svc *SnapshotService) deleteFromRepo(snapshots []model.Snapshot) {
 
 func (svc *SnapshotService) callSnapshotHookWithPatchEvent(snapshot model.Snapshot, fields []string) (model.Snapshot, error) {
 	if svc.config.SnapshotWebhook != "" {
-		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
+		if err := svc.snapshotWebhookClient.Call(config.GetConfig().SnapshotWebhook, dto.SnapshotWebhookOptions{
 			EventType: dto.SnapshotWebhookEventTypePatch,
 			Fields:    fields,
 			Snapshot:  svc.snapshotMapper.MapWithS3Objects(snapshot),

@@ -20,9 +20,11 @@ import {
   client as meilisearch,
   USER_SEARCH_INDEX,
 } from '@/infra/meilisearch.ts'
+import { logger } from '@/infra/logger.ts'
 import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { getCount, mapEntity, UserDTO } from '@/user/service.ts'
+import { call as callWebhook, UserWebhookEventType } from '@/user/webhook.ts'
 
 export type AccountCreateOptions = {
   email: string
@@ -93,7 +95,20 @@ export async function createUser(
       'UI_URL': getConfig().publicUIURL,
       'TOKEN': emailConfirmationToken,
     })
-    return mapEntity(user)
+    const dto = mapEntity(user)
+    if (getConfig().userWebhooks.length > 0) {
+      for (const url of getConfig().userWebhooks) {
+        try {
+          await callWebhook(url, {
+            eventType: UserWebhookEventType.Create,
+            user: dto,
+          })
+        } catch (error) {
+          logger.error(error)
+        }
+      }
+    }
+    return dto
   } catch (error) {
     await userRepo.delete(id)
     await meilisearch.index(USER_SEARCH_INDEX).deleteDocuments([id])

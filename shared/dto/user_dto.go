@@ -48,3 +48,22 @@ type UserProbe struct {
 	TotalPages    uint64 `json:"totalPages"`
 	TotalElements uint64 `json:"totalElements"`
 }
+
+type UserFromIdP struct {
+	ID           string   `json:"id"`
+	FullName     string   `json:"fullName"`
+	Picture      *Picture `json:"picture,omitempty"`
+	Email        string   `json:"email"`
+	PendingEmail *string  `json:"pendingEmail,omitempty"`
+	Username     string   `json:"username"`
+}
+
+const (
+	UserWebhookEventTypeCreate = "create"
+	UserWebhookEventTypeDelete = "delete"
+)
+
+type UserWebhookOptions struct {
+	EventType string       `json:"eventType"      validate:"required"`
+	User      *UserFromIdP `json:"user,omitempty"`
+}

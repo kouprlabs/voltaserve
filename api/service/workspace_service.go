@@ -18,6 +18,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/kouprlabs/voltaserve/shared/cache"
+	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/guard"
@@ -29,24 +30,23 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/search"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/webhook"
 )
 
 type WorkspaceService struct {
-	workspaceRepo    *repo.WorkspaceRepo
-	workspaceCache   *cache.WorkspaceCache
-	workspaceGuard   *guard.WorkspaceGuard
-	workspaceSearch  *search.WorkspaceSearch
-	workspaceMapper  *mapper.WorkspaceMapper
-	workspaceWebhook *webhook.WorkspaceWebhook
-	orgCache         *cache.OrganizationCache
-	orgGuard         *guard.OrganizationGuard
-	fileRepo         *repo.FileRepo
-	fileCache        *cache.FileCache
-	fileGuard        *guard.FileGuard
-	fileMapper       *mapper.FileMapper
-	s3               infra.S3Manager
-	config           *config.Config
+	workspaceRepo          *repo.WorkspaceRepo
+	workspaceCache         *cache.WorkspaceCache
+	workspaceGuard         *guard.WorkspaceGuard
+	workspaceSearch        *search.WorkspaceSearch
+	workspaceMapper        *mapper.WorkspaceMapper
+	workspaceWebhookClient *client.WorkspaceWebhookClient
+	orgCache               *cache.OrganizationCache
+	orgGuard               *guard.OrganizationGuard
+	fileRepo               *repo.FileRepo
+	fileCache              *cache.FileCache
+	fileGuard              *guard.FileGuard
+	fileMapper             *mapper.FileMapper
+	s3                     infra.S3Manager
+	config                 *config.Config
 }
 
 func NewWorkspaceService() *WorkspaceService {
@@ -74,7 +74,9 @@ func NewWorkspaceService() *WorkspaceService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		workspaceWebhook: webhook.NewWorkspaceWebhook(),
+		workspaceWebhookClient: client.NewWorkspaceWebhookClient(
+			config.GetConfig().Security,
+		),
 		orgCache: cache.NewOrganizationCache(
 			config.GetConfig().Postgres,
 			config.GetConfig().Redis,
@@ -121,7 +123,7 @@ func (svc *WorkspaceService) Create(opts dto.WorkspaceCreateOptions, userID stri
 		return nil, err
 	}
 	if svc.config.WorkspaceWebhook != "" {
-		if err := svc.workspaceWebhook.Call(dto.WorkspaceWebhookOptions{
+		if err := svc.workspaceWebhookClient.Call(config.GetConfig().WorkspaceWebhook, dto.WorkspaceWebhookOptions{
 			EventType: dto.WorkspaceWebhookEventTypeCreate,
 			Create:    &opts,
 		}); err != nil {
@@ -241,7 +243,7 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 		return nil, err
 	}
 	if svc.config.WorkspaceWebhook != "" {
-		if err := svc.workspaceWebhook.Call(dto.WorkspaceWebhookOptions{
+		if err := svc.workspaceWebhookClient.Call(config.GetConfig().WorkspaceWebhook, dto.WorkspaceWebhookOptions{
 			EventType: dto.WorkspaceWebhookEventTypePatchStorageCapacity,
 			PatchStorageCapacity: &dto.WorkspacePatchStorageCapacityOptions{
 				StorageCapacity: storageCapacity,

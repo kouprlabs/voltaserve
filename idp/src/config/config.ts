@@ -26,6 +26,7 @@ export function getConfig(): Config {
     readSearch(config)
     readSMTP(config)
     readSecurity(config)
+    readWebhooks(config)
   }
   return config
 }
@@ -127,6 +128,9 @@ export function readSMTP(config: Config) {
 }
 
 export function readSecurity(config: Config) {
+  if (!process.env.SECURITY_API_KEY) {
+    throw newEnvironmentVariableNotSetError('SECURITY_API_KEY')
+  }
   if (process.env.SECURITY_MAX_FAILED_ATTEMPTS) {
     config.security.maxFailedAttempts = parseInt(
       process.env.SECURITY_MAX_FAILED_ATTEMPTS,
@@ -136,6 +140,14 @@ export function readSecurity(config: Config) {
     config.security.lockoutPeriod = parseInt(
       process.env.SECURITY_LOCKOUT_PERIOD,
     )
+  }
+  config.security.apiKey = process.env.SECURITY_API_KEY
+}
+
+export function readWebhooks(config: Config) {
+  if (process.env.USER_WEBHOOKS) {
+    config.userWebhooks = process.env.USER_WEBHOOKS.split(',')
+    config.userWebhooks.forEach((e) => e.trim())
   }
 }
 

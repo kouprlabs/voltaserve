@@ -20,13 +20,10 @@ import {
   newPictureNotFoundError,
   newUserIsNotAdminError,
 } from '@/error/creators.ts'
-import {
-  handleValidationError,
-  ZodFactory,
-} from '@/lib/validation.ts'
+import { handleValidationError, ZodFactory } from '@/lib/validation.ts'
 import {
   deletePicture,
-  drop,
+  deleteUser,
   find,
   findAsAdmin,
   getPicture,
@@ -70,7 +67,7 @@ router.get('/me/:filename', async (c) => {
   if (extension !== extname(c.req.param('filename'))) {
     throw newPictureNotFoundError()
   }
-  return c.body(buffer, 200, {
+  return c.body(buffer as any, 200, {
     'Content-Type': mime,
     'Content-Disposition': `attachment; filename=picture${extension}`,
   })
@@ -180,7 +177,7 @@ router.delete(
   ),
   async (c) => {
     const body = c.req.valid('json') as UserDeleteOptions
-    await drop(c.get('user').id, body)
+    await deleteUser(c.get('user').id, body)
     return c.body(null, 204)
   },
 )

@@ -30,7 +30,7 @@ const transporter = nodemailer.createTransport({
       pass: config.password,
     }
     : null,
-})
+} as any)
 
 export function sendTemplateMail(
   template: string,
