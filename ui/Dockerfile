@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM 22.14-alpine AS ui-builder
+FROM node:22.14-alpine AS ui-builder
 
 WORKDIR /build
 
