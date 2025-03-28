@@ -22,7 +22,7 @@ func (wh *UserWebhook) Handle(opts dto.UserWebhookOptions) error {
 	if opts.EventType == dto.UserWebhookEventTypeCreate {
 		return wh.handleCreate(opts)
 	} else if opts.EventType == dto.UserWebhookEventTypeDelete {
-		return wh.handlePatchStorageCapacity(opts)
+		return wh.handleDelete(opts)
 	}
 	return nil
 }
@@ -31,6 +31,6 @@ func (wh *UserWebhook) handleCreate(opts dto.UserWebhookOptions) error {
 	return nil
 }
 
-func (wh *UserWebhook) handlePatchStorageCapacity(opts dto.UserWebhookOptions) error {
+func (wh *UserWebhook) handleDelete(opts dto.UserWebhookOptions) error {
 	return nil
 }
