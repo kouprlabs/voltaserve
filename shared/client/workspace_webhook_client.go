@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
-package webhook
+package client
 
 import (
 	"bytes"
@@ -17,31 +17,29 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/shared/client"
+	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/dto"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/logger"
+	"github.com/kouprlabs/voltaserve/shared/logger"
 )
 
-type SnapshotWebhook struct {
-	config *config.Config
+type WorkspaceWebhookClient struct {
+	apiKey string
 }
 
-func NewSnapshotWebhook() *SnapshotWebhook {
-	return &SnapshotWebhook{
-		config: config.GetConfig(),
+func NewWorkspaceWebhookClient(security config.SecurityConfig) *WorkspaceWebhookClient {
+	return &WorkspaceWebhookClient{
+		apiKey: security.APIKey,
 	}
 }
 
-func (wh *SnapshotWebhook) Call(opts dto.SnapshotWebhookOptions) error {
+func (cl *WorkspaceWebhookClient) Call(url string, opts dto.WorkspaceWebhookOptions) error {
 	b, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}
 	req, err := http.NewRequest(
 		"POST",
-		fmt.Sprintf("%s?api_key=%s", config.GetConfig().SnapshotWebhook, wh.config.Security.APIKey),
+		fmt.Sprintf("%s?api_key=%s", url, cl.apiKey),
 		bytes.NewBuffer(b),
 	)
 	if err != nil {
@@ -58,5 +56,5 @@ func (wh *SnapshotWebhook) Call(opts dto.SnapshotWebhookOptions) error {
 			logger.GetLogger().Error(err)
 		}
 	}(resp.Body)
-	return client.SuccessfulResponseOrError(resp)
+	return SuccessfulResponseOrError(resp)
 }

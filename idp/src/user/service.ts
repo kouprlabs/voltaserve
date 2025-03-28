@@ -35,14 +35,16 @@ import {
 import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { Buffer } from 'node:buffer'
+import { call as callWebhook, UserWebhookEventType } from './webhook.ts'
+import { logger } from '../infra/logger.ts'
 
 export type UserDTO = {
   id: string
   fullName: string
   picture?: PictureDTO
   email: string
-  username: string
   pendingEmail?: string
+  username: string
 }
 
 export type UserAdminDTO = {
@@ -338,9 +340,24 @@ export async function deletePicture(id: string): Promise<UserDTO> {
   return mapEntity(user)
 }
 
-export async function drop(id: string, options: UserDeleteOptions) {
+export async function deleteUser(id: string, options: UserDeleteOptions) {
   const user = await userRepo.findById(id)
   if (verifyPassword(options.password, user.passwordHash)) {
+    if (getConfig().userWebhooks.length > 0) {
+      const dto = mapEntity(user)
+      if (getConfig().userWebhooks.length > 0) {
+        for (const url of getConfig().userWebhooks) {
+          try {
+            await callWebhook(url, {
+              eventType: UserWebhookEventType.Delete,
+              user: dto,
+            })
+          } catch (error) {
+            logger.error(error)
+          }
+        }
+      }
+    }
     await userRepo.delete(user.id)
     await meilisearch.index(USER_SEARCH_INDEX).deleteDocuments([user.id])
   } else {

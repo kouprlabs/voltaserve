@@ -18,6 +18,7 @@ export class Config {
   corsOrigins: string[] = []
   search: SearchConfig
   smtp: SMTPConfig
+  userWebhooks: string[] = []
 
   constructor() {
     this.token = new TokenConfig()
@@ -47,6 +48,7 @@ export class PasswordConfig {
 export class SecurityConfig {
   maxFailedAttempts: number = 0
   lockoutPeriod: number = 0
+  apiKey: string = ''
 }
 
 export class SearchConfig {

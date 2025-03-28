@@ -78,6 +78,7 @@ func main() {
 			{Path: "/" + v + "/tasks/:id", Method: "DELETE"},
 			{Path: "/" + v + "/tasks/:id", Method: "PATCH"},
 			{Path: "/" + v + "/users/:id/picture.:extension", Method: "GET"},
+			{Path: "/" + v + "/webhooks/users", Method: "POST"},
 		} {
 			if helper.MatchPath(route.Path, c.Path()) && c.Method() == route.Method {
 				return c.Next()
@@ -104,6 +105,7 @@ func main() {
 	router.NewStorageRouter().AppendRoutes(group.Group("storage"))
 	router.NewGroupRouter().AppendRoutes(group.Group("groups"))
 	router.NewEntityRouter().AppendRoutes(group.Group("entities"))
+	router.NewWebhookRouter().AppendRoutes(group.Group("webhooks"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

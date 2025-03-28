@@ -768,6 +768,21 @@ definitions:
       username:
         type: string
     type: object
+  dto.UserFromIdP:
+    properties:
+      email:
+        type: string
+      fullName:
+        type: string
+      id:
+        type: string
+      pendingEmail:
+        type: string
+      picture:
+        $ref: '#/definitions/dto.Picture'
+      username:
+        type: string
+    type: object
   dto.UserList:
     properties:
       data:
@@ -798,6 +813,15 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  dto.UserWebhookOptions:
+    properties:
+      eventType:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserFromIdP'
+    required:
+    - eventType
     type: object
   dto.Workspace:
     properties:
@@ -4012,6 +4036,38 @@ paths:
       summary: Get
       tags:
       - Version
+  /webhooks/users:
+    post:
+      description: Users
+      operationId: webhooks_users
+      parameters:
+      - description: API Key
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserWebhookOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Users
+      tags:
+      - Webhooks
   /workspaces:
     get:
       description: List

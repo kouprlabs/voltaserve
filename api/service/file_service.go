@@ -37,7 +37,6 @@ import (
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/logger"
-	"github.com/kouprlabs/voltaserve/api/webhook"
 )
 
 type FileService struct {
@@ -2399,20 +2398,20 @@ func (svc *fileReprocess) runPipeline(file model.File, snapshot model.Snapshot, 
 }
 
 type fileStore struct {
-	fileCache       *cache.FileCache
-	fileCoreSvc     *fileCoreService
-	fileMapper      *mapper.FileMapper
-	workspaceCache  *cache.WorkspaceCache
-	snapshotRepo    *repo.SnapshotRepo
-	snapshotCache   *cache.SnapshotCache
-	snapshotSvc     *SnapshotService
-	snapshotMapper  *mapper.SnapshotMapper
-	snapshotWebhook *webhook.SnapshotWebhook
-	taskSvc         *TaskService
-	fileIdent       *infra.FileIdentifier
-	s3              infra.S3Manager
-	pipelineClient  client.PipelineClient
-	config          *config.Config
+	fileCache             *cache.FileCache
+	fileCoreSvc           *fileCoreService
+	fileMapper            *mapper.FileMapper
+	workspaceCache        *cache.WorkspaceCache
+	snapshotRepo          *repo.SnapshotRepo
+	snapshotCache         *cache.SnapshotCache
+	snapshotSvc           *SnapshotService
+	snapshotMapper        *mapper.SnapshotMapper
+	snapshotWebhookClient *client.SnapshotWebhookClient
+	taskSvc               *TaskService
+	fileIdent             *infra.FileIdentifier
+	s3                    infra.S3Manager
+	pipelineClient        client.PipelineClient
+	config                *config.Config
 }
 
 func newFileStore() *fileStore {
@@ -2448,10 +2447,12 @@ func newFileStore() *fileStore {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		snapshotWebhook: webhook.NewSnapshotWebhook(),
-		taskSvc:         NewTaskService(),
-		fileIdent:       infra.NewFileIdentifier(),
-		s3:              infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		snapshotWebhookClient: client.NewSnapshotWebhookClient(
+			config.GetConfig().Security,
+		),
+		taskSvc:   NewTaskService(),
+		fileIdent: infra.NewFileIdentifier(),
+		s3:        infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
 		pipelineClient: client.NewPipelineClient(
 			config.GetConfig().ConversionURL,
 			config.GetConfig().Environment.IsTest,
@@ -2616,7 +2617,7 @@ func (svc *fileStore) createTask(file model.File, userID string) (model.Task, er
 
 func (svc *fileStore) callSnapshotHookWithCreateEvent(snapshot model.Snapshot) (model.Snapshot, error) {
 	if svc.config.SnapshotWebhook != "" {
-		if err := svc.snapshotWebhook.Call(dto.SnapshotWebhookOptions{
+		if err := svc.snapshotWebhookClient.Call(config.GetConfig().SnapshotWebhook, dto.SnapshotWebhookOptions{
 			EventType: dto.SnapshotWebhookEventTypeCreate,
 			Snapshot:  svc.snapshotMapper.MapWithS3Objects(snapshot),
 		}); err != nil {

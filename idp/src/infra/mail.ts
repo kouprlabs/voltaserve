@@ -21,6 +21,7 @@ type MessageParams = {
 const config = getConfig().smtp
 
 const transporter = nodemailer.createTransport({
+  // @ts-expect-error: Works fine at runtime
   host: config.host,
   port: config.port,
   secure: config.secure,

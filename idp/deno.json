@@ -7,6 +7,7 @@
   "imports": {
     "@/": "./src/",
     "hono": "npm:hono@4.6.13",
+    "pino": "npm:pino@9.6.0",
     "zod": "npm:zod@3.24.1",
     "@hono/zod-validator": "npm:@hono/zod-validator@0.4.2",
     "camelize": "npm:camelize@1.0.1",
