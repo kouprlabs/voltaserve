@@ -27,10 +27,10 @@ func (wh *UserWebhook) Handle(opts dto.UserWebhookOptions) error {
 	return nil
 }
 
-func (wh *UserWebhook) handleCreate(opts dto.UserWebhookOptions) error {
+func (wh *UserWebhook) handleCreate(_ dto.UserWebhookOptions) error {
 	return nil
 }
 
-func (wh *UserWebhook) handleDelete(opts dto.UserWebhookOptions) error {
+func (wh *UserWebhook) handleDelete(_ dto.UserWebhookOptions) error {
 	return nil
 }
