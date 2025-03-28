@@ -110,14 +110,6 @@ github.com/klauspost/compress v1.17.11/go.mod h1:pMDklpSncoRMuLFrf1W9Ss9KT+0rH90
 github.com/klauspost/cpuid/v2 v2.0.1/go.mod h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa0213Md/qVLRg=
 github.com/klauspost/cpuid/v2 v2.2.9 h1:66ze0taIn2H33fBvCkXuv9BmCwDfafmiIVpKV9kKGuY=
 github.com/klauspost/cpuid/v2 v2.2.9/go.mod h1:rqkxqrZ1EhYM9G+hXH7YdowN5R5RGN6NK4QwQ3WMXF8=
-github.com/kouprlabs/voltaserve/shared v0.0.0-20250310210257-54d86ee4b40d h1:TyuiV6WzCy5jIYH0rDgV2HQConqPQ5sL4qsnu/WrWiw=
-github.com/kouprlabs/voltaserve/shared v0.0.0-20250310210257-54d86ee4b40d/go.mod h1:nmfZMgoZiUA9uPSIoM6IWMmUaee5P0ItRk1mixariNE=
-github.com/kouprlabs/voltaserve/shared v0.0.0-20250313214113-95d79699eb77 h1:TmzgbKi6Hn47jXPq3iEyoEcUHbNeDg5nA5iJcVxVdo0=
-github.com/kouprlabs/voltaserve/shared v0.0.0-20250313214113-95d79699eb77/go.mod h1:nmfZMgoZiUA9uPSIoM6IWMmUaee5P0ItRk1mixariNE=
-github.com/kouprlabs/voltaserve/shared v0.0.0-20250314192332-709740439e05 h1:z0Y7IRG8CrfeE3fgFDuQnDiJtLNLkm8m2CZr7m60Ggg=
-github.com/kouprlabs/voltaserve/shared v0.0.0-20250314192332-709740439e05/go.mod h1:nmfZMgoZiUA9uPSIoM6IWMmUaee5P0ItRk1mixariNE=
-github.com/kouprlabs/voltaserve/shared v0.0.0-20250322122743-e2a53027cb8d h1:Ay6CJr4Jn6XDdi6ZbmxCk+0NIkVhbygSHM8/mEA2H94=
-github.com/kouprlabs/voltaserve/shared v0.0.0-20250322122743-e2a53027cb8d/go.mod h1:nmfZMgoZiUA9uPSIoM6IWMmUaee5P0ItRk1mixariNE=
 github.com/kouprlabs/voltaserve/shared v0.0.0-20250323141648-04535554bfd4 h1:DUzjUZV5dK6SztTRLzVtmrcc39j7ii6rxRRl81JYV8s=
 github.com/kouprlabs/voltaserve/shared v0.0.0-20250323141648-04535554bfd4/go.mod h1:nmfZMgoZiUA9uPSIoM6IWMmUaee5P0ItRk1mixariNE=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=

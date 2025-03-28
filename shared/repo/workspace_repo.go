@@ -284,6 +284,25 @@ func (repo *WorkspaceRepo) FindIDsByOrganization(orgID string) ([]string, error)
 	return res, nil
 }
 
+func (repo *WorkspaceRepo) FindIDsByOwner(userID string) ([]string, error) {
+	type IDResult struct {
+		Result string
+	}
+	var ids []IDResult
+	db := repo.db.
+		Raw(`SELECT id result FROM workspace 
+			 WHERE id IN (SELECT resource_id FROM userpermission WHERE user_id = ? AND permission = 'owner')`,
+			userID).Scan(&ids)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := make([]string, 0)
+	for _, id := range ids {
+		res = append(res, id.Result)
+	}
+	return res, nil
+}
+
 func (repo *WorkspaceRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&workspaceEntity{}).Count(&count)
@@ -328,6 +347,14 @@ func (repo *WorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int6
 
 func (repo *WorkspaceRepo) UpdateRootID(id string, rootNodeID string) error {
 	db := repo.db.Exec("UPDATE workspace SET root_id = ? WHERE id = ?", rootNodeID, id)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *WorkspaceRepo) ClearRootID(id string) error {
+	db := repo.db.Exec("UPDATE workspace SET root_id = null WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error
 	}

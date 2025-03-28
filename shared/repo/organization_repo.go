@@ -208,6 +208,25 @@ func (repo *OrganizationRepo) FindIDs() ([]string, error) {
 	return res, nil
 }
 
+func (repo *OrganizationRepo) FindIDsByOwner(userID string) ([]string, error) {
+	type IDResult struct {
+		Result string
+	}
+	var ids []IDResult
+	db := repo.db.
+		Raw(`SELECT id result FROM organization 
+			 WHERE id IN (SELECT resource_id FROM userpermission WHERE user_id = ? AND permission = 'owner')`,
+			userID).Scan(&ids)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := make([]string, 0)
+	for _, id := range ids {
+		res = append(res, id.Result)
+	}
+	return res, nil
+}
+
 func (repo *OrganizationRepo) FindMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
