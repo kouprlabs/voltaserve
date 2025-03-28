@@ -132,7 +132,7 @@ const GroupSelector = ({
                 <SectionError text={errorToString(listError)} />
               ) : null}
               {listIsEmpty ? (
-                <SectionPlaceholder text="There are no groups." />
+                <SectionPlaceholder text="There are no items." />
               ) : null}
               {listIsReady ? (
                 <div

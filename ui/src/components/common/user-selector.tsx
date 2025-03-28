@@ -146,7 +146,7 @@ const UserSelector = ({
               ) : null}
               {listIsLoading ? <SectionSpinner /> : null}
               {listIsEmpty ? (
-                <SectionPlaceholder text="There are no users." />
+                <SectionPlaceholder text="There are no items." />
               ) : null}
               {listIsReady ? (
                 <div

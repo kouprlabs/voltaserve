@@ -80,9 +80,7 @@ const InsightsOverviewEntities = () => {
       />
       {listIsLoading ? <SectionSpinner /> : null}
       {listError ? <SectionError text={errorToString(listError)} /> : null}
-      {listIsEmpty ? (
-        <SectionPlaceholder text="There are no entities." />
-      ) : null}
+      {listIsEmpty ? <SectionPlaceholder text="There are no items." /> : null}
       {listIsReady ? (
         <div
           className={cx(

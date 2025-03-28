@@ -84,9 +84,7 @@ const ConsolePanelOrganizations = () => {
         <Heading className={cx('text-heading')}>Organizations</Heading>
         {listIsLoading ? <SectionSpinner /> : null}
         {listError ? <SectionError text={errorToString(listError)} /> : null}
-        {listIsEmpty ? (
-          <SectionPlaceholder text="There are no organizations." />
-        ) : null}
+        {listIsEmpty ? <SectionPlaceholder text="There are no items." /> : null}
         {listIsReady ? (
           <DataTable
             items={list.data}

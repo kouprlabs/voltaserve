@@ -140,7 +140,7 @@ const ConsolePanelUser = () => {
               ) : null}
               {orgListIsEmpty ? (
                 <ListSekeleton header="Organizations">
-                  <SectionPlaceholder text="There are no organizations." />
+                  <SectionPlaceholder text="There are no items." />
                 </ListSekeleton>
               ) : null}
               {orgListError ? (
@@ -242,7 +242,7 @@ const ConsolePanelUser = () => {
               ) : null}
               {workspaceListIsEmpty ? (
                 <ListSekeleton header="Workspaces">
-                  <SectionPlaceholder text="There are no workspaces." />
+                  <SectionPlaceholder text="There are no items." />
                 </ListSekeleton>
               ) : null}
               {workspaceListIsReady ? (
@@ -337,7 +337,7 @@ const ConsolePanelUser = () => {
               ) : null}
               {groupListIsEmpty ? (
                 <ListSekeleton header="Groups">
-                  <SectionPlaceholder text="There are no groups." />
+                  <SectionPlaceholder text="There are no items." />
                 </ListSekeleton>
               ) : null}
               {groupListIsReady ? (

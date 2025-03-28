@@ -95,7 +95,7 @@ const OrganizationListPage = () => {
         {listError ? <SectionError text={errorToString(listError)} /> : null}
         {listIsEmpty ? (
           <SectionPlaceholder
-            text="There are no organizations."
+            text="There are no items."
             content={
               <Button
                 as={Link}

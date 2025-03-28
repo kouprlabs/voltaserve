@@ -84,15 +84,15 @@ const WorkspaceListPage = () => {
   return (
     <>
       <Helmet>
-        <title>Workspaces</title>
+        <title>Files</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Workspaces</Heading>
+        <Heading className={cx('text-heading')}>Files</Heading>
         {listIsLoading ? <SectionSpinner /> : null}
         {listError ? <SectionError text={errorToString(listError)} /> : null}
         {listIsEmpty ? (
           <SectionPlaceholder
-            text="There are no workspaces."
+            text="There are no items."
             content={
               <Button
                 as={Link}

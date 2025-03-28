@@ -140,7 +140,7 @@ const OrganizationSelector = ({
                 <SectionError text={errorToString(listError)} />
               ) : null}
               {listIsEmpty ? (
-                <SectionPlaceholder text="There are no organizations." />
+                <SectionPlaceholder text="There are no items." />
               ) : null}
               {listIsReady ? (
                 <div

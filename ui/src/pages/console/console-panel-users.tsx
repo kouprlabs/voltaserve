@@ -86,7 +86,7 @@ const ConsolePanelUsers = () => {
         <Heading className={cx('text-heading')}>Users</Heading>
         {listIsLoading ? <SectionSpinner /> : null}
         {listError ? <SectionError text={errorToString(listError)} /> : null}
-        {listIsEmpty ? <SectionPlaceholder text="There are no users." /> : null}
+        {listIsEmpty ? <SectionPlaceholder text="There are no items." /> : null}
         {listIsReady ? (
           <DataTable
             items={list.data}

@@ -84,9 +84,7 @@ const ConsolePanelGroups = () => {
         <Heading className={cx('text-heading')}>Groups</Heading>
         {listIsLoading ? <SectionSpinner /> : null}
         {listError ? <SectionError text={errorToString(listError)} /> : null}
-        {listIsEmpty ? (
-          <SectionPlaceholder text="There are no groups." />
-        ) : null}
+        {listIsEmpty ? <SectionPlaceholder text="There are no items." /> : null}
         {listIsReady ? (
           <DataTable
             items={list.data}

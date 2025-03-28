@@ -85,9 +85,7 @@ const ConsolePanelWorkspaces = () => {
         <Heading className={cx('text-heading')}>Workspaces</Heading>
         {listIsLoading ? <SectionSpinner /> : null}
         {listError ? <SectionError text={errorToString(listError)} /> : null}
-        {listIsEmpty ? (
-          <SectionPlaceholder text="There are no workspaces." />
-        ) : null}
+        {listIsEmpty ? <SectionPlaceholder text="There are no items." /> : null}
         {listIsReady ? (
           <DataTable
             items={list.data}
