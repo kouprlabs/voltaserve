@@ -21,7 +21,6 @@ type MessageParams = {
 const config = getConfig().smtp
 
 const transporter = nodemailer.createTransport({
-  // @ts-expect-error: Works fine at runtime
   host: config.host,
   port: config.port,
   secure: config.secure,
@@ -31,7 +30,7 @@ const transporter = nodemailer.createTransport({
       pass: config.password,
     }
     : null,
-})
+} as any)
 
 export function sendTemplateMail(
   template: string,

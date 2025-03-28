@@ -8,6 +8,12 @@ Run:
 deno task start
 ```
 
+Check code:
+
+```shell
+deno check .
+```
+
 Lint code:
 
 ```shell

@@ -1,8 +1,7 @@
 {
   "tasks": {
     "start": "deno run --allow-read --allow-write --allow-env --allow-sys --allow-net src/app.ts",
-    "compile": "deno compile --allow-read --allow-write --allow-env --allow-sys --allow-net --output voltaserve-idp src/app.ts",
-    "check": "deno check src/app.ts"
+    "compile": "deno compile --allow-read --allow-write --allow-env --allow-sys --allow-net --output voltaserve-idp src/app.ts"
   },
   "imports": {
     "@/": "./src/",

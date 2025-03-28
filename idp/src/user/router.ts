@@ -67,8 +67,7 @@ router.get('/me/:filename', async (c) => {
   if (extension !== extname(c.req.param('filename'))) {
     throw newPictureNotFoundError()
   }
-  // @ts-expect-error: Works fine at runtime
-  return c.body(buffer, 200, {
+  return c.body(buffer as any, 200, {
     'Content-Type': mime,
     'Content-Disposition': `attachment; filename=picture${extension}`,
   })
