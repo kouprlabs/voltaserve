@@ -28,13 +28,9 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import { GroupAPI } from '@/client/api/group'
-import { OrganizationAPI } from '@/client/api/organization'
-import { WorkspaceAPI } from '@/client/api/workspace'
 import { TokenAPI } from '@/client/idp/token'
 import LayoutFull from '@/components/layout/layout-full'
 import { saveToken } from '@/infra/token'
-import { gigabyteToByte } from '@/lib/helpers/convert-storage'
 
 type FormValues = {
   email: string
@@ -62,31 +58,7 @@ const SignInPage = () => {
           grant_type: 'password',
         })
         saveToken(token).then()
-        const orgList = await OrganizationAPI.list()
-        if (orgList.totalElements === 0) {
-          const { id: organizationId } = await OrganizationAPI.create({
-            name: 'My Organization',
-          })
-          await GroupAPI.create({
-            name: 'My Group',
-            organizationId,
-          })
-          const { id: workspaceId, rootId } = await WorkspaceAPI.create({
-            name: 'My Workspace',
-            organizationId,
-            storageCapacity: gigabyteToByte(100),
-          })
-          navigate(`/workspace/${workspaceId}/file/${rootId}`)
-        } else {
-          const workspaceList = await WorkspaceAPI.list()
-          if (workspaceList.totalElements === 1) {
-            navigate(
-              `/workspace/${workspaceList.data[0].id}/file/${workspaceList.data[0].rootId}`,
-            )
-          } else {
-            navigate('/workspace')
-          }
-        }
+        navigate('/workspace')
       } catch (error) {
         console.error(error)
       } finally {

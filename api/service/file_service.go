@@ -42,7 +42,7 @@ import (
 type FileService struct {
 	fileCreate      *fileCreate
 	fileStore       *fileStore
-	fileDelete      *fileDelete
+	fileDelete      *FileDelete
 	fileMove        *fileMove
 	fileCopy        *fileCopy
 	fileDownload    *fileDownload
@@ -59,7 +59,7 @@ func NewFileService() *FileService {
 	return &FileService{
 		fileCreate:      newFileCreate(),
 		fileStore:       newFileStore(),
-		fileDelete:      newFileDelete(),
+		fileDelete:      NewFileDelete(),
 		fileMove:        newFileMove(),
 		fileCopy:        newFileCopy(),
 		fileDownload:    newFileDownload(),
@@ -1289,7 +1289,7 @@ func (svc *fileCopy) refreshUpdateTime(target model.File) error {
 	return nil
 }
 
-type fileDelete struct {
+type FileDelete struct {
 	fileRepo       *repo.FileRepo
 	fileSearch     *search.FileSearch
 	fileGuard      *guard.FileGuard
@@ -1300,8 +1300,8 @@ type fileDelete struct {
 	snapshotSvc    *SnapshotService
 }
 
-func newFileDelete() *fileDelete {
-	return &fileDelete{
+func NewFileDelete() *FileDelete {
+	return &FileDelete{
 		fileRepo: repo.NewFileRepo(
 			config.GetConfig().Postgres,
 			config.GetConfig().Environment,
@@ -1336,7 +1336,7 @@ func newFileDelete() *fileDelete {
 	}
 }
 
-func (svc *fileDelete) delete(id string, userID string) error {
+func (svc *FileDelete) delete(id string, userID string) error {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
@@ -1359,7 +1359,7 @@ func (svc *fileDelete) delete(id string, userID string) error {
 	return svc.performDelete(file)
 }
 
-func (svc *fileDelete) deleteMany(opts dto.FileDeleteManyOptions, userID string) (*dto.FileDeleteManyResult, error) {
+func (svc *FileDelete) deleteMany(opts dto.FileDeleteManyOptions, userID string) (*dto.FileDeleteManyResult, error) {
 	res := &dto.FileDeleteManyResult{
 		Failed:    make([]string, 0),
 		Succeeded: make([]string, 0),
@@ -1374,16 +1374,16 @@ func (svc *fileDelete) deleteMany(opts dto.FileDeleteManyOptions, userID string)
 	return res, nil
 }
 
-func (svc *fileDelete) performDelete(file model.File) error {
+func (svc *FileDelete) performDelete(file model.File) error {
 	if file.GetType() == model.FileTypeFolder {
-		return svc.deleteFolder(file.GetID())
+		return svc.DeleteFolder(file.GetID())
 	} else if file.GetType() == model.FileTypeFile {
 		return svc.deleteFile(file.GetID())
 	}
 	return nil
 }
 
-func (svc *fileDelete) check(file model.File) error {
+func (svc *FileDelete) check(file model.File) error {
 	if file.GetParentID() == nil {
 		workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 		if err != nil {
@@ -1394,7 +1394,7 @@ func (svc *fileDelete) check(file model.File) error {
 	return nil
 }
 
-func (svc *fileDelete) createTask(file model.File, userID string) (model.Task, error) {
+func (svc *FileDelete) createTask(file model.File, userID string) (model.Task, error) {
 	res, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Deleting.",
@@ -1409,7 +1409,7 @@ func (svc *fileDelete) createTask(file model.File, userID string) (model.Task, e
 	return res, nil
 }
 
-func (svc *fileDelete) deleteFolder(id string) error {
+func (svc *FileDelete) DeleteFolder(id string) error {
 	treeIDs, err := svc.fileRepo.FindTreeIDs(id)
 	if err != nil {
 		return err
@@ -1430,7 +1430,7 @@ func (svc *fileDelete) deleteFolder(id string) error {
 	return nil
 }
 
-func (svc *fileDelete) deleteFile(id string) error {
+func (svc *FileDelete) deleteFile(id string) error {
 	if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
 		logger.GetLogger().Error(err)
 	}
@@ -1449,7 +1449,7 @@ func (svc *fileDelete) deleteFile(id string) error {
 	return nil
 }
 
-func (svc *fileDelete) deleteSnapshots(ids []string) {
+func (svc *FileDelete) deleteSnapshots(ids []string) {
 	for _, id := range ids {
 		if err := svc.snapshotSvc.deleteForFile(id); err != nil {
 			logger.GetLogger().Error(err)
@@ -1457,7 +1457,7 @@ func (svc *fileDelete) deleteSnapshots(ids []string) {
 	}
 }
 
-func (svc *fileDelete) deleteFromRepo(ids []string) {
+func (svc *FileDelete) deleteFromRepo(ids []string) {
 	const ChunkSize = 1000
 	for i := 0; i < len(ids); i += ChunkSize {
 		end := i + ChunkSize
@@ -1471,7 +1471,7 @@ func (svc *fileDelete) deleteFromRepo(ids []string) {
 	}
 }
 
-func (svc *fileDelete) deleteFromCache(ids []string) {
+func (svc *FileDelete) deleteFromCache(ids []string) {
 	for _, id := range ids {
 		if err := svc.fileCache.Delete(id); err != nil {
 			logger.GetLogger().Error(err)
@@ -1479,7 +1479,7 @@ func (svc *fileDelete) deleteFromCache(ids []string) {
 	}
 }
 
-func (svc *fileDelete) deleteFromSearch(ids []string) {
+func (svc *FileDelete) deleteFromSearch(ids []string) {
 	if err := svc.fileSearch.Delete(ids); err != nil {
 		logger.GetLogger().Error(err)
 	}

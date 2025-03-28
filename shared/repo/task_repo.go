@@ -268,6 +268,22 @@ func (repo *TaskRepo) FindIDs(userID string) ([]string, error) {
 	return res, nil
 }
 
+func (repo *TaskRepo) FindIDsByOwner(userID string) ([]string, error) {
+	type IDResult struct {
+		Result string
+	}
+	var ids []IDResult
+	db := repo.db.Raw(`SELECT id result FROM task WHERE user_id = ?`, userID).Scan(&ids)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := make([]string, 0)
+	for _, id := range ids {
+		res = append(res, id.Result)
+	}
+	return res, nil
+}
+
 func (repo *TaskRepo) Count() (int64, error) {
 	var count int64
 	db := repo.db.Model(&taskEntity{}).Count(&count)

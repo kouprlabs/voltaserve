@@ -261,6 +261,25 @@ func (repo *GroupRepo) FindIDs() ([]string, error) {
 	return res, nil
 }
 
+func (repo *GroupRepo) FindIDsByOwner(userID string) ([]string, error) {
+	type IDResult struct {
+		Result string
+	}
+	var ids []IDResult
+	db := repo.db.
+		Raw(`SELECT id result FROM "group" 
+			 WHERE id IN (SELECT resource_id FROM userpermission WHERE user_id = ? AND permission = 'owner')`,
+			userID).Scan(&ids)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := make([]string, 0)
+	for _, id := range ids {
+		res = append(res, id.Result)
+	}
+	return res, nil
+}
+
 func (repo *GroupRepo) FindMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
