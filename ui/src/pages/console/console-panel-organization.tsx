@@ -142,7 +142,7 @@ const ConsolePanelOrganization = () => {
                 ) : null}
                 {userListIsEmpty ? (
                   <ListSkeleton header="Users">
-                    <SectionPlaceholder text="There are no users." />
+                    <SectionPlaceholder text="There are no items." />
                   </ListSkeleton>
                 ) : null}
                 {userListIsReady ? (
@@ -230,7 +230,7 @@ const ConsolePanelOrganization = () => {
                 ) : null}
                 {workspaceListIsEmpty ? (
                   <ListSkeleton header="Workspaces">
-                    <SectionPlaceholder text="There are no workspaces." />
+                    <SectionPlaceholder text="There are no items." />
                   </ListSkeleton>
                 ) : null}
                 {workspaceListIsReady ? (
@@ -320,7 +320,7 @@ const ConsolePanelOrganization = () => {
                 ) : null}
                 {groupListIsEmpty ? (
                   <ListSkeleton header="Groups">
-                    <SectionPlaceholder text="There are no groups." />
+                    <SectionPlaceholder text="There are no items." />
                   </ListSkeleton>
                 ) : null}
                 {groupListIsReady ? (

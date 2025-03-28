@@ -52,7 +52,7 @@ const TasksList = () => {
     <>
       {listIsLoading ? <SectionSpinner /> : null}
       {listError ? <SectionError text={errorToString(listError)} /> : null}
-      {listIsEmpty ? <SectionPlaceholder text="There are no tasks." /> : null}
+      {listIsEmpty ? <SectionPlaceholder text="There are no items." /> : null}
       {listIsReady ? (
         <div
           className={cx(

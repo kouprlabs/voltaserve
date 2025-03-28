@@ -92,7 +92,7 @@ const GroupListPage = () => {
         {listError ? <SectionError text={errorToString(listError)} /> : null}
         {listIsEmpty ? (
           <SectionPlaceholder
-            text="There are no groups."
+            text="There are no items."
             content={
               <Button
                 as={Link}

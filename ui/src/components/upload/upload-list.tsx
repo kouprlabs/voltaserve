@@ -39,7 +39,7 @@ const UploadList = () => {
     <>
       {items.length === 0 ? (
         <SectionPlaceholder
-          text="There are no uploads."
+          text="There are no items."
           content={<UploadMenu />}
         />
       ) : (

@@ -111,7 +111,7 @@ const AccountInvitationsPage = () => {
           {listIsLoading ? <SectionSpinner /> : null}
           {listError ? <SectionError text={errorToString(listError)} /> : null}
           {listIsEmpty ? (
-            <SectionPlaceholder text="There are no invitations." />
+            <SectionPlaceholder text="There are no items." />
           ) : null}
           {listIsReady ? (
             <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>

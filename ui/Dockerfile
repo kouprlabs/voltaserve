@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM oven/bun:1-alpine AS ui-builder
+FROM node:22.14-alpine AS ui-builder
 
 WORKDIR /build
 
@@ -19,12 +19,12 @@ COPY postcss.config.cjs .
 COPY tailwind.config.cjs .
 COPY vite.config.ts .
 COPY package.json .
-COPY bun.lockb .
+COPY package-lock.json .
 COPY tsconfig.json .
 COPY tsconfig.node.json .
 
-RUN bun install --frozen-lockfile
-RUN bun run build
+RUN npm ci
+RUN npm run build
 
 FROM golang:1.23-alpine3.21 AS go-builder
 

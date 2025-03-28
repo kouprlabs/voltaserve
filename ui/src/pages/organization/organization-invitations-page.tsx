@@ -112,7 +112,7 @@ const OrganizationInvitationsPage = () => {
           {listError ? <SectionError text={errorToString(listError)} /> : null}
           {listIsEmpty ? (
             <SectionPlaceholder
-              text="There are no invitations."
+              text="There are no items."
               content={
                 geOwnerPermission(org.permission) ? (
                   <Button

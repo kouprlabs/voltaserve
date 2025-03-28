@@ -148,7 +148,7 @@ const SnapshotList = () => {
           {listIsLoading ? <SectionSpinner /> : null}
           {listError ? <SectionError text={errorToString(listError)} /> : null}
           {listIsEmpty ? (
-            <SectionPlaceholder text="There are no snapshots." />
+            <SectionPlaceholder text="There are no items." />
           ) : null}
           {listIsReady ? (
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>

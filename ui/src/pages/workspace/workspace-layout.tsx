@@ -71,7 +71,7 @@ const WorkspaceLayout = () => {
                     navigate(`/workspace/${id}/file/${workspace.rootId}`)
                   }
                 >
-                  Files
+                  Browse
                 </Tab>
                 <Tab onClick={() => navigate(`/workspace/${id}/settings`)}>
                   Settings
