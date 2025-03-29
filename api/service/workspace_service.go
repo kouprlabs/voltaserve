@@ -45,6 +45,7 @@ type WorkspaceService struct {
 	fileCache              *cache.FileCache
 	fileGuard              *guard.FileGuard
 	fileMapper             *mapper.FileMapper
+	fileDelete             *fileDelete
 	s3                     infra.S3Manager
 	config                 *config.Config
 }
@@ -106,8 +107,9 @@ func NewWorkspaceService() *WorkspaceService {
 			config.GetConfig().Redis,
 			config.GetConfig().Environment,
 		),
-		s3:     infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
-		config: config.GetConfig(),
+		fileDelete: newFileDelete(),
+		s3:         infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		config:     config.GetConfig(),
 	}
 }
 
@@ -280,17 +282,43 @@ func (svc *WorkspaceService) Delete(id string, userID string) error {
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionOwner); err != nil {
 		return err
 	}
-	if err = svc.workspaceRepo.Delete(id); err != nil {
+	return svc.delete(id)
+}
+
+func (svc *WorkspaceService) delete(id string) error {
+	workspace, err := svc.workspaceCache.Get(id)
+	if err != nil {
 		return err
 	}
-	if err = svc.workspaceSearch.Delete([]string{workspace.GetID()}); err != nil {
+	if err := svc.deleteFiles(id); err != nil {
 		return err
 	}
-	if err = svc.workspaceCache.Delete(id); err != nil {
+	if err := svc.workspaceRepo.Delete(id); err != nil {
 		return err
 	}
-	if err = svc.s3.RemoveBucket(workspace.GetBucket()); err != nil {
+	if err := svc.workspaceSearch.Delete([]string{workspace.GetID()}); err != nil {
 		return err
+	}
+	if err := svc.workspaceCache.Delete(id); err != nil {
+		return err
+	}
+	if err := svc.s3.RemoveBucket(workspace.GetBucket()); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *WorkspaceService) deleteFiles(id string) error {
+	workspace, err := svc.workspaceCache.Get(id)
+	if err != nil {
+		return err
+	}
+	if err := svc.workspaceRepo.ClearRootID(id); err != nil {
+		return err
+	} else {
+		if err := svc.fileDelete.deleteFolder(workspace.GetRootID()); err != nil {
+			return err
+		}
 	}
 	return nil
 }

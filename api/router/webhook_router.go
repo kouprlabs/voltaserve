@@ -18,18 +18,18 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 
 	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/webhook"
+	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 type WebhookRouter struct {
-	userWebhook *webhook.UserWebhook
-	config      *config.Config
+	userWebhookSvc *service.UserWebhookService
+	config         *config.Config
 }
 
 func NewWebhookRouter() *WebhookRouter {
 	return &WebhookRouter{
-		userWebhook: webhook.NewUserWebhook(),
-		config:      config.GetConfig(),
+		userWebhookSvc: service.NewUserWebhookService(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -65,7 +65,7 @@ func (r *WebhookRouter) Users(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.userWebhook.Handle(*opts); err != nil {
+	if err := r.userWebhookSvc.Handle(*opts); err != nil {
 		return err
 	}
 	return c.SendStatus(200)

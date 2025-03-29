@@ -250,6 +250,14 @@ func (svc *GroupService) Delete(id string, userID string) error {
 	if err := svc.groupGuard.Authorize(userID, group, model.PermissionOwner); err != nil {
 		return err
 	}
+	return svc.delete(id)
+}
+
+func (svc *GroupService) delete(id string) error {
+	group, err := svc.groupCache.Get(id)
+	if err != nil {
+		return err
+	}
 	if err := svc.groupRepo.Delete(id); err != nil {
 		return err
 	}

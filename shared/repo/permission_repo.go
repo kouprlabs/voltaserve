@@ -248,3 +248,12 @@ func (repo *PermissionRepo) FindGroupPermissions(id string) ([]model.GroupPermis
 		return nil, nil
 	}
 }
+
+func (repo *PermissionRepo) DeleteUserPermissionsForUser(userID string) error {
+	if db := repo.db.
+		Where("user_id = ?", userID).
+		Delete(&userPermissionEntity{}); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
