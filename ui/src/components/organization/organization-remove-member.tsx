@@ -65,7 +65,7 @@ const OrganizationRemoveMember = ({
         <ModalCloseButton />
         <ModalBody>
           <div>
-            Do you want to remove member{' '}
+            Are you sure you want to remove member{' '}
             <span className={cx('font-bold')}>{userToString(user)}</span> from
             organization{' '}
             <span className={cx('font-bold')}>{organization.name}</span>?

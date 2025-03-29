@@ -64,7 +64,7 @@ const SnapshotDetach = () => {
         <ModalHeader>Detach Snapshot</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <span>Do you want to detach this snapshot?</span>
+          <span>Are you sure you want to detach this snapshot?</span>
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>

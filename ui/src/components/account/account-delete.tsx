@@ -79,7 +79,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Delete Account</ModalHeader>
+        <ModalHeader>Delete Account and Data</ModalHeader>
         <ModalCloseButton />
         <Formik
           initialValues={{ password: '' }}
@@ -91,7 +91,9 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'items-start', 'gap-1')}>
-                  <span>Do you want to delete your account permanently?</span>
+                  <span>
+                    Are you sure you want to delete your account and data?
+                  </span>
                   <span className={cx('font-semibold')}>
                     Type your password to confirm:
                   </span>
@@ -131,7 +133,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
                     colorScheme="red"
                     isLoading={isSubmitting}
                   >
-                    Delete Permanently
+                    Delete
                   </Button>
                 </div>
               </ModalFooter>

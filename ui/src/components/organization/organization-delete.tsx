@@ -98,7 +98,9 @@ const OrganizationDelete = ({
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                  <span>Do you want to delete this organization?</span>
+                  <span>
+                    Are you sure you want to delete this organization?
+                  </span>
                   <span>
                     Please type <b>{organization.name}</b> to confirm.
                   </span>
@@ -133,7 +135,7 @@ const OrganizationDelete = ({
                     colorScheme="red"
                     isLoading={isSubmitting}
                   >
-                    Delete Permanently
+                    Delete
                   </Button>
                 </div>
               </ModalFooter>

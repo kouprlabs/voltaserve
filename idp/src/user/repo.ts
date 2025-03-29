@@ -272,7 +272,7 @@ class UserRepoImpl {
       emailUpdateToken: row.email_update_token,
       emailUpdateValue: row.email_update_value,
       picture: row.picture,
-      failedAttempts: row.failed_attempts,
+      failedAttempts: Number(row.failed_attempts),
       lockedUntil: row.locked_until,
       createTime: row.create_time,
       updateTime: row.update_time,

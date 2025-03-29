@@ -183,7 +183,7 @@ const ConsolePanelUsers = () => {
                   setConfirmationHeader(<>Suspend User</>)
                   setConfirmationBody(
                     <>
-                      Do you want to suspend{' '}
+                      Are you sure you want to suspend{' '}
                       <span className={cx('font-bold')}>
                         {userToString(user)}
                       </span>
@@ -206,7 +206,7 @@ const ConsolePanelUsers = () => {
                   setConfirmationHeader(<>Unsuspend User</>)
                   setConfirmationBody(
                     <>
-                      Do you want to unsuspend{' '}
+                      Are you sure you want to unsuspend{' '}
                       <span className={cx('font-bold')}>
                         {userToString(user)}
                       </span>
@@ -229,7 +229,7 @@ const ConsolePanelUsers = () => {
                   setConfirmationHeader(<>Make Admin</>)
                   setConfirmationBody(
                     <>
-                      Do you want to make{' '}
+                      Are you sure you want to make{' '}
                       <span className={cx('font-bold')}>
                         {userToString(user)}
                       </span>{' '}
@@ -253,7 +253,7 @@ const ConsolePanelUsers = () => {
                   setConfirmationHeader(<>Demote Admin</>)
                   setConfirmationBody(
                     <>
-                      Do you want to demote{' '}
+                      Are you sure you want to demote{' '}
                       <span className={cx('font-bold')}>
                         {userToString(user)}
                       </span>

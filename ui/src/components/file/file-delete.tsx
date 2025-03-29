@@ -69,9 +69,9 @@ const FileDelete = () => {
         <ModalCloseButton />
         <ModalBody>
           {selection.length > 1 ? (
-            <span>Do you want to delete these items?</span>
+            <span>Are you sure you want to delete these items?</span>
           ) : (
-            <span>Do you want to delete this item?</span>
+            <span>Are you sure you want to delete this item?</span>
           )}
         </ModalBody>
         <ModalFooter>

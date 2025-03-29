@@ -149,7 +149,8 @@ const ConsolePanelOrganizations = () => {
                   setConfirmationHeader(<>Grant Owner Permission</>)
                   setConfirmationBody(
                     <>
-                      Do you want to grant yourself owner permission on{' '}
+                      Are you sure you want to grant yourself owner permission
+                      on{' '}
                       <span className={cx('font-bold')}>
                         {organization.name}
                       </span>
@@ -178,7 +179,7 @@ const ConsolePanelOrganizations = () => {
                   setConfirmationHeader(<>Revoke Permission</>)
                   setConfirmationBody(
                     <>
-                      Do you want to revoke your permission on{' '}
+                      Are you sure you want to revoke your permission on{' '}
                       <span className={cx('font-bold')}>
                         {organization.name}
                       </span>
