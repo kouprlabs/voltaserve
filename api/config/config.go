@@ -38,12 +38,12 @@ type Config struct {
 }
 
 type LimitsConfig struct {
-	FileUploadMB     int
-	FileProcessingMB map[string]int
+	FileUploadMB     int64
+	FileProcessingMB map[string]int64
 }
 
 type DefaultsConfig struct {
-	WorkspaceStorageCapacityMB int
+	WorkspaceStorageCapacityMB int64
 }
 
 type WebhookConfig struct {
@@ -80,7 +80,7 @@ func GetConfig() *Config {
 	return cfg
 }
 
-func (l *LimitsConfig) GetFileProcessingMB(fileType string) int {
+func (l *LimitsConfig) GetFileProcessingMB(fileType string) int64 {
 	v, ok := l.FileProcessingMB[fileType]
 	if !ok {
 		return l.FileProcessingMB[FileTypeEverythingElse]
@@ -106,37 +106,37 @@ func readURLs(config *Config) {
 
 func readLimits(config *Config) {
 	if len(os.Getenv("LIMITS_FILE_UPLOAD_MB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_FILE_UPLOAD_MB"), 10, 32)
+		v, err := strconv.ParseInt(os.Getenv("LIMITS_FILE_UPLOAD_MB"), 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		config.Limits.FileUploadMB = int(v)
+		config.Limits.FileUploadMB = v
 	}
 	if len(os.Getenv("LIMITS_FILE_PROCESSING_MB")) > 0 {
 		raw := os.Getenv("LIMITS_FILE_PROCESSING_MB")
 		parts := strings.Split(raw, ",")
-		config.Limits.FileProcessingMB = make(map[string]int)
+		config.Limits.FileProcessingMB = make(map[string]int64)
 		for _, part := range parts {
 			limit := strings.Split(part, ":")
 			if len(limit) != 2 {
 				panic("invalid LIMITS_FILE_PROCESSING_MB format")
 			}
-			v, err := strconv.ParseInt(limit[1], 10, 32)
+			v, err := strconv.ParseInt(limit[1], 10, 64)
 			if err != nil {
 				panic(err)
 			}
-			config.Limits.FileProcessingMB[limit[0]] = int(v)
+			config.Limits.FileProcessingMB[limit[0]] = v
 		}
 	}
 }
 
 func readDefaults(config *Config) {
 	if len(os.Getenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB"), 10, 32)
+		v, err := strconv.ParseInt(os.Getenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB"), 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		config.Defaults.WorkspaceStorageCapacityMB = int(v)
+		config.Defaults.WorkspaceStorageCapacityMB = v
 	}
 }
 

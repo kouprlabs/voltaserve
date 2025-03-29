@@ -10,6 +10,6 @@
 
 package helper
 
-func MegabyteToByte(mb int) int64 {
-	return int64(mb) * 1000000
+func MegabyteToByte(mb int64) int64 {
+	return mb * 1000000
 }
