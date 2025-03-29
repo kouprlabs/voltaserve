@@ -190,14 +190,14 @@ const AccountSettingsPage = () => {
                 title: 'Advanced',
                 rows: [
                   {
-                    label: 'Delete account',
+                    label: 'Delete account and data',
                     content: (
                       <IconButton
                         icon={<IconDelete />}
                         variant="solid"
                         colorScheme="red"
-                        title="Delete account"
-                        aria-label="Delete account"
+                        title="Delete account and data"
+                        aria-label="Delete account and data"
                         onClick={() => setIsDeleteModalOpen(true)}
                       />
                     ),

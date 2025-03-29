@@ -46,11 +46,12 @@ import {
 import { basename, extname, join } from 'node:path'
 import { Buffer } from 'node:buffer'
 import { UserListOptions } from '@/user/service.ts'
+import { getUser } from '../lib/router.ts'
 
 const router = new Hono()
 
 router.get('/me', async (c) => {
-  return c.json(await find(c.get('user').id))
+  return c.json(await find(getUser(c).id))
 })
 
 router.get('/me/:filename', async (c) => {
@@ -82,7 +83,7 @@ router.post(
   ),
   async (c) => {
     const body = c.req.valid('json') as UserUpdateFullNameOptions
-    return c.json(await updateFullName(c.get('user').id, body))
+    return c.json(await updateFullName(getUser(c).id, body))
   },
 )
 
@@ -95,7 +96,7 @@ router.post(
   ),
   async (c) => {
     const body = c.req.valid('json') as UserUpdateEmailRequestOptions
-    return c.json(await updateEmailRequest(c.get('user').id, body))
+    return c.json(await updateEmailRequest(getUser(c).id, body))
   },
 )
 
@@ -124,7 +125,7 @@ router.post(
   ),
   async (c) => {
     const body = c.req.valid('json') as UserUpdatePasswordOptions
-    return c.json(await updatePassword(c.get('user').id, body))
+    return c.json(await updatePassword(getUser(c).id, body))
   },
 )
 
@@ -157,7 +158,7 @@ router.post(
     await writeFile(path, Buffer.from(arrayBuffer))
 
     try {
-      return c.json(await updatePicture(c.get('user').id, path, file.type))
+      return c.json(await updatePicture(getUser(c).id, path, file.type))
     } finally {
       await fs.rm(path)
     }
@@ -165,7 +166,7 @@ router.post(
 )
 
 router.post('/me/delete_picture', async (c) => {
-  return c.json(await deletePicture(c.get('user').id))
+  return c.json(await deletePicture(getUser(c).id))
 })
 
 router.delete(
@@ -177,7 +178,7 @@ router.delete(
   ),
   async (c) => {
     const body = c.req.valid('json') as UserDeleteOptions
-    await deleteUser(c.get('user').id, body)
+    await deleteUser(getUser(c).id, body)
     return c.body(null, 204)
   },
 )

@@ -79,7 +79,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Delete Account</ModalHeader>
+        <ModalHeader>Delete Account and Data</ModalHeader>
         <ModalCloseButton />
         <Formik
           initialValues={{ password: '' }}
