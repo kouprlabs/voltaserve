@@ -77,7 +77,7 @@ func CreateWorkspace(orgID string, userID string) (*dto.Workspace, error) {
 	workspace, err := service.NewWorkspaceService().Create(dto.WorkspaceCreateOptions{
 		Name:            "workspace",
 		OrganizationID:  orgID,
-		StorageCapacity: int64(config.GetConfig().Defaults.WorkspaceStorageCapacityMB),
+		StorageCapacity: config.GetConfig().Defaults.WorkspaceStorageCapacityMB,
 	}, userID)
 	if err != nil {
 		return nil, err
