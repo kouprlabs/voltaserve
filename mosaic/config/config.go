@@ -25,7 +25,7 @@ type Config struct {
 }
 
 type LimitsConfig struct {
-	MultipartBodyLengthLimitMB int
+	MultipartBodyLengthLimitMB int64
 }
 
 func GetConfig() *Config {
@@ -48,10 +48,10 @@ func readPort(config *Config) {
 
 func readLimits(config *Config) {
 	if len(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB"), 10, 32)
+		v, err := strconv.ParseInt(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB"), 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		config.Limits.MultipartBodyLengthLimitMB = int(v)
+		config.Limits.MultipartBodyLengthLimitMB = v
 	}
 }

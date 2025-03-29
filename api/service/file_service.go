@@ -2752,8 +2752,8 @@ func (svc *fileCoreService) authorizeIDs(userID string, ids []string, permission
 	return res, nil
 }
 
-func (svc *fileCoreService) getProcessingLimitMB(path string) int {
-	var res int
+func (svc *fileCoreService) getProcessingLimitMB(path string) int64 {
+	var res int64
 	if svc.fileIdent.IsAudio(path) {
 		res = svc.config.Limits.GetFileProcessingMB(config.FileTypeAudio)
 	} else if svc.fileIdent.IsImage(path) {
