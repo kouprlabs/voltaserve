@@ -225,6 +225,14 @@ func (svc *OrganizationService) Delete(id string, userID string) error {
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
 		return err
 	}
+	return svc.delete(id)
+}
+
+func (svc *OrganizationService) delete(id string) error {
+	org, err := svc.orgCache.Get(id)
+	if err != nil {
+		return err
+	}
 	if err := svc.orgRepo.Delete(id); err != nil {
 		return err
 	}

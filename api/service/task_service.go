@@ -470,13 +470,17 @@ func (svc *TaskService) deleteAndSync(id string) error {
 		}
 	}
 	// Proceed with deleting the task
-	if err = svc.taskRepo.Delete(id); err != nil {
+	return svc.delete(id)
+}
+
+func (svc *TaskService) delete(id string) error {
+	if err := svc.taskRepo.Delete(id); err != nil {
 		return err
 	}
-	if err = svc.taskCache.Delete(id); err != nil {
+	if err := svc.taskCache.Delete(id); err != nil {
 		return err
 	}
-	if err = svc.taskSearch.Delete([]string{id}); err != nil {
+	if err := svc.taskSearch.Delete([]string{id}); err != nil {
 		return err
 	}
 	return nil
