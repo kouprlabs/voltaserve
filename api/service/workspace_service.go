@@ -247,8 +247,9 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	}
 	if svc.config.WorkspaceWebhook != "" {
 		if err := svc.workspaceWebhookClient.Call(config.GetConfig().WorkspaceWebhook, dto.WorkspaceWebhookOptions{
-			EventType: dto.WorkspaceWebhookEventTypePatchStorageCapacity,
-			UserID:    userID,
+			EventType:   dto.WorkspaceWebhookEventTypePatchStorageCapacity,
+			UserID:      userID,
+			WorkspaceID: &id,
 			PatchStorageCapacity: &dto.WorkspacePatchStorageCapacityOptions{
 				StorageCapacity: storageCapacity,
 			},
