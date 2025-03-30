@@ -12,7 +12,11 @@ package service
 
 import (
 	"errors"
+	"sort"
+	"strings"
+
 	"github.com/google/uuid"
+
 	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
@@ -24,8 +28,6 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 	"github.com/kouprlabs/voltaserve/shared/search"
-	"sort"
-	"strings"
 
 	"github.com/kouprlabs/voltaserve/api/config"
 )

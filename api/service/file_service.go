@@ -1422,7 +1422,7 @@ func (svc *fileDelete) deleteFolder(id string) error {
 		return err
 	}
 	if err := svc.fileRepo.Delete(id); err != nil {
-		logger.GetLogger().Error(err)
+		return err
 	}
 	return nil
 }
