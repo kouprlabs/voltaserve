@@ -520,11 +520,15 @@ func (repo *FileRepo) ComputeSize(id string) (int64, error) {
 	}
 	var res Result
 	db := repo.db.
-		Raw(`WITH RECURSIVE rec (id, parent_id) AS
-             (SELECT f.id, f.parent_id FROM file f WHERE f.id = ?
-             UNION SELECT f.id, f.parent_id FROM rec, file f WHERE f.parent_id = rec.id)
-             SELECT coalesce(sum((s.original->>'size')::bigint), 0) as result FROM snapshot s, rec
-             LEFT JOIN snapshot_file map ON rec.id = map.file_id WHERE map.snapshot_id = s.id`,
+		Raw(`WITH RECURSIVE rec (id, parent_id) AS (
+				SELECT f.id, f.parent_id FROM file f WHERE f.id = ?
+				UNION
+				SELECT f.id, f.parent_id FROM rec JOIN file f ON f.parent_id = rec.id
+			)
+			SELECT COALESCE(SUM((s.original->>'size')::bigint), 0) AS result
+			FROM snapshot_file map
+			JOIN snapshot s ON map.snapshot_id = s.id
+			JOIN rec ON rec.id = map.file_id`,
 			id).
 		Scan(&res)
 	if db.Error != nil {
