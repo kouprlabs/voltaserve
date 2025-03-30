@@ -68,6 +68,7 @@ const (
 
 type WorkspaceWebhookOptions struct {
 	EventType            string                                `json:"eventType"            validate:"required"`
+	UserID               string                                `json:"userId"               validate:"required"`
 	Create               *WorkspaceCreateOptions               `json:"create,omitempty"`
 	PatchStorageCapacity *WorkspacePatchStorageCapacityOptions `json:"patchStorageCapacity"`
 }
