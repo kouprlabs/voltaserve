@@ -12,11 +12,7 @@ package service
 
 import (
 	"errors"
-	"sort"
-	"strings"
-
 	"github.com/google/uuid"
-
 	"github.com/kouprlabs/voltaserve/shared/cache"
 	"github.com/kouprlabs/voltaserve/shared/client"
 	"github.com/kouprlabs/voltaserve/shared/dto"
@@ -28,6 +24,8 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/model"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 	"github.com/kouprlabs/voltaserve/shared/search"
+	"sort"
+	"strings"
 
 	"github.com/kouprlabs/voltaserve/api/config"
 )
@@ -288,44 +286,6 @@ func (svc *WorkspaceService) Delete(id string, userID string) error {
 	return svc.delete(id)
 }
 
-func (svc *WorkspaceService) delete(id string) error {
-	workspace, err := svc.workspaceCache.Get(id)
-	if err != nil {
-		return err
-	}
-	if err := svc.deleteFiles(id); err != nil {
-		return err
-	}
-	if err := svc.workspaceRepo.Delete(id); err != nil {
-		return err
-	}
-	if err := svc.workspaceSearch.Delete([]string{workspace.GetID()}); err != nil {
-		return err
-	}
-	if err := svc.workspaceCache.Delete(id); err != nil {
-		return err
-	}
-	if err := svc.s3.RemoveBucket(workspace.GetBucket()); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (svc *WorkspaceService) deleteFiles(id string) error {
-	workspace, err := svc.workspaceCache.Get(id)
-	if err != nil {
-		return err
-	}
-	if err := svc.workspaceRepo.ClearRootID(id); err != nil {
-		return err
-	} else {
-		if err := svc.fileDelete.deleteFolder(workspace.GetRootID()); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64, userID string) (bool, error) {
 	workspace, err := svc.workspaceRepo.Find(id)
 	if err != nil {
@@ -430,9 +390,14 @@ func (svc *WorkspaceService) search(opts WorkspaceListOptions, userID string) ([
 }
 
 func (svc *WorkspaceService) create(opts dto.WorkspaceCreateOptions, userID string) (model.Workspace, error) {
-	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
-	if err := svc.s3.CreateBucket(bucket); err != nil {
-		return nil, err
+	var bucket string
+	if config.GetConfig().S3.Bucket == "" {
+		bucket = strings.ReplaceAll(uuid.NewString(), "-", "")
+		if err := svc.s3.CreateBucket(bucket); err != nil {
+			return nil, err
+		}
+	} else {
+		bucket = config.GetConfig().S3.Bucket
 	}
 	res, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
 		ID:              helper.NewID(),
@@ -573,6 +538,46 @@ func (svc *WorkspaceService) sync(workspace model.Workspace) error {
 	}
 	if err := svc.workspaceSearch.Update([]model.Workspace{workspace}); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (svc *WorkspaceService) delete(id string) error {
+	workspace, err := svc.workspaceCache.Get(id)
+	if err != nil {
+		return err
+	}
+	if err := svc.deleteFiles(id); err != nil {
+		return err
+	}
+	if err := svc.workspaceRepo.Delete(id); err != nil {
+		return err
+	}
+	if err := svc.workspaceCache.Delete(id); err != nil {
+		return err
+	}
+	if err := svc.workspaceSearch.Delete([]string{workspace.GetID()}); err != nil {
+		return err
+	}
+	if config.GetConfig().S3.Bucket == "" {
+		if err := svc.s3.RemoveBucket(workspace.GetBucket()); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (svc *WorkspaceService) deleteFiles(id string) error {
+	workspace, err := svc.workspaceCache.Get(id)
+	if err != nil {
+		return err
+	}
+	if err := svc.workspaceRepo.ClearRootID(id); err != nil {
+		return err
+	} else {
+		if err := svc.fileDelete.deleteFolder(workspace.GetRootID()); err != nil {
+			return err
+		}
 	}
 	return nil
 }

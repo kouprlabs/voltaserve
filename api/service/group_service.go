@@ -261,10 +261,10 @@ func (svc *GroupService) delete(id string) error {
 	if err := svc.groupRepo.Delete(id); err != nil {
 		return err
 	}
-	if err := svc.groupSearch.Delete([]string{group.GetID()}); err != nil {
+	if err := svc.groupCache.Delete(group.GetID()); err != nil {
 		return err
 	}
-	if err := svc.groupCache.Delete(group.GetID()); err != nil {
+	if err := svc.groupSearch.Delete([]string{group.GetID()}); err != nil {
 		return err
 	}
 	return nil

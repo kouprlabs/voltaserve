@@ -1414,19 +1414,16 @@ func (svc *fileDelete) deleteFolder(id string) error {
 	if err != nil {
 		return err
 	}
-	// Start by deleting the folder's root to give a quick user feedback
+	svc.deleteSnapshots(treeIDs)
+	svc.deleteFromCache(treeIDs)
+	svc.deleteFromRepo(treeIDs)
+	svc.deleteFromSearch(treeIDs)
 	if err := svc.fileCache.Delete(id); err != nil {
 		return err
 	}
 	if err := svc.fileRepo.Delete(id); err != nil {
-		return err
+		logger.GetLogger().Error(err)
 	}
-	go func(treeIDs []string) {
-		svc.deleteSnapshots(treeIDs)
-		svc.deleteFromCache(treeIDs)
-		svc.deleteFromRepo(treeIDs)
-		svc.deleteFromSearch(treeIDs)
-	}(treeIDs)
 	return nil
 }
 
@@ -1437,10 +1434,10 @@ func (svc *fileDelete) deleteFile(id string) error {
 	if err := svc.snapshotSvc.deleteForFile(id); err != nil {
 		logger.GetLogger().Error(err)
 	}
-	if err := svc.fileCache.Delete(id); err != nil {
+	if err := svc.fileRepo.Delete(id); err != nil {
 		logger.GetLogger().Error(err)
 	}
-	if err := svc.fileRepo.Delete(id); err != nil {
+	if err := svc.fileCache.Delete(id); err != nil {
 		logger.GetLogger().Error(err)
 	}
 	if err := svc.fileSearch.Delete([]string{id}); err != nil {

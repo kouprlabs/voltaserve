@@ -43,6 +43,7 @@ type SnapshotService struct {
 	fileMapper            *mapper.FileMapper
 	taskRepo              *repo.TaskRepo
 	taskCache             *cache.TaskCache
+	taskSearch            *search.TaskSearch
 	s3                    infra.S3Manager
 	config                *config.Config
 	languages             []*dto.SnapshotLanguage
@@ -99,6 +100,10 @@ func NewSnapshotService() *SnapshotService {
 		taskCache: cache.NewTaskCache(
 			config.GetConfig().Postgres,
 			config.GetConfig().Redis,
+			config.GetConfig().Environment,
+		),
+		taskSearch: search.NewTaskSearch(
+			config.GetConfig().Search,
 			config.GetConfig().Environment,
 		),
 		s3:     infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
@@ -403,10 +408,10 @@ func (svc *SnapshotService) deleteForFile(fileID string) error {
 	}
 	svc.deleteAssociatedTasks(snapshots)
 	svc.deleteFromS3(snapshots)
-	svc.deleteFromCache(snapshots)
 	if err := svc.snapshotRepo.DeleteMappingsForFile(fileID); err == nil {
 		if err := svc.fileRepo.ClearSnapshotID(fileID); err == nil {
 			svc.deleteFromRepo(snapshots)
+			svc.deleteFromCache(snapshots)
 		}
 	}
 	return nil
@@ -415,10 +420,13 @@ func (svc *SnapshotService) deleteForFile(fileID string) error {
 func (svc *SnapshotService) deleteAssociatedTasks(snapshots []model.Snapshot) {
 	for _, snapshot := range snapshots {
 		if snapshot.GetTaskID() != nil {
+			if err := svc.taskCache.Delete(*snapshot.GetTaskID()); err != nil {
+				logger.GetLogger().Error(err)
+			}
 			if err := svc.taskRepo.Delete(*snapshot.GetTaskID()); err != nil {
 				logger.GetLogger().Error(err)
 			}
-			if err := svc.taskCache.Delete(*snapshot.GetTaskID()); err != nil {
+			if err := svc.taskSearch.Delete([]string{*snapshot.GetTaskID()}); err != nil {
 				logger.GetLogger().Error(err)
 			}
 		}
@@ -461,9 +469,6 @@ func (svc *SnapshotService) deleteFromS3(snapshots []model.Snapshot) {
 			if err := svc.s3.RemoveObject(s.GetOCR().Key, s.GetOCR().Bucket, minio.RemoveObjectOptions{}); err != nil {
 				logger.GetLogger().Error(err)
 			}
-		}
-		if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
-			logger.GetLogger().Error(err)
 		}
 	}
 }

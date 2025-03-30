@@ -20,6 +20,7 @@ type S3Config struct {
 	AccessKey string
 	SecretKey string
 	Region    string
+	Bucket    string
 	Secure    bool
 }
 
@@ -28,6 +29,7 @@ func ReadS3(config *S3Config) {
 	config.AccessKey = os.Getenv("S3_ACCESS_KEY")
 	config.SecretKey = os.Getenv("S3_SECRET_KEY")
 	config.Region = os.Getenv("S3_REGION")
+	config.Bucket = os.Getenv("S3_BUCKET")
 	if len(os.Getenv("S3_SECURE")) > 0 {
 		v, err := strconv.ParseBool(os.Getenv("S3_SECURE"))
 		if err != nil {
