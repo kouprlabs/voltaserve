@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/shared/config"
+	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/infra"
 	"github.com/kouprlabs/voltaserve/shared/model"
@@ -247,6 +248,25 @@ func (repo *PermissionRepo) FindGroupPermissions(id string) ([]model.GroupPermis
 	} else {
 		return nil, nil
 	}
+}
+
+func (repo *PermissionRepo) FindFirstOwnerOfResource(id string) (string, error) {
+	var entities []userPermissionEntity
+	if db := repo.db.
+		Raw("SELECT * FROM userpermission WHERE resource_id = ? AND permission = 'owner'", id).
+		Scan(&entities); db.Error != nil {
+		return "", db.Error
+	}
+	if len(entities) == 0 {
+		return "", errorpkg.NewResourceNotFoundError(nil)
+	}
+	res := entities[0]
+	for _, p := range entities {
+		if helper.StringToTime(p.CreateTime).Before(helper.StringToTime(res.CreateTime)) {
+			res = p
+		}
+	}
+	return res.UserID, nil
 }
 
 func (repo *PermissionRepo) DeleteUserPermissionsForUser(userID string) error {

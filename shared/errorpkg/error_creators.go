@@ -328,7 +328,6 @@ func NewInsufficientStorageCapacityError() *ErrorResponse {
 		http.StatusForbidden,
 		"Insufficient storage capacity.",
 		"Insufficient storage capacity.",
-
 		nil,
 	)
 }
