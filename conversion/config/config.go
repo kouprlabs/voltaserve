@@ -12,7 +12,6 @@ package config
 
 import (
 	"os"
-	"runtime"
 	"strconv"
 
 	"github.com/kouprlabs/voltaserve/shared/config"
@@ -110,7 +109,5 @@ func readScheduler(config *Config) {
 			panic(err)
 		}
 		config.Scheduler.PipelineWorkerCount = int(v)
-	} else {
-		config.Scheduler.PipelineWorkerCount = runtime.NumCPU()
 	}
 }

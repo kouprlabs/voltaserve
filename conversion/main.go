@@ -13,6 +13,7 @@ package main
 import (
 	"fmt"
 	"os"
+	goruntime "runtime"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -43,6 +44,10 @@ func main() {
 	}
 
 	cfg := config.GetConfig()
+
+	if cfg.Scheduler.PipelineWorkerCount == 0 {
+		cfg.Scheduler.PipelineWorkerCount = goruntime.NumCPU()
+	}
 
 	installer := runtime.NewInstaller()
 	scheduler := runtime.NewScheduler(runtime.SchedulerOptions{
