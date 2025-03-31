@@ -97,6 +97,7 @@ func (s *MailTemplateSuite) TestSend() {
 		s.Run(name, func() {
 			dialMock := &DialMock{}
 			mt := infra.NewMailTemplateWithDialer(config.SMTPConfig{
+				Host:          "localhost",
 				SenderName:    "Voltaserve",
 				SenderAddress: "voltaserve@example.com",
 			}, dialMock, false)
