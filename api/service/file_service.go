@@ -1418,10 +1418,10 @@ func (svc *fileDelete) deleteFolder(id string) error {
 	svc.deleteFromCache(treeIDs)
 	svc.deleteFromRepo(treeIDs)
 	svc.deleteFromSearch(treeIDs)
-	if err := svc.fileCache.Delete(id); err != nil {
+	if err := svc.fileRepo.Delete(id); err != nil {
 		return err
 	}
-	if err := svc.fileRepo.Delete(id); err != nil {
+	if err := svc.fileCache.Delete(id); err != nil {
 		return err
 	}
 	return nil
