@@ -1419,10 +1419,13 @@ func (svc *fileDelete) deleteFolder(id string) error {
 	svc.deleteFromRepo(treeIDs)
 	svc.deleteFromSearch(treeIDs)
 	if err := svc.fileRepo.Delete(id); err != nil {
-		return err
+		logger.GetLogger().Error(err)
 	}
 	if err := svc.fileCache.Delete(id); err != nil {
-		return err
+		logger.GetLogger().Error(err)
+	}
+	if err := svc.fileSearch.Delete([]string{id}); err != nil {
+		logger.GetLogger().Error(err)
 	}
 	return nil
 }
