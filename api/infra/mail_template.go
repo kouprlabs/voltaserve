@@ -75,6 +75,9 @@ func newMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer) *mai
 }
 
 func (mt *mailTemplate) Send(templateName string, address string, variables map[string]string) error {
+	if mt.config.Host == "" {
+		return nil
+	}
 	html, err := mt.getText(filepath.FromSlash(templateName+"/template.html"), variables)
 	if err != nil {
 		return err
