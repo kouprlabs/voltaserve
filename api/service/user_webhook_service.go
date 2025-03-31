@@ -73,19 +73,19 @@ func (svc *UserWebhookService) handleCreate(opts dto.UserWebhookOptions) error {
 		Name: "My Organization",
 	}, opts.User.ID)
 	if err != nil {
-		return nil
+		return err
 	}
 	if _, err := svc.workspaceSvc.Create(dto.WorkspaceCreateOptions{
 		Name:           "My Workspace",
 		OrganizationID: org.ID,
 	}, opts.User.ID); err != nil {
-		return nil
+		return err
 	}
 	if _, err := svc.groupSvc.Create(dto.GroupCreateOptions{
 		Name:           "My Group",
 		OrganizationID: org.ID,
 	}, opts.User.ID); err != nil {
-		return nil
+		return err
 	}
 	return nil
 }

@@ -16,7 +16,7 @@
 
 ```shell
 docker compose up -d \
-    postgres \
+    cockroach \
     minio \
     meilisearch \
     redis \
