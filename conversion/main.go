@@ -11,7 +11,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -45,16 +44,9 @@ func main() {
 
 	cfg := config.GetConfig()
 
-	pipelineWorkers := flag.Int(
-		"pipeline-workers",
-		runtime.NewDefaultSchedulerOptions().PipelineWorkerCount,
-		"Number of pipeline workers",
-	)
-	flag.Parse()
-
 	installer := runtime.NewInstaller()
 	scheduler := runtime.NewScheduler(runtime.SchedulerOptions{
-		PipelineWorkerCount: *pipelineWorkers,
+		PipelineWorkerCount: cfg.Scheduler.PipelineWorkerCount,
 		Installer:           installer,
 	})
 

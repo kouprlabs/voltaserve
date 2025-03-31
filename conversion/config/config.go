@@ -12,6 +12,7 @@ package config
 
 import (
 	"os"
+	"runtime"
 	"strconv"
 
 	"github.com/kouprlabs/voltaserve/shared/config"
@@ -23,10 +24,11 @@ type Config struct {
 	LanguageURL     string
 	MosaicURL       string
 	EnableInstaller bool
+	Limits          LimitsConfig
+	Scheduler       SchedulerConfig
 	Security        config.SecurityConfig
 	S3              config.S3Config
 	Environment     config.EnvironmentConfig
-	Limits          LimitsConfig
 }
 
 type LimitsConfig struct {
@@ -35,12 +37,17 @@ type LimitsConfig struct {
 	ImagePreviewMaxHeight         int
 }
 
+type SchedulerConfig struct {
+	PipelineWorkerCount int
+}
+
 func GetConfig() *Config {
 	cfg := &Config{}
 	readPort(cfg)
 	readEnableInstaller(cfg)
 	readURLs(cfg)
 	readLimits(cfg)
+	readScheduler(cfg)
 	config.ReadSecurity(&cfg.Security)
 	config.ReadS3(&cfg.S3)
 	config.ReadEnvironment(&cfg.Environment)
@@ -93,5 +100,17 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.ImagePreviewMaxHeight = int(v)
+	}
+}
+
+func readScheduler(config *Config) {
+	if len(os.Getenv("SCHEDULER_PIPELINE_WORKER_COUNT")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("SCHEDULER_PIPELINE_WORKER_COUNT"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		config.Scheduler.PipelineWorkerCount = int(v)
+	} else {
+		config.Scheduler.PipelineWorkerCount = runtime.NumCPU()
 	}
 }
