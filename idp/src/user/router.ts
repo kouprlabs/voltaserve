@@ -135,7 +135,7 @@ router.post(
     'form',
     z.object({
       file: z.instanceof(File)
-        .refine((file) => file.size <= 3_000_000, 'File too large.')
+        .refine((file) => file.size <= 3 * 1024 * 1024, 'File too large.')
         .refine((file) =>
           [
             'image/jpeg',
