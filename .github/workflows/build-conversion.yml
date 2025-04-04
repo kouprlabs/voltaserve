@@ -15,12 +15,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "conversion/**"
-      - "!conversion/.gitattributes"
-      - "!conversion/.gitignore"
-      - "!conversion/README.md"
-      - "!conversion/.env"
     tags:
       - "v*"
 

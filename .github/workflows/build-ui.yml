@@ -15,12 +15,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "ui/**"
-      - "!ui/.gitattributes"
-      - "!ui/.gitignore"
-      - "!ui/README.md"
-      - "!ui/.env"
     tags:
       - "v*"
 

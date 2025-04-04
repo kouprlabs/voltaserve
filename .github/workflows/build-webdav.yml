@@ -15,12 +15,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "webdav/**"
-      - "!webdav/.gitattributes"
-      - "!webdav/.gitignore"
-      - "!webdav/README.md"
-      - "!webdav/.env"
     tags:
       - "v*"
 

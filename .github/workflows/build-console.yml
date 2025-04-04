@@ -15,11 +15,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "console/**"
-      - "!console/.gitignore"
-      - "!console/README.md"
-      - "!console/api/.env"
     tags:
       - "v*"
 
