@@ -15,10 +15,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "migrations/**"
-      - "!migrations/.gitignore"
-      - "!migrations/README.md"
     tags:
       - "v*"
 

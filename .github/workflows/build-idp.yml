@@ -15,12 +15,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "idp/**"
-      - "!idp/.gitattributes"
-      - "!idp/.gitignore"
-      - "!idp/README.md"
-      - "!idp/.env"
     tags:
       - "v*"
 

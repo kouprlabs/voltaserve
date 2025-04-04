@@ -15,12 +15,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "api/**"
-      - "!api/.gitattributes"
-      - "!api/.gitignore"
-      - "!api/README.md"
-      - "!api/.env"
     tags:
       - "v*"
 
