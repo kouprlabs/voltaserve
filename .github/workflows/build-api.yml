@@ -57,7 +57,6 @@ jobs:
             suffix=
           tags: |
             type=ref,event=branch,enable=${{ github.ref_type != 'tag' }}
-            type=ref,event=tag
             type=sha,enable=${{ github.ref_type != 'tag' }}
             type=semver,pattern={{version}},enable=${{ github.ref_type == 'tag' }}
             type=semver,pattern={{major}}.{{minor}},enable=${{ github.ref_type == 'tag' }}
@@ -113,7 +112,6 @@ jobs:
             suffix=
           tags: |
             type=ref,event=branch,enable=${{ github.ref_type != 'tag' }}
-            type=ref,event=tag
             type=sha,enable=${{ github.ref_type != 'tag' }}
             type=semver,pattern={{version}},enable=${{ github.ref_type == 'tag' }}
             type=semver,pattern={{major}}.{{minor}},enable=${{ github.ref_type == 'tag' }}
