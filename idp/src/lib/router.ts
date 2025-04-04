@@ -10,7 +10,9 @@
 
 import { User } from '@/user/model.ts'
 import { Context } from 'hono'
-import { newUserNotFoundError } from '../error/creators.ts'
+import { verify } from 'hono/jwt'
+import { newInvalidJwtError, newUserNotFoundError } from '@/error/creators.ts'
+import { getConfig } from '@/config/config.ts'
 
 export function getUser(c: Context): User {
   const user = c.get('user')
@@ -18,4 +20,23 @@ export function getUser(c: Context): User {
     throw newUserNotFoundError()
   }
   return user
+}
+
+export async function getUserIdFromAccessToken(
+  accessToken: string,
+): Promise<string> {
+  try {
+    const payload = await verify(
+      accessToken,
+      getConfig().token.jwtSigningKey,
+      'HS256',
+    )
+    if (payload.sub) {
+      return payload.sub as string
+    } else {
+      throw newInvalidJwtError()
+    }
+  } catch {
+    throw newInvalidJwtError()
+  }
 }

@@ -13,15 +13,16 @@ import { zValidator } from '@hono/zod-validator'
 import { handleValidationError, ZodFactory } from '@/lib/validation.ts'
 import {
   AccountConfirmEmailOptions,
-  AccountCreateOptions,
   AccountResetPasswordOptions,
   AccountSendResetPasswordEmailOptions,
+  AccountSignUpWithLocalOptions,
   confirmEmail,
-  createUser,
   getPasswordRequirements,
   resetPassword,
   sendResetPasswordEmail,
+  signUpWithLocal,
 } from '@/account/service.ts'
+import { getConfig } from '@/config/config.ts'
 
 const router = new Hono()
 
@@ -30,7 +31,9 @@ router.post(
   zValidator(
     'json',
     z.object({
-      email: ZodFactory.email(),
+      email: ZodFactory.email().transform((value) =>
+        value.trim().toLowerCase()
+      ),
       password: ZodFactory.password(),
       fullName: ZodFactory.fullName(),
       picture: ZodFactory.picture(),
@@ -38,8 +41,11 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    const body = c.req.valid('json') as AccountCreateOptions
-    return c.json(await createUser(body))
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
+    const body = c.req.valid('json') as AccountSignUpWithLocalOptions
+    return c.json(await signUpWithLocal(body))
   },
 )
 
@@ -58,6 +64,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
     const body = c.req.valid('json') as AccountResetPasswordOptions
     await resetPassword(body)
     return c.body(null, 200)
@@ -72,6 +81,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
     const body = c.req.valid('json') as AccountConfirmEmailOptions
     await confirmEmail(body)
     return c.body(null, 200)
@@ -86,6 +98,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
     const body = c.req.valid('json') as AccountSendResetPasswordEmailOptions
     await sendResetPasswordEmail(body)
     return c.body(null, 204)

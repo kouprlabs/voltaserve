@@ -8,14 +8,12 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { Hono } from 'hono'
-import { verify } from 'hono/jwt'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import fs, { writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { getConfig } from '@/config/config.ts'
 import {
-  newInvalidJwtError,
   newMissingQueryParamError,
   newPictureNotFoundError,
   newUserIsNotAdminError,
@@ -35,7 +33,6 @@ import {
   updateFullName,
   updatePassword,
   updatePicture,
-  UserDeleteOptions,
   UserMakeAdminOptions,
   UserSuspendOptions,
   UserUpdateEmailConfirmationOptions,
@@ -46,7 +43,7 @@ import {
 import { basename, extname, join } from 'node:path'
 import { Buffer } from 'node:buffer'
 import { UserListOptions } from '@/user/service.ts'
-import { getUser } from '../lib/router.ts'
+import { getUser, getUserIdFromAccessToken } from '@/lib/router.ts'
 
 const router = new Hono()
 
@@ -95,6 +92,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
     const body = c.req.valid('json') as UserUpdateEmailRequestOptions
     return c.json(await updateEmailRequest(getUser(c).id, body))
   },
@@ -108,6 +108,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
     const body = c.req.valid('json') as UserUpdateEmailConfirmationOptions
     return c.json(await updateEmailConfirmation(body))
   },
@@ -124,6 +127,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
     const body = c.req.valid('json') as UserUpdatePasswordOptions
     return c.json(await updatePassword(getUser(c).id, body))
   },
@@ -171,14 +177,8 @@ router.post('/me/delete_picture', async (c) => {
 
 router.delete(
   '/me',
-  zValidator(
-    'json',
-    z.object({ password: ZodFactory.password() }),
-    handleValidationError,
-  ),
   async (c) => {
-    const body = c.req.valid('json') as UserDeleteOptions
-    await deleteUser(getUser(c).id, body)
+    await deleteUser(getUser(c).id)
     return c.body(null, 204)
   },
 )
@@ -195,6 +195,9 @@ router.get(
     handleValidationError,
   ),
   async (c) => {
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
     if (!c.get('user').isAdmin) {
       throw newUserIsNotAdminError()
     }
@@ -211,6 +214,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
     if (!c.get('user').isAdmin) {
       throw newUserIsNotAdminError()
     }
@@ -229,6 +235,9 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
+    if (!getConfig().isLocalStrategy()) {
+      return c.notFound()
+    }
     if (!c.get('user').isAdmin) {
       throw newUserIsNotAdminError()
     }
@@ -240,28 +249,14 @@ router.post(
 )
 
 router.get('/:id', async (c) => {
+  if (!getConfig().isLocalStrategy()) {
+    return c.notFound()
+  }
   if (!c.get('user').isAdmin) {
     throw newUserIsNotAdminError()
   }
   const { id } = c.req.param()
   return c.json(await findAsAdmin(id))
 })
-
-async function getUserIdFromAccessToken(accessToken: string): Promise<string> {
-  try {
-    const payload = await verify(
-      accessToken,
-      getConfig().token.jwtSigningKey,
-      'HS256',
-    )
-    if (payload.sub) {
-      return payload.sub as string
-    } else {
-      throw newInvalidJwtError()
-    }
-  } catch {
-    throw newInvalidJwtError()
-  }
-}
 
 export default router

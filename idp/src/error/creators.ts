@@ -130,14 +130,6 @@ export function newPasswordValidationFailedError() {
   })
 }
 
-export function newInvalidPasswordError() {
-  return newError({
-    code: ErrorCode.InvalidPassword,
-    message: 'Invalid password.',
-    userMessage: 'Invalid password.',
-  })
-}
-
 export function newCannotSuspendSoleAdminError() {
   return newError({
     code: ErrorCode.CannotSuspendLastAdmin,
@@ -151,5 +143,13 @@ export function newCannotDemoteSoleAdminError() {
     code: ErrorCode.CannotSuspendLastAdmin,
     message: 'Cannot demote sole admin.',
     userMessage: 'Cannot demote sole admin.',
+  })
+}
+
+export function newInvalidAppleTokenError() {
+  return newError({
+    code: ErrorCode.InvalidJwt,
+    message: 'Invalid Apple identity token.',
+    userMessage: 'Unable to verify your Apple sign-in. Please try again.',
   })
 }

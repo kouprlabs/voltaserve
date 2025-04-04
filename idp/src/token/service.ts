@@ -7,23 +7,27 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { sign } from 'hono/jwt'
+import { decode, sign, verify } from 'hono/jwt'
 import { getConfig } from '@/config/config.ts'
 import {
   newEmailNotConfirmedError,
+  newInvalidAppleTokenError,
   newInvalidGrantType,
   newInvalidUsernameOrPasswordError,
   newMissingFormParamError,
   newRefreshTokenExpiredError,
+  newUserNotFoundError,
   newUserSuspendedError,
   newUserTemporarilyLockedError,
 } from '@/error/creators.ts'
 import { newHyphenlessUuid } from '@/infra/id.ts'
 import { verifyPassword } from '@/infra/password.ts'
+import { getApplePublicKey } from '@/infra/apple.ts'
 import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
+import { signUpWithApple } from '@/account/service.ts'
 
-export type TokenGrantType = 'password' | 'refresh_token'
+export type TokenGrantType = 'password' | 'refresh_token' | 'apple'
 
 // https://datatracker.ietf.org/doc/html/rfc6749#section-5.1
 export type Token = {
@@ -39,66 +43,118 @@ export type TokenExchangeOptions = {
   username?: string
   password?: string
   refresh_token?: string
+  apple_jwt?: string
+  apple_full_name?: string
 }
 
 export async function exchange(options: TokenExchangeOptions): Promise<Token> {
   validateParameters(options)
   if (options.grant_type === 'password') {
-    // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
-    let user: User
-    try {
-      user = await userRepo.findByUsername(
-        options.username!.toLocaleLowerCase(),
-      )
-    } catch {
-      throw newInvalidUsernameOrPasswordError()
-    }
-    if (!user.isEmailConfirmed) {
-      throw newEmailNotConfirmedError()
-    }
-    if (!user.isActive) {
-      throw newUserSuspendedError()
-    }
-    if (isStillLocked(user)) {
-      throw newUserTemporarilyLockedError()
-    } else {
-      if (verifyPassword(options.password!, user.passwordHash!)) {
-        await resetFailedAttemptsAndUnlock(user.id)
-        return newToken(user.id, user.isAdmin)
-      } else {
-        await increaseFailedAttemptsOrLock(user.id)
-        throw newInvalidUsernameOrPasswordError()
-      }
-    }
+    return await exchangeWithPassword(options)
   } else if (options.grant_type === 'refresh_token') {
-    // https://datatracker.ietf.org/doc/html/rfc6749#section-6
-    let user: User
-    try {
-      user = await userRepo.findByRefreshTokenValue(options.refresh_token!)
-    } catch {
-      throw newInvalidUsernameOrPasswordError()
-    }
-    if (!user.isEmailConfirmed) {
-      throw newEmailNotConfirmedError()
-    }
-    if (new Date() >= new Date(user.refreshTokenExpiry!)) {
-      throw newRefreshTokenExpiredError()
-    }
-    return newToken(user.id, user.isAdmin)
+    return await exchangeWithRefreshToken(options)
+  } else if (options.grant_type == 'apple') {
+    return await exchangeWithApple(options)
   } else {
-    // Should never end up here, but the Dino linter doesn't know that.
     throw newInvalidGrantType(options.grant_type)
   }
+}
+
+// https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
+async function exchangeWithPassword(
+  options: TokenExchangeOptions,
+): Promise<Token> {
+  let user: User
+  try {
+    user = await userRepo.findByUsername(options.username!.toLocaleLowerCase())
+  } catch {
+    throw newInvalidUsernameOrPasswordError()
+  }
+  if (!user.isEmailConfirmed) {
+    throw newEmailNotConfirmedError()
+  }
+  if (!user.isActive) {
+    throw newUserSuspendedError()
+  }
+  if (isStillLocked(user)) {
+    throw newUserTemporarilyLockedError()
+  } else {
+    if (verifyPassword(options.password!, user.passwordHash!)) {
+      await resetFailedAttemptsAndUnlock(user.id)
+      return newToken(user.id, user.isAdmin)
+    } else {
+      await increaseFailedAttemptsOrLock(user.id)
+      throw newInvalidUsernameOrPasswordError()
+    }
+  }
+}
+
+// https://datatracker.ietf.org/doc/html/rfc6749#section-6
+async function exchangeWithRefreshToken(
+  options: TokenExchangeOptions,
+): Promise<Token> {
+  let user: User
+  try {
+    user = await userRepo.findByRefreshTokenValue(options.refresh_token!)
+  } catch {
+    throw newInvalidUsernameOrPasswordError()
+  }
+  if (!user.isEmailConfirmed) {
+    throw newEmailNotConfirmedError()
+  }
+  if (new Date() >= new Date(user.refreshTokenExpiry!)) {
+    throw newRefreshTokenExpiredError()
+  }
+  return newToken(user.id, user.isAdmin)
+}
+
+async function exchangeWithApple(
+  options: TokenExchangeOptions,
+): Promise<Token> {
+  const { apple_jwt } = options
+  const { header } = decode(apple_jwt!)
+  const appleKey = await getApplePublicKey(header)
+  let payload: any
+  try {
+    payload = await verify(apple_jwt!, appleKey, 'RS256')
+  } catch {
+    throw newInvalidAppleTokenError()
+  }
+  let user: User
+  try {
+    user = await userRepo.findByUsername(payload.sub)
+  } catch (error: any) {
+    if (error.code === newUserNotFoundError().code) {
+      user = await signUpWithApple({
+        payload,
+        appleFullName: options.apple_full_name,
+      })
+    } else {
+      throw error
+    }
+  }
+  return newToken(user.id, user.isAdmin)
 }
 
 function validateParameters(options: TokenExchangeOptions) {
   if (!options.grant_type) {
     throw newMissingFormParamError('grant_type')
   }
-  if (
-    options.grant_type !== 'password' &&
-    options.grant_type !== 'refresh_token'
-  ) {
+  if (getConfig().isLocalStrategy()) {
+    if (
+      options.grant_type !== 'password' &&
+      options.grant_type !== 'refresh_token'
+    ) {
+      throw newInvalidGrantType(options.grant_type)
+    }
+  } else if (getConfig().isAppleStrategy()) {
+    if (
+      options.grant_type !== 'apple' &&
+      options.grant_type !== 'refresh_token'
+    ) {
+      throw newInvalidGrantType(options.grant_type)
+    }
+  } else {
     throw newInvalidGrantType(options.grant_type)
   }
   if (options.grant_type === 'password') {

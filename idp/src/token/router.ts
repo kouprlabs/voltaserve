@@ -20,15 +20,21 @@ router.post(
   zValidator(
     'form',
     z.object({
-      grant_type: z.union([z.literal('password'), z.literal('refresh_token')]),
+      grant_type: z.union([
+        z.literal('password'),
+        z.literal('refresh_token'),
+        z.literal('apple'),
+      ]),
       username: z.string().optional(),
       password: z.string().optional(),
       refresh_token: z.string().optional(),
+      apple_jwt: z.string().optional(),
+      apple_full_name: z.string().optional(),
     }),
     handleValidationError,
   ),
   async (c) => {
-    const options = (await c.req.valid('form')) as TokenExchangeOptions
+    const options = c.req.valid('form') as TokenExchangeOptions
     return c.json(await exchange(options))
   },
 )
