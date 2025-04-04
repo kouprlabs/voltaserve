@@ -27,11 +27,27 @@ import { getCount, mapEntity, UserDTO } from '@/user/service.ts'
 import { call as callWebhook, UserWebhookEventType } from '@/user/webhook.ts'
 
 export type AccountCreateOptions = {
+  username: string
+  email: string
+  password?: string
+  fullName: string
+  picture?: string
+  emailConfirmationToken?: string
+  isAdmin?: boolean
+  isEmailConfirmed?: boolean
+}
+
+export type AccountSignUpWithLocalOptions = {
   email: string
   password: string
   fullName: string
   picture?: string
   isAdmin?: boolean
+}
+
+export type AccountSignUpWithAppleOptions = {
+  payload: any
+  appleFullName?: string
 }
 
 export type AccountResetPasswordOptions = {
@@ -55,30 +71,25 @@ export type PasswordRequirements = {
   minSymbols: number
 }
 
-export async function createUser(
-  options: AccountCreateOptions,
-): Promise<UserDTO> {
+export async function createUser(options: AccountCreateOptions): Promise<User> {
   const id = newHashId()
-  if (!(await userRepo.isUsernameAvailable(options.email))) {
+  if (!(await userRepo.isUsernameAvailable(options.username))) {
     throw newUsernameUnavailableError()
   }
-  // First user is made an admin
-  const count = await getCount()
-  if (count === 0) {
-    options.isAdmin = true
-  }
   try {
-    const emailConfirmationToken = newHyphenlessUuid()
     const user = await userRepo.insert({
       id,
-      username: options.email.toLocaleLowerCase(),
-      email: options.email.toLocaleLowerCase(),
+      username: options.username,
+      email: options.email,
       fullName: options.fullName,
       picture: options.picture,
-      passwordHash: hashPassword(options.password),
-      emailConfirmationToken,
+      passwordHash: options.password
+        ? hashPassword(options.password)
+        : undefined,
+      emailConfirmationToken: options.emailConfirmationToken,
       createTime: newDateTime(),
       isAdmin: options.isAdmin,
+      isEmailConfirmed: options.isEmailConfirmed,
     })
     await meilisearch.index(USER_SEARCH_INDEX).addDocuments([
       {
@@ -91,29 +102,57 @@ export async function createUser(
         updateTime: user.updateTime,
       },
     ])
-    await sendTemplateMail('email-confirmation', options.email, {
-      'UI_URL': getConfig().publicUIURL,
-      'TOKEN': emailConfirmationToken,
-    })
-    const dto = mapEntity(user)
+    if (options.emailConfirmationToken) {
+      await sendTemplateMail('email-confirmation', options.email, {
+        'UI_URL': getConfig().publicUIURL,
+        'TOKEN': options.emailConfirmationToken,
+      })
+    }
     if (getConfig().userWebhooks.length > 0) {
       for (const url of getConfig().userWebhooks) {
         try {
           await callWebhook(url, {
             eventType: UserWebhookEventType.Create,
-            user: dto,
+            user: mapEntity(user),
           })
         } catch (error) {
           logger.error(error)
         }
       }
     }
-    return dto
+    return user
   } catch (error) {
     await userRepo.delete(id)
     await meilisearch.index(USER_SEARCH_INDEX).deleteDocuments([id])
     throw newInternalServerError(error)
   }
+}
+
+export async function signUpWithLocal(
+  options: AccountSignUpWithLocalOptions,
+): Promise<UserDTO> {
+  return mapEntity(
+    await createUser({
+      username: options.email,
+      email: options.email,
+      password: options.password,
+      fullName: options.fullName,
+      picture: options.picture,
+      emailConfirmationToken: newHyphenlessUuid(),
+      isAdmin: (await getCount()) === 0,
+    }),
+  )
+}
+
+export async function signUpWithApple(
+  options: AccountSignUpWithAppleOptions,
+): Promise<User> {
+  return await createUser({
+    username: options.payload.sub,
+    email: options.payload.email.toLocaleLowerCase(),
+    fullName: options.appleFullName ?? options.payload.email,
+    isEmailConfirmed: true,
+  })
 }
 
 export async function resetPassword(options: AccountResetPasswordOptions) {

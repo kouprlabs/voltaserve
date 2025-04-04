@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import * as process from 'node:process'
-import { Config } from '@/config/types.ts'
+import { Config, Strategy } from '@/config/types.ts'
 
 let config: Config
 
@@ -19,6 +19,9 @@ export function getConfig(): Config {
   if (!config) {
     config = new Config()
     config.port = parseInt(process.env.PORT)
+    if (process.env.STRATEGY && isValidStrategy(process.env.STRATEGY)) {
+      config.strategy = process.env.STRATEGY as Strategy
+    }
     readURLs(config)
     readToken(config)
     readPassword(config)
@@ -29,6 +32,10 @@ export function getConfig(): Config {
     readWebhooks(config)
   }
   return config
+}
+
+function isValidStrategy(value: string): boolean {
+  return value === Strategy.Local || value === Strategy.Apple
 }
 
 export function readURLs(config: Config) {
