@@ -19,6 +19,7 @@ const (
 	PipelineMosaic     = "mosaic"
 	PipelineGLB        = "glb"
 	PipelineZIP        = "zip"
+	PipelineOCR        = "ocr"
 )
 
 type PipelineRunOptions struct {

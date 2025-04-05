@@ -29,6 +29,7 @@ type Dispatcher struct {
 	mosaicPipeline     Pipeline
 	glbPipeline        Pipeline
 	zipPipeline        Pipeline
+	ocrPipeline        Pipeline
 	taskClient         *client.TaskClient
 	snapshotClient     *client.SnapshotClient
 	fileIdent          *infra.FileIdentifier
@@ -44,6 +45,7 @@ func NewDispatcher() *Dispatcher {
 		mosaicPipeline:     NewMosaicPipeline(),
 		glbPipeline:        NewGLBPipeline(),
 		zipPipeline:        NewZIPPipeline(),
+		ocrPipeline:        NewOCRPipeline(),
 		taskClient:         client.NewTaskClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
 		snapshotClient:     client.NewSnapshotClient(config.GetConfig().APIURL, config.GetConfig().Security.APIKey),
 		fileIdent:          infra.NewFileIdentifier(),
@@ -78,6 +80,8 @@ func (d *Dispatcher) Dispatch(opts dto.PipelineRunOptions) error {
 		err = d.glbPipeline.Run(opts)
 	} else if id == dto.PipelineZIP {
 		err = d.zipPipeline.Run(opts)
+	} else if id == dto.PipelineOCR {
+		err = d.ocrPipeline.Run(opts)
 	}
 	if err != nil {
 		if opts.TaskID != nil {
