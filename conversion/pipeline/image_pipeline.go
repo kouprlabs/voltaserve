@@ -29,6 +29,7 @@ import (
 )
 
 type imagePipeline struct {
+	ocrPipeline    Pipeline
 	imageProc      *processor.ImageProcessor
 	ocrProc        *processor.OCRProcessor
 	pdfProc        *processor.PDFProcessor
@@ -41,6 +42,7 @@ type imagePipeline struct {
 
 func NewImagePipeline() Pipeline {
 	return &imagePipeline{
+		ocrPipeline:    NewOCRPipeline(),
 		imageProc:      processor.NewImageProcessor(),
 		ocrProc:        processor.NewOCRProcessor(),
 		pdfProc:        processor.NewPDFProcessor(),
@@ -117,8 +119,8 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts dto.PipelineRunO
 		}
 	}
 	_ = p.patchThumbnail(imagePath, opts)
-	if opts.Intent != nil && *opts.Intent == model.SnapshotIntentDocument {
-		_ = p.patchText(imagePath, opts)
+	if opts.Intent != nil && *opts.Intent == model.SnapshotIntentDocument && opts.Language != nil && *opts.Language != "" {
+		_ = p.ocrPipeline.RunFromLocalPath(imagePath, opts)
 	}
 	if opts.TaskID != nil {
 		if _, err := p.taskClient.Patch(*opts.TaskID, dto.TaskPatchOptions{
@@ -237,93 +239,6 @@ func (p *imagePipeline) patchPreviewWithOriginal(inputPath string, imageProps mo
 			Size:   stat.Size(),
 			Image:  &imageProps,
 		},
-	}); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *imagePipeline) patchText(inputPath string, opts dto.PipelineRunOptions) error {
-	// Generate PDF/A
-	var pdfPath string
-	// Get DPI
-	dpi, err := p.imageProc.DPIFromImage(inputPath)
-	if err != nil {
-		dpi = helper.ToPtr(72)
-	}
-	// Remove alpha channel
-	noAlphaImagePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
-	if err := p.imageProc.RemoveAlphaChannel(inputPath, noAlphaImagePath); err != nil {
-		return err
-	}
-	defer func(path string) {
-		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
-			return
-		} else if err != nil {
-			logger.GetLogger().Error(err)
-		}
-	}(noAlphaImagePath)
-	// Convert to PDF/A
-	pdfPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
-	if err := p.ocrProc.SearchablePDFFromFile(noAlphaImagePath, *opts.Language, *dpi, pdfPath); err != nil {
-		return err
-	}
-	defer func(path string) {
-		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
-			return
-		} else if err != nil {
-			logger.GetLogger().Error(err)
-		}
-	}(pdfPath)
-	// Set OCR S3 object
-	stat, err := os.Stat(pdfPath)
-	if err != nil {
-		return err
-	}
-	count, err := p.pdfProc.CountPages(pdfPath)
-	if err != nil {
-		return err
-	}
-	s3Object := model.S3Object{
-		Bucket: opts.Bucket,
-		Key:    opts.SnapshotID + "/ocr.pdf",
-		Size:   stat.Size(),
-		Document: &model.DocumentProps{
-			Page: &model.PageProps{
-				Count:     *count,
-				Extension: ".pdf",
-			},
-		},
-	}
-	if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMIMEFromPath(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
-		return err
-	}
-	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
-		Fields: []string{model.SnapshotFieldOCR},
-		OCR:    &s3Object,
-	}); err != nil {
-		return err
-	}
-	// Extract text
-	text, err := p.pdfProc.TextFromPDF(pdfPath)
-	if err != nil {
-		return err
-	}
-	if text == nil || len(*text) == 0 {
-		return nil
-	}
-	// Set text S3 object
-	s3Object = model.S3Object{
-		Bucket: opts.Bucket,
-		Key:    opts.SnapshotID + "/text.txt",
-		Size:   int64(len(*text)),
-	}
-	if err := p.s3.PutText(s3Object.Key, *text, "text/plain", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
-		return err
-	}
-	if _, err := p.snapshotClient.Patch(opts.SnapshotID, dto.SnapshotPatchOptions{
-		Fields: []string{model.SnapshotFieldText},
-		Text:   &s3Object,
 	}); err != nil {
 		return err
 	}
