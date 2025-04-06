@@ -9,7 +9,6 @@
 // AGPL-3.0-only in the root of this repository.
 import { useCallback, useEffect, useState } from 'react'
 import {
-  Avatar,
   Badge,
   Button,
   Modal,
