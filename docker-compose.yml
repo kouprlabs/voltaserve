@@ -68,7 +68,8 @@ services:
   api:
     image: voltaserve/api:${VOLTASERVE_VERSION}
     build:
-      context: ./api
+      context: .
+      dockerfile: ./api/Dockerfile
     ports:
       - ${VOLTASERVE_API_PORT}:8080
     environment:
@@ -139,7 +140,8 @@ services:
   webdav:
     image: voltaserve/webdav:${VOLTASERVE_VERSION}
     build:
-      context: ./webdav
+      context: .
+      dockerfile: ./webdav/Dockerfile
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:8082
     environment:
@@ -157,7 +159,8 @@ services:
   conversion:
     image: voltaserve/conversion:${VOLTASERVE_VERSION}
     build:
-      context: ./conversion
+      context: .
+      dockerfile: ./conversion/Dockerfile
     ports:
       - ${VOLTASERVE_CONVERSION_PORT}:8083
     environment:
@@ -185,7 +188,8 @@ services:
   mosaic:
     image: voltaserve/mosaic:${VOLTASERVE_VERSION}
     build:
-      context: ./mosaic
+      context: .
+      dockerfile: ./mosaic/Dockerfile
     ports:
       - ${VOLTASERVE_MOSAIC_PORT}:8085
     environment:
