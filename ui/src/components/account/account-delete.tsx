@@ -28,6 +28,7 @@ export type AccountDeleteProps = {
   onClose?: () => void
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type FormValues = {}
 
 const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
