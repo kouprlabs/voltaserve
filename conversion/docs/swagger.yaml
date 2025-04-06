@@ -4,7 +4,11 @@ definitions:
     properties:
       bucket:
         type: string
+      intent:
+        type: string
       key:
+        type: string
+      language:
         type: string
       payload:
         additionalProperties:
@@ -16,6 +20,10 @@ definitions:
         type: string
       taskId:
         type: string
+    required:
+    - bucket
+    - key
+    - snapshotId
     type: object
   errorpkg.ErrorResponse:
     properties:

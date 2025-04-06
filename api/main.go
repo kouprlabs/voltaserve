@@ -63,6 +63,8 @@ func main() {
 			Path   string
 			Method string
 		}{
+			{Path: "/version", Method: "GET"},
+			{Path: "/" + v + "/health", Method: "GET"},
 			{Path: "/" + v + "/workspaces/:id/bucket", Method: "GET"},
 			{Path: "/" + v + "/files/:id/original.:extension", Method: "GET"},
 			{Path: "/" + v + "/files/:id/preview.:extension", Method: "GET"},
