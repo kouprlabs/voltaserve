@@ -29,14 +29,12 @@ import (
 )
 
 type MosaicRouter struct {
-	mosaicSvc             *service.MosaicService
-	accessTokenCookieName string
+	mosaicSvc *service.MosaicService
 }
 
 func NewMosaicRouter() *MosaicRouter {
 	return &MosaicRouter{
-		mosaicSvc:             service.NewMosaicService(),
-		accessTokenCookieName: "voltaserve_access_token",
+		mosaicSvc: service.NewMosaicService(),
 	}
 }
 
@@ -136,12 +134,9 @@ func (r *MosaicRouter) GetMetadata(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension} [get]
 func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
+	accessToken := c.Query("access_token")
 	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
+		return errorpkg.NewFileNotFoundError(nil)
 	}
 	userID, err := r.getUserIDFromAccessToken(accessToken)
 	if err != nil {

@@ -28,10 +28,7 @@ export function getAccessTokenOrRedirect(): string {
   }
 }
 
-export const ACCESS_TOKEN_COOKIE = 'voltaserve_access_token'
-
 export async function clearToken() {
-  document.cookie = `${ACCESS_TOKEN_COOKIE}=; Max-Age=-99999999;`
   removeAccessToken()
   removeRefreshToken()
   removeTokenExpiry()

@@ -34,6 +34,7 @@ export async function getUserIdFromAccessToken(
     if (payload.sub) {
       return payload.sub as string
     } else {
+      // noinspection ExceptionCaughtLocallyJS
       throw newInvalidJwtError()
     }
   } catch {

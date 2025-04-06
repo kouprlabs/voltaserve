@@ -182,16 +182,14 @@ const SnapshotList = () => {
                             'gap-1.5',
                           )}
                         >
-                          <Avatar
-                            name={`V ${s.version}`}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
                           <div className={cx('flex', 'flex-col', 'gap-0.5')}>
                             <span className={cx('text-base')}>
                               <RelativeDate date={new Date(s.createTime)} />
                             </span>
                             <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+                              <Badge variant="outline">
+                                Version {s.version}
+                              </Badge>
                               {s.original.size ? (
                                 <Badge variant="outline">
                                   {prettyBytes(s.original.size)}

@@ -61,10 +61,6 @@ export type AuthUserUpdatePasswordOptions = {
   newPassword: string
 }
 
-export type AuthUserDeleteOptions = {
-  password: string
-}
-
 type AuthUserListOptions = {
   query?: string
   id?: string
@@ -175,11 +171,10 @@ export class AuthUserAPI {
     }) as Promise<AuthUser>
   }
 
-  static async delete(options: AuthUserDeleteOptions) {
+  static async delete() {
     return idpFetcher({
       url: `/users/me`,
       method: 'DELETE',
-      body: JSON.stringify(options),
     })
   }
 

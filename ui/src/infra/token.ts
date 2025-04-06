@@ -10,7 +10,6 @@
 import { decodeJwt } from 'jose'
 import { TokenAPI, Token } from '@/client/idp/token'
 import {
-  ACCESS_TOKEN_COOKIE,
   getAccessToken,
   loadRefreshToken,
   loadTokenExpiry,
@@ -20,7 +19,6 @@ import {
 } from '@/client/token'
 
 export async function saveToken(token: Token) {
-  document.cookie = `${ACCESS_TOKEN_COOKIE}=${token.access_token}; Path=/; Max-Age=${token.expires_in}`
   saveAccessToken(token.access_token)
   saveRefreshToken(token.refresh_token)
   const tokenExpiry = new Date()

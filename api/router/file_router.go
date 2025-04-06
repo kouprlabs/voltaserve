@@ -39,11 +39,10 @@ import (
 )
 
 type FileRouter struct {
-	fileSvc               *service.FileService
-	workspaceSvc          *service.WorkspaceService
-	config                *config.Config
-	bufferPool            sync.Pool
-	accessTokenCookieName string
+	fileSvc      *service.FileService
+	workspaceSvc *service.WorkspaceService
+	config       *config.Config
+	bufferPool   sync.Pool
 }
 
 func NewFileRouter() *FileRouter {
@@ -56,7 +55,6 @@ func NewFileRouter() *FileRouter {
 				return new(bytes.Buffer)
 			},
 		},
-		accessTokenCookieName: "voltaserve_access_token",
 	}
 }
 
@@ -900,12 +898,9 @@ func (r *FileRouter) FindGroupPermissions(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/original.{ext} [get]
 func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
+	accessToken := c.Query("access_token")
 	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
+		return errorpkg.NewFileNotFoundError(nil)
 	}
 	userID, err := r.getUserIDFromAccessToken(accessToken)
 	if err != nil {
@@ -957,12 +952,9 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/preview.{ext} [get]
 func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
+	accessToken := c.Query("access_token")
 	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
+		return errorpkg.NewFileNotFoundError(nil)
 	}
 	userID, err := r.getUserIDFromAccessToken(accessToken)
 	if err != nil {
@@ -1014,12 +1006,9 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/text{ext} [get]
 func (r *FileRouter) DownloadText(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
+	accessToken := c.Query("access_token")
 	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
+		return errorpkg.NewFileNotFoundError(nil)
 	}
 	userID, err := r.getUserIDFromAccessToken(accessToken)
 	if err != nil {
@@ -1065,12 +1054,9 @@ func (r *FileRouter) DownloadText(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/ocr{ext} [get]
 func (r *FileRouter) DownloadOCR(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
+	accessToken := c.Query("access_token")
 	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
+		return errorpkg.NewFileNotFoundError(nil)
 	}
 	userID, err := r.getUserIDFromAccessToken(accessToken)
 	if err != nil {
@@ -1116,12 +1102,9 @@ func (r *FileRouter) DownloadOCR(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/thumbnail.{ext} [get]
 func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
+	accessToken := c.Query("access_token")
 	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
+		return errorpkg.NewFileNotFoundError(nil)
 	}
 	userID, err := r.getUserIDFromAccessToken(accessToken)
 	if err != nil {

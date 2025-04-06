@@ -25,14 +25,12 @@ import (
 )
 
 type EntityRouter struct {
-	entitySvc             *service.EntityService
-	accessTokenCookieName string
+	entitySvc *service.EntityService
 }
 
 func NewEntityRouter() *EntityRouter {
 	return &EntityRouter{
-		entitySvc:             service.NewEntityService(),
-		accessTokenCookieName: "voltaserve_access_token",
+		entitySvc: service.NewEntityService(),
 	}
 }
 
