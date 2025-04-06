@@ -11,9 +11,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Button,
-  FormControl,
-  FormErrorMessage,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -22,15 +19,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
-import * as Yup from 'yup'
+import { Form, Formik, FormikHelpers } from 'formik'
 import cx from 'classnames'
 import { AuthUserAPI } from '@/client/idp/user'
 
@@ -39,29 +28,22 @@ export type AccountDeleteProps = {
   onClose?: () => void
 }
 
-type FormValues = {
-  password: string
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+type FormValues = {}
 
 const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const formSchema = Yup.object().shape({
-    password: Yup.string().required('Password is required.'),
-  })
 
   useEffect(() => {
     setIsModalOpen(open)
   }, [open])
 
   const handleSubmit = useCallback(
-    async (
-      { password }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async (_: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
-        await AuthUserAPI.delete({ password })
+        await AuthUserAPI.delete()
         navigate('/sign-in')
         onClose?.()
       } finally {
@@ -82,36 +64,17 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
         <ModalHeader>Delete Account and Data</ModalHeader>
         <ModalCloseButton />
         <Formik
-          initialValues={{ password: '' }}
-          validationSchema={formSchema}
+          initialValues={{}}
           validateOnBlur={false}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ isSubmitting }) => (
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'items-start', 'gap-1')}>
                   <span>
                     Are you sure you want to delete your account and data?
                   </span>
-                  <span className={cx('font-semibold')}>
-                    Type your password to confirm:
-                  </span>
-                  <Field name="password">
-                    {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={Boolean(errors.password && touched.password)}
-                      >
-                        <Input
-                          {...field}
-                          type="password"
-                          placeholder="Password"
-                          disabled={isSubmitting}
-                        />
-                        <FormErrorMessage>{errors.password}</FormErrorMessage>
-                      </FormControl>
-                    )}
-                  </Field>
                 </div>
               </ModalBody>
               <ModalFooter>

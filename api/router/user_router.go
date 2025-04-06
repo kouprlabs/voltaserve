@@ -29,14 +29,12 @@ import (
 )
 
 type UserRouter struct {
-	userSvc               *service.UserService
-	accessTokenCookieName string
+	userSvc *service.UserService
 }
 
 func NewUserRouter() *UserRouter {
 	return &UserRouter{
-		userSvc:               service.NewUserService(),
-		accessTokenCookieName: "voltaserve_access_token",
+		userSvc: service.NewUserService(),
 	}
 }
 
@@ -134,12 +132,9 @@ func (r *UserRouter) Probe(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/users/{id}/picture.{extension} [get]
 func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
+	accessToken := c.Query("access_token")
 	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
+		return errorpkg.NewFileNotFoundError(nil)
 	}
 	userID, isAdmin, err := r.getUserIDFromAccessToken(accessToken)
 	if err != nil {
