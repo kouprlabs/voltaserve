@@ -14,6 +14,6 @@ func MegabyteToByte(mb int64) int64 {
 	return mb * 1000000
 }
 
-func ByteToMegabytePrecise(b int64) float64 {
+func ByteToMegabyte(b int64) float64 {
 	return float64(b) / 1000000
 }
