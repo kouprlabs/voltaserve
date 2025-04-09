@@ -1,2 +1,2 @@
-You have been invited by {{.USER_FULL_NAME}} to join the organization {{.ORGANIZATION_NAME}}.
-Please follow this link to sign up: {{.UI_URL}}/sign-up
+Hello,
+You have been invited by {{.USER_FULL_NAME}} to join the organization {{.ORGANIZATION_NAME}} on Voltaserve.
