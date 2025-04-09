@@ -52,14 +52,6 @@ func NewMailTemplate(smtpConfig config.SMTPConfig, useMock bool) MailTemplate {
 	}
 }
 
-func NewMailTemplateWithDialer(smtpConfig config.SMTPConfig, dialer dialer, useMock bool) MailTemplate {
-	if useMock {
-		return newMockMailTemplate()
-	} else {
-		return newMailTemplateWithDialer(smtpConfig, dialer)
-	}
-}
-
 func newMailTemplate(smtpConfig config.SMTPConfig) *mailTemplate {
 	return newMailTemplateWithDialer(
 		smtpConfig,
