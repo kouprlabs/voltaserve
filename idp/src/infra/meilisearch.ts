@@ -12,5 +12,8 @@ import { getConfig } from '@/config/config.ts'
 
 export const USER_SEARCH_INDEX = 'user'
 
-export const client = new MeiliSearch({ host: getConfig().search.url })
+export const client = new MeiliSearch({
+  host: getConfig().search.url,
+  apiKey: getConfig().search.apiKey ?? undefined,
+})
 client.createIndex(USER_SEARCH_INDEX, { primaryKey: 'id' }).then()

@@ -67,6 +67,7 @@ export class SecurityConfig {
 
 export class SearchConfig {
   url: string = ''
+  apiKey: string = ''
 }
 
 export class SMTPConfig {

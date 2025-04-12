@@ -99,6 +99,7 @@ func (mgr *RedisManager) Connect() error {
 	if len(addresses) > 1 {
 		mgr.clusterClient = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs:    addresses,
+			Username: mgr.redisConfig.Username,
 			Password: mgr.redisConfig.Password,
 		})
 		if err := mgr.clusterClient.Ping(context.Background()).Err(); err != nil {
@@ -107,6 +108,7 @@ func (mgr *RedisManager) Connect() error {
 	} else {
 		mgr.client = redis.NewClient(&redis.Options{
 			Addr:     mgr.redisConfig.Address,
+			Username: mgr.redisConfig.Username,
 			Password: mgr.redisConfig.Password,
 			DB:       mgr.redisConfig.DB,
 		})

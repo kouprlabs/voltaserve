@@ -109,6 +109,9 @@ export function readSearch(config: Config) {
     throw newEnvironmentVariableNotSetError('SEARCH_URL')
   }
   config.search.url = process.env.SEARCH_URL
+  if (process.env.SEARCH_API_KEY) {
+    config.search.apiKey = process.env.SEARCH_API_KEY
+  }
 }
 
 export function readSMTP(config: Config) {

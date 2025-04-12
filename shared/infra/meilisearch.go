@@ -24,7 +24,11 @@ var meilisearchClient meilisearch.ServiceManager
 
 func newMeilisearchManager(searchConfig config.SearchConfig) *meilisearchManager {
 	if meilisearchClient == nil {
-		meilisearchClient = meilisearch.New(searchConfig.URL)
+		if searchConfig.APIKey == "" {
+			meilisearchClient = meilisearch.New(searchConfig.URL)
+		} else {
+			meilisearchClient = meilisearch.New(searchConfig.URL, meilisearch.WithAPIKey(searchConfig.APIKey))
+		}
 	}
 	mgr := &meilisearchManager{
 		searchConfig: searchConfig,
