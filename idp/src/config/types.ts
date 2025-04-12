@@ -9,72 +9,73 @@
 // AGPL-3.0-only in the root of this repository.
 
 export class Config {
-  port: number = 0
-  strategy: Strategy = Strategy.Local
-  publicUIURL: string = ''
-  databaseURL: string = ''
-  token: TokenConfig
-  password: PasswordConfig
-  security: SecurityConfig
-  corsOrigins: string[] = []
-  search: SearchConfig
-  smtp: SMTPConfig
-  userWebhooks: string[] = []
+  port: number = 0;
+  strategy: Strategy = Strategy.Local;
+  publicUIURL: string = "";
+  databaseURL: string = "";
+  token: TokenConfig;
+  password: PasswordConfig;
+  security: SecurityConfig;
+  corsOrigins: string[] = [];
+  search: SearchConfig;
+  smtp: SMTPConfig;
+  userWebhooks: string[] = [];
 
   constructor() {
-    this.token = new TokenConfig()
-    this.password = new PasswordConfig()
-    this.search = new SearchConfig()
-    this.smtp = new SMTPConfig()
-    this.security = new SecurityConfig()
+    this.token = new TokenConfig();
+    this.password = new PasswordConfig();
+    this.search = new SearchConfig();
+    this.smtp = new SMTPConfig();
+    this.security = new SecurityConfig();
   }
 
   isLocalStrategy(): boolean {
-    return this.strategy === Strategy.Local
+    return this.strategy === Strategy.Local;
   }
 
   isAppleStrategy(): boolean {
-    return this.strategy === Strategy.Apple
+    return this.strategy === Strategy.Apple;
   }
 }
 
 export enum Strategy {
-  Local = 'local',
-  Apple = 'apple',
+  Local = "local",
+  Apple = "apple",
 }
 
 export class TokenConfig {
-  jwtSigningKey: string = ''
-  audience: string = ''
-  issuer: string = ''
-  accessTokenLifetime: number = 0
-  refreshTokenLifetime: number = 0
+  jwtSigningKey: string = "";
+  audience: string = "";
+  issuer: string = "";
+  accessTokenLifetime: number = 0;
+  refreshTokenLifetime: number = 0;
 }
 
 export class PasswordConfig {
-  minLength: number = 0
-  minLowercase: number = 0
-  minUppercase: number = 0
-  minNumbers: number = 0
-  minSymbols: number = 0
+  minLength: number = 0;
+  minLowercase: number = 0;
+  minUppercase: number = 0;
+  minNumbers: number = 0;
+  minSymbols: number = 0;
 }
 
 export class SecurityConfig {
-  maxFailedAttempts: number = 0
-  lockoutPeriod: number = 0
-  apiKey: string = ''
+  maxFailedAttempts: number = 0;
+  lockoutPeriod: number = 0;
+  apiKey: string = "";
 }
 
 export class SearchConfig {
-  url: string = ''
+  url: string = "";
+  apiKey: string = "";
 }
 
 export class SMTPConfig {
-  host: string = ''
-  port: number = 0
-  secure: boolean = false
-  username?: string
-  password?: string
-  senderAddress: string = ''
-  senderName: string = ''
+  host: string = "";
+  port: number = 0;
+  secure: boolean = false;
+  username?: string;
+  password?: string;
+  senderAddress: string = "";
+  senderName: string = "";
 }

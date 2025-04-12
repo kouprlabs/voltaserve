@@ -7,10 +7,13 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
-import { MeiliSearch } from 'meilisearch'
-import { getConfig } from '@/config/config.ts'
+import { MeiliSearch } from "meilisearch";
+import { getConfig } from "@/config/config.ts";
 
-export const USER_SEARCH_INDEX = 'user'
+export const USER_SEARCH_INDEX = "user";
 
-export const client = new MeiliSearch({ host: getConfig().search.url })
-client.createIndex(USER_SEARCH_INDEX, { primaryKey: 'id' }).then()
+export const client = new MeiliSearch({
+  host: getConfig().search.url,
+  apiKey: getConfig().search.apiKey ?? undefined,
+});
+client.createIndex(USER_SEARCH_INDEX, { primaryKey: "id" }).then();
