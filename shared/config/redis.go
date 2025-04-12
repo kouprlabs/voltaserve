@@ -17,12 +17,14 @@ import (
 
 type RedisConfig struct {
 	Address  string
+	Username string
 	Password string
 	DB       int
 }
 
 func ReadRedis(config *RedisConfig) {
 	config.Address = os.Getenv("REDIS_ADDRESS")
+	config.Username = os.Getenv("REDIS_USERNAME")
 	config.Password = os.Getenv("REDIS_PASSWORD")
 	if len(os.Getenv("REDIS_DB")) > 0 {
 		v, err := strconv.ParseInt(os.Getenv("REDIS_DB"), 10, 32)
