@@ -13,9 +13,11 @@ package config
 import "os"
 
 type SearchConfig struct {
-	URL string
+	URL    string
+	APIKey string
 }
 
 func ReadSearch(config *SearchConfig) {
 	config.URL = os.Getenv("SEARCH_URL")
+	config.APIKey = os.Getenv("SEARCH_API_KEY")
 }
