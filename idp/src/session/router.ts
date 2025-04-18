@@ -10,10 +10,19 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
-import { exchange, TokenExchangeOptions } from '@/token/service.ts'
+import { exchange, TokenGrantType } from '@/token/service.ts'
 import { handleValidationError } from '@/lib/validation.ts'
 
 const router = new Hono()
+
+export type SessionExchangeOptions = {
+  grant_type: TokenGrantType
+  username?: string
+  password?: string
+  refresh_key?: string
+  apple_key?: string
+  apple_full_name?: string
+}
 
 router.post(
   '/',
@@ -22,20 +31,29 @@ router.post(
     z.object({
       grant_type: z.union([
         z.literal('password'),
-        z.literal('refresh_token'),
+        z.literal('refresh_key'),
         z.literal('apple'),
       ]),
       username: z.string().optional(),
       password: z.string().optional(),
       refresh_token: z.string().optional(),
-      apple_token: z.string().optional(),
+      apple_key: z.string().optional(),
       apple_full_name: z.string().optional(),
     }),
     handleValidationError,
   ),
   async (c) => {
-    const options = c.req.valid('form') as TokenExchangeOptions
-    return c.json(await exchange(options))
+    const options = c.req.valid('form') as SessionExchangeOptions
+    return c.json(
+      await exchange({
+        grant_type: options.grant_type,
+        username: options.username,
+        password: options.password,
+        refresh_token: options.refresh_key,
+        apple_token: options.apple_key,
+        apple_full_name: options.apple_full_name,
+      }),
+    )
   },
 )
 

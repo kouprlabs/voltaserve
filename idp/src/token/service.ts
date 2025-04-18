@@ -27,14 +27,21 @@ import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { signUpWithApple } from '@/account/service.ts'
 
-export type TokenGrantType = 'password' | 'refresh_token' | 'apple'
+export type TokenGrantType =
+  | 'password'
+  | 'refresh_token'
+  | 'refresh_key'
+  | 'apple'
 
 // https://datatracker.ietf.org/doc/html/rfc6749#section-5.1
 export type Token = {
   access_token: string
+  access_key: string
   token_type: string
+  key_type: string
   expires_in: number
   refresh_token: string
+  refresh_key: string
 }
 
 // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3.2
@@ -43,7 +50,7 @@ export type TokenExchangeOptions = {
   username?: string
   password?: string
   refresh_token?: string
-  apple_jwt?: string
+  apple_token?: string
   apple_full_name?: string
 }
 
@@ -111,12 +118,12 @@ async function exchangeWithRefreshToken(
 async function exchangeWithApple(
   options: TokenExchangeOptions,
 ): Promise<Token> {
-  const { apple_jwt } = options
-  const { header } = decode(apple_jwt!)
+  const { apple_token } = options
+  const { header } = decode(apple_token!)
   const appleKey = await getApplePublicKey(header)
   let payload: any
   try {
-    payload = await verify(apple_jwt!, appleKey, 'RS256')
+    payload = await verify(apple_token!, appleKey, 'RS256')
   } catch {
     throw newInvalidAppleTokenError()
   }
@@ -143,14 +150,16 @@ function validateParameters(options: TokenExchangeOptions) {
   if (getConfig().isLocalStrategy()) {
     if (
       options.grant_type !== 'password' &&
-      options.grant_type !== 'refresh_token'
+      options.grant_type !== 'refresh_token' &&
+      options.grant_type !== 'refresh_key'
     ) {
       throw newInvalidGrantType(options.grant_type)
     }
   } else if (getConfig().isAppleStrategy()) {
     if (
       options.grant_type !== 'apple' &&
-      options.grant_type !== 'refresh_token'
+      options.grant_type !== 'refresh_token' &&
+      options.grant_type !== 'refresh_key'
     ) {
       throw newInvalidGrantType(options.grant_type)
     }
@@ -165,7 +174,10 @@ function validateParameters(options: TokenExchangeOptions) {
       throw newMissingFormParamError('password')
     }
   }
-  if (options.grant_type === 'refresh_token' && !options.refresh_token) {
+  if (
+    (options.grant_type === 'refresh_token' ||
+      options.grant_type === 'refresh_key') && !options.refresh_token
+  ) {
     throw newMissingFormParamError('refresh_token')
   }
 }
@@ -185,11 +197,15 @@ async function newToken(userId: string, isAdmin: boolean): Promise<Token> {
     config.jwtSigningKey,
     'HS256',
   )
+  const refreshToken = newHyphenlessUuid()
   const token: Token = {
     access_token: jwt,
+    access_key: jwt,
     expires_in: expiry,
     token_type: 'Bearer',
-    refresh_token: newHyphenlessUuid(),
+    key_type: 'Bearer',
+    refresh_token: refreshToken,
+    refresh_key: refreshToken,
   }
   const user = await userRepo.findById(userId)
   await userRepo.update({

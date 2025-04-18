@@ -16,6 +16,7 @@ import { getConfig } from '@/config/config.ts'
 import healthRouter from '@/health/router.ts'
 import { ErrorCode, ErrorData, newError, newResponse } from '@/error/core.ts'
 import tokenRouter from '@/token/router.ts'
+import sessionRouter from '@/session/router.ts'
 import userRepo from '@/user/repo.ts'
 import userRouter from '@/user/router.ts'
 import versionRouter from '@/version/router.ts'
@@ -68,6 +69,7 @@ app.use('/v3/*', async (c, next) => {
     c.req.path.startsWith('/v3/accounts') ||
     c.req.path.startsWith('/v3/users/me/picture') ||
     c.req.path === '/v3/token' ||
+    c.req.path === '/v3/session' ||
     c.req.path === '/v3/health' ||
     c.req.path === '/version'
   ) {
@@ -102,6 +104,7 @@ app.route('/v3/health', healthRouter)
 app.route('/v3/users', userRouter)
 app.route('/v3/accounts', accountRouter)
 app.route('/v3/token', tokenRouter)
+app.route('/v3/session', sessionRouter)
 app.route('/version', versionRouter)
 
 postgres

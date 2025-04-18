@@ -132,7 +132,7 @@ func (r *UserRouter) Probe(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/users/{id}/picture.{extension} [get]
 func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Query("access_token", c.Query("access_key"))
 	if accessToken == "" {
 		return errorpkg.NewFileNotFoundError(nil)
 	}
