@@ -898,7 +898,7 @@ func (r *FileRouter) FindGroupPermissions(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/original.{ext} [get]
 func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Query("access_token", c.Query("access_key"))
 	if accessToken == "" {
 		return errorpkg.NewFileNotFoundError(nil)
 	}
@@ -952,7 +952,7 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/preview.{ext} [get]
 func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Query("access_token", c.Query("access_key"))
 	if accessToken == "" {
 		return errorpkg.NewFileNotFoundError(nil)
 	}
@@ -1006,7 +1006,7 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/text{ext} [get]
 func (r *FileRouter) DownloadText(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Query("access_token", c.Query("access_key"))
 	if accessToken == "" {
 		return errorpkg.NewFileNotFoundError(nil)
 	}
@@ -1054,7 +1054,7 @@ func (r *FileRouter) DownloadText(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/ocr{ext} [get]
 func (r *FileRouter) DownloadOCR(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Query("access_token", c.Query("access_key"))
 	if accessToken == "" {
 		return errorpkg.NewFileNotFoundError(nil)
 	}
@@ -1102,7 +1102,7 @@ func (r *FileRouter) DownloadOCR(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/thumbnail.{ext} [get]
 func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Query("access_token", c.Query("access_key"))
 	if accessToken == "" {
 		return errorpkg.NewFileNotFoundError(nil)
 	}
@@ -1162,7 +1162,7 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 	if apiKey != r.config.Security.APIKey {
 		return errorpkg.NewInvalidAPIKeyError()
 	}
-	accessToken := c.Query("access_token")
+	accessToken := c.Query("access_token", c.Query("access_key"))
 	if accessToken == "" {
 		return errorpkg.NewMissingQueryParamError("access_token")
 	}
@@ -1268,7 +1268,7 @@ func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 	if apiKey != r.config.Security.APIKey {
 		return errorpkg.NewInvalidAPIKeyError()
 	}
-	accessToken := c.Query("access_token")
+	accessToken := c.Query("access_token", c.Query("access_key"))
 	if accessToken == "" {
 		return errorpkg.NewMissingQueryParamError("access_token")
 	}
