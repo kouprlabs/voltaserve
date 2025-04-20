@@ -27,11 +27,7 @@ import { User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { signUpWithApple } from '@/account/service.ts'
 
-export type TokenGrantType =
-  | 'password'
-  | 'refresh_token'
-  | 'refresh_key'
-  | 'apple'
+export type TokenGrantType = 'password' | 'refresh_token' | 'apple'
 
 // https://datatracker.ietf.org/doc/html/rfc6749#section-5.1
 export type Token = {
@@ -150,16 +146,14 @@ function validateParameters(options: TokenExchangeOptions) {
   if (getConfig().isLocalStrategy()) {
     if (
       options.grant_type !== 'password' &&
-      options.grant_type !== 'refresh_token' &&
-      options.grant_type !== 'refresh_key'
+      options.grant_type !== 'refresh_token'
     ) {
       throw newInvalidGrantType(options.grant_type)
     }
   } else if (getConfig().isAppleStrategy()) {
     if (
       options.grant_type !== 'apple' &&
-      options.grant_type !== 'refresh_token' &&
-      options.grant_type !== 'refresh_key'
+      options.grant_type !== 'refresh_token'
     ) {
       throw newInvalidGrantType(options.grant_type)
     }
@@ -174,10 +168,7 @@ function validateParameters(options: TokenExchangeOptions) {
       throw newMissingFormParamError('password')
     }
   }
-  if (
-    (options.grant_type === 'refresh_token' ||
-      options.grant_type === 'refresh_key') && !options.refresh_token
-  ) {
+  if (options.grant_type === 'refresh_token' && !options.refresh_token) {
     throw newMissingFormParamError('refresh_token')
   }
 }
