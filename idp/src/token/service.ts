@@ -185,12 +185,11 @@ async function newToken(userId: string, isAdmin: boolean): Promise<Token> {
     config.jwtSigningKey,
     'HS256',
   )
-  const refreshToken = newHyphenlessUuid()
   const token: Token = {
     access_token: jwt,
     expires_in: expiry,
     token_type: 'Bearer',
-    refresh_token: refreshToken,
+    refresh_token: newHyphenlessUuid(),
   }
   const user = await userRepo.findById(userId)
   await userRepo.update({
