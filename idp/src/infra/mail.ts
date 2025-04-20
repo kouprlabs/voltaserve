@@ -37,9 +37,6 @@ export function sendTemplateMail(
   address: string,
   variables: Record<string, any>,
 ) {
-  if (!getConfig().isLocalStrategy()) {
-    return
-  }
   const params = yaml.load(
     fs.readFileSync(path.join('templates', template, 'params.yml'), 'utf8'),
   ) as MessageParams

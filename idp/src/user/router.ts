@@ -12,7 +12,6 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import fs, { writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { getConfig } from '@/config/config.ts'
 import {
   newMissingQueryParamError,
   newPictureNotFoundError,
@@ -47,8 +46,8 @@ import { getUser, getUserIdFromAccessToken } from '@/lib/router.ts'
 
 const router = new Hono()
 
-router.get('/me', async (c) => {
-  return c.json(await find(getUser(c).id))
+router.get('/me', (c) => {
+  return c.json(find(getUser(c)))
 })
 
 router.get('/me/:filename', async (c) => {
@@ -80,7 +79,7 @@ router.post(
   ),
   async (c) => {
     const body = c.req.valid('json') as UserUpdateFullNameOptions
-    return c.json(await updateFullName(getUser(c).id, body))
+    return c.json(await updateFullName(getUser(c), body))
   },
 )
 
@@ -92,11 +91,8 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
     const body = c.req.valid('json') as UserUpdateEmailRequestOptions
-    return c.json(await updateEmailRequest(getUser(c).id, body))
+    return c.json(await updateEmailRequest(getUser(c), body))
   },
 )
 
@@ -108,9 +104,6 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
     const body = c.req.valid('json') as UserUpdateEmailConfirmationOptions
     return c.json(await updateEmailConfirmation(body))
   },
@@ -127,11 +120,8 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
     const body = c.req.valid('json') as UserUpdatePasswordOptions
-    return c.json(await updatePassword(getUser(c).id, body))
+    return c.json(await updatePassword(getUser(c), body))
   },
 )
 
@@ -164,7 +154,7 @@ router.post(
     await writeFile(path, Buffer.from(arrayBuffer))
 
     try {
-      return c.json(await updatePicture(getUser(c).id, path, file.type))
+      return c.json(await updatePicture(getUser(c), path, file.type))
     } finally {
       await fs.rm(path)
     }
@@ -172,13 +162,13 @@ router.post(
 )
 
 router.post('/me/delete_picture', async (c) => {
-  return c.json(await deletePicture(getUser(c).id))
+  return c.json(await deletePicture(getUser(c)))
 })
 
 router.delete(
   '/me',
   async (c) => {
-    await deleteUser(getUser(c).id)
+    await deleteUser(getUser(c))
     return c.body(null, 204)
   },
 )
@@ -195,10 +185,7 @@ router.get(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
-    if (!c.get('user').isAdmin) {
+    if (!getUser(c).isAdmin) {
       throw newUserIsNotAdminError()
     }
     const { query, size, page } = c.req.valid('query') as UserListOptions
@@ -214,10 +201,7 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
-    if (!c.get('user').isAdmin) {
+    if (!getUser(c).isAdmin) {
       throw newUserIsNotAdminError()
     }
     const { id } = c.req.param()
@@ -235,10 +219,7 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
-    if (!c.get('user').isAdmin) {
+    if (!getUser(c).isAdmin) {
       throw newUserIsNotAdminError()
     }
     const { id } = c.req.param()
@@ -249,10 +230,7 @@ router.post(
 )
 
 router.get('/:id', async (c) => {
-  if (!getConfig().isLocalStrategy()) {
-    return c.notFound()
-  }
-  if (!c.get('user').isAdmin) {
+  if (!getUser(c).isAdmin) {
     throw newUserIsNotAdminError()
   }
   const { id } = c.req.param()

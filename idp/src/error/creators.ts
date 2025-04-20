@@ -153,3 +153,11 @@ export function newInvalidAppleTokenError() {
     userMessage: 'Unable to verify your Apple sign-in. Please try again.',
   })
 }
+
+export function newUnsupportedOperationError() {
+  return newError({
+    code: ErrorCode.UnsupportedOperation,
+    message: 'Unsupported operation.',
+    userMessage: 'Unsupported operation.',
+  })
+}

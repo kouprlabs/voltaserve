@@ -140,21 +140,11 @@ function validateParameters(options: TokenExchangeOptions) {
   if (!options.grant_type) {
     throw newMissingFormParamError('grant_type')
   }
-  if (getConfig().isLocalStrategy()) {
-    if (
-      options.grant_type !== 'password' &&
-      options.grant_type !== 'refresh_token'
-    ) {
-      throw newInvalidGrantType(options.grant_type)
-    }
-  } else if (getConfig().isAppleStrategy()) {
-    if (
-      options.grant_type !== 'apple' &&
-      options.grant_type !== 'refresh_token'
-    ) {
-      throw newInvalidGrantType(options.grant_type)
-    }
-  } else {
+  if (
+    options.grant_type !== 'password' &&
+    options.grant_type !== 'refresh_token' &&
+    options.grant_type !== 'apple'
+  ) {
     throw newInvalidGrantType(options.grant_type)
   }
   if (options.grant_type === 'password') {

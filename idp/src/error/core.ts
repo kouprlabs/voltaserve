@@ -28,6 +28,7 @@ export enum ErrorCode {
   UserNotFound = 'user_not_found',
   CannotSuspendLastAdmin = 'cannot_suspend_last_admin',
   SearchError = 'search_error',
+  UnsupportedOperation = 'unsupported_operation',
 }
 
 type StatusCode = 500 | 400 | 401 | 403 | 404 | 409 | 429

@@ -38,6 +38,7 @@ mod m20250328_000001_drop_userpermission_user_fkey;
 mod m20250328_000002_drop_task_user_fkey;
 mod m20250328_000003_drop_invitation_user_fkey;
 mod m20250404_000001_update_password_hash_column;
+mod m20250420_000001_add_user_strategy_column;
 
 #[async_trait::async_trait]
 impl MigratorTrait for Migrator {
@@ -68,6 +69,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20250328_000002_drop_task_user_fkey::Migration),
             Box::new(m20250328_000003_drop_invitation_user_fkey::Migration),
             Box::new(m20250404_000001_update_password_hash_column::Migration),
+            Box::new(m20250420_000001_add_user_strategy_column::Migration),
         ]
     }
 }

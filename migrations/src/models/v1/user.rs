@@ -30,6 +30,7 @@ pub enum User {
     Picture,
     FailedAttempts,
     LockedUntil,
+    Strategy,
     CreateTime,
     UpdateTime,
 }
