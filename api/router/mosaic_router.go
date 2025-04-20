@@ -134,7 +134,7 @@ func (r *MosaicRouter) GetMetadata(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{file_id}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension} [get]
 func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Query("access_token", c.Query("access_key"))
 	if accessToken == "" {
 		return errorpkg.NewFileNotFoundError(nil)
 	}

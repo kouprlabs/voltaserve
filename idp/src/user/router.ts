@@ -56,7 +56,7 @@ router.get('/me/:filename', async (c) => {
   if (basename(filename, extname(filename)) !== 'picture') {
     return c.body(null, 404)
   }
-  const accessToken = c.req.query('access_token')
+  const accessToken = c.req.query('access_token') || c.req.query('access_key')
   if (!accessToken) {
     throw newMissingQueryParamError('access_token')
   }

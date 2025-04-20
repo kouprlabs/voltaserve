@@ -43,7 +43,7 @@ export type TokenExchangeOptions = {
   username?: string
   password?: string
   refresh_token?: string
-  apple_jwt?: string
+  apple_token?: string
   apple_full_name?: string
 }
 
@@ -111,12 +111,12 @@ async function exchangeWithRefreshToken(
 async function exchangeWithApple(
   options: TokenExchangeOptions,
 ): Promise<Token> {
-  const { apple_jwt } = options
-  const { header } = decode(apple_jwt!)
+  const { apple_token } = options
+  const { header } = decode(apple_token!)
   const appleKey = await getApplePublicKey(header)
   let payload: any
   try {
-    payload = await verify(apple_jwt!, appleKey, 'RS256')
+    payload = await verify(apple_token!, appleKey, 'RS256')
   } catch {
     throw newInvalidAppleTokenError()
   }
