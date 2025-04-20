@@ -32,12 +32,9 @@ export type TokenGrantType = 'password' | 'refresh_token' | 'apple'
 // https://datatracker.ietf.org/doc/html/rfc6749#section-5.1
 export type Token = {
   access_token: string
-  access_key: string
   token_type: string
-  key_type: string
   expires_in: number
   refresh_token: string
-  refresh_key: string
 }
 
 // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3.2
@@ -191,12 +188,9 @@ async function newToken(userId: string, isAdmin: boolean): Promise<Token> {
   const refreshToken = newHyphenlessUuid()
   const token: Token = {
     access_token: jwt,
-    access_key: jwt,
     expires_in: expiry,
     token_type: 'Bearer',
-    key_type: 'Bearer',
     refresh_token: refreshToken,
-    refresh_key: refreshToken,
   }
   const user = await userRepo.findById(userId)
   await userRepo.update({
