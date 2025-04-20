@@ -10,7 +10,6 @@
 
 export class Config {
   port: number = 0
-  strategy: Strategy = Strategy.Local
   publicUIURL: string = ''
   databaseURL: string = ''
   token: TokenConfig
@@ -28,19 +27,6 @@ export class Config {
     this.smtp = new SMTPConfig()
     this.security = new SecurityConfig()
   }
-
-  isLocalStrategy(): boolean {
-    return this.strategy === Strategy.Local
-  }
-
-  isAppleStrategy(): boolean {
-    return this.strategy === Strategy.Apple
-  }
-}
-
-export enum Strategy {
-  Local = 'local',
-  Apple = 'apple',
 }
 
 export class TokenConfig {

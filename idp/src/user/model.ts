@@ -8,6 +8,11 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 
+export enum Strategy {
+  Local = 'local',
+  Apple = 'apple',
+}
+
 export type User = {
   id: string
   fullName: string
@@ -26,8 +31,17 @@ export type User = {
   picture?: string
   failedAttempts: number
   lockedUntil?: string
+  strategy: Strategy
   createTime: string
   updateTime?: string
+}
+
+export function isLocalStrategy(user: User): boolean {
+  return user.strategy === Strategy.Local
+}
+
+export function isAppleStrategy(user: User): boolean {
+  return user.strategy === Strategy.Apple
 }
 
 export type InsertOptions = {

@@ -11,6 +11,7 @@ import { getConfig } from '@/config/config.ts'
 import { newDateTime } from '@/infra/date-time.ts'
 import {
   newInternalServerError,
+  newUnsupportedOperationError,
   newUsernameUnavailableError,
 } from '@/error/creators.ts'
 import { newHashId, newHyphenlessUuid } from '@/infra/id.ts'
@@ -21,7 +22,7 @@ import {
   USER_SEARCH_INDEX,
 } from '@/infra/meilisearch.ts'
 import { logger } from '@/infra/logger.ts'
-import { User } from '@/user/model.ts'
+import { isLocalStrategy, User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { getCount, mapEntity, UserDTO } from '@/user/service.ts'
 import { call as callWebhook, UserWebhookEventType } from '@/user/webhook.ts'
@@ -157,6 +158,9 @@ export async function signUpWithApple(
 
 export async function resetPassword(options: AccountResetPasswordOptions) {
   const user = await userRepo.findByResetPasswordToken(options.token)
+  if (!isLocalStrategy(user)) {
+    throw newUnsupportedOperationError()
+  }
   await userRepo.update({
     id: user.id,
     passwordHash: hashPassword(options.newPassword),
@@ -165,6 +169,9 @@ export async function resetPassword(options: AccountResetPasswordOptions) {
 
 export async function confirmEmail(options: AccountConfirmEmailOptions) {
   let user = await userRepo.findByEmailConfirmationToken(options.token)
+  if (!isLocalStrategy(user)) {
+    throw newUnsupportedOperationError()
+  }
   user = await userRepo.update({
     id: user.id,
     isEmailConfirmed: true,
@@ -187,17 +194,15 @@ export async function confirmEmail(options: AccountConfirmEmailOptions) {
 export async function sendResetPasswordEmail(
   options: AccountSendResetPasswordEmailOptions,
 ) {
-  let user: User
+  let user = await userRepo.findByEmail(options.email)
+  if (!isLocalStrategy(user)) {
+    throw newUnsupportedOperationError()
+  }
   try {
-    user = await userRepo.findByEmail(options.email)
     user = await userRepo.update({
       id: user.id,
       resetPasswordToken: newHyphenlessUuid(),
     })
-  } catch {
-    return
-  }
-  try {
     await sendTemplateMail('reset-password', user.email, {
       'UI_URL': getConfig().publicUIURL,
       'TOKEN': user.resetPasswordToken,

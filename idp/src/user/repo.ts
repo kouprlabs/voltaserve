@@ -274,6 +274,7 @@ class UserRepoImpl {
       picture: row.picture,
       failedAttempts: Number(row.failed_attempts),
       lockedUntil: row.locked_until,
+      strategy: row.strategy,
       createTime: row.create_time,
       updateTime: row.update_time,
     }

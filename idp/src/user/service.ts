@@ -20,6 +20,7 @@ import {
   newInternalServerError,
   newPasswordValidationFailedError,
   newPictureNotFoundError,
+  newUnsupportedOperationError,
   newUsernameUnavailableError,
   newUserNotFoundError,
 } from '@/error/creators.ts'
@@ -31,7 +32,7 @@ import {
   client as meilisearch,
   USER_SEARCH_INDEX,
 } from '@/infra/meilisearch.ts'
-import { User } from '@/user/model.ts'
+import { isLocalStrategy, User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { Buffer } from 'node:buffer'
 import { call as callWebhook, UserWebhookEventType } from './webhook.ts'
@@ -115,8 +116,8 @@ export type UserListOptions = {
   page: number
 }
 
-export async function find(id: string): Promise<UserDTO> {
-  return mapEntity(await userRepo.findById(id))
+export function find(user: User): UserDTO {
+  return mapEntity(user)
 }
 
 export async function findAsAdmin(id: string): Promise<UserAdminDTO> {
@@ -183,10 +184,9 @@ export async function list({
 }
 
 export async function updateFullName(
-  id: string,
+  user: User,
   options: UserUpdateFullNameOptions,
 ): Promise<UserDTO> {
-  let user = await userRepo.findById(id)
   user = await userRepo.update({ id: user.id, fullName: options.fullName })
   await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
@@ -204,10 +204,12 @@ export async function updateFullName(
 }
 
 export async function updateEmailRequest(
-  id: string,
+  user: User,
   options: UserUpdateEmailRequestOptions,
 ): Promise<UserDTO> {
-  let user = await userRepo.findById(id)
+  if (!isLocalStrategy(user)) {
+    throw newUnsupportedOperationError()
+  }
   if (options.email === user.email) {
     user = await userRepo.update({
       id: user.id,
@@ -240,7 +242,7 @@ export async function updateEmailRequest(
       return mapEntity(user)
     } catch (error) {
       await userRepo.update({
-        id,
+        id: user.id,
         emailUpdateToken: null,
         emailUpdateValue: null,
       })
@@ -253,6 +255,9 @@ export async function updateEmailConfirmation(
   options: UserUpdateEmailConfirmationOptions,
 ) {
   let user = await userRepo.findByEmailUpdateToken(options.token)
+  if (!isLocalStrategy(user)) {
+    throw newUnsupportedOperationError()
+  }
   user = await userRepo.update({
     id: user.id,
     email: user.emailUpdateValue,
@@ -276,10 +281,12 @@ export async function updateEmailConfirmation(
 }
 
 export async function updatePassword(
-  id: string,
+  user: User,
   options: UserUpdatePasswordOptions,
 ): Promise<UserDTO> {
-  let user = await userRepo.findById(id)
+  if (!isLocalStrategy(user)) {
+    throw newUnsupportedOperationError()
+  }
   if (verifyPassword(options.currentPassword, user.passwordHash)) {
     user = await userRepo.update({
       id: user.id,
@@ -292,12 +299,11 @@ export async function updatePassword(
 }
 
 export async function updatePicture(
-  id: string,
+  { id: userId }: User,
   path: string,
   contentType: string,
 ): Promise<UserDTO> {
   const picture = await fs.readFile(path, { encoding: 'base64' })
-  const { id: userId } = await userRepo.findById(id)
   const user = await userRepo.update({
     id: userId,
     picture: `data:${contentType};base64,${picture}`,
@@ -317,9 +323,8 @@ export async function updatePicture(
   return mapEntity(user)
 }
 
-export async function deletePicture(id: string): Promise<UserDTO> {
-  let user = await userRepo.findById(id)
-  user = await userRepo.update({ id: user.id, picture: null })
+export async function deletePicture({ id }: User): Promise<UserDTO> {
+  const user = await userRepo.update({ id, picture: null })
   await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
     {
       id: user.id,
@@ -335,8 +340,7 @@ export async function deletePicture(id: string): Promise<UserDTO> {
   return mapEntity(user)
 }
 
-export async function deleteUser(id: string) {
-  const user = await userRepo.findById(id)
+export async function deleteUser(user: User) {
   if (getConfig().userWebhooks.length > 0) {
     const dto = mapEntity(user)
     if (getConfig().userWebhooks.length > 0) {

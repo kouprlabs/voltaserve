@@ -22,7 +22,6 @@ import {
   sendResetPasswordEmail,
   signUpWithLocal,
 } from '@/account/service.ts'
-import { getConfig } from '@/config/config.ts'
 
 const router = new Hono()
 
@@ -41,9 +40,6 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
     const body = c.req.valid('json') as AccountSignUpWithLocalOptions
     return c.json(await signUpWithLocal(body))
   },
@@ -64,9 +60,6 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
     const body = c.req.valid('json') as AccountResetPasswordOptions
     await resetPassword(body)
     return c.body(null, 200)
@@ -81,9 +74,6 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
     const body = c.req.valid('json') as AccountConfirmEmailOptions
     await confirmEmail(body)
     return c.body(null, 200)
@@ -98,9 +88,6 @@ router.post(
     handleValidationError,
   ),
   async (c) => {
-    if (!getConfig().isLocalStrategy()) {
-      return c.notFound()
-    }
     const body = c.req.valid('json') as AccountSendResetPasswordEmailOptions
     await sendResetPasswordEmail(body)
     return c.body(null, 204)
