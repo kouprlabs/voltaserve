@@ -7,10 +7,15 @@
 <h3 align="center">Cloud Storage for Creators</h2>
 
 <p align="center">
-<a href="https://youtu.be/Uf3EWb2hDfs?feature=shared">Watch the Demo Video</a>
+<a href="https://youtu.be/Uf3EWb2hDfs">▶ Watch the Intro Video</a><br/>
+<a href="https://youtu.be/TJor0bxQnR4">▶ Discover A New Way to Interact with Computers</a>
 </p>
 
-Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions, preview 3D models. collaborate in real-time.
+Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions, preview 3D models. collaborate in real-time —all this while keeping your data at your possession.
+
+Voltaserve is reinventing the computer experience. It lets you interact with your computer using natural, human language — issuing commands through chat — while still navigating folders and opening files in a way that feels familiar, fluid, and powerful.
+
+<img src=".assets/collage-20250421130000.png">
 
 ## Getting Started
 
