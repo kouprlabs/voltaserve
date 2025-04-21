@@ -134,7 +134,10 @@ const FileMenu = ({
     () =>
       file?.type === 'file' &&
       !isTaskPending(file.snapshot?.task) &&
-      isImage(file.snapshot?.original.extension),
+      isImage(file.snapshot?.original.extension) &&
+      ((geViewerPermission(file.permission) &&
+        file.snapshot?.capabilities.mosaic) ||
+        geEditorPermission(file.permission)),
     [file],
   )
   const isSharingAuthorized = useMemo(
