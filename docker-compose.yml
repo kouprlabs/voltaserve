@@ -234,6 +234,26 @@ services:
       - mosaic
       - cockroach
     restart: on-failure
+  murph:
+    image: voltaserve/murph
+    ports:
+      - ${VOLTASERVE_MURPH_PORT}:8087
+    environment:
+      - PORT=8080
+      - API_URL=http://api:8080
+      - CONVERSION_URL=http://conversion:8083
+      - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
+      - S3_URL=minio:9000
+      - SEARCH_URL=http://meilisearch:7700
+      - REDIS_ADDRESS=redis:6379
+    healthcheck:
+      test: wget --quiet --spider http://127.0.0.1:8087/v3/health || exit 1
+    depends_on:
+      - cockroach
+      - redis
+      - minio
+      - meilisearch
+    restart: on-failure
   migrations:
     image: voltaserve/migrations:${VOLTASERVE_VERSION}
     build:

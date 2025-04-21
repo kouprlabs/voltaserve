@@ -43,6 +43,7 @@ type LimitsConfig struct {
 }
 
 type DefaultsConfig struct {
+	StorageQuotaMB             int64
 	WorkspaceStorageCapacityMB int64
 }
 
@@ -131,6 +132,13 @@ func readLimits(config *Config) {
 }
 
 func readDefaults(config *Config) {
+	if len(os.Getenv("DEFAULTS_STORAGE_QUOTA_MB")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("DEFAULTS_STORAGE_QUOTA_MB"), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		config.Defaults.StorageQuotaMB = v
+	}
 	if len(os.Getenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB")) > 0 {
 		v, err := strconv.ParseInt(os.Getenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB"), 10, 64)
 		if err != nil {

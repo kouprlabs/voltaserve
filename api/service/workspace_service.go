@@ -46,6 +46,8 @@ type WorkspaceService struct {
 	fileGuard              *guard.FileGuard
 	fileMapper             *mapper.FileMapper
 	fileDelete             *fileDelete
+	storageQuotaRepo       *repo.StorageQuotaRepo
+	permissionRepo         *repo.PermissionRepo
 	s3                     infra.S3Manager
 	config                 *config.Config
 }
@@ -108,8 +110,16 @@ func NewWorkspaceService() *WorkspaceService {
 			config.GetConfig().Environment,
 		),
 		fileDelete: newFileDelete(),
-		s3:         infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
-		config:     config.GetConfig(),
+		storageQuotaRepo: repo.NewStorageQuotaRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		permissionRepo: repo.NewPermissionRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		s3:     infra.NewS3Manager(config.GetConfig().S3, config.GetConfig().Environment),
+		config: config.GetConfig(),
 	}
 }
 
@@ -124,14 +134,16 @@ func (svc *WorkspaceService) Create(opts dto.WorkspaceCreateOptions, userID stri
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionEditor); err != nil {
 		return nil, err
 	}
-	if svc.config.WorkspaceWebhook != "" {
-		if err := svc.workspaceWebhookClient.Call(config.GetConfig().WorkspaceWebhook, dto.WorkspaceWebhookOptions{
-			EventType: dto.WorkspaceWebhookEventTypeCreate,
-			UserID:    userID,
-			Create:    &opts,
-		}); err != nil {
-			return nil, err
-		}
+	storageQuota, err := svc.storageQuotaRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	storageUsage, err := svc.computeStorageUsageForCreate(userID, opts.StorageCapacity)
+	if err != nil {
+		return nil, err
+	}
+	if storageUsage > helper.MegabyteToByte(storageQuota.GetStorageCapacity()) {
+		return nil, errorpkg.NewStorageQuotaExceededError()
 	}
 	workspace, err := svc.create(opts, userID)
 	if err != nil {
@@ -245,17 +257,21 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	if svc.config.WorkspaceWebhook != "" {
-		if err := svc.workspaceWebhookClient.Call(config.GetConfig().WorkspaceWebhook, dto.WorkspaceWebhookOptions{
-			EventType:   dto.WorkspaceWebhookEventTypePatchStorageCapacity,
-			UserID:      userID,
-			WorkspaceID: &id,
-			PatchStorageCapacity: &dto.WorkspacePatchStorageCapacityOptions{
-				StorageCapacity: storageCapacity,
-			},
-		}); err != nil {
-			return nil, err
-		}
+	firstOwner, err := svc.permissionRepo.FindFirstOwnerOfResource(id)
+	if err != nil {
+		return nil, err
+	}
+	storageQuota, err := svc.storageQuotaRepo.FindByUserID(firstOwner)
+	if err != nil {
+		return nil, err
+	}
+	storageUsage, err := svc.computeStorageUsageForPatch(firstOwner, id, storageCapacity)
+	if err != nil {
+		return nil, err
+	}
+	storageUsage += storageCapacity
+	if storageUsage > helper.MegabyteToByte(storageQuota.GetStorageCapacity()) {
+		return nil, errorpkg.NewStorageQuotaExceededError()
 	}
 	size, err := svc.fileRepo.ComputeSize(workspace.GetRootID())
 	if err != nil {
@@ -582,4 +598,41 @@ func (svc *WorkspaceService) deleteFiles(id string) error {
 		}
 	}
 	return nil
+}
+
+func (svc *WorkspaceService) computeStorageUsageForCreate(userID string, storageCapacity int64) (int64, error) {
+	ids, err := svc.workspaceRepo.FindIDsByOwner(userID)
+	if err != nil {
+		return -1, err
+	}
+	var res int64
+	for _, id := range ids {
+		workspace, err := svc.workspaceCache.Get(id)
+		if err != nil {
+			return -1, err
+		}
+		res += workspace.GetStorageCapacity()
+	}
+	res += storageCapacity
+	return res, nil
+}
+
+func (svc *WorkspaceService) computeStorageUsageForPatch(userID string, workspaceID string, storageCapacity int64) (int64, error) {
+	ids, err := svc.workspaceRepo.FindIDsByOwner(userID)
+	if err != nil {
+		return -1, err
+	}
+	var res int64
+	for _, id := range ids {
+		workspace, err := svc.workspaceCache.Get(id)
+		if err != nil {
+			return -1, err
+		}
+		if workspaceID == workspace.GetID() {
+			res += storageCapacity
+		} else {
+			res += workspace.GetStorageCapacity()
+		}
+	}
+	return res, nil
 }
