@@ -66,7 +66,7 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:1080 || exit 1
   api:
-    image: voltaserve/api:${VOLTASERVE_VERSION}
+    image: voltaserve/api
     build:
       context: .
       dockerfile: ./api/Dockerfile
@@ -89,6 +89,7 @@ services:
       - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+      - SNAPSHOT_WEBHOOK=http://murph:8087/v1/webhooks/snapshots
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8080/v3/health || exit 1
     depends_on:
@@ -98,7 +99,7 @@ services:
       - meilisearch
     restart: on-failure
   idp:
-    image: voltaserve/idp:${VOLTASERVE_VERSION}
+    image: voltaserve/idp
     build:
       context: ./idp
     ports:
@@ -115,6 +116,7 @@ services:
       - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+      - USER_WEBHOOKS=http://api:8080/v3/webhooks/users,http://murph:8087/v1/webhooks/users
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8081/v3/health || exit 1
     depends_on:
@@ -123,7 +125,7 @@ services:
       - minio
     restart: on-failure
   ui:
-    image: voltaserve/ui:${VOLTASERVE_VERSION}
+    image: voltaserve/ui
     build:
       context: ./ui
     ports:
@@ -138,7 +140,7 @@ services:
       - api
     restart: on-failure
   webdav:
-    image: voltaserve/webdav:${VOLTASERVE_VERSION}
+    image: voltaserve/webdav
     build:
       context: .
       dockerfile: ./webdav/Dockerfile
@@ -157,7 +159,7 @@ services:
       - api
     restart: on-failure
   conversion:
-    image: voltaserve/conversion:${VOLTASERVE_VERSION}
+    image: voltaserve/conversion
     build:
       context: .
       dockerfile: ./conversion/Dockerfile
@@ -177,7 +179,7 @@ services:
       - minio
     restart: on-failure
   language:
-    image: voltaserve/language:${VOLTASERVE_VERSION}
+    image: voltaserve/language
     build:
       context: ./language
     ports:
@@ -186,7 +188,7 @@ services:
       test: wget --quiet --spider http://127.0.0.1:8084/v3/health || exit 1
     restart: on-failure
   mosaic:
-    image: voltaserve/mosaic:${VOLTASERVE_VERSION}
+    image: voltaserve/mosaic
     build:
       context: .
       dockerfile: ./mosaic/Dockerfile
@@ -198,7 +200,7 @@ services:
       test: wget --quiet --spider http://127.0.0.1:8085/v3/health || exit 1
     restart: on-failure
   console:
-    image: voltaserve/console:${VOLTASERVE_VERSION}
+    image: voltaserve/console
     build:
       context: ./console
       dockerfile: Dockerfile
@@ -239,7 +241,7 @@ services:
     ports:
       - ${VOLTASERVE_MURPH_PORT}:8087
     environment:
-      - PORT=8080
+      - PORT=8087
       - API_URL=http://api:8080
       - CONVERSION_URL=http://conversion:8083
       - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
@@ -256,7 +258,7 @@ services:
       - meilisearch
     restart: on-failure
   migrations:
-    image: voltaserve/migrations:${VOLTASERVE_VERSION}
+    image: voltaserve/migrations
     build:
       context: ./migrations
     environment:

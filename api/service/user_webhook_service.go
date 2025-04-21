@@ -77,6 +77,9 @@ func (svc *UserWebhookService) Handle(opts dto.UserWebhookOptions) error {
 }
 
 func (svc *UserWebhookService) handleCreate(opts dto.UserWebhookOptions) error {
+	if err := svc.createStorageQuota(opts.User.ID); err != nil {
+		return err
+	}
 	org, err := svc.orgSvc.Create(dto.OrganizationCreateOptions{
 		Name: "My Organization",
 	}, opts.User.ID)
@@ -93,9 +96,6 @@ func (svc *UserWebhookService) handleCreate(opts dto.UserWebhookOptions) error {
 		Name:           "My Group",
 		OrganizationID: org.ID,
 	}, opts.User.ID); err != nil {
-		return err
-	}
-	if err := svc.createStorageQuota(opts.User.ID); err != nil {
 		return err
 	}
 	return nil

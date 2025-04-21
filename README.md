@@ -14,16 +14,22 @@ Handle massive images with mosaic technology, extract insights from documents, s
 
 ## Getting Started
 
+### Optional Murph Setup
+
+To take advantage of Murph, you will need a Google Gemini API key, in this case, edit the [.env](.env) file as follows:
+
+```properties
+VOLTASERVE_LLM_GEMINI_API_KEY=YOUR_GOOGLE_GEMINI_API_KEY_HERE
+```
+
+Replace the placeholder `YOUR_GOOGLE_GEMINI_API_KEY_HERE` with the actual value.
+
+### Run Your Instance
+
 Pull images: (_recommended for most users_)
 
 ```shell
 docker compose pull
-```
-
-Optionally, you can pull a specific version by passing the environment variable as follows:
-
-```shell
-VOLTASERVE_VERSION=3.0.0 docker compose pull
 ```
 
 Optionally build the images from the source: (_can be skipped if you pulled the images_)
@@ -47,6 +53,7 @@ Wait until the following containers are running:
 - `voltaserve-language`
 - `voltaserve-mosaic`
 - `voltaserve-console`
+- `voltaserve-murph`
 - `voltaserve-ui`
 
 > **Note**
@@ -65,13 +72,34 @@ Create an account and sign in:
 >
 > Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV) and by default it listens on port `8082`.
 
-### Voltasverve iOS App
+### Voltasverve Pro iOS App (for iPad, iPhone and Mac)
 
-Voltaserve's iOS app defines a gold standard: it's native, optimized for iPhone and iPad, runs great on the Mac, has a slick UI/UX with real-time updates, and it's written in SwiftUI.
+Watch the demo video on [YouTube](https://youtu.be/RpHp0OEa_o8?feature=shared).
 
-- Get started on [GitHub](https://github.com/kouprlabs/voltaserve-ios).
+Voltaserve Pro iOS app defines a gold standard: it's native, optimized for iPhone and iPad, runs great on the Mac, has a slick UI/UX with real-time updates, and it's written in SwiftUI.
 
-- Watch the demo video on [YouTube](https://youtu.be/RpHp0OEa_o8?feature=shared).
+After launching the app, you’ll be asked to review and accept the Privacy Policy and Terms & Conditions.
+
+Once accepted, you’ll see a button labeled “New Server” in the center of the screen under the logo. Please tap it and enter the following details to connect to your Voltaserve instance:
+
+| Field                 | Value                       |
+| --------------------- | --------------------------- |
+| Name                  | My Voltaserve               |
+| API URL               | `http://your-hostname:8080` |
+| Identity Provider URL | `http://your-hostname:8081` |
+| Murph URL (optional)  | `http://your-hostname:8087` |
+
+Replace `your-hostname` with the actual hostname, domain or IP address of your Voltaserve instance.
+
+> **Note**
+>
+> Murph URL is optional, it can be omitted if you don't have a Google Gemini API key.
+
+You can keep the "Sign In Strategy" as "Apple" so you can sign in easily with your Apple account, or switch it to "Local" for a traditional sign up with email confirmation, for this you need to make sure your SMTP server is up and running as documented further down.
+
+After saving, you will be able to sign in.
+
+The core of the iOS app is open source and available [here](https://github.com/kouprlabs/voltaserve-ios).
 
 ### Mount the Drive on Your Computer
 
