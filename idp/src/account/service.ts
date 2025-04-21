@@ -22,7 +22,7 @@ import {
   USER_SEARCH_INDEX,
 } from '@/infra/meilisearch.ts'
 import { logger } from '@/infra/logger.ts'
-import { isLocalStrategy, User } from '@/user/model.ts'
+import { isLocalStrategy, Strategy, User } from '@/user/model.ts'
 import userRepo from '@/user/repo.ts'
 import { getCount, mapEntity, UserDTO } from '@/user/service.ts'
 import { call as callWebhook, UserWebhookEventType } from '@/user/webhook.ts'
@@ -36,6 +36,7 @@ export type AccountCreateOptions = {
   emailConfirmationToken?: string
   isAdmin?: boolean
   isEmailConfirmed?: boolean
+  strategy: Strategy
 }
 
 export type AccountSignUpWithLocalOptions = {
@@ -91,6 +92,7 @@ export async function createUser(options: AccountCreateOptions): Promise<User> {
       createTime: newDateTime(),
       isAdmin: options.isAdmin,
       isEmailConfirmed: options.isEmailConfirmed,
+      strategy: options.strategy,
     })
     await meilisearch.index(USER_SEARCH_INDEX).addDocuments([
       {
@@ -141,6 +143,7 @@ export async function signUpWithLocal(
       picture: options.picture,
       emailConfirmationToken: newHyphenlessUuid(),
       isAdmin: (await getCount()) === 0,
+      strategy: Strategy.Local,
     }),
   )
 }
@@ -153,6 +156,7 @@ export async function signUpWithApple(
     email: options.payload.email.toLocaleLowerCase(),
     fullName: options.appleFullName ?? options.payload.email,
     isEmailConfirmed: true,
+    strategy: Strategy.Apple,
   })
 }
 
