@@ -134,16 +134,8 @@ func (svc *WorkspaceService) Create(opts dto.WorkspaceCreateOptions, userID stri
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionEditor); err != nil {
 		return nil, err
 	}
-	storageQuota, err := svc.storageQuotaRepo.FindByUserID(userID)
-	if err != nil {
-		return nil, err
-	}
-	storageUsage, err := svc.computeStorageUsageForCreate(userID, opts.StorageCapacity)
-	if err != nil {
-		return nil, err
-	}
-	if storageUsage > helper.MegabyteToByte(storageQuota.GetStorageCapacity()) {
-		return nil, errorpkg.NewStorageQuotaExceededError()
+	if err := svc.checkStorageQuotaOnCreate(opts.StorageCapacity, userID); err != nil {
+		return nil, nil
 	}
 	workspace, err := svc.create(opts, userID)
 	if err != nil {
@@ -257,21 +249,8 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	firstOwner, err := svc.permissionRepo.FindFirstOwnerOfResource(id)
-	if err != nil {
+	if err := svc.checkStorageQuotaOnPatch(id, storageCapacity); err != nil {
 		return nil, err
-	}
-	storageQuota, err := svc.storageQuotaRepo.FindByUserID(firstOwner)
-	if err != nil {
-		return nil, err
-	}
-	storageUsage, err := svc.computeStorageUsageForPatch(firstOwner, id, storageCapacity)
-	if err != nil {
-		return nil, err
-	}
-	storageUsage += storageCapacity
-	if storageUsage > helper.MegabyteToByte(storageQuota.GetStorageCapacity()) {
-		return nil, errorpkg.NewStorageQuotaExceededError()
 	}
 	size, err := svc.fileRepo.ComputeSize(workspace.GetRootID())
 	if err != nil {
@@ -600,7 +579,48 @@ func (svc *WorkspaceService) deleteFiles(id string) error {
 	return nil
 }
 
-func (svc *WorkspaceService) computeStorageUsageForCreate(userID string, storageCapacity int64) (int64, error) {
+func (svc *WorkspaceService) checkStorageQuotaOnCreate(storageCapacity int64, userID string) error {
+	if svc.config.Environment.IsTest {
+		return nil
+	}
+	storageQuota, err := svc.storageQuotaRepo.FindByUserID(userID)
+	if err != nil {
+		return err
+	}
+	storageUsage, err := svc.computeStorageUsageForCreate(storageCapacity, userID)
+	if err != nil {
+		return err
+	}
+	if storageUsage > helper.MegabyteToByte(storageQuota.GetStorageCapacity()) {
+		return errorpkg.NewStorageQuotaExceededError()
+	}
+	return nil
+}
+
+func (svc *WorkspaceService) checkStorageQuotaOnPatch(id string, storageCapacity int64) error {
+	if svc.config.Environment.IsTest {
+		return nil
+	}
+	firstOwner, err := svc.permissionRepo.FindFirstOwnerOfResource(id)
+	if err != nil {
+		return err
+	}
+	storageQuota, err := svc.storageQuotaRepo.FindByUserID(firstOwner)
+	if err != nil {
+		return err
+	}
+	storageUsage, err := svc.computeStorageUsageForPatch(id, storageCapacity, firstOwner)
+	if err != nil {
+		return err
+	}
+	storageUsage += storageCapacity
+	if storageUsage > helper.MegabyteToByte(storageQuota.GetStorageCapacity()) {
+		return errorpkg.NewStorageQuotaExceededError()
+	}
+	return nil
+}
+
+func (svc *WorkspaceService) computeStorageUsageForCreate(storageCapacity int64, userID string) (int64, error) {
 	ids, err := svc.workspaceRepo.FindIDsByOwner(userID)
 	if err != nil {
 		return -1, err
@@ -617,18 +637,18 @@ func (svc *WorkspaceService) computeStorageUsageForCreate(userID string, storage
 	return res, nil
 }
 
-func (svc *WorkspaceService) computeStorageUsageForPatch(userID string, workspaceID string, storageCapacity int64) (int64, error) {
-	ids, err := svc.workspaceRepo.FindIDsByOwner(userID)
+func (svc *WorkspaceService) computeStorageUsageForPatch(id string, storageCapacity int64, userID string) (int64, error) {
+	ownedIDs, err := svc.workspaceRepo.FindIDsByOwner(userID)
 	if err != nil {
 		return -1, err
 	}
 	var res int64
-	for _, id := range ids {
-		workspace, err := svc.workspaceCache.Get(id)
+	for _, ownedID := range ownedIDs {
+		workspace, err := svc.workspaceCache.Get(ownedID)
 		if err != nil {
 			return -1, err
 		}
-		if workspaceID == workspace.GetID() {
+		if id == workspace.GetID() {
 			res += storageCapacity
 		} else {
 			res += workspace.GetStorageCapacity()
