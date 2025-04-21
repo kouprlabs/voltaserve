@@ -12,6 +12,7 @@ package service
 
 import (
 	"github.com/kouprlabs/voltaserve/shared/dto"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/repo"
 
 	"github.com/kouprlabs/voltaserve/api/config"
@@ -19,15 +20,17 @@ import (
 )
 
 type UserWebhookService struct {
-	permissionRepo *repo.PermissionRepo
-	workspaceSvc   *WorkspaceService
-	workspaceRepo  *repo.WorkspaceRepo
-	groupSvc       *GroupService
-	groupRepo      *repo.GroupRepo
-	orgSvc         *OrganizationService
-	orgRepo        *repo.OrganizationRepo
-	taskSvc        *TaskService
-	taskRepo       *repo.TaskRepo
+	permissionRepo   *repo.PermissionRepo
+	workspaceSvc     *WorkspaceService
+	workspaceRepo    *repo.WorkspaceRepo
+	groupSvc         *GroupService
+	groupRepo        *repo.GroupRepo
+	orgSvc           *OrganizationService
+	orgRepo          *repo.OrganizationRepo
+	taskSvc          *TaskService
+	taskRepo         *repo.TaskRepo
+	storageQuotaRepo *repo.StorageQuotaRepo
+	config           *config.Config
 }
 
 func NewUserWebhookService() *UserWebhookService {
@@ -56,6 +59,11 @@ func NewUserWebhookService() *UserWebhookService {
 			config.GetConfig().Environment,
 		),
 		taskSvc: NewTaskService(),
+		storageQuotaRepo: repo.NewStorageQuotaRepo(
+			config.GetConfig().Postgres,
+			config.GetConfig().Environment,
+		),
+		config: config.GetConfig(),
 	}
 }
 
@@ -69,6 +77,9 @@ func (svc *UserWebhookService) Handle(opts dto.UserWebhookOptions) error {
 }
 
 func (svc *UserWebhookService) handleCreate(opts dto.UserWebhookOptions) error {
+	if err := svc.createStorageQuota(opts.User.ID); err != nil {
+		return err
+	}
 	org, err := svc.orgSvc.Create(dto.OrganizationCreateOptions{
 		Name: "My Organization",
 	}, opts.User.ID)
@@ -96,9 +107,8 @@ func (svc *UserWebhookService) handleDelete(opts dto.UserWebhookOptions) error {
 		svc.deleteGroups(opts.User.ID)
 		svc.deleteOrganizations(opts.User.ID)
 		svc.deleteTasks(opts.User.ID)
-		if err := svc.permissionRepo.DeleteUserPermissionsForUser(opts.User.ID); err != nil {
-			logger.GetLogger().Error(err)
-		}
+		svc.deleteUserPermissions(opts.User.ID)
+		svc.deleteStorageQuota(opts.User.ID)
 	}()
 	return nil
 }
@@ -152,5 +162,28 @@ func (svc *UserWebhookService) deleteTasks(userID string) {
 				logger.GetLogger().Error(err)
 			}
 		}
+	}
+}
+
+func (svc *UserWebhookService) deleteUserPermissions(userID string) {
+	if err := svc.permissionRepo.DeleteUserPermissionsForUser(userID); err != nil {
+		logger.GetLogger().Error(err)
+	}
+}
+
+func (svc *UserWebhookService) createStorageQuota(userID string) error {
+	storageQuota := repo.NewStorageQuotaModel()
+	storageQuota.SetID(helper.NewID())
+	storageQuota.SetUserID(userID)
+	storageQuota.SetStorageCapacity(svc.config.Defaults.StorageQuotaMB)
+	if _, err := svc.storageQuotaRepo.Insert(storageQuota); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *UserWebhookService) deleteStorageQuota(userID string) {
+	if err := svc.storageQuotaRepo.DeleteByUserID(userID); err != nil {
+		logger.GetLogger().Error(err)
 	}
 }

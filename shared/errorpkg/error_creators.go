@@ -555,3 +555,13 @@ func NewUnauthorizedUserError() *ErrorResponse {
 		nil,
 	)
 }
+
+func NewStorageQuotaExceededError() *ErrorResponse {
+	return NewErrorResponse(
+		"storage_quota_exceeded",
+		http.StatusForbidden,
+		"Storage quota exceeded.",
+		"Storage quota of your account has been reached, please increase it and try again.",
+		nil,
+	)
+}

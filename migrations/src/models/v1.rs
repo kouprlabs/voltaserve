@@ -15,7 +15,12 @@ mod snapshot;
 mod task;
 mod user;
 mod workspace;
+mod action;
+mod run;
+mod storage_quota;
+mod murph_quota;
 
 pub use {
     file::*, group::*, invitation::*, organization::*, snapshot::*, task::*, user::*, workspace::*,
+    action::*, run::*, storage_quota::*, murph_quota::*
 };
