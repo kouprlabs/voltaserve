@@ -58,6 +58,7 @@ export type InsertOptions = {
   isAdmin?: boolean
   isActive?: boolean
   picture?: string
+  strategy: Strategy
   createTime?: string
   updateTime?: string
 }

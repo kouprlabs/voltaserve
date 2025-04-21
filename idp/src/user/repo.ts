@@ -148,8 +148,9 @@ class UserRepoImpl {
         is_admin,
         is_active,
         picture,
+        strategy,
         create_time
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
       [
         data.id,
         data.fullName,
@@ -164,6 +165,7 @@ class UserRepoImpl {
         data.isAdmin || false,
         data.isActive || true,
         data.picture,
+        data.strategy,
         new Date().toISOString(),
       ],
     )
