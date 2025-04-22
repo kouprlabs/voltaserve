@@ -77,11 +77,11 @@ Create an account and sign in:
 >
 > Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV) and by default it listens on port `8082`.
 
-### Voltasverve Pro iOS App (for iPad, iPhone and Mac)
+### The iOS App (iPad, iPhone and Mac)
 
 Watch the demo video on [YouTube](https://youtu.be/RpHp0OEa_o8?feature=shared).
 
-Voltaserve Pro iOS app defines a gold standard: it's native, optimized for iPhone and iPad, runs great on the Mac, has a slick UI/UX with real-time updates, and it's written in SwiftUI.
+The iOS app defines a gold standard: it's native, optimized for iPhone and iPad, runs great on the Mac, has a slick UI/UX with real-time updates, and it's written in SwiftUI.
 
 After launching the app, you’ll be asked to review and accept the Privacy Policy and Terms & Conditions.
 
