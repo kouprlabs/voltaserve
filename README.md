@@ -17,7 +17,7 @@
 
 <p align="center">
 <a href="https://youtu.be/Uf3EWb2hDfs">▶ Watch the Intro Video</a><br/>
-<a href="https://youtu.be/TJor0bxQnR4">▶ Discover A New Way to Interact with Computers</a>
+<a href="https://youtu.be/sCfvdj49WBw">▶ Discover A New Way to Interact with Computers</a>
 </p>
 
 Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions, preview 3D models. collaborate in real-time —all this while keeping your data at your possession.
