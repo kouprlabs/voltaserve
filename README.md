@@ -16,8 +16,8 @@
 </p>
 
 <p align="center">
-<a href="https://youtu.be/Uf3EWb2hDfs">▶ Watch the Intro Video</a><br/>
-<a href="https://youtu.be/sCfvdj49WBw">▶ Discover A New Way to Interact with Computers</a>
+  <a href="https://youtu.be/Uf3EWb2hDfs">▶ Watch the Intro Video</a><br/>
+  <a href="https://youtu.be/sCfvdj49WBw">▶ Discover A New Way to Interact with Computers</a>
 </p>
 
 Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions, preview 3D models. collaborate in real-time —all this while keeping your data at your possession.
@@ -88,7 +88,9 @@ Create an account and sign in:
 
 ### The iOS App (iPad, iPhone and Mac)
 
-Watch the demo video on [YouTube](https://youtu.be/RpHp0OEa_o8?feature=shared).
+Download on the [App Store](https://apps.apple.com/app/id6744360805), or the [Mac App Store](https://apps.apple.com/mac/app/id6744360805).
+
+Watch [Murph in action](https://youtu.be/sCfvdj49WBw) on the iPad and iPhone, or a [walkthrough video](https://youtu.be/RpHp0OEa_o8) of various capabilities.
 
 The iOS app defines a gold standard: it's native, optimized for iPhone and iPad, runs great on the Mac, has a slick UI/UX with real-time updates, and it's written in SwiftUI.
 
