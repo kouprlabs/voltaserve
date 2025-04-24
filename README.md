@@ -7,6 +7,15 @@
 <h3 align="center">Cloud Storage for Creators</h2>
 
 <p align="center">
+  <a href="https://apps.apple.com/app/id6744360805">
+    <img height="40" src=".assets/app-store-20250424234000.svg" />
+  </a>
+  <a href="https://apps.apple.com/mac/app/id6744360805">
+    <img height="40" src=".assets/mac-app-store-20250424234000.svg" />
+  </a>
+</p>
+
+<p align="center">
 <a href="https://youtu.be/Uf3EWb2hDfs">▶ Watch the Intro Video</a><br/>
 <a href="https://youtu.be/TJor0bxQnR4">▶ Discover A New Way to Interact with Computers</a>
 </p>
