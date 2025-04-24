@@ -92,7 +92,7 @@ Download on the [App Store](https://apps.apple.com/app/id6744360805), or the [Ma
 
 Watch [Murph in action](https://youtu.be/sCfvdj49WBw) on the iPad and iPhone, or a [walkthrough video](https://youtu.be/RpHp0OEa_o8) of various capabilities.
 
-The iOS app defines a gold standard: it's native, optimized for iPhone and iPad, runs great on the Mac, has a slick UI/UX with real-time updates, and it's written in SwiftUI.
+Voltaserve’s iOS app defines a gold standard: it’s fully native, optimized for iPhone and iPad, runs beautifully on Mac, features a slick UI with real-time updates, and is built using Apple’s flagship framework — SwiftUI.
 
 After launching the app, you’ll be asked to review and accept the Privacy Policy and Terms & Conditions.
 
