@@ -25,9 +25,7 @@ Voltaserve is the cloud storage where you can talk to your files and manipulate 
 
 Visualize massive images instantly and at full quality with Mosaic technology, interact with your 3D models on every device, extract valuable insights from your documents, stream large videos, protect data with permissions, and collaborate in real-time — Voltaserve is the creative powerhouse you've always wanted.
 
-> **Note**
->
-> If you are a digital artist, photographer, content creator, journalist, musician or an astronomer —Voltaserve is built for you.
+_If you are a digital artist, photographer, content creator, journalist, musician or an astronomer —Voltaserve is built for you._
 
 <img src=".assets/collage-20250421130000.png">
 
