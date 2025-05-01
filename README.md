@@ -16,13 +16,18 @@
 </p>
 
 <p align="center">
-  <a href="https://youtu.be/Uf3EWb2hDfs">▶ Watch the Intro Video</a><br/>
-  <a href="https://youtu.be/sCfvdj49WBw">▶ Discover A New Way to Interact with Computers</a>
+  <a href="https://youtu.be/sCfvdj49WBw">▶ See how you can talk to your files and manilulate them</a>
+  <br/>
+  <a href="https://youtu.be/Uf3EWb2hDfs">▶ Discover the creative private cloud you've always wanted</a>
 </p>
 
-Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions, preview 3D models. collaborate in real-time —all this while keeping your data at your possession.
+Voltaserve is the cloud storage where you can talk to your files and manipulate them — all through a unique chat UI that lets you open files, navigate folders, and manage your data in a way that feels both familiar and powerful.
 
-Voltaserve is reinventing the computer experience. It lets you interact with your computer using natural, human language — issuing commands through chat — while still navigating folders and opening files in a way that feels familiar, fluid, and powerful.
+Visualize massive images instantly and at full quality with Mosaic technology, interact with your 3D models on every device, extract valuable insights from your documents, stream large videos, protect data with permissions, and collaborate in real-time — Voltaserve is the creative powerhouse you've always wanted.
+
+> **Note**
+>
+> If you are a digital artist, photographer, content creator, journalist, musician or an astronomer —Voltaserve is built for you.
 
 <img src=".assets/collage-20250421130000.png">
 
@@ -92,7 +97,7 @@ Download on the [App Store](https://apps.apple.com/app/id6744360805), or the [Ma
 
 Watch [Murph in action](https://youtu.be/sCfvdj49WBw) on the iPad and iPhone, or a [walkthrough video](https://youtu.be/RpHp0OEa_o8) of various capabilities.
 
-Voltaserve’s iOS app defines a gold standard: it’s fully native, optimized for iPad and iPhone, runs beautifully on Mac, features a slick UI with real-time updates, and is built using Apple’s flagship framework — SwiftUI.
+Voltaserve’s iOS app defines a gold standard: it’s fully native, optimized for iPad and iPhone, runs beautifully on the Mac, features a slick UI with real-time updates, and is built using Apple’s flagship framework — SwiftUI.
 
 After launching the app, you’ll be asked to review and accept the Privacy Policy and Terms & Conditions.
 
