@@ -21,7 +21,7 @@
   <a href="https://youtu.be/Uf3EWb2hDfs">▶ Your creative private cloud</a>
 </p>
 
-Voltaserve is the cloud storage where you can talk to your files and manipulate them, this is unprecedented and it's designed for the creative minds; if you are a digital artist, photographer, content creator, journalist, or a musician — Voltaserve is built for you.
+Voltaserve is the cloud storage where you can talk to your files and manipulate them. This is unprecedented, and it’s designed for creative minds. If you are a digital artist, photographer, content creator, journalist, or a musician — Voltaserve is built for you.
 
 <img src=".assets/collage-20250421130000.png">
 
@@ -91,7 +91,7 @@ Download on the [App Store](https://apps.apple.com/app/id6744360805), or the [Ma
 
 Watch [Murph in action](https://youtu.be/sCfvdj49WBw) on the iPad and iPhone, or a [walkthrough video](https://youtu.be/RpHp0OEa_o8) of various capabilities.
 
-Voltaserve’s iOS app defines a gold standard: it’s fully native, optimized for iPad and iPhone, runs beautifully on the Mac, features a slick UI with real-time updates, and is built using Apple’s flagship framework — SwiftUI.
+Voltaserve’s iOS app defines a gold standard: it’s fully native, optimized for iPad and iPhone, runs beautifully on the Mac, features a slick UI with real-time updates, and is built using Apple’s flagship framework, SwiftUI.
 
 After launching the app, you’ll be asked to review and accept the Privacy Policy and Terms & Conditions.
 
