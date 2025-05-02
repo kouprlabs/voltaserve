@@ -16,16 +16,16 @@
 </p>
 
 <p align="center">
-  <a href="https://youtu.be/sCfvdj49WBw">▶ See how you can talk to your files and manilulate them</a>
+  <a href="https://youtu.be/sCfvdj49WBw">▶ Talk to your files and manilulate them</a>
   <br/>
-  <a href="https://youtu.be/Uf3EWb2hDfs">▶ Discover the creative private cloud you've always wanted</a>
+  <a href="https://youtu.be/Uf3EWb2hDfs">▶ Your creative private cloud</a>
 </p>
 
 Voltaserve is the cloud storage where you can talk to your files and manipulate them — all through a unique chat UI that lets you open files, navigate folders, and manage your data in a way that feels both familiar and powerful.
 
 Visualize massive images instantly and at full quality with Mosaic technology, interact with your 3D models on every device, extract valuable insights from your documents, stream large videos, protect data with permissions, and collaborate in real-time — Voltaserve is the creative powerhouse you've always wanted.
 
-_If you are a digital artist, photographer, content creator, journalist or a musician —Voltaserve is built for you._
+_If you are a digital artist, photographer, content creator, journalist, or a musician — Voltaserve is built for you._
 
 <img src=".assets/collage-20250421130000.png">
 
@@ -125,7 +125,7 @@ The core of the iOS app is open source and available [here](https://github.com/k
 We recommend the following third-party applications:
 
 - [Mountainduck](https://mountainduck.io)
-- [Owlfiles](https://www.skyjos.com/owlfiles).
+- [Owlfiles](https://www.skyjos.com/owlfiles)
 
 ### Connect with WebDAV
 
@@ -135,7 +135,7 @@ We recommend the following third-party applications:
 - [Owlfiles](https://www.skyjos.com/owlfiles)
 - [Cyberduck](https://cyberduck.io)
 - [WinSCP](https://winscp.net)
-- [Rclone](https://rclone.org/webdav).
+- [Rclone](https://rclone.org/webdav)
 
 ### Configuration
 
