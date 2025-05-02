@@ -21,11 +21,7 @@
   <a href="https://youtu.be/Uf3EWb2hDfs">▶ Your creative private cloud</a>
 </p>
 
-Voltaserve is the cloud storage where you can talk to your files and manipulate them — all through a unique chat UI that lets you open files, navigate folders, and manage your data in a way that feels both familiar and powerful.
-
-Visualize massive images instantly and at full quality with Mosaic technology, interact with your 3D models on every device, extract valuable insights from your documents, stream large videos, protect data with permissions, and collaborate in real-time — Voltaserve is the creative powerhouse you've always wanted.
-
-_If you are a digital artist, photographer, content creator, journalist, or a musician — Voltaserve is built for you._
+Voltaserve is the cloud storage where you can talk to your files and manipulate them, this is unprecedented and it's designed for the creative minds; if you are a digital artist, photographer, content creator, journalist, or a musician — Voltaserve is built for you.
 
 <img src=".assets/collage-20250421130000.png">
 
