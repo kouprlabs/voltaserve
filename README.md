@@ -19,6 +19,8 @@
   <a href="https://youtu.be/sCfvdj49WBw">▶ Talk to your files and manilulate them</a>
   <br/>
   <a href="https://youtu.be/Uf3EWb2hDfs">▶ Your creative private cloud</a>
+  <br/>
+  <a href="https://youtu.be/RpHp0OEa_o8">▶ iOS app walkthtough</a>
 </p>
 
 [![Join our Discord](https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white&label=Join%20us&style=for-the-badge)](https://discord.gg/qYXtsMpqMR)
