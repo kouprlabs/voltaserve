@@ -18,7 +18,7 @@ COPY .env .
 COPY deno.json .
 COPY deno.lock .
 
-RUN deno task compile
+RUN deno task compile --allow-read --allow-write --allow-env --allow-sys --allow-net
 
 FROM debian:bookworm-slim AS runner
 
