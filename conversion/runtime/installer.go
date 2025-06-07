@@ -11,21 +11,18 @@
 package runtime
 
 import (
-	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
 	"github.com/kouprlabs/voltaserve/conversion/logger"
 )
 
 type Installer struct {
 	cmd       *infra.Command
-	config    *config.Config
 	isRunning bool
 }
 
 func NewInstaller() *Installer {
 	return &Installer{
-		cmd:    infra.NewCommand(),
-		config: config.GetConfig(),
+		cmd: infra.NewCommand(),
 	}
 }
 
@@ -36,15 +33,13 @@ func (d *Installer) IsRunning() bool {
 func (d *Installer) Start() {
 	go func() {
 		d.isRunning = true
-		if d.config.EnableInstaller {
-			d.updatePackageList()
-			d.installCoreTools()
-			d.installGltfPipeline()
-			d.installBlender()
-			d.installLibreOffice()
-			d.installTesseract()
-			d.installFonts()
-		}
+		d.updatePackageList()
+		d.installCoreTools()
+		d.installGltfPipeline()
+		d.installBlender()
+		d.installLibreOffice()
+		d.installTesseract()
+		d.installFonts()
 		d.isRunning = false
 	}()
 }
