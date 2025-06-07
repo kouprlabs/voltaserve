@@ -8,16 +8,18 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM python:3.11.9-bookworm
+FROM python:3.11.9-slim-bookworm
 
 WORKDIR /app
 
 COPY . .
 
-RUN apt-get update &&\
-    apt-get install -y curl build-essential curl rust-all
+RUN apt-get update && \
+    apt-get install -y curl build-essential curl rust-all && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN pip install poetry &&\
+RUN pip install poetry && \
     poetry config virtualenvs.create false
 
 RUN poetry install --no-root

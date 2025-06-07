@@ -250,7 +250,7 @@ services:
       - REDIS_ADDRESS=redis:6379
       - LLM_GEMINI_API_KEY=${VOLTASERVE_LLM_GEMINI_API_KEY}
     healthcheck:
-      test: wget --quiet --spider http://127.0.0.1:8087/v3/health || exit 1
+      test: wget --quiet --spider http://127.0.0.1:8087/v1/health || exit 1
     depends_on:
       - cockroach
       - redis

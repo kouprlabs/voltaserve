@@ -63,16 +63,16 @@ func main() {
 
 	group := app.Group("v3")
 
-	router.NewHealthRouter(router.HealthRouterOptions{
-		Installer: installer,
-	}).AppendRoutes(group)
+	router.NewHealthRouter().AppendRoutes(group)
 
 	router.NewPipelineRouter(router.NewPipelineRouterOptions{
 		Scheduler: scheduler,
 	}).AppendRoutes(group)
 
 	scheduler.Start()
-	installer.Start()
+	if cfg.EnableInstaller {
+		installer.Start()
+	}
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

@@ -17,7 +17,7 @@ ARG USER_GID=$USER_UID
 
 RUN addgroup \
     --gid "$USER_UID" \
-    "$GROUPNAME" &&\
+    "$GROUPNAME" && \
     adduser \
     --disabled-password \
     --gecos "" \
@@ -31,20 +31,20 @@ WORKDIR /app
 
 ADD pyproject.toml .
 
-RUN apk update &&\
-    pip install --upgrade pip &&\
-    apk add --no-cache --virtual .build-deps gcc build-base libffi-dev libretls-dev cargo musl-dev libpq-dev &&\
-    pip install poetry &&\
-    poetry config virtualenvs.create false &&\
-    poetry config installer.max-workers 8 &&\
-    poetry config installer.parallel true &&\
+RUN apk update && \
+    pip install --upgrade pip && \
+    apk add --no-cache --virtual .build-deps gcc build-base libffi-dev libretls-dev cargo musl-dev libpq-dev && \
+    pip install poetry && \
+    poetry config virtualenvs.create false && \
+    poetry config installer.max-workers 8 && \
+    poetry config installer.parallel true && \
     poetry config solver.lazy-wheel true
 
 COPY . .
 
-RUN poetry install --no-interaction --no-ansi --no-cache &&\
-    apk del .build-deps &&\
-    rm -rf /root/.cache /root/.cargo &&\
+RUN poetry install --no-interaction --no-ansi --no-cache && \
+    apk del .build-deps && \
+    rm -rf /root/.cache /root/.cargo && \
     chown $USERNAME:$GROUPNAME /app
 
 USER $USERNAME

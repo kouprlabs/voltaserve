@@ -20,7 +20,12 @@ COPY deno.lock .
 
 RUN deno task compile --allow-read --allow-write --allow-env --allow-sys --allow-net
 
-FROM debian:bookworm AS runner
+FROM debian:bookworm-slim AS runner
+
+RUN apt-get update && \
+    apt-get install -y curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
