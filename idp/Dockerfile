@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM denoland/deno:debian-2.1.4 AS builder
+FROM denoland/deno:debian-2.3.5 AS builder
 
 WORKDIR /build
 
@@ -20,7 +20,7 @@ COPY deno.lock .
 
 RUN deno task compile --allow-read --allow-write --allow-env --allow-sys --allow-net
 
-FROM debian:bookworm-slim AS runner
+FROM debian:bookworm AS runner
 
 WORKDIR /app
 

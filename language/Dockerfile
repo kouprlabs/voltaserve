@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # AGPL-3.0-only in the root of this repository.
 
-FROM python:3.11.9-slim-bookworm
+FROM python:3.11.9-bookworm
 
 WORKDIR /app
 
