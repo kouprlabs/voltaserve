@@ -118,7 +118,7 @@ services:
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
       - USER_WEBHOOKS=http://api:8080/v3/webhooks/users,http://murph:8087/v1/webhooks/users
     healthcheck:
-      test: wget --quiet --spider http://127.0.0.1:8081/v3/health || exit 1
+      test: curl -fs http://127.0.0.1:8081/v3/health || exit 1
     depends_on:
       - cockroach
       - meilisearch
@@ -173,7 +173,7 @@ services:
       - MOSAIC_URL=http://mosaic:8085
       - S3_URL=minio:9000
     healthcheck:
-      test: wget --quiet --spider http://127.0.0.1:8083/v3/health || exit 1
+      test: curl -fs http://127.0.0.1:8083/v3/health || exit 1
     depends_on:
       - api
       - minio
@@ -185,7 +185,7 @@ services:
     ports:
       - ${VOLTASERVE_LANGUAGE_PORT}:8084
     healthcheck:
-      test: wget --quiet --spider http://127.0.0.1:8084/v3/health || exit 1
+      test: curl -fs http://127.0.0.1:8084/v3/health || exit 1
     restart: on-failure
   mosaic:
     image: voltaserve/mosaic
