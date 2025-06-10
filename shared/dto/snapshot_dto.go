@@ -51,7 +51,7 @@ type SnapshotCapabilities struct {
 
 type SnapshotDownloadable struct {
 	Extension string               `json:"extension,omitempty"`
-	Size      int64                `json:"size,omitempty"`
+	Size      int64                `json:"size"`
 	Image     *model.ImageProps    `json:"image,omitempty"`
 	Document  *model.DocumentProps `json:"document,omitempty"`
 }
