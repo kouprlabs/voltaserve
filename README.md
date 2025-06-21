@@ -118,7 +118,7 @@ You can keep the "Sign In Strategy" as "Apple" so you can sign in easily with yo
 
 After saving, you will be able to sign in.
 
-The core of the iOS app is open source and available [here](https://github.com/kouprlabs/voltaserve-ios).
+The core of the iOS app is open source and available [here](https://github.com/kouprlabs/voltaserve-touch).
 
 ### Mount the Drive on Your Computer
 
