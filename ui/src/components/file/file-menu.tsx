@@ -195,17 +195,23 @@ const FileMenu = ({
   ])
   const isMacOS = useMemo(() => helperIsMacOS(), [])
   const [safePosition, setSafePosition] = useState<FileMenuPosition | null>()
+  const [safeHeight, setSafeHeight] = useState<number | null>()
   const uploadInputRef = useRef<HTMLInputElement>(null)
   const menuListRef = useRef<HTMLDivElement>(null)
   const style = useMemo(() => {
-    if (!isToolbarMode && safePosition) {
+    if (isToolbarMode && safeHeight) {
+      return {
+        height: `${safeHeight}px`,
+        overflowY: 'scroll',
+      }
+    } else if (!isToolbarMode && safePosition) {
       return {
         position: 'absolute',
         left: safePosition.x,
         top: safePosition.y,
       }
     }
-  }, [isToolbarMode, safePosition])
+  }, [isToolbarMode, safePosition, safeHeight])
 
   useEffect(() => {
     if (isOpen && selection.length > 0 && menuListRef.current && position) {
@@ -230,6 +236,27 @@ const FileMenu = ({
       setSafePosition(null)
     }
   }, [isOpen, menuListRef.current])
+
+  const handleMenuButtonClick = useCallback(
+    (event: MouseEvent) => {
+      if (isToolbarMode && menuListRef.current && selection.length > 0) {
+        const rect = new DOMRect(
+          event.clientX,
+          event.clientY,
+          menuListRef.current.offsetWidth,
+          menuListRef.current.offsetHeight,
+        )
+        const overflow = Math.max(0, rect.bottom - window.innerHeight)
+        console.log(overflow, rect)
+        if (overflow > 0) {
+          setSafeHeight(rect.height - 40 - overflow)
+        } else {
+          setSafeHeight(null)
+        }
+      }
+    },
+    [isToolbarMode, selection, menuListRef.current],
+  )
 
   const handleUploadInputChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -268,6 +295,7 @@ const FileMenu = ({
             variant="solid"
             title="File menu"
             aria-label="File menu"
+            onClick={handleMenuButtonClick}
           />
         ) : null}
         <Portal>
