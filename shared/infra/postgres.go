@@ -45,9 +45,9 @@ func (mgr *PostgresManager) Connect(ignoreExisting bool) error {
 	if err != nil {
 		return err
 	}
-	sqlDB.SetMaxIdleConns(5)
-	sqlDB.SetMaxOpenConns(10)
-	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
+	sqlDB.SetMaxIdleConns(mgr.postgresConfig.MaxIdleConnections)
+	sqlDB.SetMaxOpenConns(mgr.postgresConfig.MaxOpenConnections)
+	sqlDB.SetConnMaxIdleTime(time.Duration(mgr.postgresConfig.ConnectionMaxIdleTimeMinutes) * time.Minute)
 
 	opts := &gorm.Config{}
 	if mgr.envConfig.IsTest {
