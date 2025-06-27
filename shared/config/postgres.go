@@ -20,6 +20,7 @@ type PostgresConfig struct {
 	MaxIdleConnections           int
 	MaxOpenConnections           int
 	ConnectionMaxIdleTimeMinutes int
+	KeepAliveIntervalMinutes     int
 }
 
 func ReadPostgres(config *PostgresConfig) {
@@ -44,5 +45,12 @@ func ReadPostgres(config *PostgresConfig) {
 			panic(err)
 		}
 		config.ConnectionMaxIdleTimeMinutes = int(v)
+	}
+	if len(os.Getenv("POSTGRES_KEEPALIVE_INTERVAL_MINUTES")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("POSTGRES_KEEPALIVE_INTERVAL_MINUTES"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		config.KeepAliveIntervalMinutes = int(v)
 	}
 }

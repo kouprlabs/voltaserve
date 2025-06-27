@@ -60,7 +60,7 @@ func (mgr *PostgresManager) Connect(ignoreExisting bool) error {
 	}
 
 	go func() {
-		t := time.NewTicker(3 * time.Minute)
+		t := time.NewTicker(time.Duration(mgr.postgresConfig.KeepAliveIntervalMinutes) * time.Minute)
 		for range t.C {
 			db.Exec("SELECT 1")
 		}
