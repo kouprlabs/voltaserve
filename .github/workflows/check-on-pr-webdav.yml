@@ -33,6 +33,7 @@ jobs:
 
       - name: Download Go modules
         run: go mod download
+        working-directory: webdav
 
       - name: Lint using golangci-lint
         uses: golangci/golangci-lint-action@v6.1.0
