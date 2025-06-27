@@ -11,6 +11,10 @@
 package infra
 
 import (
+	"database/sql"
+	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -36,15 +40,32 @@ func (mgr *PostgresManager) Connect(ignoreExisting bool) error {
 	if !ignoreExisting && db != nil {
 		return nil
 	}
-	var err error
+
+	sqlDB, err := sql.Open("pgx", mgr.postgresConfig.URL)
+	if err != nil {
+		return err
+	}
+	sqlDB.SetMaxIdleConns(5)
+	sqlDB.SetMaxOpenConns(10)
+	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
+
 	opts := &gorm.Config{}
 	if mgr.envConfig.IsTest {
 		opts.Logger = logger.Default.LogMode(logger.Silent)
 	}
-	db, err = gorm.Open(postgres.Open(mgr.postgresConfig.URL), opts)
+
+	db, err = gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), opts)
 	if err != nil {
 		return err
 	}
+
+	go func() {
+		t := time.NewTicker(3 * time.Minute)
+		for range t.C {
+			db.Exec("SELECT 1")
+		}
+	}()
+
 	return nil
 }
 

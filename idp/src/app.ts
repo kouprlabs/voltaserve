@@ -20,8 +20,6 @@ import sessionRouter from '@/session/router.ts'
 import userRepo from '@/user/repo.ts'
 import userRouter from '@/user/router.ts'
 import versionRouter from '@/version/router.ts'
-import { client as postgres } from '@/infra/postgres.ts'
-import process from 'node:process'
 import { User } from '@/user/model.ts'
 
 const app = new Hono()
@@ -107,10 +105,4 @@ app.route('/v3/token', tokenRouter)
 app.route('/v3/session', sessionRouter)
 app.route('/version', versionRouter)
 
-postgres
-  .connect()
-  .then(() => Deno.serve({ port: getConfig().port }, app.fetch))
-  .catch((err) => {
-    console.error(err)
-    process.exit(1)
-  })
+Deno.serve({ port: getConfig().port }, app.fetch)

@@ -8,13 +8,15 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // AGPL-3.0-only in the root of this repository.
 import { Hono } from 'hono'
-import { client as postgres } from '@/infra/postgres.ts'
+import { withPostgres } from '@/infra/postgres.ts'
 import { client as meilisearch } from '@/infra/meilisearch.ts'
 
 const router = new Hono()
 
 router.get('', async (c) => {
-  if (!postgres.connected) {
+  try {
+    await withPostgres((client) => client.queryArray('SELECT 1'))
+  } catch {
     return c.body(null, 503)
   }
   if (!(await meilisearch.isHealthy())) {

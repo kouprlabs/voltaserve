@@ -10,12 +10,39 @@
 
 package config
 
-import "os"
+import (
+	"os"
+	"strconv"
+)
 
 type PostgresConfig struct {
-	URL string
+	URL                          string
+	MaxIdleConnections           int
+	MaxOpenConnections           int
+	ConnectionMaxIdleTimeMinutes int
 }
 
 func ReadPostgres(config *PostgresConfig) {
 	config.URL = os.Getenv("POSTGRES_URL")
+	if len(os.Getenv("POSTGRES_MAX_IDLE_CONNECTIONS")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("POSTGRES_MAX_IDLE_CONNECTIONS"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		config.MaxIdleConnections = int(v)
+	}
+	if len(os.Getenv("POSTGRES_MAX_OPEN_CONNECTIONS")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("POSTGRES_MAX_OPEN_CONNECTIONS"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		config.MaxOpenConnections = int(v)
+	}
+	if len(os.Getenv("POSTGRES_CONNECTION_MAX_IDLE_TIME_MINUTES")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("POSTGRES_CONNECTION_MAX_IDLE_TIME_MINUTES"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		config.ConnectionMaxIdleTimeMinutes = int(v)
+	}
 }

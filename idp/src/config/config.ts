@@ -20,6 +20,7 @@ export function getConfig(): Config {
     config = new Config()
     config.port = parseInt(process.env.PORT)
     readURLs(config)
+    readPostgres(config)
     readToken(config)
     readPassword(config)
     readCORS(config)
@@ -35,11 +36,22 @@ export function readURLs(config: Config) {
   if (!process.env.PUBLIC_UI_URL) {
     throw newEnvironmentVariableNotSetError('PUBLIC_UI_URL')
   }
+  config.publicUIURL = process.env.PUBLIC_UI_URL
+}
+
+export function readPostgres(config: Config) {
   if (!process.env.POSTGRES_URL) {
     throw newEnvironmentVariableNotSetError('POSTGRES_URL')
   }
-  config.publicUIURL = process.env.PUBLIC_UI_URL
-  config.databaseURL = process.env.POSTGRES_URL
+  if (!process.env.POSTGRES_MAX_OPEN_CONNECTIONS) {
+    throw newEnvironmentVariableNotSetError('POSTGRES_MAX_OPEN_CONNECTIONS')
+  }
+  config.database.url = process.env.POSTGRES_URL
+  if (process.env.POSTGRES_MAX_OPEN_CONNECTIONS) {
+    config.database.maxOpenConnections = parseInt(
+      process.env.POSTGRES_MAX_OPEN_CONNECTIONS,
+    )
+  }
 }
 
 export function readToken(config: Config) {
@@ -51,6 +63,12 @@ export function readToken(config: Config) {
   }
   if (!process.env.TOKEN_ISSUER) {
     throw newEnvironmentVariableNotSetError('TOKEN_ISSUER')
+  }
+  if (!process.env.TOKEN_ACCESS_TOKEN_LIFETIME) {
+    throw newEnvironmentVariableNotSetError('TOKEN_ACCESS_TOKEN_LIFETIME')
+  }
+  if (!process.env.TOKEN_REFRESH_TOKEN_LIFETIME) {
+    throw newEnvironmentVariableNotSetError('TOKEN_REFRESH_TOKEN_LIFETIME')
   }
   config.token.jwtSigningKey = process.env.TOKEN_JWT_SIGNING_KEY
   config.token.audience = process.env.TOKEN_AUDIENCE
@@ -111,6 +129,9 @@ export function readSMTP(config: Config) {
   if (!process.env.SMTP_HOST) {
     throw newEnvironmentVariableNotSetError('SMTP_HOST')
   }
+  if (!process.env.SMTP_PORT) {
+    throw newEnvironmentVariableNotSetError('SMTP_PORT')
+  }
   if (!process.env.SMTP_SENDER_ADDRESS) {
     throw newEnvironmentVariableNotSetError('SMTP_SENDER_ADDRESS')
   }
@@ -133,6 +154,12 @@ export function readSMTP(config: Config) {
 export function readSecurity(config: Config) {
   if (!process.env.SECURITY_API_KEY) {
     throw newEnvironmentVariableNotSetError('SECURITY_API_KEY')
+  }
+  if (!process.env.SECURITY_MAX_FAILED_ATTEMPTS) {
+    throw newEnvironmentVariableNotSetError('SECURITY_MAX_FAILED_ATTEMPTS')
+  }
+  if (!process.env.SECURITY_LOCKOUT_PERIOD) {
+    throw newEnvironmentVariableNotSetError('SECURITY_LOCKOUT_PERIOD')
   }
   if (process.env.SECURITY_MAX_FAILED_ATTEMPTS) {
     config.security.maxFailedAttempts = parseInt(
