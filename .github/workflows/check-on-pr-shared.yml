@@ -28,8 +28,7 @@ jobs:
       - name: Lint using golangci-lint
         uses: golangci/golangci-lint-action@v6.1.0
         with:
-          working-directory: shared
-          args: --timeout=5m
+          args: --timeout=5m ./shared/...
           version: v1.61.0
     permissions:
       contents: read
