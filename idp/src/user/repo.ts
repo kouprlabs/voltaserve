@@ -11,130 +11,153 @@ import {
   newInternalServerError,
   newUserNotFoundError,
 } from '@/error/creators.ts'
-import { client } from '@/infra/postgres.ts'
+import { withPostgres } from '@/infra/postgres.ts'
 import { InsertOptions, UpdateOptions, User } from '@/user/model.ts'
 
 class UserRepoImpl {
-  async findById(id: string): Promise<User> {
-    const { rows } = await client.queryObject(
-      `SELECT * FROM "user" WHERE id = $1`,
-      [id],
-    )
-    if (rows.length === 0) {
-      throw newUserNotFoundError()
-    }
-    return this.mapRow(rows[0])
+  findById(id: string): Promise<User> {
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        `SELECT * FROM "user" WHERE id = $1`,
+        [id],
+      )
+      if (rows.length === 0) {
+        throw newUserNotFoundError()
+      }
+      return this.mapRow(rows[0])
+    })
   }
 
-  async findByUsername(username: string): Promise<User> {
-    const { rows } = await client.queryObject(
-      `SELECT * FROM "user" WHERE username = $1`,
-      [username],
-    )
-    if (rows.length === 0) {
-      throw newUserNotFoundError()
-    }
-    return this.mapRow(rows[0])
+  findByUsername(username: string): Promise<User> {
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        `SELECT * FROM "user" WHERE username = $1`,
+        [username],
+      )
+      if (rows.length === 0) {
+        throw newUserNotFoundError()
+      }
+      return this.mapRow(rows[0])
+    })
   }
 
-  async findByEmail(email: string): Promise<User> {
-    const { rows } = await client.queryObject(
-      `SELECT * FROM "user" WHERE email = $1`,
-      [email],
-    )
-    if (rows.length === 0) {
-      throw newUserNotFoundError()
-    }
-    return this.mapRow(rows[0])
+  findByEmail(email: string): Promise<User> {
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        `SELECT * FROM "user" WHERE email = $1`,
+        [email],
+      )
+      if (rows.length === 0) {
+        throw newUserNotFoundError()
+      }
+      return this.mapRow(rows[0])
+    })
   }
 
-  async findByRefreshTokenValue(refreshTokenValue: string): Promise<User> {
-    const { rows } = await client.queryObject(
-      `SELECT * FROM "user" WHERE refresh_token_value = $1`,
-      [refreshTokenValue],
-    )
-    if (rows.length === 0) {
-      throw newUserNotFoundError()
-    }
-    return this.mapRow(rows[0])
+  findByRefreshTokenValue(refreshTokenValue: string): Promise<User> {
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        `SELECT * FROM "user" WHERE refresh_token_value = $1`,
+        [refreshTokenValue],
+      )
+      if (rows.length === 0) {
+        throw newUserNotFoundError()
+      }
+      return this.mapRow(rows[0])
+    })
   }
 
-  async findByResetPasswordToken(resetPasswordToken: string): Promise<User> {
-    const { rows } = await client.queryObject(
-      `SELECT * FROM "user" WHERE reset_password_token = $1`,
-      [resetPasswordToken],
-    )
-    if (rows.length === 0) {
-      throw newUserNotFoundError()
-    }
-    return this.mapRow(rows[0])
+  findByResetPasswordToken(resetPasswordToken: string): Promise<User> {
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        `SELECT * FROM "user" WHERE reset_password_token = $1`,
+        [resetPasswordToken],
+      )
+      if (rows.length === 0) {
+        throw newUserNotFoundError()
+      }
+      return this.mapRow(rows[0])
+    })
   }
 
-  async findByEmailConfirmationToken(
+  findByEmailConfirmationToken(
     emailConfirmationToken: string,
   ): Promise<User> {
-    const { rows } = await client.queryObject(
-      `SELECT * FROM "user" WHERE email_confirmation_token = $1`,
-      [emailConfirmationToken],
-    )
-    if (rows.length === 0) {
-      throw newUserNotFoundError()
-    }
-    return this.mapRow(rows[0])
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        `SELECT * FROM "user" WHERE email_confirmation_token = $1`,
+        [emailConfirmationToken],
+      )
+      if (rows.length === 0) {
+        throw newUserNotFoundError()
+      }
+      return this.mapRow(rows[0])
+    })
   }
 
-  async findByEmailUpdateToken(emailUpdateToken: string): Promise<User> {
-    const { rows } = await client.queryObject(
-      `SELECT * FROM "user" WHERE email_update_token = $1`,
-      [emailUpdateToken],
-    )
-    if (rows.length === 0) {
-      throw newUserNotFoundError()
-    }
-    return this.mapRow(rows[0])
+  findByEmailUpdateToken(emailUpdateToken: string): Promise<User> {
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        `SELECT * FROM "user" WHERE email_update_token = $1`,
+        [emailUpdateToken],
+      )
+      if (rows.length === 0) {
+        throw newUserNotFoundError()
+      }
+      return this.mapRow(rows[0])
+    })
   }
 
-  async list(page: number, size: number): Promise<User[]> {
-    const { rows } = await client.queryObject(
-      `SELECT *
+  list(page: number, size: number): Promise<User[]> {
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        `SELECT *
        FROM "user"
        ORDER BY create_time
        OFFSET $1
        LIMIT $2`,
-      [(page - 1) * size, size],
-    )
-    return rows.map(this.mapRow)
+        [(page - 1) * size, size],
+      )
+      return rows.map(this.mapRow)
+    })
   }
 
-  async findMany(ids: string[]): Promise<User[]> {
-    const { rows } = await client.queryObject(
-      `SELECT *
+  findMany(ids: string[]): Promise<User[]> {
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        `SELECT *
        FROM "user"
        WHERE id = ANY ($1)
        ORDER BY create_time`,
-      [ids],
-    )
-    return rows.map(this.mapRow)
+        [ids],
+      )
+      return rows.map(this.mapRow)
+    })
   }
 
-  async getCount(): Promise<number> {
-    const { rowCount } = await client.queryObject(
-      `SELECT COUNT(id) as count FROM "user"`,
-    )
-    return rowCount ?? 0
+  getCount(): Promise<number> {
+    return withPostgres(async (client) => {
+      const { rowCount } = await client.queryObject(
+        `SELECT COUNT(id) as count FROM "user"`,
+      )
+      return rowCount ?? 0
+    })
   }
 
-  async isUsernameAvailable(username: string): Promise<boolean> {
-    const { rowCount } = await client.queryObject(
-      `SELECT * FROM "user" WHERE username = $1`,
-      [username],
-    )
-    return rowCount === 0
+  isUsernameAvailable(username: string): Promise<boolean> {
+    return withPostgres(async (client) => {
+      const { rowCount } = await client.queryObject(
+        `SELECT * FROM "user" WHERE username = $1`,
+        [username],
+      )
+      return rowCount === 0
+    })
   }
 
-  async insert(data: InsertOptions): Promise<User> {
-    const { rowCount } = await client.queryObject(
-      `INSERT INTO "user" (
+  insert(data: InsertOptions): Promise<User> {
+    return withPostgres(async (client) => {
+      const { rowCount } = await client.queryObject(
+        `INSERT INTO "user" (
         id,
         full_name,
         username,
@@ -151,39 +174,41 @@ class UserRepoImpl {
         strategy,
         create_time
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
-      [
-        data.id,
-        data.fullName,
-        data.username,
-        data.email,
-        data.passwordHash,
-        data.refreshTokenValue,
-        data.refreshTokenExpiry,
-        data.resetPasswordToken,
-        data.emailConfirmationToken,
-        data.isEmailConfirmed || false,
-        data.isAdmin || false,
-        data.isActive || true,
-        data.picture,
-        data.strategy,
-        new Date().toISOString(),
-      ],
-    )
-    if (!rowCount || rowCount === 0) {
-      throw newInternalServerError()
-    }
-    return await this.findById(data.id)
+        [
+          data.id,
+          data.fullName,
+          data.username,
+          data.email,
+          data.passwordHash,
+          data.refreshTokenValue,
+          data.refreshTokenExpiry,
+          data.resetPasswordToken,
+          data.emailConfirmationToken,
+          data.isEmailConfirmed || false,
+          data.isAdmin || false,
+          data.isActive || true,
+          data.picture,
+          data.strategy,
+          new Date().toISOString(),
+        ],
+      )
+      if (!rowCount || rowCount === 0) {
+        throw newInternalServerError()
+      }
+      return await this.findById(data.id)
+    })
   }
 
-  async update(data: UpdateOptions): Promise<User> {
-    const entity = await this.findById(data.id)
-    if (!entity) {
-      throw newUserNotFoundError()
-    }
-    Object.assign(entity, data)
-    entity.updateTime = new Date().toISOString()
-    const { rowCount } = await client.queryObject(
-      `UPDATE "user" 
+  update(data: UpdateOptions): Promise<User> {
+    return withPostgres(async (client) => {
+      const entity = await this.findById(data.id)
+      if (!entity) {
+        throw newUserNotFoundError()
+      }
+      Object.assign(entity, data)
+      entity.updateTime = new Date().toISOString()
+      const { rowCount } = await client.queryObject(
+        `UPDATE "user" 
         SET
           full_name = $1,
           username = $2,
@@ -204,57 +229,66 @@ class UserRepoImpl {
           update_time = $17
         WHERE id = $18
         RETURNING *`,
-      [
-        entity.fullName,
-        entity.username,
-        entity.email,
-        entity.passwordHash,
-        entity.refreshTokenValue,
-        entity.refreshTokenExpiry,
-        entity.resetPasswordToken,
-        entity.emailConfirmationToken,
-        entity.isEmailConfirmed,
-        entity.isAdmin,
-        entity.isActive,
-        entity.emailUpdateToken,
-        entity.emailUpdateValue,
-        entity.picture,
-        entity.failedAttempts,
-        entity.lockedUntil,
-        new Date().toISOString(),
-        entity.id,
-      ],
-    )
-    if (!rowCount || rowCount === 0) {
-      throw newInternalServerError()
-    }
-    return await this.findById(data.id)
+        [
+          entity.fullName,
+          entity.username,
+          entity.email,
+          entity.passwordHash,
+          entity.refreshTokenValue,
+          entity.refreshTokenExpiry,
+          entity.resetPasswordToken,
+          entity.emailConfirmationToken,
+          entity.isEmailConfirmed,
+          entity.isAdmin,
+          entity.isActive,
+          entity.emailUpdateToken,
+          entity.emailUpdateValue,
+          entity.picture,
+          entity.failedAttempts,
+          entity.lockedUntil,
+          new Date().toISOString(),
+          entity.id,
+        ],
+      )
+      if (!rowCount || rowCount === 0) {
+        throw newInternalServerError()
+      }
+      return await this.findById(data.id)
+    })
   }
 
-  async delete(id: string): Promise<void> {
-    await client.queryObject('DELETE FROM "user" WHERE id = $1', [id])
+  delete(id: string): Promise<void> {
+    return withPostgres(async (client) => {
+      await client.queryObject('DELETE FROM "user" WHERE id = $1', [id])
+    })
   }
 
-  async suspend(id: string, suspend: boolean): Promise<void> {
-    await client.queryObject(
-      'UPDATE "user" SET is_active = $1, refresh_token_value = null, refresh_token_expiry = null, update_time = $2 WHERE id = $3',
-      [!suspend, new Date().toISOString(), id],
-    )
+  suspend(id: string, suspend: boolean): Promise<void> {
+    return withPostgres(async (client) => {
+      await client.queryObject(
+        'UPDATE "user" SET is_active = $1, refresh_token_value = null, refresh_token_expiry = null, update_time = $2 WHERE id = $3',
+        [!suspend, new Date().toISOString(), id],
+      )
+    })
   }
 
-  async makeAdmin(id: string, makeAdmin: boolean): Promise<void> {
-    await client.queryObject(
-      'UPDATE "user" SET is_admin = $1, update_time = $2 WHERE id = $3',
-      [makeAdmin, new Date().toISOString(), id],
-    )
+  makeAdmin(id: string, makeAdmin: boolean): Promise<void> {
+    return withPostgres(async (client) => {
+      await client.queryObject(
+        'UPDATE "user" SET is_admin = $1, update_time = $2 WHERE id = $3',
+        [makeAdmin, new Date().toISOString(), id],
+      )
+    })
   }
 
-  async enoughActiveAdmins() {
-    const { rows } = await client.queryObject(
-      'SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',
-    )
-    const result = rows as { count: number }[]
-    return result[0].count > 1
+  enoughActiveAdmins() {
+    return withPostgres(async (client) => {
+      const { rows } = await client.queryObject(
+        'SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',
+      )
+      const result = rows as { count: number }[]
+      return result[0].count > 1
+    })
   }
 
   private mapRow(row: any): User {

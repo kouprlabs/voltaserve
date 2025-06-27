@@ -11,7 +11,7 @@
 export class Config {
   port: number = 0
   publicUIURL: string = ''
-  databaseURL: string = ''
+  database: DatabaseConfig
   token: TokenConfig
   password: PasswordConfig
   security: SecurityConfig
@@ -21,12 +21,18 @@ export class Config {
   userWebhooks: string[] = []
 
   constructor() {
+    this.database = new DatabaseConfig()
     this.token = new TokenConfig()
     this.password = new PasswordConfig()
     this.search = new SearchConfig()
     this.smtp = new SMTPConfig()
     this.security = new SecurityConfig()
   }
+}
+
+export class DatabaseConfig {
+  url: string = ''
+  maxOpenConnections: number = 10
 }
 
 export class TokenConfig {
