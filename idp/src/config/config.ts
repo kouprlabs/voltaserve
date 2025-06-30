@@ -46,10 +46,20 @@ export function readPostgres(config: Config) {
   if (!process.env.POSTGRES_MAX_OPEN_CONNECTIONS) {
     throw newEnvironmentVariableNotSetError('POSTGRES_MAX_OPEN_CONNECTIONS')
   }
+  if (!process.env.POSTGRES_KEEPALIVE_INTERVAL_MINUTES) {
+    throw newEnvironmentVariableNotSetError(
+      'POSTGRES_KEEPALIVE_INTERVAL_MINUTES',
+    )
+  }
   config.database.url = process.env.POSTGRES_URL
   if (process.env.POSTGRES_MAX_OPEN_CONNECTIONS) {
     config.database.maxOpenConnections = parseInt(
       process.env.POSTGRES_MAX_OPEN_CONNECTIONS,
+    )
+  }
+  if (process.env.POSTGRES_KEEPALIVE_INTERVAL_MINUTES) {
+    config.database.keepAliveIntervalMinutes = parseInt(
+      process.env.POSTGRES_KEEPALIVE_INTERVAL_MINUTES,
     )
   }
 }

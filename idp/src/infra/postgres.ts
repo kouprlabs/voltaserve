@@ -26,3 +26,9 @@ export async function withPostgres<T>(
     client.release()
   }
 }
+
+setInterval(() => {
+  withPostgres((client) => client.queryArray('SELECT 1')).catch((err) => {
+    console.error(err.message)
+  })
+}, getConfig().database.keepAliveIntervalMinutes * 60 * 1000)

@@ -33,6 +33,7 @@ export class Config {
 export class DatabaseConfig {
   url: string = ''
   maxOpenConnections: number = 10
+  keepAliveIntervalMinutes: number = 3
 }
 
 export class TokenConfig {
