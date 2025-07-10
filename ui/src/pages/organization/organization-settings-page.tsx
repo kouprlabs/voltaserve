@@ -87,7 +87,7 @@ const OrganizationSettingsPage = () => {
                     ),
                   },
                   {
-                    label: 'Leave',
+                    label: 'Leave organization',
                     content: (
                       <IconButton
                         icon={<IconLogout />}

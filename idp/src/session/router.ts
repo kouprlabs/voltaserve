@@ -15,8 +15,10 @@ import { handleValidationError } from '@/lib/validation.ts'
 
 const router = new Hono()
 
+export type SessionGrantType = 'password' | 'refresh_key' | 'apple'
+
 type SessionExchangeOptions = {
-  grant_type: TokenGrantType
+  grant_type: SessionGrantType
   username?: string
   password?: string
   refresh_key?: string
@@ -43,7 +45,7 @@ router.post(
       ]),
       username: z.string().optional(),
       password: z.string().optional(),
-      refresh_token: z.string().optional(),
+      refresh_key: z.string().optional(),
       apple_key: z.string().optional(),
       apple_full_name: z.string().optional(),
     }),
@@ -51,8 +53,14 @@ router.post(
   ),
   async (c) => {
     const options = c.req.valid('form') as SessionExchangeOptions
+    let grantType: TokenGrantType
+    if (options.grant_type === 'refresh_key') {
+      grantType = 'refresh_token'
+    } else {
+      grantType = options.grant_type
+    }
     const token = await exchange({
-      grant_type: options.grant_type,
+      grant_type: grantType,
       username: options.username,
       password: options.password,
       refresh_token: options.refresh_key,
