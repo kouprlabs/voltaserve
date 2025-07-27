@@ -25,7 +25,7 @@
 
 [![Join our Discord](https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white&label=Join%20us&style=for-the-badge)](https://discord.gg/qYXtsMpqMR)
 
-Voltaserve is the cloud storage where you can talk to your files and manipulate them. This is unprecedented, and it’s designed for creative minds. If you are a digital artist, photographer, content creator, journalist, or a musician — Voltaserve is built for you.
+Voltaserve is the reality OS where you can talk to your files and manipulate them. This is unprecedented, and it’s designed for creative minds. If you are a digital artist, photographer, content creator, journalist, or a musician — Voltaserve is built for you.
 
 <img src=".assets/collage-20250421130000.png">
 
