@@ -4,7 +4,7 @@
   <h1 align="center">Voltaserve</h1>
 </p>
 
-<h3 align="center">Cloud Storage for Creators</h2>
+<h3 align="center">Reality OS for Creators</h2>
 
 <p align="center">
   <a href="https://apps.apple.com/app/id6744360805">
