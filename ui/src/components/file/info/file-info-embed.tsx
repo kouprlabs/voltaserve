@@ -25,12 +25,12 @@ export type FileInfoEmbedProps = {
 
 const FileInfoEmbed = ({ file }: FileInfoEmbedProps) => (
   <div className={cx('flex', 'flex-col', 'gap-1')}>
+    <FileInfoStorage file={file} />
     <FileInfoName file={file} />
     <FileInfoImage file={file} />
     <FileInfoDocument file={file} />
     <FileInfoExtension file={file} />
     {file.type === FileType.Folder ? <FileInfoItemCount file={file} /> : null}
-    <FileInfoStorage file={file} />
     <FileInfoPermission file={file} />
     <FileInfoCreateTime file={file} />
     <FileInfoUpdateTime file={file} />
