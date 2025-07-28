@@ -125,6 +125,25 @@ func (svc *InvitationService) Create(opts dto.InvitationCreateOptions, userID st
 	return res, nil
 }
 
+func (svc *InvitationService) Find(id string, userID string) (*dto.Invitation, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	invitation, err := svc.invitationRepo.Find(id)
+	if err != nil {
+		return nil, err
+	}
+	if !strings.EqualFold(invitation.GetEmail(), user.GetEmail()) && invitation.GetOwnerID() != userID {
+		return nil, errorpkg.NewUserNotAllowedToViewInvitationError(user, invitation)
+	}
+	res, err := svc.invitationMapper.Map(invitation, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 type InvitationListOptions struct {
 	Page      uint64
 	Size      uint64

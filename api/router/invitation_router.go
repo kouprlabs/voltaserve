@@ -45,6 +45,7 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/incoming/count", r.GetIncomingCount)
 	g.Get("/outgoing", r.ListOutgoing)
 	g.Get("/outgoing/probe", r.ProbeOutgoing)
+	g.Get("/:id", r.Find)
 	g.Post("/:id/accept", r.Accept)
 	g.Post("/:id/resend", r.Resend)
 	g.Post("/:id/decline", r.Decline)
@@ -83,6 +84,30 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 		return err
 	}
 	return c.Status(fiber.StatusCreated).JSON(res)
+}
+
+// Find godoc
+//
+//	@Summary		Find
+//	@Description	Find
+//	@Tags			Invitations
+//	@Id				invitations_find
+//	@Produce		application/json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.Invitation
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/{id} [get]
+func (r *InvitationRouter) Find(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.invitationSvc.Find(c.Params("id"), userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
 }
 
 // ListIncoming godoc
