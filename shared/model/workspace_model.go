@@ -13,6 +13,7 @@ package model
 type Workspace interface {
 	GetID() string
 	GetName() string
+	GetImage() *string
 	GetStorageCapacity() int64
 	GetRootID() string
 	GetOrganizationID() string
@@ -23,6 +24,7 @@ type Workspace interface {
 	GetUpdateTime() *string
 	SetID(string)
 	SetName(string)
+	SetImage(*string)
 	SetStorageCapacity(int64)
 	SetRootID(string)
 	SetOrganizationID(string)

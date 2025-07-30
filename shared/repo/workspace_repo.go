@@ -25,6 +25,7 @@ import (
 type workspaceEntity struct {
 	ID               string                  `gorm:"column:id;size:36"              json:"id"`
 	Name             string                  `gorm:"column:name;size:255"           json:"name"`
+	Image            *string                 `gorm:"column:image" json:"image"`
 	StorageCapacity  int64                   `gorm:"column:storage_capacity"        json:"storageCapacity"`
 	RootID           *string                 `gorm:"column:root_id;size:36"         json:"rootId"`
 	OrganizationID   string                  `gorm:"column:organization_id;size:36" json:"organizationId"`
@@ -55,6 +56,10 @@ func (w *workspaceEntity) GetID() string {
 
 func (w *workspaceEntity) GetName() string {
 	return w.Name
+}
+
+func (w *workspaceEntity) GetImage() *string {
+	return w.Image
 }
 
 func (w *workspaceEntity) GetStorageCapacity() int64 {
@@ -107,6 +112,10 @@ func (w *workspaceEntity) SetID(id string) {
 
 func (w *workspaceEntity) SetName(name string) {
 	w.Name = name
+}
+
+func (w *workspaceEntity) SetImage(image *string) {
+	w.Image = image
 }
 
 func (w *workspaceEntity) SetStorageCapacity(storageCapacity int64) {
@@ -290,7 +299,7 @@ func (repo *WorkspaceRepo) FindIDsByOwner(userID string) ([]string, error) {
 	}
 	var ids []IDResult
 	db := repo.db.
-		Raw(`SELECT id result FROM workspace 
+		Raw(`SELECT id result FROM workspace
 			 WHERE id IN (SELECT resource_id FROM userpermission WHERE user_id = ? AND permission = 'owner')`,
 			userID).Scan(&ids)
 	if db.Error != nil {
@@ -312,39 +321,6 @@ func (repo *WorkspaceRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (repo *WorkspaceRepo) UpdateName(id string, name string) (model.Workspace, error) {
-	workspace, err := repo.find(id)
-	if err != nil {
-		return &workspaceEntity{}, err
-	}
-	workspace.Name = name
-	if db := repo.db.Save(&workspace); db.Error != nil {
-		return nil, db.Error
-	}
-	res, err := repo.Find(id)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (repo *WorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error) {
-	workspace, err := repo.find(id)
-	if err != nil {
-		return &workspaceEntity{}, err
-	}
-	workspace.StorageCapacity = storageCapacity
-	db := repo.db.Save(&workspace)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	res, err := repo.Find(id)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func (repo *WorkspaceRepo) UpdateRootID(id string, rootNodeID string) error {
 	db := repo.db.Exec("UPDATE workspace SET root_id = ? WHERE id = ?", rootNodeID, id)
 	if db.Error != nil {
@@ -355,6 +331,14 @@ func (repo *WorkspaceRepo) UpdateRootID(id string, rootNodeID string) error {
 
 func (repo *WorkspaceRepo) ClearRootID(id string) error {
 	db := repo.db.Exec("UPDATE workspace SET root_id = null WHERE id = ?", id)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *WorkspaceRepo) Save(org model.Workspace) error {
+	db := repo.db.Save(org)
 	if db.Error != nil {
 		return db.Error
 	}

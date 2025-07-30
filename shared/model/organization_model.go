@@ -13,6 +13,7 @@ package model
 type Organization interface {
 	GetID() string
 	GetName() string
+	GetImage() *string
 	GetUserPermissions() []CoreUserPermission
 	GetGroupPermissions() []CoreGroupPermission
 	GetMembers() []string
@@ -20,6 +21,7 @@ type Organization interface {
 	GetUpdateTime() *string
 	SetID(string)
 	SetName(string)
+	SetImage(*string)
 	SetUserPermissions([]CoreUserPermission)
 	SetGroupPermissions([]CoreGroupPermission)
 	SetCreateTime(string)

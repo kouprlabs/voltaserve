@@ -41,6 +41,10 @@ type GroupPatchNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
 
+type GroupPatchImageOptions struct {
+	Image *string `json:"image" validate:"max=2048"`
+}
+
 type GroupAddMemberOptions struct {
 	UserID string `json:"userId" validate:"required"`
 }
