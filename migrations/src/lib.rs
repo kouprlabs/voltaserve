@@ -43,6 +43,9 @@ mod m20250421_000001_create_action;
 mod m20250421_000002_create_run;
 mod m20250421_000003_create_storage_quota;
 mod m20250421_000004_create_murph_quota;
+mod m20250729_000001_add_workspace_image_column;
+mod m20250729_000002_add_group_image_column;
+mod m20250729_000003_add_organization_image_column;
 
 #[async_trait::async_trait]
 impl MigratorTrait for Migrator {
@@ -78,6 +81,9 @@ impl MigratorTrait for Migrator {
             Box::new(m20250421_000002_create_run::Migration),
             Box::new(m20250421_000003_create_storage_quota::Migration),
             Box::new(m20250421_000004_create_murph_quota::Migration),
+            Box::new(m20250729_000001_add_workspace_image_column::Migration),
+            Box::new(m20250729_000002_add_group_image_column::Migration),
+            Box::new(m20250729_000003_add_organization_image_column::Migration),
         ]
     }
 }

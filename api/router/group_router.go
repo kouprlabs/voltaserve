@@ -46,6 +46,7 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id", r.Find)
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
+	g.Patch("/:id/image", r.PatchImage)
 	g.Post("/:id/members", r.AddMember)
 	g.Delete("/:id/members", r.RemoveMember)
 }
@@ -198,6 +199,40 @@ func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
 	res, err := r.groupSvc.PatchName(c.Params("id"), opts.Name, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// PatchImage godoc
+//
+//	@Summary		Patch Image
+//	@Description	Patch Image
+//	@Tags			Groups
+//	@Id				groups_patch_image
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		dto.GroupPatchImageOptions	true	"Body"
+//	@Success		200		{object}	dto.Group
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/image [patch]
+func (r *GroupRouter) PatchImage(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	opts := new(dto.GroupPatchImageOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	res, err := r.groupSvc.PatchImage(c.Params("id"), opts.Image, userID)
 	if err != nil {
 		return err
 	}

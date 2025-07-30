@@ -14,6 +14,7 @@ pub enum Organization {
     Table,
     Id,
     Name,
+    Image,
     CreateTime,
     UpdateTime,
 }

@@ -52,6 +52,10 @@ type OrganizationPatchNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
 
+type OrganizationPatchImageOptions struct {
+	Image *string `json:"image" validate:"max=2048"`
+}
+
 type OrganizationRemoveMemberOptions struct {
 	UserID string `json:"userId" validate:"required"`
 }

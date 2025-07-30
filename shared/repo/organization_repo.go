@@ -25,6 +25,7 @@ import (
 type organizationEntity struct {
 	ID               string                  `gorm:"column:id"          json:"id"`
 	Name             string                  `gorm:"column:name"        json:"name"`
+	Image            *string                 `gorm:"column:image"       json:"image"`
 	UserPermissions  []*UserPermissionValue  `gorm:"-"                  json:"userPermissions"`
 	GroupPermissions []*GroupPermissionValue `gorm:"-"                  json:"groupPermissions"`
 	Members          []string                `gorm:"-"                  json:"members"`
@@ -52,6 +53,10 @@ func (o *organizationEntity) GetID() string {
 
 func (o *organizationEntity) GetName() string {
 	return o.Name
+}
+
+func (o *organizationEntity) GetImage() *string {
+	return o.Image
 }
 
 func (o *organizationEntity) GetUserPermissions() []model.CoreUserPermission {
@@ -88,6 +93,10 @@ func (o *organizationEntity) SetID(id string) {
 
 func (o *organizationEntity) SetName(name string) {
 	o.Name = name
+}
+
+func (o *organizationEntity) SetImage(image *string) {
+	o.Image = image
 }
 
 func (o *organizationEntity) SetUserPermissions(permissions []model.CoreUserPermission) {
@@ -214,7 +223,7 @@ func (repo *OrganizationRepo) FindIDsByOwner(userID string) ([]string, error) {
 	}
 	var ids []IDResult
 	db := repo.db.
-		Raw(`SELECT id result FROM organization 
+		Raw(`SELECT id result FROM organization
 			 WHERE id IN (SELECT resource_id FROM userpermission WHERE user_id = ? AND permission = 'owner')`,
 			userID).Scan(&ids)
 	if db.Error != nil {

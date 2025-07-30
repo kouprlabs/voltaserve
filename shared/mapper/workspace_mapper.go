@@ -42,6 +42,7 @@ func (mp *WorkspaceMapper) Map(m model.Workspace, userID string) (*dto.Workspace
 	res := &dto.Workspace{
 		ID:              m.GetID(),
 		Name:            m.GetName(),
+		Image:           m.GetImage(),
 		RootID:          m.GetRootID(),
 		StorageCapacity: m.GetStorageCapacity(),
 		Organization:    *org,

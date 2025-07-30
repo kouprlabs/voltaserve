@@ -14,6 +14,7 @@ pub enum Group {
     Table,
     Id,
     Name,
+    Image,
     OrganizationId,
     CreateTime,
     UpdateTime,

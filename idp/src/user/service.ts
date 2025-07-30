@@ -91,6 +91,10 @@ export type UserUpdateFullNameOptions = {
   fullName: string
 }
 
+export type UserUpdatePictureRawOptions = {
+  picture?: string
+}
+
 export type UserUpdatePasswordOptions = {
   currentPassword: string
   newPassword: string
@@ -197,7 +201,6 @@ export async function updateFullName(
       isEmailConfirmed: user.isEmailConfirmed,
       createTime: user.createTime,
       updateTime: user.updateTime,
-      picture: user.picture,
     },
   ])
   return mapEntity(user)
@@ -308,35 +311,22 @@ export async function updatePicture(
     id: userId,
     picture: `data:${contentType};base64,${picture}`,
   })
-  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
-    {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      fullName: user.fullName,
-      isEmailConfirmed: user.isEmailConfirmed,
-      createTime: user.createTime,
-      updateTime: user.updateTime,
-      picture: user.picture,
-    },
-  ])
+  return mapEntity(user)
+}
+
+export async function updatePictureRaw(
+  { id: userId }: User,
+  picture?: string,
+): Promise<UserDTO> {
+  const user = await userRepo.update({
+    id: userId,
+    picture,
+  })
   return mapEntity(user)
 }
 
 export async function deletePicture({ id }: User): Promise<UserDTO> {
   const user = await userRepo.update({ id, picture: null })
-  await meilisearch.index(USER_SEARCH_INDEX).updateDocuments([
-    {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      fullName: user.fullName,
-      isEmailConfirmed: user.isEmailConfirmed,
-      createTime: user.createTime,
-      updateTime: user.updateTime,
-      picture: user.picture,
-    },
-  ])
   return mapEntity(user)
 }
 

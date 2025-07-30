@@ -14,6 +14,7 @@ pub enum Workspace {
     Table,
     Id,
     Name,
+    Image,
     OrganizationId,
     StorageCapacity,
     RootId,
