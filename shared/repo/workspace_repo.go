@@ -25,7 +25,7 @@ import (
 type workspaceEntity struct {
 	ID               string                  `gorm:"column:id;size:36"              json:"id"`
 	Name             string                  `gorm:"column:name;size:255"           json:"name"`
-	Image            *string                 `gorm:"column:image" json:"image"`
+	Image            *string                 `gorm:"column:image"                   json:"image"`
 	StorageCapacity  int64                   `gorm:"column:storage_capacity"        json:"storageCapacity"`
 	RootID           *string                 `gorm:"column:root_id;size:36"         json:"rootId"`
 	OrganizationID   string                  `gorm:"column:organization_id;size:36" json:"organizationId"`

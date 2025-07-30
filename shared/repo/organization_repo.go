@@ -25,7 +25,7 @@ import (
 type organizationEntity struct {
 	ID               string                  `gorm:"column:id"          json:"id"`
 	Name             string                  `gorm:"column:name"        json:"name"`
-	Image            *string                 `gorm:"column:image" json:"image"`
+	Image            *string                 `gorm:"column:image"       json:"image"`
 	UserPermissions  []*UserPermissionValue  `gorm:"-"                  json:"userPermissions"`
 	GroupPermissions []*GroupPermissionValue `gorm:"-"                  json:"groupPermissions"`
 	Members          []string                `gorm:"-"                  json:"members"`
