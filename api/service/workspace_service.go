@@ -338,6 +338,26 @@ func (svc *WorkspaceService) GetBucket(id string) (string, error) {
 	return workspace.GetBucket(), nil
 }
 
+func (svc *WorkspaceService) DownloadImageBuffer(id string, userID string) ([]byte, *string, *string, error) {
+	workspace, err := svc.workspaceCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	if workspace.GetImage() == nil {
+		return nil, nil, nil, errorpkg.NewImageNotFoundError(nil)
+	}
+	mime := helper.Base64ToMIME(*workspace.GetImage())
+	ext := helper.Base64ToExtension(*workspace.GetImage())
+	b, err := helper.Base64ToBytes(*workspace.GetImage())
+	if err != nil {
+		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
+	}
+	return b, &ext, &mime, nil
+}
+
 func (svc *WorkspaceService) IsValidSortBy(value string) bool {
 	return value == "" ||
 		value == dto.WorkspaceSortByName ||

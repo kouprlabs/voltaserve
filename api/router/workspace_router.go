@@ -11,12 +11,16 @@
 package router
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
@@ -52,6 +56,7 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Patch("/:id/image", r.PatchImage)
 	g.Patch("/:id/storage_capacity", r.PatchStorageCapacity)
 	g.Get("/:id/bucket", r.GetBucket)
+	g.Get("/:id/image.:extension", r.DownloadImage)
 }
 
 // Create godoc
@@ -318,6 +323,49 @@ func (r *WorkspaceRouter) GetBucket(c *fiber.Ctx) error {
 	return c.SendString(bucket)
 }
 
+// DownloadImage godoc
+//
+//	@Summary		Download Image
+//	@Description	Download Image
+//	@Tags			Files
+//	@Id				workspaces_download_image
+//	@Produce		application/octet-stream
+//	@Param			id				path		string	true	"ID"
+//	@Param			ext				path		string	true	"Extension"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Success		200				{file}		file
+//	@Failure		400				{object}	errorpkg.ErrorResponse
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/workspaces/{id}/image.{ext} [get]
+func (r *WorkspaceRouter) DownloadImage(c *fiber.Ctx) error {
+	accessToken := c.Query("access_token", c.Query("access_key"))
+	if accessToken == "" {
+		return errorpkg.NewFileNotFoundError(nil)
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	if c.Params("extension") == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	b, extension, mime, err := r.workspaceSvc.DownloadImageBuffer(c.Params("id"), userID)
+	if err != nil {
+		return err
+	}
+	if !strings.EqualFold(strings.TrimPrefix(*extension, "."), c.Params("extension")) {
+		return errorpkg.NewPictureNotFoundError(nil)
+	}
+	c.Set("Content-Type", *mime)
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"image%s\"", *extension))
+	return c.Send(b)
+}
+
 func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*service.WorkspaceListOptions, error) {
 	var err error
 	var page uint64
@@ -360,4 +408,24 @@ func (r *WorkspaceRouter) parseListQueryParams(c *fiber.Ctx) (*service.Workspace
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, nil
+}
+
+func (r *WorkspaceRouter) getUserIDFromAccessToken(accessToken string) (string, error) {
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(config.GetConfig().Security.JWTSigningKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if !token.Valid {
+		return "", errors.New("invalid token")
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		return claims["sub"].(string), nil
+	} else {
+		return "", errors.New("cannot find sub claim")
+	}
 }

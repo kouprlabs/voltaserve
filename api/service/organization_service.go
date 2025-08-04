@@ -294,6 +294,26 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	return nil
 }
 
+func (svc *OrganizationService) DownloadImageBuffer(id string, userID string) ([]byte, *string, *string, error) {
+	org, err := svc.orgCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.orgGuard.Authorize(userID, org, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	if org.GetImage() == nil {
+		return nil, nil, nil, errorpkg.NewImageNotFoundError(nil)
+	}
+	mime := helper.Base64ToMIME(*org.GetImage())
+	ext := helper.Base64ToExtension(*org.GetImage())
+	b, err := helper.Base64ToBytes(*org.GetImage())
+	if err != nil {
+		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
+	}
+	return b, &ext, &mime, nil
+}
+
 func (svc *OrganizationService) IsValidSortBy(value string) bool {
 	return value == "" ||
 		value == dto.OrganizationSortByName ||

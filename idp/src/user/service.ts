@@ -91,10 +91,6 @@ export type UserUpdateFullNameOptions = {
   fullName: string
 }
 
-export type UserUpdatePictureRawOptions = {
-  picture?: string
-}
-
 export type UserUpdatePasswordOptions = {
   currentPassword: string
   newPassword: string
