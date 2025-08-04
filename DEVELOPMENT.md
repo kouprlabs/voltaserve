@@ -2,10 +2,9 @@
 
 ## Prerequisites
 
-- [Deno](https://deno.com)
-- [Bun](https://bun.sh)
-- [Node.js](https://nodejs.org)
 - [Go](https://go.dev)
+- [Deno](https://deno.com)
+- [Node.js](https://nodejs.org)
 - [Rust](https://www.rust-lang.org)
 - [Poetry](https://python-poetry.org/docs/#installation)
 - [Python](https://www.python.org) 3.11 with [pyenv](https://github.com/pyenv/pyenv)

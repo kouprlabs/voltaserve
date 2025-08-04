@@ -23,8 +23,8 @@ const (
 
 type Workspace struct {
 	ID              string       `json:"id"`
-	Image           *string      `json:"image,omitempty"`
 	Name            string       `json:"name"`
+	Image           *string      `json:"image,omitempty"`
 	RootID          string       `json:"rootId,omitempty"`
 	StorageCapacity int64        `json:"storageCapacity"`
 	Permission      string       `json:"permission"`
@@ -55,6 +55,10 @@ type WorkspaceProbe struct {
 
 type WorkspacePatchNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
+}
+
+type WorkspacePatchImageOptions struct {
+	Image *string `json:"image" validate:"max=2048"`
 }
 
 type WorkspacePatchStorageCapacityOptions struct {

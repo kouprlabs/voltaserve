@@ -59,12 +59,14 @@ func (mgr *PostgresManager) Connect(ignoreExisting bool) error {
 		return err
 	}
 
-	go func() {
-		t := time.NewTicker(time.Duration(mgr.postgresConfig.KeepAliveIntervalMinutes) * time.Minute)
-		for range t.C {
-			db.Exec("SELECT 1")
-		}
-	}()
+	if !mgr.envConfig.IsTest {
+		go func() {
+			t := time.NewTicker(time.Duration(mgr.postgresConfig.KeepAliveIntervalMinutes) * time.Minute)
+			for range t.C {
+				db.Exec("SELECT 1")
+			}
+		}()
+	}
 
 	return nil
 }

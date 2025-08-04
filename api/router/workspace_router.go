@@ -49,6 +49,7 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id", r.Find)
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
+	g.Patch("/:id/image", r.PatchImage)
 	g.Patch("/:id/storage_capacity", r.PatchStorageCapacity)
 	g.Get("/:id/bucket", r.GetBucket)
 }
@@ -186,7 +187,7 @@ func (r *WorkspaceRouter) Probe(c *fiber.Ctx) error {
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/workspaces/{id}/update_name [patch]
+//	@Router			/workspaces/{id}/name [patch]
 func (r *WorkspaceRouter) PatchName(c *fiber.Ctx) error {
 	userID, err := helper.GetUserID(c)
 	if err != nil {
@@ -197,6 +198,37 @@ func (r *WorkspaceRouter) PatchName(c *fiber.Ctx) error {
 		return err
 	}
 	res, err := r.workspaceSvc.PatchName(c.Params("id"), opts.Name, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// PatchImage godoc
+//
+//	@Summary		Patch Image
+//	@Description	Patch Image
+//	@Tags			Workspaces
+//	@Id				workspaces_patch_image
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		dto.WorkspacePatchImageOptions	true	"Body"
+//	@Success		200		{object}	dto.Workspace
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/workspaces/{id}/image [patch]
+func (r *WorkspaceRouter) PatchImage(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	opts := new(dto.WorkspacePatchImageOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	res, err := r.workspaceSvc.PatchImage(c.Params("id"), opts.Image, userID)
 	if err != nil {
 		return err
 	}
