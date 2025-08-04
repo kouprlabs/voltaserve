@@ -32,12 +32,14 @@ import {
   updateFullName,
   updatePassword,
   updatePicture,
+  updatePictureRaw,
   UserMakeAdminOptions,
   UserSuspendOptions,
   UserUpdateEmailConfirmationOptions,
   UserUpdateEmailRequestOptions,
   UserUpdateFullNameOptions,
   UserUpdatePasswordOptions,
+  UserUpdatePictureRawOptions,
 } from '@/user/service.ts'
 import { basename, extname, join } from 'node:path'
 import { Buffer } from 'node:buffer'
@@ -158,6 +160,19 @@ router.post(
     } finally {
       await fs.rm(path)
     }
+  },
+)
+
+router.post(
+  '/me/update_picture_raw',
+  zValidator(
+    'json',
+    z.object({ picture: z.string().max(2048).optional() }),
+    handleValidationError,
+  ),
+  async (c) => {
+    const body = c.req.valid('json') as UserUpdatePictureRawOptions
+    return c.json(await updatePictureRaw(getUser(c), body.picture))
   },
 )
 

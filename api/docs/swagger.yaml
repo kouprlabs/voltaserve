@@ -294,6 +294,12 @@ definitions:
       totalPages:
         type: integer
     type: object
+  dto.GroupPatchImageOptions:
+    properties:
+      image:
+        maxLength: 2048
+        type: string
+    type: object
   dto.GroupPatchNameOptions:
     properties:
       name:
@@ -456,6 +462,12 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  dto.OrganizationPatchImageOptions:
+    properties:
+      image:
+        maxLength: 2048
+        type: string
     type: object
   dto.OrganizationPatchNameOptions:
     properties:
@@ -873,6 +885,12 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  dto.WorkspacePatchImageOptions:
+    properties:
+      image:
+        maxLength: 2048
+        type: string
     type: object
   dto.WorkspacePatchNameOptions:
     properties:
@@ -2418,6 +2436,46 @@ paths:
       summary: Find
       tags:
       - Groups
+  /groups/{id}/image:
+    patch:
+      consumes:
+      - application/json
+      description: Patch Image
+      operationId: groups_patch_image
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GroupPatchImageOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Group'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch Image
+      tags:
+      - Groups
   /groups/{id}/members:
     delete:
       consumes:
@@ -2645,6 +2703,33 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Delete
+      tags:
+      - Invitations
+    get:
+      description: Find
+      operationId: invitations_find
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Invitation'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Find
       tags:
       - Invitations
   /invitations/{id}/accept:
@@ -3150,6 +3235,46 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Find
+      tags:
+      - Organizations
+  /organizations/{id}/image:
+    patch:
+      consumes:
+      - application/json
+      description: Patch Image
+      operationId: organizations_patch_image
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OrganizationPatchImageOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Organization'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch Image
       tags:
       - Organizations
   /organizations/{id}/leave:
@@ -4236,6 +4361,86 @@ paths:
       summary: Get Bucket
       tags:
       - Workspaces
+  /workspaces/{id}/image:
+    patch:
+      consumes:
+      - application/json
+      description: Patch Image
+      operationId: workspaces_patch_image
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.WorkspacePatchImageOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Workspace'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch Image
+      tags:
+      - Workspaces
+  /workspaces/{id}/name:
+    patch:
+      consumes:
+      - application/json
+      description: Patch Name
+      operationId: workspaces_patch_name
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.WorkspacePatchNameOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Workspace'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch Name
+      tags:
+      - Workspaces
   /workspaces/{id}/storage_capacity:
     patch:
       consumes:
@@ -4274,46 +4479,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Patch Storage Capacity
-      tags:
-      - Workspaces
-  /workspaces/{id}/update_name:
-    patch:
-      consumes:
-      - application/json
-      description: Patch Name
-      operationId: workspaces_patch_name
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.WorkspacePatchNameOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.Workspace'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Patch Name
       tags:
       - Workspaces
   /workspaces/probe:
