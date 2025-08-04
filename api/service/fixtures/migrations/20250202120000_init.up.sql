@@ -2,6 +2,7 @@ CREATE TABLE organization
 (
     id          text NOT NULL,
     "name"      text NOT NULL,
+    image       text NULL,
     create_time text NOT NULL,
     update_time text NULL,
     CONSTRAINT organization_pkey PRIMARY KEY (id)
@@ -63,6 +64,7 @@ CREATE TABLE "group"
 (
     id              text NOT NULL,
     "name"          text NOT NULL,
+    image           text NULL,
     organization_id text NOT NULL,
     create_time     text NOT NULL,
     update_time     text NULL,
@@ -161,6 +163,7 @@ CREATE TABLE workspace
 (
     id               text NOT NULL,
     "name"           text NOT NULL,
+    image            text NULL,
     organization_id  text NOT NULL,
     storage_capacity int8 NOT NULL,
     root_id          text NULL,
@@ -188,57 +191,3 @@ ALTER TABLE workspace
     ADD CONSTRAINT workspace_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organization (id) ON DELETE CASCADE;
 ALTER TABLE workspace
     ADD CONSTRAINT workspace_root_id_fkey FOREIGN KEY (root_id) REFERENCES file (id);
-
-CREATE TABLE action
-(
-    id            text  NOT NULL,
-    prompt        text  NOT NULL,
-    files         jsonb NULL,
-    workspaces    jsonb NULL,
-    organizations jsonb NULL,
-    groups        jsonb NULL,
-    snapshots     jsonb NULL,
-    tasks         jsonb NULL,
-    invitations   jsonb NULL,
-    operations    jsonb NULL,
-    message       text  NULL,
-    user_id       text  NOT NULL,
-    create_time   text  NOT NULL,
-    CONSTRAINT action_pkey PRIMARY KEY (id)
-);
-
-CREATE TABLE run
-(
-    id           text NOT NULL,
-    action_id    text NOT NULL,
-    operation_id text NOT NULL,
-    error        text NULL,
-    create_time  text NOT NULL,
-    CONSTRAINT run_pkey PRIMARY KEY (id),
-    CONSTRAINT run_action_id_fkey FOREIGN KEY (action_id) REFERENCES action (id) ON DELETE CASCADE
-);
-
-CREATE TABLE murph_quota
-(
-    id                text NOT NULL,
-    user_id           text NOT NULL,
-    actions_per_month int8 NOT NULL,
-    usage             int8 NOT NULL DEFAULT 0,
-    reset_time        text NOT NULL,
-    memory_window     int8 NOT NULL,
-    create_time       text NOT NULL,
-    update_time       text NULL,
-    CONSTRAINT murph_quota_pkey PRIMARY KEY (id),
-    CONSTRAINT murph_quota_user_id_key UNIQUE (user_id)
-);
-
-CREATE TABLE storage_quota
-(
-    id               text NOT NULL,
-    user_id          text NOT NULL,
-    storage_capacity int8 NOT NULL,
-    create_time      text NOT NULL,
-    update_time      text NULL,
-    CONSTRAINT storage_quota_pkey PRIMARY KEY (id),
-    CONSTRAINT storage_quota_user_id_key UNIQUE (user_id)
-);

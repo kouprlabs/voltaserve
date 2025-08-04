@@ -2,6 +2,7 @@ CREATE TABLE organization
 (
     id          text NOT NULL,
     "name"      text NOT NULL,
+    image       text NULL,
     create_time text NOT NULL,
     update_time text NULL,
     CONSTRAINT organization_pkey PRIMARY KEY (id)
@@ -63,6 +64,7 @@ CREATE TABLE "group"
 (
     id              text NOT NULL,
     "name"          text NOT NULL,
+    image           text NULL,
     organization_id text NOT NULL,
     create_time     text NOT NULL,
     update_time     text NULL,
@@ -161,6 +163,7 @@ CREATE TABLE workspace
 (
     id               text NOT NULL,
     "name"           text NOT NULL,
+    image            text NULL,
     organization_id  text NOT NULL,
     storage_capacity int8 NOT NULL,
     root_id          text NULL,
