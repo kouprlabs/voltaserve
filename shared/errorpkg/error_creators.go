@@ -496,6 +496,16 @@ func NewCannotResendNonPendingInvitationError(invitation model.Invitation) *Erro
 	)
 }
 
+func NewUserNotAllowedToViewInvitationError(user model.User, invitation model.Invitation) *ErrorResponse {
+	return NewErrorResponse(
+		"user_not_allowed_to_view_invitation",
+		http.StatusForbidden,
+		fmt.Sprintf("User '%s' is not allowed to view invitation '%s'.", user.GetID(), invitation.GetID()),
+		"Not allowed to view this invitation.",
+		nil,
+	)
+}
+
 func NewUserNotAllowedToAcceptInvitationError(user model.User, invitation model.Invitation) *ErrorResponse {
 	return NewErrorResponse(
 		"user_not_allowed_to_accept_invitation",
