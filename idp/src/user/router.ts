@@ -32,7 +32,6 @@ import {
   updateFullName,
   updatePassword,
   updatePicture,
-  updatePictureRaw,
   UserMakeAdminOptions,
   UserSuspendOptions,
   UserUpdateEmailConfirmationOptions,

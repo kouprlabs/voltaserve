@@ -310,17 +310,6 @@ export async function updatePicture(
   return mapEntity(user)
 }
 
-export async function updatePictureRaw(
-  { id: userId }: User,
-  picture?: string,
-): Promise<UserDTO> {
-  const user = await userRepo.update({
-    id: userId,
-    picture,
-  })
-  return mapEntity(user)
-}
-
 export async function deletePicture({ id }: User): Promise<UserDTO> {
   const user = await userRepo.update({ id, picture: null })
   return mapEntity(user)
