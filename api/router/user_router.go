@@ -140,13 +140,6 @@ func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	id := c.Params("id")
-	if id == "" {
-		return errorpkg.NewMissingQueryParamError("id")
-	}
-	if c.Params("extension") == "" {
-		return errorpkg.NewMissingQueryParamError("extension")
-	}
 	var orgID *string
 	if c.Query("organization_id") != "" {
 		orgID = helper.ToPtr(c.Query("organization_id"))
@@ -159,7 +152,7 @@ func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
 	if c.Query("invitation_id") != "" {
 		invitationID = helper.ToPtr(c.Query("invitation_id"))
 	}
-	b, extension, mime, err := r.userSvc.ExtractPicture(id, service.ExtractPictureJustification{
+	b, extension, mime, err := r.userSvc.ExtractPicture(c.Params("id"), service.ExtractPictureJustification{
 		OrganizationID: orgID,
 		GroupID:        groupID,
 		InvitationID:   invitationID,

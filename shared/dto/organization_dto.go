@@ -24,7 +24,7 @@ const (
 type Organization struct {
 	ID         string  `json:"id"`
 	Name       string  `json:"name"`
-	Image      *string `json:"image,omitempty"`
+	Image      *Image  `json:"image,omitempty"`
 	Permission string  `json:"permission"`
 	CreateTime string  `json:"createTime"`
 	UpdateTime *string `json:"updateTime,omitempty"`
@@ -50,10 +50,6 @@ type OrganizationCreateOptions struct {
 
 type OrganizationPatchNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
-}
-
-type OrganizationPatchImageOptions struct {
-	Image *string `json:"image" validate:"max=2048"`
 }
 
 type OrganizationRemoveMemberOptions struct {

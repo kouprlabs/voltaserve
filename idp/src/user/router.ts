@@ -21,25 +21,23 @@ import { handleValidationError, ZodFactory } from '@/lib/validation.ts'
 import {
   deletePicture,
   deleteUser,
-  find,
   findAsAdmin,
   getPicture,
   list,
   makeAdmin,
+  mapEntity,
   suspend,
   updateEmailConfirmation,
   updateEmailRequest,
   updateFullName,
   updatePassword,
   updatePicture,
-  updatePictureRaw,
   UserMakeAdminOptions,
   UserSuspendOptions,
   UserUpdateEmailConfirmationOptions,
   UserUpdateEmailRequestOptions,
   UserUpdateFullNameOptions,
   UserUpdatePasswordOptions,
-  UserUpdatePictureRawOptions,
 } from '@/user/service.ts'
 import { basename, extname, join } from 'node:path'
 import { Buffer } from 'node:buffer'
@@ -49,7 +47,7 @@ import { getUser, getUserIdFromAccessToken } from '@/lib/router.ts'
 const router = new Hono()
 
 router.get('/me', (c) => {
-  return c.json(find(getUser(c)))
+  return c.json(mapEntity(getUser(c)))
 })
 
 router.get('/me/:filename', async (c) => {
@@ -160,19 +158,6 @@ router.post(
     } finally {
       await fs.rm(path)
     }
-  },
-)
-
-router.post(
-  '/me/update_picture_raw',
-  zValidator(
-    'json',
-    z.object({ picture: z.string().max(2048).optional() }),
-    handleValidationError,
-  ),
-  async (c) => {
-    const body = c.req.valid('json') as UserUpdatePictureRawOptions
-    return c.json(await updatePictureRaw(getUser(c), body.picture))
   },
 )
 

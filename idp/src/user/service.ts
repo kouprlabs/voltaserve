@@ -91,10 +91,6 @@ export type UserUpdateFullNameOptions = {
   fullName: string
 }
 
-export type UserUpdatePictureRawOptions = {
-  picture?: string
-}
-
 export type UserUpdatePasswordOptions = {
   currentPassword: string
   newPassword: string
@@ -118,10 +114,6 @@ export type UserListOptions = {
   query?: string
   size: number
   page: number
-}
-
-export function find(user: User): UserDTO {
-  return mapEntity(user)
 }
 
 export async function findAsAdmin(id: string): Promise<UserAdminDTO> {
@@ -310,17 +302,6 @@ export async function updatePicture(
   const user = await userRepo.update({
     id: userId,
     picture: `data:${contentType};base64,${picture}`,
-  })
-  return mapEntity(user)
-}
-
-export async function updatePictureRaw(
-  { id: userId }: User,
-  picture?: string,
-): Promise<UserDTO> {
-  const user = await userRepo.update({
-    id: userId,
-    picture,
   })
   return mapEntity(user)
 }

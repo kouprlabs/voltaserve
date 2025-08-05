@@ -122,10 +122,20 @@ func NewUserNotMemberOfOrganizationError() *ErrorResponse {
 
 func NewPictureNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
-		"Picture_not_found",
+		"picture_not_found",
 		http.StatusNotFound,
 		"Picture not found.",
 		"Picture not found.",
+		err,
+	)
+}
+
+func NewImageNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"image_not_found",
+		http.StatusNotFound,
+		"Image not found.",
+		"Image not found.",
 		err,
 	)
 }
@@ -307,6 +317,26 @@ func NewInvalidQueryParamError(param string) *ErrorResponse {
 		"invalid_query_param",
 		http.StatusBadRequest,
 		fmt.Sprintf("Query param '%s' is invalid.", param),
+		"An invalid request was sent to the server.",
+		nil,
+	)
+}
+
+func NewInvalidFormFileError(field string) *ErrorResponse {
+	return NewErrorResponse(
+		"invalid_form_file",
+		http.StatusBadRequest,
+		fmt.Sprintf("Form file '%s' is invalid.", field),
+		"An invalid request was sent to the server.",
+		nil,
+	)
+}
+
+func NewLargeFormFileError(field string) *ErrorResponse {
+	return NewErrorResponse(
+		"large_form_file",
+		http.StatusBadRequest,
+		fmt.Sprintf("Form file '%s' is too large.", field),
 		"An invalid request was sent to the server.",
 		nil,
 	)

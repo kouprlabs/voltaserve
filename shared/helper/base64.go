@@ -12,6 +12,11 @@ package helper
 
 import (
 	"encoding/base64"
+	"fmt"
+	"mime"
+	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -50,4 +55,17 @@ func Base64ToExtension(value string) string {
 	default:
 		return ""
 	}
+}
+
+func FileToBase64(path string) (*string, error) {
+	data, err := os.ReadFile(path) //nolint:gosec // Safe path
+	if err != nil {
+		return nil, err
+	}
+	mimeType := mime.TypeByExtension(filepath.Ext(path))
+	if mimeType == "" {
+		mimeType = http.DetectContentType(data)
+	}
+	base64 := fmt.Sprintf("data:%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(data))
+	return &base64, nil
 }

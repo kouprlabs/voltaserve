@@ -11,17 +11,25 @@
 package router
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
 	"github.com/kouprlabs/voltaserve/shared/helper"
 
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -47,8 +55,10 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
 	g.Patch("/:id/image", r.PatchImage)
+	g.Delete("/:id/image", r.DeleteImage)
 	g.Post("/:id/members", r.AddMember)
 	g.Delete("/:id/members", r.RemoveMember)
+	g.Get("/:id/image.:extension", r.DownloadImage)
 }
 
 // Create godoc
@@ -211,28 +221,66 @@ func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
 //	@Description	Patch Image
 //	@Tags			Groups
 //	@Id				groups_patch_image
-//	@Accept			application/json
+//	@Accept			x-www-form-urlencoded
 //	@Produce		application/json
-//	@Param			id		path		string						true	"ID"
-//	@Param			body	body		dto.GroupPatchImageOptions	true	"Body"
-//	@Success		200		{object}	dto.Group
-//	@Failure		400		{object}	errorpkg.ErrorResponse
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.Group
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/image [patch]
 func (r *GroupRouter) PatchImage(c *fiber.Ctx) error {
 	userID, err := helper.GetUserID(c)
 	if err != nil {
 		return err
 	}
-	opts := new(dto.GroupPatchImageOptions)
-	if err := c.BodyParser(opts); err != nil {
+	fh, err := c.FormFile("file")
+	if err != nil {
+		return errorpkg.NewInvalidFormFileError("file")
+	}
+	if fh.Size > 3*1024*1024 {
+		return errorpkg.NewLargeFormFileError("file")
+	}
+	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+	if err := c.SaveFile(fh, path); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
+	defer func(path string) {
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			logger.GetLogger().Error(err)
+		}
+	}(path)
+	base64, err := helper.FileToBase64(path)
+	if err != nil {
+		return errorpkg.NewInvalidFormFileError("file")
 	}
-	res, err := r.groupSvc.PatchImage(c.Params("id"), opts.Image, userID)
+	res, err := r.groupSvc.PatchImage(c.Params("id"), base64, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// DeleteImage godoc
+//
+//	@Summary		Delete Image
+//	@Description	Delete Image
+//	@Tags			Groups
+//	@Id				groups_delete_image
+//	@Produce		application/json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.Group
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/image [delete]
+func (r *GroupRouter) DeleteImage(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.groupSvc.DeleteImage(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -327,6 +375,42 @@ func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
+// DownloadImage godoc
+//
+//	@Summary		Download Image
+//	@Description	Download Image
+//	@Tags			Files
+//	@Id				groups_download_image
+//	@Produce		application/octet-stream
+//	@Param			id				path		string	true	"ID"
+//	@Param			ext				path		string	true	"Extension"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Success		200				{file}		file
+//	@Failure		400				{object}	errorpkg.ErrorResponse
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/image.{ext} [get]
+func (r *GroupRouter) DownloadImage(c *fiber.Ctx) error {
+	accessToken := c.Query("access_token", c.Query("access_key"))
+	if accessToken == "" {
+		return errorpkg.NewFileNotFoundError(nil)
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	b, extension, mime, err := r.groupSvc.DownloadImageBuffer(c.Params("id"), userID)
+	if err != nil {
+		return err
+	}
+	if !strings.EqualFold(strings.TrimPrefix(*extension, "."), c.Params("extension")) {
+		return errorpkg.NewImageNotFoundError(nil)
+	}
+	c.Set("Content-Type", *mime)
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"image%s\"", *extension))
+	return c.Send(b)
+}
+
 func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*service.GroupListOptions, error) {
 	var err error
 	var page uint64
@@ -370,4 +454,24 @@ func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*service.GroupListOpti
 		SortBy:         sortBy,
 		SortOrder:      sortOrder,
 	}, nil
+}
+
+func (r *GroupRouter) getUserIDFromAccessToken(accessToken string) (string, error) {
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(config.GetConfig().Security.JWTSigningKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if !token.Valid {
+		return "", errors.New("invalid token")
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		return claims["sub"].(string), nil
+	} else {
+		return "", errors.New("cannot find sub claim")
+	}
 }

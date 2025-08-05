@@ -264,6 +264,28 @@ func (svc *GroupService) PatchImage(id string, image *string, userID string) (*d
 	return res, nil
 }
 
+func (svc *GroupService) DeleteImage(id string, userID string) (*dto.Group, error) {
+	group, err := svc.groupCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.groupGuard.Authorize(userID, group, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	group.SetImage(nil)
+	if err := svc.groupRepo.Save(group); err != nil {
+		return nil, err
+	}
+	if err := svc.sync(group); err != nil {
+		return nil, err
+	}
+	res, err := svc.groupMapper.Map(group, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (svc *GroupService) Delete(id string, userID string) error {
 	group, err := svc.groupCache.Get(id)
 	if err != nil {
@@ -354,6 +376,26 @@ func (svc *GroupService) IsValidSortBy(value string) bool {
 
 func (svc *GroupService) IsValidSortOrder(value string) bool {
 	return value == "" || value == dto.GroupSortOrderAsc || value == dto.GroupSortOrderDesc
+}
+
+func (svc *GroupService) DownloadImageBuffer(id string, userID string) ([]byte, *string, *string, error) {
+	group, err := svc.groupCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	if group.GetImage() == nil {
+		return nil, nil, nil, errorpkg.NewImageNotFoundError(nil)
+	}
+	mime := helper.Base64ToMIME(*group.GetImage())
+	ext := helper.Base64ToExtension(*group.GetImage())
+	b, err := helper.Base64ToBytes(*group.GetImage())
+	if err != nil {
+		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
+	}
+	return b, &ext, &mime, nil
 }
 
 func (svc *GroupService) checkUserIsMemberOfOrganization(userID string, organizationID string) error {

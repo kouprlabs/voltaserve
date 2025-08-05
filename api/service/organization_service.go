@@ -239,6 +239,28 @@ func (svc *OrganizationService) PatchImage(id string, image *string, userID stri
 	return res, nil
 }
 
+func (svc *OrganizationService) DeleteImage(id string, userID string) (*dto.Organization, error) {
+	org, err := svc.orgCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	org.SetImage(nil)
+	if err := svc.orgRepo.Save(org); err != nil {
+		return nil, err
+	}
+	if err := svc.sync(org); err != nil {
+		return nil, err
+	}
+	res, err := svc.orgMapper.Map(org, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (svc *OrganizationService) Delete(id string, userID string) error {
 	org, err := svc.orgCache.Get(id)
 	if err != nil {
@@ -292,6 +314,26 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return err
 	}
 	return nil
+}
+
+func (svc *OrganizationService) DownloadImageBuffer(id string, userID string) ([]byte, *string, *string, error) {
+	org, err := svc.orgCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.orgGuard.Authorize(userID, org, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	if org.GetImage() == nil {
+		return nil, nil, nil, errorpkg.NewImageNotFoundError(nil)
+	}
+	mime := helper.Base64ToMIME(*org.GetImage())
+	ext := helper.Base64ToExtension(*org.GetImage())
+	b, err := helper.Base64ToBytes(*org.GetImage())
+	if err != nil {
+		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
+	}
+	return b, &ext, &mime, nil
 }
 
 func (svc *OrganizationService) IsValidSortBy(value string) bool {
