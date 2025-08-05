@@ -116,10 +116,6 @@ export type UserListOptions = {
   page: number
 }
 
-export function find(user: User): UserDTO {
-  return mapEntity(user)
-}
-
 export async function findAsAdmin(id: string): Promise<UserAdminDTO> {
   return mapAdminEntity(await userRepo.findById(id))
 }

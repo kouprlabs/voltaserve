@@ -256,7 +256,7 @@ definitions:
       id:
         type: string
       image:
-        type: string
+        $ref: '#/definitions/dto.Image'
       name:
         type: string
       organization:
@@ -294,12 +294,6 @@ definitions:
       totalPages:
         type: integer
     type: object
-  dto.GroupPatchImageOptions:
-    properties:
-      image:
-        maxLength: 2048
-        type: string
-    type: object
   dto.GroupPatchNameOptions:
     properties:
       name:
@@ -330,6 +324,11 @@ definitions:
         type: string
     required:
     - userId
+    type: object
+  dto.Image:
+    properties:
+      extension:
+        type: string
     type: object
   dto.Invitation:
     properties:
@@ -430,7 +429,7 @@ definitions:
       id:
         type: string
       image:
-        type: string
+        $ref: '#/definitions/dto.Image'
       name:
         type: string
       permission:
@@ -462,12 +461,6 @@ definitions:
         type: integer
       totalPages:
         type: integer
-    type: object
-  dto.OrganizationPatchImageOptions:
-    properties:
-      image:
-        maxLength: 2048
-        type: string
     type: object
   dto.OrganizationPatchNameOptions:
     properties:
@@ -842,7 +835,7 @@ definitions:
       id:
         type: string
       image:
-        type: string
+        $ref: '#/definitions/dto.Image'
       name:
         type: string
       organization:
@@ -885,12 +878,6 @@ definitions:
         type: integer
       totalPages:
         type: integer
-    type: object
-  dto.WorkspacePatchImageOptions:
-    properties:
-      image:
-        maxLength: 2048
-        type: string
     type: object
   dto.WorkspacePatchNameOptions:
     properties:
@@ -2437,9 +2424,36 @@ paths:
       tags:
       - Groups
   /groups/{id}/image:
+    delete:
+      description: Delete Image
+      operationId: groups_delete_image
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Group'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete Image
+      tags:
+      - Groups
     patch:
       consumes:
-      - application/json
+      - application/x-www-form-urlencoded
       description: Patch Image
       operationId: groups_patch_image
       parameters:
@@ -2448,12 +2462,6 @@ paths:
         name: id
         required: true
         type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.GroupPatchImageOptions'
       produces:
       - application/json
       responses:
@@ -2476,6 +2484,48 @@ paths:
       summary: Patch Image
       tags:
       - Groups
+  /groups/{id}/image.{ext}:
+    get:
+      description: Download Image
+      operationId: groups_download_image
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Extension
+        in: path
+        name: ext
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Image
+      tags:
+      - Files
   /groups/{id}/members:
     delete:
       consumes:
@@ -3238,9 +3288,36 @@ paths:
       tags:
       - Organizations
   /organizations/{id}/image:
+    delete:
+      description: Delete Image
+      operationId: organizations_delete_image
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Organization'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete Image
+      tags:
+      - Organizations
     patch:
       consumes:
-      - application/json
+      - application/x-www-form-urlencoded
       description: Patch Image
       operationId: organizations_patch_image
       parameters:
@@ -3249,12 +3326,6 @@ paths:
         name: id
         required: true
         type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.OrganizationPatchImageOptions'
       produces:
       - application/json
       responses:
@@ -3275,6 +3346,48 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Patch Image
+      tags:
+      - Organizations
+  /organizations/{id}/image.{ext}:
+    get:
+      description: Download Image
+      operationId: organizations_download_image
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Extension
+        in: path
+        name: ext
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Image
       tags:
       - Organizations
   /organizations/{id}/leave:
@@ -4362,9 +4475,36 @@ paths:
       tags:
       - Workspaces
   /workspaces/{id}/image:
+    delete:
+      description: Delete Image
+      operationId: workspaces_delete_image
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Workspace'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete Image
+      tags:
+      - Workspaces
     patch:
       consumes:
-      - application/json
+      - application/x-www-form-urlencoded
       description: Patch Image
       operationId: workspaces_patch_image
       parameters:
@@ -4373,12 +4513,6 @@ paths:
         name: id
         required: true
         type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.WorkspacePatchImageOptions'
       produces:
       - application/json
       responses:
@@ -4401,6 +4535,48 @@ paths:
       summary: Patch Image
       tags:
       - Workspaces
+  /workspaces/{id}/image.{ext}:
+    get:
+      description: Download Image
+      operationId: workspaces_download_image
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Extension
+        in: path
+        name: ext
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Image
+      tags:
+      - Files
   /workspaces/{id}/name:
     patch:
       consumes:

@@ -17,6 +17,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/config"
 	"github.com/kouprlabs/voltaserve/shared/dto"
 	"github.com/kouprlabs/voltaserve/shared/errorpkg"
+	"github.com/kouprlabs/voltaserve/shared/helper"
 	"github.com/kouprlabs/voltaserve/shared/model"
 )
 
@@ -36,6 +37,11 @@ func (mp *OrganizationMapper) Map(m model.Organization, userID string) (*dto.Org
 		Name:       m.GetName(),
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
+	}
+	if m.GetImage() != nil {
+		res.Image = &dto.Image{
+			Extension: helper.Base64ToExtension(*m.GetImage()),
+		}
 	}
 	res.Permission = model.PermissionNone
 	for _, p := range m.GetUserPermissions() {

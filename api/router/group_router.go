@@ -15,6 +15,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -27,6 +29,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/helper"
 
 	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -52,6 +55,7 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
 	g.Patch("/:id/image", r.PatchImage)
+	g.Delete("/:id/image", r.DeleteImage)
 	g.Post("/:id/members", r.AddMember)
 	g.Delete("/:id/members", r.RemoveMember)
 	g.Get("/:id/image.:extension", r.DownloadImage)
@@ -217,28 +221,66 @@ func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
 //	@Description	Patch Image
 //	@Tags			Groups
 //	@Id				groups_patch_image
-//	@Accept			application/json
+//	@Accept			x-www-form-urlencoded
 //	@Produce		application/json
-//	@Param			id		path		string						true	"ID"
-//	@Param			body	body		dto.GroupPatchImageOptions	true	"Body"
-//	@Success		200		{object}	dto.Group
-//	@Failure		400		{object}	errorpkg.ErrorResponse
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.Group
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/image [patch]
 func (r *GroupRouter) PatchImage(c *fiber.Ctx) error {
 	userID, err := helper.GetUserID(c)
 	if err != nil {
 		return err
 	}
-	opts := new(dto.GroupPatchImageOptions)
-	if err := c.BodyParser(opts); err != nil {
+	fh, err := c.FormFile("file")
+	if err != nil {
+		return errorpkg.NewInvalidFormFileError("file")
+	}
+	if fh.Size > 3*1024*1024 {
+		return errorpkg.NewLargeFormFileError("file")
+	}
+	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+	if err := c.SaveFile(fh, path); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
+	defer func(path string) {
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			logger.GetLogger().Error(err)
+		}
+	}(path)
+	base64, err := helper.FileToBase64(path)
+	if err != nil {
+		return errorpkg.NewInvalidFormFileError("file")
 	}
-	res, err := r.groupSvc.PatchImage(c.Params("id"), opts.Image, userID)
+	res, err := r.groupSvc.PatchImage(c.Params("id"), base64, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// DeleteImage godoc
+//
+//	@Summary		Delete Image
+//	@Description	Delete Image
+//	@Tags			Groups
+//	@Id				groups_delete_image
+//	@Produce		application/json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.Group
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/image [delete]
+func (r *GroupRouter) DeleteImage(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.groupSvc.DeleteImage(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -357,19 +399,12 @@ func (r *GroupRouter) DownloadImage(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	id := c.Params("id")
-	if id == "" {
-		return errorpkg.NewMissingQueryParamError("id")
-	}
-	if c.Params("extension") == "" {
-		return errorpkg.NewMissingQueryParamError("ext")
-	}
 	b, extension, mime, err := r.groupSvc.DownloadImageBuffer(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
 	if !strings.EqualFold(strings.TrimPrefix(*extension, "."), c.Params("extension")) {
-		return errorpkg.NewPictureNotFoundError(nil)
+		return errorpkg.NewImageNotFoundError(nil)
 	}
 	c.Set("Content-Type", *mime)
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"image%s\"", *extension))

@@ -15,6 +15,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -27,6 +29,7 @@ import (
 	"github.com/kouprlabs/voltaserve/shared/helper"
 
 	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/logger"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
@@ -54,6 +57,7 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
 	g.Patch("/:id/image", r.PatchImage)
+	g.Delete("/:id/image", r.DeleteImage)
 	g.Patch("/:id/storage_capacity", r.PatchStorageCapacity)
 	g.Get("/:id/bucket", r.GetBucket)
 	g.Get("/:id/image.:extension", r.DownloadImage)
@@ -215,25 +219,42 @@ func (r *WorkspaceRouter) PatchName(c *fiber.Ctx) error {
 //	@Description	Patch Image
 //	@Tags			Workspaces
 //	@Id				workspaces_patch_image
-//	@Accept			application/json
+//	@Accept			x-www-form-urlencoded
 //	@Produce		application/json
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		dto.WorkspacePatchImageOptions	true	"Body"
-//	@Success		200		{object}	dto.Workspace
-//	@Failure		400		{object}	errorpkg.ErrorResponse
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.Workspace
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/image [patch]
 func (r *WorkspaceRouter) PatchImage(c *fiber.Ctx) error {
 	userID, err := helper.GetUserID(c)
 	if err != nil {
 		return err
 	}
-	opts := new(dto.WorkspacePatchImageOptions)
-	if err := c.BodyParser(opts); err != nil {
+	fh, err := c.FormFile("file")
+	if err != nil {
+		return errorpkg.NewInvalidFormFileError("file")
+	}
+	if fh.Size > 3*1024*1024 {
+		return errorpkg.NewLargeFormFileError("file")
+	}
+	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+	if err := c.SaveFile(fh, path); err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.PatchImage(c.Params("id"), opts.Image, userID)
+	defer func(path string) {
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			logger.GetLogger().Error(err)
+		}
+	}(path)
+	base64, err := helper.FileToBase64(path)
+	if err != nil {
+		return errorpkg.NewInvalidFormFileError("file")
+	}
+	res, err := r.workspaceSvc.PatchImage(c.Params("id"), base64, userID)
 	if err != nil {
 		return err
 	}
@@ -265,6 +286,30 @@ func (r *WorkspaceRouter) PatchStorageCapacity(c *fiber.Ctx) error {
 		return err
 	}
 	res, err := r.workspaceSvc.PatchStorageCapacity(c.Params("id"), opts.StorageCapacity, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// DeleteImage godoc
+//
+//	@Summary		Delete Image
+//	@Description	Delete Image
+//	@Tags			Workspaces
+//	@Id				workspaces_delete_image
+//	@Produce		application/json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	dto.Workspace
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/workspaces/{id}/image [delete]
+func (r *WorkspaceRouter) DeleteImage(c *fiber.Ctx) error {
+	userID, err := helper.GetUserID(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.workspaceSvc.DeleteImage(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -347,19 +392,12 @@ func (r *WorkspaceRouter) DownloadImage(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	id := c.Params("id")
-	if id == "" {
-		return errorpkg.NewMissingQueryParamError("id")
-	}
-	if c.Params("extension") == "" {
-		return errorpkg.NewMissingQueryParamError("ext")
-	}
 	b, extension, mime, err := r.workspaceSvc.DownloadImageBuffer(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
 	if !strings.EqualFold(strings.TrimPrefix(*extension, "."), c.Params("extension")) {
-		return errorpkg.NewPictureNotFoundError(nil)
+		return errorpkg.NewImageNotFoundError(nil)
 	}
 	c.Set("Content-Type", *mime)
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"image%s\"", *extension))

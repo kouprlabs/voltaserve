@@ -138,7 +138,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 	if fileType == model.FileTypeFile {
 		fh, err := c.FormFile("file")
 		if err != nil {
-			return err
+			return errorpkg.NewInvalidFormFileError("file")
 		}
 		hasEnoughSpace, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, fh.Size, userID)
 		if err != nil {

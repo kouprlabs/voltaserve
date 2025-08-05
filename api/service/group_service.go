@@ -264,6 +264,28 @@ func (svc *GroupService) PatchImage(id string, image *string, userID string) (*d
 	return res, nil
 }
 
+func (svc *GroupService) DeleteImage(id string, userID string) (*dto.Group, error) {
+	group, err := svc.groupCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.groupGuard.Authorize(userID, group, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	group.SetImage(nil)
+	if err := svc.groupRepo.Save(group); err != nil {
+		return nil, err
+	}
+	if err := svc.sync(group); err != nil {
+		return nil, err
+	}
+	res, err := svc.groupMapper.Map(group, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (svc *GroupService) Delete(id string, userID string) error {
 	group, err := svc.groupCache.Get(id)
 	if err != nil {

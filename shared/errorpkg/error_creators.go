@@ -322,6 +322,26 @@ func NewInvalidQueryParamError(param string) *ErrorResponse {
 	)
 }
 
+func NewInvalidFormFileError(field string) *ErrorResponse {
+	return NewErrorResponse(
+		"invalid_form_file",
+		http.StatusBadRequest,
+		fmt.Sprintf("Form file '%s' is invalid.", field),
+		"An invalid request was sent to the server.",
+		nil,
+	)
+}
+
+func NewLargeFormFileError(field string) *ErrorResponse {
+	return NewErrorResponse(
+		"large_form_file",
+		http.StatusBadRequest,
+		fmt.Sprintf("Form file '%s' is too large.", field),
+		"An invalid request was sent to the server.",
+		nil,
+	)
+}
+
 func NewStorageLimitExceededError() *ErrorResponse {
 	return NewErrorResponse(
 		"storage_limit_exceeded",

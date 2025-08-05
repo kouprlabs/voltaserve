@@ -296,6 +296,28 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	return res, nil
 }
 
+func (svc *WorkspaceService) DeleteImage(id string, userID string) (*dto.Workspace, error) {
+	workspace, err := svc.workspaceCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	workspace.SetImage(nil)
+	if err := svc.workspaceRepo.Save(workspace); err != nil {
+		return nil, err
+	}
+	if err = svc.sync(workspace); err != nil {
+		return nil, err
+	}
+	res, err := svc.workspaceMapper.Map(workspace, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (svc *WorkspaceService) Delete(id string, userID string) error {
 	workspace, err := svc.workspaceCache.Get(id)
 	if err != nil {

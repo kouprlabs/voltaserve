@@ -239,6 +239,28 @@ func (svc *OrganizationService) PatchImage(id string, image *string, userID stri
 	return res, nil
 }
 
+func (svc *OrganizationService) DeleteImage(id string, userID string) (*dto.Organization, error) {
+	org, err := svc.orgCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	org.SetImage(nil)
+	if err := svc.orgRepo.Save(org); err != nil {
+		return nil, err
+	}
+	if err := svc.sync(org); err != nil {
+		return nil, err
+	}
+	res, err := svc.orgMapper.Map(org, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (svc *OrganizationService) Delete(id string, userID string) error {
 	org, err := svc.orgCache.Get(id)
 	if err != nil {

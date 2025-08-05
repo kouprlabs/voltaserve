@@ -21,11 +21,11 @@ import { handleValidationError, ZodFactory } from '@/lib/validation.ts'
 import {
   deletePicture,
   deleteUser,
-  find,
   findAsAdmin,
   getPicture,
   list,
   makeAdmin,
+  mapEntity,
   suspend,
   updateEmailConfirmation,
   updateEmailRequest,
@@ -47,7 +47,7 @@ import { getUser, getUserIdFromAccessToken } from '@/lib/router.ts'
 const router = new Hono()
 
 router.get('/me', (c) => {
-  return c.json(find(getUser(c)))
+  return c.json(mapEntity(getUser(c)))
 })
 
 router.get('/me/:filename', async (c) => {

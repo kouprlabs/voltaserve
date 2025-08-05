@@ -1,0 +1,50 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "adapter": "Delve",
+    "label": "api",
+    "request": "launch",
+    "mode": "debug",
+    "program": ".",
+    "cwd": "${ZED_WORKTREE_ROOT}/api",
+    "args": [],
+    "buildFlags": [],
+    "env": {}
+  },
+  {
+    "adapter": "Delve",
+    "label": "conversion",
+    "request": "launch",
+    "mode": "debug",
+    "program": ".",
+    "cwd": "${ZED_WORKTREE_ROOT}/conversion",
+    "args": [],
+    "buildFlags": [],
+    "env": {}
+  },
+  {
+    "adapter": "Delve",
+    "label": "mosaic",
+    "request": "launch",
+    "mode": "debug",
+    "program": ".",
+    "cwd": "${ZED_WORKTREE_ROOT}/mosaic",
+    "args": [],
+    "buildFlags": [],
+    "env": {}
+  },
+  {
+    "adapter": "Delve",
+    "label": "webdav",
+    "request": "launch",
+    "mode": "debug",
+    "program": ".",
+    "cwd": "${ZED_WORKTREE_ROOT}/webdav",
+    "args": [],
+    "buildFlags": [],
+    "env": {}
+  }
+]
