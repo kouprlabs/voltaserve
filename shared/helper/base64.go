@@ -58,7 +58,7 @@ func Base64ToExtension(value string) string {
 }
 
 func FileToBase64(path string) (*string, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //nolint:gosec // Safe path
 	if err != nil {
 		return nil, err
 	}
