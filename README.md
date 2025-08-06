@@ -7,11 +7,11 @@
 <h3 align="center">Reality OS for Creators</h2>
 
 <p align="center">
-  <a href="https://apps.apple.com/app/id6744360805">
-    <img height="40" src=".assets/app-store-20250424234000.svg" />
-  </a>
   <a href="https://apps.apple.com/mac/app/id6744360805">
     <img height="40" src=".assets/mac-app-store-20250424234000.svg" />
+  </a>
+  <a href="https://apps.apple.com/app/id6744360805">
+    <img height="40" src=".assets/app-store-20250424234000.svg" />
   </a>
 </p>
 
