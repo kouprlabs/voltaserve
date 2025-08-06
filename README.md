@@ -91,7 +91,7 @@ Create an account and sign in:
 
 ### The App for Mac, iPhone and iPad
 
-Download on the [App Store](https://apps.apple.com/app/id6744360805), or the [Mac App Store](https://apps.apple.com/mac/app/id6744360805).
+Download on the [Mac App Store](https://apps.apple.com/mac/app/id6744360805), or the [App Store](https://apps.apple.com/app/id6744360805).
 
 Watch [Murph in action](https://youtu.be/sCfvdj49WBw) on the iPad and iPhone, or a [walkthrough video](https://youtu.be/RpHp0OEa_o8) of various capabilities.
 
