@@ -89,7 +89,7 @@ Create an account and sign in:
 >
 > Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV) and by default it listens on port `8082`.
 
-### The App for Mac, iPhone and iPad
+### Mac, iPhone and iPad
 
 Download on the [Mac App Store](https://apps.apple.com/mac/app/id6744360805), or the [App Store](https://apps.apple.com/app/id6744360805).
 
