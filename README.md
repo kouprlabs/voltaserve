@@ -89,13 +89,13 @@ Create an account and sign in:
 >
 > Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV) and by default it listens on port `8082`.
 
-### The iOS App (iPad, iPhone and Mac)
+### The App for Mac, iPad and iPhone
 
 Download on the [App Store](https://apps.apple.com/app/id6744360805), or the [Mac App Store](https://apps.apple.com/mac/app/id6744360805).
 
 Watch [Murph in action](https://youtu.be/sCfvdj49WBw) on the iPad and iPhone, or a [walkthrough video](https://youtu.be/RpHp0OEa_o8) of various capabilities.
 
-Voltaserve’s iOS app defines a gold standard: it’s fully native, optimized for iPad and iPhone, runs beautifully on the Mac, features a slick user interface with real-time updates, and is built using Apple’s flagship framework, SwiftUI.
+Voltaserve’s app defines a gold standard; it’s fully native, optimized for Mac, iPad and iPhone, features a slick user interface with real-time updates, and is built using Apple’s flagship framework, SwiftUI.
 
 After launching the app, you’ll be asked to review and accept the Privacy Policy and Terms & Conditions.
 
@@ -118,7 +118,7 @@ You can keep the "Sign In Strategy" as "Apple" so you can sign in easily with yo
 
 After saving, you will be able to sign in.
 
-The core of the iOS app is open source and available [here](https://github.com/kouprlabs/voltaserve-touch).
+The core of the app is open source and available [here](https://github.com/kouprlabs/voltaserve-core).
 
 ### Mount the Drive on Your Computer
 
