@@ -28,7 +28,7 @@ Voltaserve is the AI native cloud file system that can be managed using natural 
 
 ## Getting Started
 
-### Run Your Instance
+### Run Your Instance Using Docker
 
 Pull images: (_recommended for most users_)
 
