@@ -22,7 +22,7 @@
 
 [![Join our Discord](https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white&label=Join%20us&style=for-the-badge)](https://discord.gg/qYXtsMpqMR)
 
-Voltaserve is the AI native cloud file system that can be managed using natural language. It's designed for digital artists and content creators. It understands your files visually and contextually, so you can simply describe them.
+Voltaserve is the AI native cloud file system that understands natural language. It's designed for digital artists and content creators. It understands your files visually and contextually, so you can simply describe them.
 
 <img src=".assets/collage-20250421130000.png">
 
