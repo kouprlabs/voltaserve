@@ -4,42 +4,29 @@
   <h1 align="center">Voltaserve</h1>
 </p>
 
-<h3 align="center">Reality OS for Creators</h2>
+<h3 align="center">The AI Native Cloud File System</h2>
 
 <p align="center">
-  <a href="https://apps.apple.com/mac/app/id6744360805">
-    <img height="40" src=".assets/mac-app-store-20250424234000.svg" />
-  </a>
   <a href="https://apps.apple.com/app/id6744360805">
     <img height="40" src=".assets/app-store-20250424234000.svg" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://youtu.be/sCfvdj49WBw">▶ Talk to your files and manilulate them</a>
+  <a href="https://youtu.be/sCfvdj49WBw">▶ Discover the AI native capabilities</a>
   <br/>
-  <a href="https://youtu.be/Uf3EWb2hDfs">▶ Your creative private cloud</a>
+  <a href="https://youtu.be/Uf3EWb2hDfs">▶ Discover the creative capabilities</a>
   <br/>
   <a href="https://youtu.be/RpHp0OEa_o8">▶ iOS app walkthtough</a>
 </p>
 
 [![Join our Discord](https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white&label=Join%20us&style=for-the-badge)](https://discord.gg/qYXtsMpqMR)
 
-Voltaserve is the reality OS where you can talk to your files and manipulate them. This is unprecedented, and it’s designed for creative minds. If you are a digital artist, photographer, content creator, journalist, or a musician — Voltaserve is built for you.
+Voltaserve is the AI native cloud file system that can be managed using natural language. It's designed for digital artists and content creators. It understands your files visually and contextually, so you can simply describe them.
 
 <img src=".assets/collage-20250421130000.png">
 
 ## Getting Started
-
-### Optional Murph Setup
-
-To take advantage of Murph, you will need a Google Gemini API key, in this case, edit the [.env](.env) file as follows:
-
-```properties
-VOLTASERVE_LLM_GEMINI_API_KEY=YOUR_GOOGLE_GEMINI_API_KEY_HERE
-```
-
-Replace the placeholder `YOUR_GOOGLE_GEMINI_API_KEY_HERE` with the actual value.
 
 ### Run Your Instance
 
@@ -54,6 +41,14 @@ Optionally build the images from the source: (_can be skipped if you pulled the 
 ```shell
 docker compose build
 ```
+
+To take advantage of AI capabilities, which is optional, you will need a Google Gemini API key, in this case, edit the [.env](.env) file as follows:
+
+```properties
+VOLTASERVE_LLM_GEMINI_API_KEY=YOUR_GOOGLE_GEMINI_API_KEY_HERE
+```
+
+Replace the placeholder `YOUR_GOOGLE_GEMINI_API_KEY_HERE` with the actual value.
 
 Start containers:
 
@@ -91,11 +86,11 @@ Create an account and sign in:
 
 ### Mac, iPhone and iPad
 
-Download the app on the [Mac App Store](https://apps.apple.com/mac/app/id6744360805), or the [App Store](https://apps.apple.com/app/id6744360805).
+Download the app on the [App Store](https://apps.apple.com/app/id6744360805).
 
-Watch [Murph in action](https://youtu.be/sCfvdj49WBw) on the iPad and iPhone, or a [walkthrough video](https://youtu.be/RpHp0OEa_o8) of various capabilities.
+Watch [Voltaserve in action](https://youtu.be/sCfvdj49WBw) on the iPad and iPhone, or a [walkthrough video](https://youtu.be/RpHp0OEa_o8) to discover the various capabilities.
 
-Voltaserve’s app defines a gold standard; it’s fully native, optimized for Mac, iPhone and iPad, features a slick user interface with real-time updates, and is built using Apple’s flagship framework, SwiftUI.
+Voltaserve’s app is fully native, built for iPhone, iPad and Mac, it features a carefully designed user interface that is reactive, with real-time updates, and is built with SwiftUI.
 
 After launching the app, you’ll be asked to review and accept the Privacy Policy and Terms & Conditions.
 
@@ -118,7 +113,7 @@ You can keep the "Sign In Strategy" as "Apple" so you can sign in easily with yo
 
 After saving, you will be able to sign in.
 
-The core of the app is open source and available [here](https://github.com/kouprlabs/voltaserve-core).
+A fully functional app core is open source and available [here](https://github.com/kouprlabs/voltaserve-core).
 
 ### Mount the Drive on Your Computer
 
